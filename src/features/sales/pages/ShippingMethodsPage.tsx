@@ -1,0 +1,270 @@
+// src/features/sales/pages/ShippingMethodsPage.tsx
+import { useState } from 'react';
+import DashboardLayout from '../../../layouts/DashboardLayout';
+import {
+  useGetShippingMethodsQuery,
+  useCreateShippingMethodMutation,
+  useUpdateShippingMethodMutation,
+  useDeleteShippingMethodMutation,
+} from '../../../services/salesApi';
+import type { ShippingMethod } from '../../../types/sales';
+
+import search_icon from '../../../assets/icons/search_icon.svg';
+
+const emptyForm = {
+  method_name: '',
+  provider: '',
+  description: '',
+  base_cost: '',
+  cost_per_kg: '0',
+  estimated_days_min: '',
+  estimated_days_max: '',
+  is_active: true,
+};
+
+export default function ShippingMethodsPage() {
+  const [search, setSearch] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const [editingMethod, setEditingMethod] = useState<ShippingMethod | null>(null);
+  const [form, setForm] = useState(emptyForm);
+
+  const { data: methodsResponse, isLoading } = useGetShippingMethodsQuery({ search: search || undefined });
+  const [createMethod, { isLoading: isCreating }] = useCreateShippingMethodMutation();
+  const [updateMethod, { isLoading: isUpdating }] = useUpdateShippingMethodMutation();
+  const [deleteMethod] = useDeleteShippingMethodMutation();
+
+  const methods: ShippingMethod[] = methodsResponse?.data?.data || methodsResponse?.data || [];
+
+  const openCreate = () => {
+    setEditingMethod(null);
+    setForm(emptyForm);
+    setShowModal(true);
+  };
+
+  const openEdit = (method: ShippingMethod) => {
+    setEditingMethod(method);
+    setForm({
+      method_name: method.method_name,
+      provider: method.provider || '',
+      description: method.description || '',
+      base_cost: method.base_cost.toString(),
+      cost_per_kg: method.cost_per_kg.toString(),
+      estimated_days_min: method.estimated_days_min?.toString() || '',
+      estimated_days_max: method.estimated_days_max?.toString() || '',
+      is_active: method.is_active,
+    });
+    setShowModal(true);
+  };
+
+  const handleSubmit = async () => {
+    if (!form.method_name || !form.base_cost) {
+      alert('Method name and base cost are required'); return;
+    }
+    const payload = {
+      method_name: form.method_name,
+      provider: form.provider || undefined,
+      description: form.description || undefined,
+      base_cost: parseFloat(form.base_cost),
+      cost_per_kg: parseFloat(form.cost_per_kg) || 0,
+      estimated_days_min: form.estimated_days_min ? parseInt(form.estimated_days_min) : undefined,
+      estimated_days_max: form.estimated_days_max ? parseInt(form.estimated_days_max) : undefined,
+      is_active: form.is_active,
+    };
+    try {
+      if (editingMethod) {
+        await updateMethod({ id: editingMethod.id, data: payload }).unwrap();
+      } else {
+        await createMethod(payload).unwrap();
+      }
+      setShowModal(false);
+    } catch (err: any) {
+      alert(err?.data?.message || 'Failed to save shipping method');
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm('Delete this shipping method?')) return;
+    try {
+      await deleteMethod(id).unwrap();
+    } catch (err: any) {
+      alert(err?.data?.message || 'Failed to delete. It may be used in existing orders.');
+    }
+  };
+
+  const handleToggleActive = async (method: ShippingMethod) => {
+    try {
+      await updateMethod({ id: method.id, data: { is_active: !method.is_active } }).unwrap();
+    } catch (err: any) {
+      alert(err?.data?.message || 'Failed to update');
+    }
+  };
+
+  return (
+    <DashboardLayout>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Shipping Methods</h1>
+            <p className="text-sm text-gray-500 mt-1">Manage shipping options for orders</p>
+          </div>
+          <button onClick={openCreate}
+            className="flex items-center gap-2 px-5 py-3 bg-[#1773CF] text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Add Method
+          </button>
+        </div>
+
+        {/* Search */}
+        <div className="bg-white rounded-xl p-4">
+          <div className="relative w-80">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <img src={search_icon} alt="" className="w-4 h-4" />
+            </div>
+            <input type="text" value={search} onChange={e => setSearch(e.target.value)}
+              placeholder="Search shipping methods..."
+              className="pl-9 pr-4 py-2.5 border rounded-lg w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+        </div>
+
+        {/* Table */}
+        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  {['Method', 'Provider', 'Base Cost', 'Per KG', 'Est. Delivery', 'Status', 'Actions'].map(h => (
+                    <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-[#37638F] uppercase tracking-wider">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-100">
+                {isLoading ? (
+                  <tr><td colSpan={7} className="py-12 text-center">
+                    <div className="flex items-center justify-center gap-2 text-gray-500">
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600" />
+                      Loading...
+                    </div>
+                  </td></tr>
+                ) : methods.length === 0 ? (
+                  <tr><td colSpan={7} className="py-12 text-center text-gray-500">No shipping methods found.</td></tr>
+                ) : methods.map((method) => (
+                  <tr key={method.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-5 py-4">
+                      <div className="font-medium text-gray-900">{method.method_name}</div>
+                      {method.description && <div className="text-xs text-gray-500 mt-0.5 max-w-[200px] truncate">{method.description}</div>}
+                    </td>
+                    <td className="px-5 py-4 text-sm text-gray-700">{method.provider || '—'}</td>
+                    <td className="px-5 py-4 text-sm font-semibold text-gray-900">KD {parseFloat(method.base_cost as any).toFixed(3)}</td>
+                    <td className="px-5 py-4 text-sm text-gray-700">KD {parseFloat(method.cost_per_kg as any).toFixed(3)}</td>
+                    <td className="px-5 py-4 text-sm text-gray-700">
+                      {method.estimated_days_min && method.estimated_days_max
+                        ? `${method.estimated_days_min}–${method.estimated_days_max} days`
+                        : method.estimated_delivery_text || '—'}
+                    </td>
+                    <td className="px-5 py-4">
+                      <button onClick={() => handleToggleActive(method)}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${method.is_active ? 'bg-green-500' : 'bg-gray-300'}`}>
+                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${method.is_active ? 'translate-x-6' : 'translate-x-1'}`} />
+                      </button>
+                    </td>
+                    <td className="px-5 py-4">
+                      <div className="flex gap-2">
+                        <button onClick={() => openEdit(method)}
+                          className="px-3 py-1.5 text-xs bg-[#1773CF] text-white rounded-lg hover:bg-blue-700 font-medium">
+                          Edit
+                        </button>
+                        <button onClick={() => handleDelete(method.id)}
+                          className="px-3 py-1.5 text-xs bg-red-100 text-red-700 rounded-lg hover:bg-red-200 font-medium">
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {/* Create/Edit Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
+            <div className="bg-[#1773CF] px-6 py-5">
+              <h2 className="text-lg font-bold text-white">
+                {editingMethod ? 'Edit Shipping Method' : 'New Shipping Method'}
+              </h2>
+            </div>
+            <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1 block">Method Name *</label>
+                <input value={form.method_name} onChange={e => setForm(f => ({ ...f, method_name: e.target.value }))}
+                  placeholder="e.g. Standard Delivery"
+                  className="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1 block">Provider</label>
+                <input value={form.provider} onChange={e => setForm(f => ({ ...f, provider: e.target.value }))}
+                  placeholder="e.g. Aramex, DHL"
+                  className="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1 block">Description</label>
+                <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+                  rows={2} placeholder="Short description"
+                  className="w-full px-4 py-2.5 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">Base Cost (KD) *</label>
+                  <input type="number" step="0.001" value={form.base_cost}
+                    onChange={e => setForm(f => ({ ...f, base_cost: e.target.value }))}
+                    placeholder="0.000" className="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">Cost per KG (KD)</label>
+                  <input type="number" step="0.001" value={form.cost_per_kg}
+                    onChange={e => setForm(f => ({ ...f, cost_per_kg: e.target.value }))}
+                    placeholder="0.000" className="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">Min Days</label>
+                  <input type="number" value={form.estimated_days_min}
+                    onChange={e => setForm(f => ({ ...f, estimated_days_min: e.target.value }))}
+                    placeholder="1" className="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">Max Days</label>
+                  <input type="number" value={form.estimated_days_max}
+                    onChange={e => setForm(f => ({ ...f, estimated_days_max: e.target.value }))}
+                    placeholder="5" className="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <button onClick={() => setForm(f => ({ ...f, is_active: !f.is_active }))}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${form.is_active ? 'bg-green-500' : 'bg-gray-300'}`}>
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${form.is_active ? 'translate-x-6' : 'translate-x-1'}`} />
+                </button>
+                <span className="text-sm text-gray-700">{form.is_active ? 'Active' : 'Inactive'}</span>
+              </div>
+            </div>
+            <div className="px-6 py-4 border-t flex gap-3">
+              <button onClick={() => setShowModal(false)}
+                className="flex-1 py-2.5 border rounded-xl font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+              <button onClick={handleSubmit} disabled={isCreating || isUpdating}
+                className="flex-1 py-2.5 bg-[#1773CF] text-white rounded-xl font-medium hover:bg-blue-700 disabled:opacity-50">
+                {isCreating || isUpdating ? 'Saving...' : editingMethod ? 'Update Method' : 'Create Method'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </DashboardLayout>
+  );
+}

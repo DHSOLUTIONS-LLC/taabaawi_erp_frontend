@@ -17,6 +17,7 @@ interface Product {
     description: string;
     sku: string;
     barcode?: string;
+    barcode_image?: string;
     category: string | { category_name: string };
     branch: string;
     quantity: number;
@@ -120,19 +121,24 @@ export default function ProductDetailsSidebar({ isOpen, product, onClose }: Prod
         { label: 'Dimensions', value: product.dimensions || 'Not specified' },
         { label: 'Color', value: product.color || 'Not specified' },
         { label: 'SKU', value: product.sku || 'N/A' },
-        { label: 'Barcode', value: product.barcode || 'N/A' },
+        {
+            label: 'Barcode',
+            value: product.barcode || 'N/A',
+            image: product.barcode_image
+        },
         { label: 'Low Stock Alert', value: product.low_stock_alert?.toString() || '10' },
         { label: 'Status', value: product.is_active ? 'Active' : 'Inactive' },
     ];
 
     // ============ VARIANT SPECIFICATIONS ============
     const variantSpecifications = !product.variants || product.variants.length === 0 ? [] :
-        product.variants.map(variant => ({
+        product.variants.map((variant: any) => ({
             id: variant.id,
             name: variant.variant_name,
             value: variant.variant_value,
             sku: variant.sku,
             barcode: variant.barcode,
+            barcode_image: variant.barcode_image,
             cost_price: variant.cost_price,
             selling_price: variant.selling_price,
             additional_price: variant.additional_price,
@@ -211,7 +217,7 @@ export default function ProductDetailsSidebar({ isOpen, product, onClose }: Prod
         setShowDamageModal(true);
     };
 
-    
+
     const handleEditProductClick = () => {
         setShowEditModal(true);
     };
@@ -236,12 +242,32 @@ export default function ProductDetailsSidebar({ isOpen, product, onClose }: Prod
         setShowAddStockModal(false);
     };
 
-    
+
 
     // Generate barcode visualization
-    const renderBarcode = (barcodeValue: string) => {
+    // Generate barcode visualization
+    const renderBarcode = (barcodeValue: string, barcodeImage?: string) => {
         if (!barcodeValue) return null;
 
+        // If we have a barcode image from backend, show it
+        if (barcodeImage) {
+            return (
+                <div className="flex flex-col items-center">
+                    <img
+                        src={`https://puristic-filmily-bula.ngrok-free.dev/storage/${barcodeImage}`}
+                        alt={`Barcode ${barcodeValue}`}
+                        className="h-8 w-auto object-contain"
+                        onError={(e) => {
+                            // Fallback to text if image fails to load
+                            e.currentTarget.style.display = 'none';
+                        }}
+                    />
+                    <span className="text-xs font-mono leading-md">{barcodeValue}</span>
+                </div>
+            );
+        }
+
+        // Fallback to simulated barcode if no image
         return (
             <div className="flex flex-col items-center">
                 <div className="flex space-x-0.5 mb-1">
@@ -308,7 +334,7 @@ export default function ProductDetailsSidebar({ isOpen, product, onClose }: Prod
                                     {/* Barcode */}
                                     {product.barcode && (
                                         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white px-3 py-2 rounded-lg shadow-md">
-                                            {renderBarcode(product.barcode)}
+                                            {renderBarcode(product.barcode, product.barcode_image)}
                                         </div>
                                     )}
                                 </div>
@@ -352,14 +378,23 @@ export default function ProductDetailsSidebar({ isOpen, product, onClose }: Prod
                                     </div>
 
                                     {/* Specifications */}
-                                    <div className="space-y-3">
-                                        {specifications.map((spec, index) => (
-                                            <div key={index} className="flex flex-col items-start">
-                                                <span className="text-sm text-gray-500 min-w-30">{spec.label}</span>
+                                    {specifications.map((spec, index) => (
+                                        <div key={index} className="flex flex-col items-start">
+                                            <span className="text-sm text-gray-500 min-w-30">{spec.label}</span>
+                                            {spec.label === 'Barcode' && spec.image ? (
+                                                <div className="flex flex-col">
+                                                    <img
+                                                        src={`https://puristic-filmily-bula.ngrok-free.dev/storage/${spec.image}`}
+                                                        alt="Barcode"
+                                                        className="h-8 w-auto object-contain mb-1"
+                                                    />
+                                                    <span className="text-sm text-gray-900 font-semibold">{spec.value}</span>
+                                                </div>
+                                            ) : (
                                                 <span className="text-sm text-gray-900 font-semibold">{spec.value}</span>
-                                            </div>
-                                        ))}
-                                    </div>
+                                            )}
+                                        </div>
+                                    ))}
 
                                     {/* Variant Specifications - Only show if product has variants */}
                                     {variantSpecifications.length > 0 && (
@@ -665,6 +700,7 @@ export default function ProductDetailsSidebar({ isOpen, product, onClose }: Prod
                     image: product.image,
                     description: product.description,
                     barcode: product.barcode,
+                    barcode_image: product.barcode_image,
                     unit: product.unit,
                     weight: product.weight,
                     dimensions: product.dimensions,

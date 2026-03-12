@@ -46,6 +46,8 @@ interface Product {
   description: string;
   sku: string;
   barcode?: string;
+  barcode_image?: string;
+  barcode_image_url?: string;
   category?: {
     id: number; // Add this
     category_name: string;
@@ -115,6 +117,8 @@ interface SidebarProduct {
   description: string;
   sku: string;
   barcode?: string;
+  barcode_image?: string;
+  barcode_image_url?: string;
   weight?: number;
   dimensions?: string;
   color?: string;
@@ -334,7 +338,7 @@ export default function DashboardPage() {
     let matchesStockStatus = true;
     if (selectedStockStatus) {
       const totalStock = p.inventory?.reduce((sum, inv) => sum + (inv.quantity || 0), 0) || 0;
-      
+
       switch (selectedStockStatus) {
         case "In Stock":
           matchesStockStatus = totalStock > (p.low_stock_threshold || 10);
@@ -456,11 +460,11 @@ export default function DashboardPage() {
       }
 
       if (typeof aValue === 'string' && typeof bValue === 'string') {
-        return sortOrder === 'asc' 
+        return sortOrder === 'asc'
           ? aValue.localeCompare(bValue)
           : bValue.localeCompare(aValue);
       } else {
-        return sortOrder === 'asc' 
+        return sortOrder === 'asc'
           ? (aValue > bValue ? 1 : -1)
           : (aValue < bValue ? 1 : -1);
       }
@@ -485,6 +489,8 @@ export default function DashboardPage() {
       description: product.description || '',
       sku: product.sku || "N/A",
       barcode: product.barcode,
+      barcode_image: product?.barcode_image,
+      barcode_image_url: product?.barcode_image_url,
       category: product.category?.category_name || product.category_name || "Uncategorized",
       branch: product.branch || product.branch_name || "Main Warehouse",
       quantity: product.stock_quantity || product.quantity || 0,
@@ -518,7 +524,7 @@ export default function DashboardPage() {
   };
 
   // Calculate pagination indexes
-  const productsToDisplay = activeTab === "products" 
+  const productsToDisplay = activeTab === "products"
     ? sortProducts(filteredProducts)
     : sortProducts(productsWithInventory);
 
@@ -609,7 +615,7 @@ export default function DashboardPage() {
     if (sortField !== field) {
       return <img src={sort_asc} alt="sort" className="w-4 h-4 opacity-30" />;
     }
-    return sortOrder === 'asc' 
+    return sortOrder === 'asc'
       ? <img src={sort_asc} alt="asc" className="w-4 h-4" />
       : <img src={sort_desc} alt="desc" className="w-4 h-4" />;
   };
@@ -865,7 +871,7 @@ export default function DashboardPage() {
 
               {/* Row 2: Two buttons */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <button 
+                <button
                   onClick={handleBulkDiscountClick}
                   className="flex items-center space-x-4 bg-white rounded-lg p-6 border-2 border-[#0088FF] hover:border-blue-700 hover:shadow-sm transition-all w-full cursor-pointer"
                 >
@@ -1425,7 +1431,7 @@ export default function DashboardPage() {
                             <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
                               Image
                             </th>
-                            <th 
+                            <th
                               className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                               onClick={() => handleSort('product_name')}
                             >
@@ -1434,7 +1440,7 @@ export default function DashboardPage() {
                                 {renderSortIcon('product_name')}
                               </div>
                             </th>
-                            <th 
+                            <th
                               className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                               onClick={() => handleSort('sku')}
                             >
@@ -1443,7 +1449,7 @@ export default function DashboardPage() {
                                 {renderSortIcon('sku')}
                               </div>
                             </th>
-                            <th 
+                            <th
                               className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                               onClick={() => handleSort('category')}
                             >
@@ -1455,7 +1461,7 @@ export default function DashboardPage() {
 
                             {activeTab === "products" ? (
                               <>
-                                <th 
+                                <th
                                   className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                                   onClick={() => handleSort('dimensions')}
                                 >
@@ -1464,7 +1470,7 @@ export default function DashboardPage() {
                                     {renderSortIcon('dimensions')}
                                   </div>
                                 </th>
-                                <th 
+                                <th
                                   className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                                   onClick={() => handleSort('unit')}
                                 >
@@ -1473,7 +1479,7 @@ export default function DashboardPage() {
                                     {renderSortIcon('unit')}
                                   </div>
                                 </th>
-                                <th 
+                                <th
                                   className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                                   onClick={() => handleSort('weight')}
                                 >
@@ -1482,7 +1488,7 @@ export default function DashboardPage() {
                                     {renderSortIcon('weight')}
                                   </div>
                                 </th>
-                                <th 
+                                <th
                                   className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                                   onClick={() => handleSort('cost_price')}
                                 >
@@ -1491,7 +1497,7 @@ export default function DashboardPage() {
                                     {renderSortIcon('cost_price')}
                                   </div>
                                 </th>
-                                <th 
+                                <th
                                   className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                                   onClick={() => handleSort('selling_price')}
                                 >
@@ -1503,7 +1509,7 @@ export default function DashboardPage() {
                               </>
                             ) : (
                               <>
-                                <th 
+                                <th
                                   className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                                   onClick={() => handleSort('branches')}
                                 >
@@ -1512,7 +1518,7 @@ export default function DashboardPage() {
                                     {renderSortIcon('branches')}
                                   </div>
                                 </th>
-                                <th 
+                                <th
                                   className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                                   onClick={() => handleSort('branch_name')}
                                 >
@@ -1521,7 +1527,7 @@ export default function DashboardPage() {
                                     {renderSortIcon('branch_name')}
                                   </div>
                                 </th>
-                                <th 
+                                <th
                                   className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                                   onClick={() => handleSort('stock')}
                                 >
@@ -1530,9 +1536,18 @@ export default function DashboardPage() {
                                     {renderSortIcon('stock')}
                                   </div>
                                 </th>
+                                <th
+                                  className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                  onClick={() => handleSort('status')}
+                                >
+                                  <div className="flex items-center gap-2">
+                                    Status
+                                    {renderSortIcon('status')}
+                                  </div>
+                                </th>
                               </>
                             )}
-                            <th 
+                            <th
                               className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                               onClick={() => handleSort('created_at')}
                             >
@@ -1541,15 +1556,7 @@ export default function DashboardPage() {
                                 {renderSortIcon('created_at')}
                               </div>
                             </th>
-                            <th 
-                              className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                              onClick={() => handleSort('status')}
-                            >
-                              <div className="flex items-center gap-2">
-                                Status
-                                {renderSortIcon('status')}
-                              </div>
-                            </th>
+
                             {activeTab === "products" && (
                               <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
                                 Action
@@ -1710,6 +1717,33 @@ export default function DashboardPage() {
                                       <span className="text-gray-400 text-[13px]">No branch inventory</span>
                                     )}
                                   </td>
+                                  {/* Status */}
+                                  <td className="px-6 py-4 whitespace-nowrap">
+                                    <span
+                                      className={`inline-flex px-3 py-2 text-xs font-medium rounded-lg ${(() => {
+                                          const totalStock = product.inventory?.reduce((sum, inv) => sum + (inv.quantity || 0), 0) || 0;
+                                          if (totalStock === 0) {
+                                            return "bg-red-100 text-red-800";
+                                          } else if (totalStock <= (product.low_stock_threshold || 10)) {
+                                            return "bg-yellow-100 text-yellow-800";
+                                          } else {
+                                            return "bg-green-100 text-green-800";
+                                          }
+                                        })()
+                                        }`}
+                                    >
+                                      {(() => {
+                                        const totalStock = product.inventory?.reduce((sum, inv) => sum + (inv.quantity || 0), 0) || 0;
+                                        if (totalStock === 0) {
+                                          return "Out of Stock";
+                                        } else if (totalStock <= (product.low_stock_threshold || 10)) {
+                                          return "Low Stock";
+                                        } else {
+                                          return "In Stock";
+                                        }
+                                      })()}
+                                    </span>
+                                  </td>
                                 </>
                               )}
 
@@ -1720,34 +1754,7 @@ export default function DashboardPage() {
                                     : "N/A"}
                                 </span>
                               </td>
-                              {/* Status */}
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <span
-                                  className={`inline-flex px-3 py-2 text-xs font-medium rounded-lg ${
-                                    (() => {
-                                      const totalStock = product.inventory?.reduce((sum, inv) => sum + (inv.quantity || 0), 0) || 0;
-                                      if (totalStock === 0) {
-                                        return "bg-red-100 text-red-800";
-                                      } else if (totalStock <= (product.low_stock_threshold || 10)) {
-                                        return "bg-yellow-100 text-yellow-800";
-                                      } else {
-                                        return "bg-green-100 text-green-800";
-                                      }
-                                    })()
-                                  }`}
-                                >
-                                  {(() => {
-                                    const totalStock = product.inventory?.reduce((sum, inv) => sum + (inv.quantity || 0), 0) || 0;
-                                    if (totalStock === 0) {
-                                      return "Out of Stock";
-                                    } else if (totalStock <= (product.low_stock_threshold || 10)) {
-                                      return "Low Stock";
-                                    } else {
-                                      return "In Stock";
-                                    }
-                                  })()}
-                                </span>
-                              </td>
+
 
                               {/* Action Column - Only in Products Tab */}
                               {activeTab === "products" && (
@@ -1862,6 +1869,11 @@ export default function DashboardPage() {
         isOpen={showBulkDiscountModal}
         onClose={() => setShowBulkDiscountModal(false)}
         onSuccess={handleBulkDiscountSuccess}
+        filters={{
+          category_id: selectedCategory ? Number(selectedCategory) : undefined,
+          start_date: isCustomDateSelected ? customStartDate : undefined,
+          end_date: isCustomDateSelected ? customEndDate : undefined
+        }}
       />
 
       {/* Product Details Sidebar */}

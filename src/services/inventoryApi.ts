@@ -287,6 +287,48 @@ export const inventoryApi = createApi({
             }),
             invalidatesTags: ['Products'],
         }),
+
+
+        generateDiscountTemplate: builder.mutation<
+            {
+                success: boolean;
+                data: {
+                    file_name: string;
+                    download_url: string;
+                    total_items: number
+                }
+            },
+            { category_id?: number; start_date: string; end_date: string }
+        >({
+            query: (body) => ({
+                url: '/products/discounts/generate-template',
+                method: 'POST',
+                body,
+            }),
+        }),
+
+        // Import bulk discount
+        importBulkDiscount: builder.mutation<
+            {
+                success: boolean;
+                data: {
+                    created: number;
+                    updated: number;
+                    errors: string[];
+                    total_processed: number;
+                };
+            },
+            FormData
+        >({
+            query: (formData) => ({
+                url: '/products/discounts/import',
+                method: 'POST',
+                body: formData,
+            }),
+            invalidatesTags: ['Products'],
+        }),
+
+
     }),
 });
 
@@ -305,6 +347,7 @@ export const {
     useGetAllInventoryQuery,
     useBulkDiscountMutation,
     useReportDamagedItemMutation,
-
+    useGenerateDiscountTemplateMutation,
+    useImportBulkDiscountMutation,
 
 } = inventoryApi;

@@ -18,6 +18,7 @@ interface EditProductModalProps {
         status: string;
         image?: string;
         barcode?: string;
+        barcode_image?: string;
         description?: string;
         unit?: string;
         weight?: number;
@@ -35,7 +36,7 @@ interface Variant {
     selling_price: number;
     additional_price: number;
     sku?: string;
-    barcode?: string;
+    // barcode?: string;
     is_active?: boolean;
 }
 
@@ -76,8 +77,8 @@ export default function EditProductModal({ isOpen, onClose, mode, product }: Edi
 
     const [productName, setProductName] = useState(product?.name || '');
     const [sku] = useState(product?.sku || '');
-    const [barcode, setBarcode] = useState(product?.barcode || '');
-    const [autoGenerateBarcode] = useState(true);
+    // const [barcode, setBarcode] = useState(product?.barcode || '');
+    // const [autoGenerateBarcode] = useState(true);
     const [category, setCategory] = useState(product?.category || '');
     const [description, setDescription] = useState(product?.description || '');
     const [unit, setUnit] = useState(product?.unit || 'piece');
@@ -127,17 +128,17 @@ export default function EditProductModal({ isOpen, onClose, mode, product }: Edi
     const categories: Category[] = (categoriesResponse as CategoryResponse)?.data?.data || [];
 
 
-    useEffect(() => {
-        if (autoGenerateBarcode && !barcode) {
-            // Generate EAN-13 compatible format (20 + 11 digits)
-            const generateBarcode = () => {
-                const prefix = '20';
-                const randomPart = Math.floor(Math.random() * 99999999999).toString().padStart(11, '0');
-                return prefix + randomPart;
-            };
-            setBarcode(generateBarcode());
-        }
-    }, [autoGenerateBarcode, barcode]);
+    // useEffect(() => {
+    //     if (autoGenerateBarcode && !barcode) {
+    //         // Generate EAN-13 compatible format (20 + 11 digits)
+    //         const generateBarcode = () => {
+    //             const prefix = '20';
+    //             const randomPart = Math.floor(Math.random() * 99999999999).toString().padStart(11, '0');
+    //             return prefix + randomPart;
+    //         };
+    //         setBarcode(generateBarcode());
+    //     }
+    // }, [autoGenerateBarcode, barcode]);
 
     // Reset messages when modal opens
     useEffect(() => {
@@ -399,11 +400,11 @@ export default function EditProductModal({ isOpen, onClose, mode, product }: Edi
                 formData.append('sku', sku.trim());
             }
 
-            if (barcode.trim() && !autoGenerateBarcode) {
-                formData.append('barcode', barcode.trim());
-            } else if (autoGenerateBarcode && barcode.trim()) {
-                formData.append('barcode', barcode.trim()); // Auto-generated barcode
-            }
+            // if (barcode.trim() && !autoGenerateBarcode) {
+            //     formData.append('barcode', barcode.trim());
+            // } else if (autoGenerateBarcode && barcode.trim()) {
+            //     formData.append('barcode', barcode.trim()); // Auto-generated barcode
+            // }
 
             if (weight && parseFloat(weight) > 0) {
                 formData.append('weight', weight);

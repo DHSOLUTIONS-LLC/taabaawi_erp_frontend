@@ -7,7 +7,7 @@ import { useDeleteInvoiceMutation, useGetInvoiceByIdQuery, useCreateInstallmentP
 import arrow_back_icon from '../../../../assets/icons/arrow_back_icon.svg';
 import { useState } from 'react';
 import CreateInstallmentModal from '../../components/CreateInstallmentModal';
-
+import { useCreateInvoiceMutation } from '../../../../services/invoiceApi';
 
 const STATUS_COLORS: Record<string, string> = {
   Paid: 'bg-green-100 text-green-700',
@@ -31,6 +31,7 @@ export default function InvoiceDetailPage() {
   const [showInstallmentModal, setShowInstallmentModal] = useState(false);
   const [createInstallmentPlan, { isLoading: isCreatingPlan }] = useCreateInstallmentPlanMutation();
   const [payInstallment, { isLoading: isPayingInstallment }] = usePayInstallmentMutation();
+const [createInvoice, { isLoading: isConverting }] = useCreateInvoiceMutation();
 
 
   const isSuperAdmin = user?.role?.role_name === 'Super Admin';
@@ -89,6 +90,49 @@ export default function InvoiceDetailPage() {
     }
   }
 
+const handleConvertToInvoice = async () => {
+  if (!confirm('Convert this quotation to a sales invoice?')) return;
+  
+  try {
+    // Prepare payload for new invoice (copy all data from quotation)
+    const payload: any = {
+      invoice_type: invoice.invoice_type === 'b2b' ? 'b2b' : 'b2c',
+      source: invoice.source || 'Manual',
+      branch_id: invoice.branch_id,
+      customer_name: invoice.customer_name,
+      customer_phone: invoice.customer_phone || '',
+      payment_method: 'CASH',
+      payment_status: 'Unpaid',
+      items: invoice.items?.map((item: any) => ({
+        product_id: item.product_id,
+        variant_id: item.variant_id || null,
+        product_name: item.product_name,
+        quantity: item.quantity,
+        unit_price: parseFloat(item.unit_price),
+        discount_percentage: item.discount_percentage || 0,
+        tax_percentage: 5
+      }))
+    };
+
+    // Add B2B specific fields
+    if (invoice.invoice_type === 'b2b') {
+      payload.company_name = invoice.company_name;
+      payload.contact_person = invoice.contact_person;
+      payload.company_phone = invoice.company_phone;
+      payload.company_address = invoice.company_address;
+    }
+
+    const result = await createInvoice(payload).unwrap();
+    
+    alert('Quotation converted to invoice successfully!');
+    // Navigate to the new invoice
+    navigate(`${basePath}/sales/invoices/${result.data.id}`);
+    
+  } catch (error: any) {
+    console.error('Failed to convert:', error);
+    alert(error?.data?.message || 'Failed to convert quotation to invoice');
+  }
+};
 
   if (isLoading) {
     return (
@@ -162,6 +206,18 @@ export default function InvoiceDetailPage() {
                 Edit
               </button>
             )}
+
+            {/* convert to invoice */}
+            {invoice.invoice_type === `quotation` && (
+                <button
+      onClick={handleConvertToInvoice}
+      disabled={isConverting}
+      className="px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors cursor-pointer disabled:opacity-50"
+    >
+      {isConverting ? 'Converting...' : 'Convert to Invoice'}
+    </button>
+            )}
+
 
             {/* Only show Delete if invoice is unpaid */}
             {invoice.payment_status === 'Unpaid' && (

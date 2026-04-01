@@ -11,7 +11,7 @@ import {
 } from '../../salesSlice';
 import { useCreateOrderMutation, useGetShippingMethodsQuery } from '../../../../services/salesApi';
 import { useGetBranchesQuery } from '../../../../services/superAdminApi';
-import { useGetUsersQuery } from '../../../../services/superAdminApi'; // Add this import
+import { useGetCustomersQuery } from '../../../../services/crmApi';
 import { canSwitchBranch } from '../../../../utils/roleHelpers';
 
 import arrow_back_icon from '../../../../assets/icons/arrow_back_icon.svg';
@@ -34,24 +34,6 @@ export interface ShippingMethod {
   estimated_delivery_text?: string;
   created_at: string;
   updated_at: string;
-}
-
-export interface User {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  role_id: number;
-  branch_id: number | null;
-  is_active: boolean;
-  role?: {
-    id: number;
-    role_name: string;
-  };
-  branch?: {
-    id: number;
-    branch_name: string;
-  };
 }
 
 export default function CreateOrderPage() {
@@ -93,17 +75,17 @@ export default function CreateOrderPage() {
   const [createOrder, { isLoading: isCreating }] = useCreateOrderMutation();
   const { data: branchesData } = useGetBranchesQuery();
   const { data: methodsResponse, isLoading: _isLoadingShipping } = useGetShippingMethodsQuery({ search: search || undefined });
-  const { data: usersResponse, isLoading: isLoadingUsers } = useGetUsersQuery({ 
-    search: customerSearch || undefined,
-    per_page: 10 
-  });
+const { data: customersResponse, isLoading: isLoadingCustomers } = useGetCustomersQuery(
+  customerSearch ? { search: customerSearch } : {}
+);
+console.log('customersResponse:', customersResponse);
+
+
 
   const branches = Array.isArray(branchesData) ? branchesData : [];
   const methods: ShippingMethod[] = methodsResponse?.data?.data || methodsResponse?.data || [];
-  
-  // Filter users to show only customers (role_id 10 is Customer role)
-  const customers = usersResponse?.data?.data?.filter((u: User) => u.role_id === 10) || [];
-
+ const customers = customersResponse?.data || [];
+console.log('customers',customers)
   // ─── Calculations ─────────────────────────────────
   const subtotal = selectedProducts.reduce((sum: number, p: any) => sum + p.price * p.quantity, 0);
   const taxAmount = 0;
@@ -120,12 +102,12 @@ export default function CreateOrderPage() {
     setIsModalOpen(true);
   };
 
-  const handleCustomerSelect = (selectedCustomer: User) => {
+  const handleCustomerSelect = (selectedCustomer: any) => {
     setCustomerId(selectedCustomer.id.toString());
-    setCustomerName(selectedCustomer.name);
+    setCustomerName(selectedCustomer.first_name);
     setCustomerEmail(selectedCustomer.email);
     setCustomerPhone(selectedCustomer.phone || '');
-    setCustomerSearch(selectedCustomer.name);
+    setCustomerSearch(selectedCustomer.first_name + selectedCustomer.last_name);
     setShowCustomerDropdown(false);
   };
 
@@ -156,17 +138,13 @@ export default function CreateOrderPage() {
     }
 
     try {
-      // const subtotal = selectedProducts.reduce((sum: number, p: any) => sum + p.price * p.quantity, 0);
-
-      // Prepare items with ALL required fields matching the API example
       const items = selectedProducts.map((p: any) => ({
         product_id: p.product_id,
-        variant_id: p.variant_id || null, // Must be null if no variant
+        variant_id: p.variant_id || null,
         quantity: p.quantity,
         unit_price: p.price
       }));
 
-      // Build complete payload matching the API example exactly
       const payload: any = {
         customer_id: parseInt(customerId),
         channel: channel,
@@ -183,7 +161,6 @@ export default function CreateOrderPage() {
         items: items
       };
 
-      // Add optional fields only if they have values
       if (branchId) payload.branch_id = parseInt(branchId);
       if (couponCode) payload.coupon_code = couponCode;
       if (customerNotes) payload.customer_notes = customerNotes;
@@ -200,7 +177,6 @@ export default function CreateOrderPage() {
       console.error('Failed to create order:', err);
       
       if (err.data?.errors) {
-        // Show all validation errors
         const errorMessages = Object.entries(err.data.errors)
           .map(([field, messages]) => `${field}: ${(messages as any).join(', ')}`)
           .join('\n');
@@ -272,7 +248,6 @@ export default function CreateOrderPage() {
                       onChange={(e) => {
                         setCustomerSearch(e.target.value);
                         setShowCustomerDropdown(true);
-                        // Clear selected customer when searching
                         setCustomerId('');
                         setCustomerName('');
                         setCustomerEmail('');
@@ -287,7 +262,7 @@ export default function CreateOrderPage() {
                   {/* Customer Dropdown */}
                   {showCustomerDropdown && (
                     <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                      {isLoadingUsers ? (
+                      {isLoadingCustomers ? (
                         <div className="p-4 text-center text-gray-500">
                           <div className="animate-spin inline-block w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full mr-2" />
                           Loading customers...
@@ -297,7 +272,7 @@ export default function CreateOrderPage() {
                           No customers found
                         </div>
                       ) : (
-                        customers.map((customer: User) => (
+                        customers.map((customer: any) => (
                           <button
                             key={customer.id}
                             className="w-full px-4 py-3 text-left hover:bg-gray-50 focus:bg-gray-50 focus:outline-none border-b last:border-b-0"
@@ -306,9 +281,12 @@ export default function CreateOrderPage() {
                               handleCustomerSelect(customer);
                             }}
                           >
-                            <div className="font-medium text-gray-900">{customer.name}</div>
+                            <div className="font-medium text-gray-900">{customer.full_name}</div>
                             <div className="text-sm text-gray-500">{customer.email}</div>
                             <div className="text-xs text-gray-400">{customer.phone}</div>
+                            {customer.loyalty_tier && (
+                              <div className="text-xs text-yellow-600 mt-0.5">{customer.loyalty_tier}</div>
+                            )}
                           </button>
                         ))
                       )}
@@ -529,7 +507,6 @@ export default function CreateOrderPage() {
                 </button>
               </div>
 
-              {/* Products Table */}
               {selectedProducts.length > 0 ? (
                 <div className="overflow-x-auto">
                   <table className="w-full">
@@ -601,7 +578,7 @@ export default function CreateOrderPage() {
                                     d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                 </svg>
                               </button>
-                            </td>
+                             </td>
                           </tr>
                         );
                       })}

@@ -78,9 +78,22 @@ const typeColor: Record<CustomerInteraction['interaction_type'], string> = {
   Other:     'bg-gray-50 text-gray-500',
 };
 
-export const InteractionTimeline = ({ customer }: { customer: Customer }) => {
+
+interface InteractionTimelineProps {
+  customer: Customer;
+  interactions?: CustomerInteraction[];
+  isLoading?: boolean;
+}
+
+
+export const InteractionTimeline = ({ customer, interactions: propInteractions, isLoading }: InteractionTimelineProps) => {
   const dispatch = useDispatch();
-  const interactions: CustomerInteraction[] = (customer as any).interactions ?? [];
+  const interactions = propInteractions ?? (customer as any).interactions ?? [];
+
+  if (isLoading) {
+    return <div className="text-center py-8 text-gray-400">Loading interactions...</div>;
+  }
+
 
   return (
     <div className="space-y-4">
@@ -121,12 +134,12 @@ export const InteractionTimeline = ({ customer }: { customer: Customer }) => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {interactions.map((interaction) => {
-                  const Icon = typeIcon[interaction.interaction_type] ?? MoreHorizontal;
+                {interactions.map((interaction: any) => {
+                  const Icon = typeIcon[interaction.interaction_type as keyof typeof typeIcon] ?? MoreHorizontal;
                   return (
                     <tr key={interaction.id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-3 py-2.5">
-                        <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium ${typeColor[interaction.interaction_type] ?? 'bg-gray-50 text-gray-500'}`}>
+                        <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium ${typeColor[interaction.interaction_type as keyof typeof typeColor] ?? 'bg-gray-50 text-gray-500'}`}>
                           <Icon className="h-3 w-3" />
                           {interaction.interaction_type}
                         </div>

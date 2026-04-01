@@ -11,7 +11,7 @@ import { InteractionTimeline } from '../components/interactions/InteractionTimel
 import { InteractionForm } from '../components/interactions/InteractionForm';
 import { LoyaltyCard, LoyaltyTransactionTable, AdjustPointsModal } from '../components/loyalty/LoyaltyComponent';
 import { setCustomerProfileTab, openCustomerModal, closeCustomerModal } from '../crmSlice';
-import { useGetCustomerByIdQuery, useGetCustomerPurchaseHistoryQuery } from '../../../services/crmApi';
+import { useGetCustomerByIdQuery, useGetCustomerPurchaseHistoryQuery ,useGetCustomerInteractionsQuery   } from '../../../services/crmApi';
 import type { RootState } from '../../../app/store';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import { useAppSelector } from '../../../app/hooks';
@@ -19,7 +19,7 @@ import { useAppSelector } from '../../../app/hooks';
 const TABS = [
   { id: 'info',         label: 'Info',         icon: User },
   { id: 'orders',       label: 'Orders',        icon: ShoppingBag },
-  { id: 'interactions', label: 'Interactions',  icon: MessageSquare },
+  // { id: 'interactions', label: 'Interactions',  icon: MessageSquare },
   { id: 'loyalty',      label: 'Loyalty',       icon: Star },
 ] as const;
 
@@ -42,6 +42,16 @@ export const CustomerProfilePage = () => {
   );
   const orders = Array.isArray(ordersData?.data) ? ordersData.data : [];
 console.log('orders:', orders);
+
+
+
+const { data: interactionsData, isLoading: interactionsLoading } = useGetCustomerInteractionsQuery(
+  { id: Number(id), per_page: 20 },
+  { skip: activeTab !== 'interactions' || !id }
+);
+const interactions = interactionsData?.data || [];
+
+
 
   if (isLoading) return (
     <div className="p-6 space-y-4 animate-pulse">
@@ -257,10 +267,14 @@ console.log('orders:', orders);
       )}
 
       {activeTab === 'interactions' && (
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <InteractionTimeline customer={customer} />
-        </div>
-      )}
+  <div className="bg-white rounded-xl border border-gray-200 p-5">
+    <InteractionTimeline 
+      customer={customer} 
+      interactions={interactions}      // ← ADD THIS PROP
+      isLoading={interactionsLoading}  // ← ADD THIS PROP
+    />
+  </div>
+)}
 
       {activeTab === 'loyalty' && (
         <div className="space-y-4">

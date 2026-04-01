@@ -99,7 +99,7 @@ export default function ProductDetailsSidebar({ isOpen, product, onClose }: Prod
         if (product.images && Array.isArray(product.images) && product.images.length > 0) {
             return [...product.images]
                 .sort((a, b) => a.sort_order - b.sort_order)
-                .map(img => `https://puristic-filmily-bula.ngrok-free.dev/storage/${img.image_path}`);
+                .map(img => `https://erp-backend.ttexpresskw.com/storage/${img.image_path}`);
         }
         return [product.image || 'https://images.unsplash.com/photo-1457089328109-e5d9bd499191?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fGZsb3dlcnN8ZW58MHwxfDB8fHww'];
     })();
@@ -254,7 +254,7 @@ export default function ProductDetailsSidebar({ isOpen, product, onClose }: Prod
             return (
                 <div className="flex flex-col items-center">
                     <img
-                        src={`https://puristic-filmily-bula.ngrok-free.dev/storage/${barcodeImage}`}
+                        src={`https://erp-backend.ttexpresskw.com/storage/${barcodeImage}`}
                         alt={`Barcode ${barcodeValue}`}
                         className="h-8 w-auto object-contain"
                         onError={(e) => {
@@ -384,7 +384,7 @@ export default function ProductDetailsSidebar({ isOpen, product, onClose }: Prod
                                             {spec.label === 'Barcode' && spec.image ? (
                                                 <div className="flex flex-col">
                                                     <img
-                                                        src={`https://puristic-filmily-bula.ngrok-free.dev/storage/${spec.image}`}
+                                                        src={`https://erp-backend.ttexpresskw.com/storage/${spec.image}`}
                                                         alt="Barcode"
                                                         className="h-8 w-auto object-contain mb-1"
                                                     />

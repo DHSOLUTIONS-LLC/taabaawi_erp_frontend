@@ -66,7 +66,7 @@ export default function BulkTransferModal({ isOpen, onClose, selectedProducts }:
 
             for (const product of selectedProducts) {
                 const response = await fetch(
-                    `https://puristic-filmily-bula.ngrok-free.dev/api/products/${product.id}/stock`,
+                    `https://erp-backend.ttexpresskw.com/api/products/${product.id}/stock`,
                     {
                         headers: {
                             'Authorization': `Bearer ${token}`,

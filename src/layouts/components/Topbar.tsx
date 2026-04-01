@@ -350,7 +350,7 @@ export default function Topbar({ pageTitle = "Dashboard Overview", toggleMobileM
           </button>
 
           {/* Shift Close Button */}
-          {(user?.role?.role_name === 'Cashier' || user?.role?.role_name === 'cashier' || user?.role?.role_name === 'Super Admin') && currentRegister && (
+          {(user?.role?.role_name === 'Cashier' || user?.role?.role_name === 'cashier' || user?.role?.role_name === 'Super Admin' || user?.role?.role_name === 'Super Admin') && currentRegister && (
             <button
               onClick={handleCloseShift}
               className="hidden lg:flex items-center space-x-2 px-3 py-2 md:px-4 md:py-2 bg-[#FF5F57] text-white rounded-lg hover:bg-[#FF4A42] transition-colors text-sm"

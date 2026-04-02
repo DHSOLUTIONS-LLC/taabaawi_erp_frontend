@@ -10,6 +10,10 @@ import { XMarkIcon } from '@heroicons/react/24/outline';
 import search_icon from '../../../assets/icons/search_icon.svg';
 import barcode_icon from '../../../assets/icons/barcode_icon.svg';
 
+
+const API_BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://erp-backend.ttexpresskw.com';
+
+
 interface ProductSelectionModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -58,8 +62,8 @@ export default function ProductSelectionModal({ isOpen, onClose }: ProductSelect
         (sum: number, inv: any) => sum + (inv.available_quantity ?? inv.quantity ?? 0), 0
       ) || 0;
 
-      const imagePath = product.primary_image?.image_path 
-  ? `/storage/${product.primary_image.image_path}` 
+     const imagePath = product.primary_image?.image_path 
+  ? `${API_BASE_URL}/storage/${product.primary_image.image_path}` 
   : 'https://images.unsplash.com/photo-1541275055241-329bbdf9a191?w=500&auto=format&fit=crop&q=60';
 
       return {
@@ -105,6 +109,8 @@ export default function ProductSelectionModal({ isOpen, onClose }: ProductSelect
   const handleAddToSelection = (productWithDetails: any) => {
     const uniqueId = `${currentProduct?.product_id}-${productWithDetails.variant_id || 'default'}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     
+      const fullImageUrl = currentProduct?.image || '';
+
     dispatch(addOrderProduct({
       id: uniqueId,
       product_id: currentProduct?.product_id || 0,
@@ -115,7 +121,7 @@ export default function ProductSelectionModal({ isOpen, onClose }: ProductSelect
       variant_id: productWithDetails.variant_id ?? null,
       quantity: productWithDetails.quantity || 1,
       image: currentProduct?.image || '',
-      image_url: currentProduct?.image_url || currentProduct?.image || '',
+      image_url: fullImageUrl, 
     }));
     
     setIsProductPopupOpen(false);

@@ -2,6 +2,10 @@
 import { useState, useMemo } from 'react';
 import { useGetProductsQuery, useGetCategoriesQuery } from '../../../services/inventoryApi';
 
+
+const API_BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://erp-backend.ttexpresskw.com';
+
+
 interface POProduct {
   id: string;
   product_id: number;
@@ -77,9 +81,9 @@ export default function ProductSelectorModal({
           sku: (p.sku as string) || '',
           price: parseFloat(p.selling_price as string) || 0,
           stock: totalStock,
-          image: p.primary_image?.image_path
-            ? `/storage/${p.primary_image.image_path as string}`
-            : 'https://images.unsplash.com/photo-1541275055241-329bbdf9a191?w=200&auto=format&fit=crop',
+          image: p.primary_image?.image_path 
+  ? `${API_BASE_URL}/storage/${p.primary_image.image_path}` 
+  : 'https://images.unsplash.com/photo-1541275055241-329bbdf9a191?w=500&auto=format&fit=crop&q=60',
           category: (p.category?.category_name as string) || 'Uncategorized',
         };
       })

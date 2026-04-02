@@ -17,7 +17,7 @@ import { useGetInvoiceStatisticsQuery } from '../../../services/invoiceApi';
 import { useGetInvoicesQuery } from '../../../services/invoiceApi';
 import { useGetOrdersQuery, useGetSalesWeeklyQuery, useGetSalesMonthlyQuery, useGetSalesOverviewQuery, useGetChannelBreakdownQuery } from '../../../services/salesApi';
 
- 
+
 
 // Types for filters
 interface FilterState {
@@ -37,11 +37,11 @@ const CustomTooltip = ({ active, payload, label }: any) => {
             <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-100">
                 <p className="text-sm font-medium text-gray-900">{label}</p>
                 <p className="text-sm text-blue-600">
-                    Revenue: KWD {payload[0]?.value?.toLocaleString?.(undefined, {minimumFractionDigits: 3, maximumFractionDigits: 3}) || '0.000'}
+                    Revenue: KWD {payload[0]?.value?.toLocaleString?.(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 3 }) || '0.000'}
                 </p>
                 {payload[1] && (
                     <p className="text-sm text-gray-500">
-                        Previous: KWD {payload[1]?.value?.toLocaleString?.(undefined, {minimumFractionDigits: 3, maximumFractionDigits: 3}) || '0.000'}
+                        Previous: KWD {payload[1]?.value?.toLocaleString?.(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 3 }) || '0.000'}
                     </p>
                 )}
             </div>
@@ -51,12 +51,12 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 export default function SalesDashboardPage() {
-    const [selectedTimeframe, setSelectedTimeframe] = useState<'weekly' | 'monthly' >('weekly');
+    const [selectedTimeframe, setSelectedTimeframe] = useState<'weekly' | 'monthly'>('weekly');
     const [isExpanded, setIsExpanded] = useState(false);
     const [showBulkTransfer] = useState(false);
     const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
     const [showCustomDatePicker, setShowCustomDatePicker] = useState(false);
-    
+
     const [_dashboardData, setDashboardData] = useState<any>(null);
     const [_channelData, setChannelData] = useState<any>(null);
     const [processedChartData, setProcessedChartData] = useState<any>({
@@ -64,8 +64,8 @@ export default function SalesDashboardPage() {
         monthly: { dataPoints: [], totalRevenue: 0, changePercentage: 0 },
     });
 
-    
- 
+
+
     // Filter states
     const [filters, setFilters] = useState<FilterState>({
         dateRange: 'Today',
@@ -97,7 +97,7 @@ export default function SalesDashboardPage() {
 
         // Handle date range
         const today = new Date().toISOString().split('T')[0];
-        
+
         if (filters.dateRange === 'Today') {
             params.start_date = today;
             params.end_date = today;
@@ -120,11 +120,11 @@ export default function SalesDashboardPage() {
         if (filters.invoiceType) {
             params.invoice_type = filters.invoiceType.toLowerCase();
         }
-        
+
         if (filters.paymentStatus) {
             params.payment_status = filters.paymentStatus;
         }
-        
+
         if (filters.orderSource) {
             params.source = filters.orderSource;
         }
@@ -143,11 +143,13 @@ export default function SalesDashboardPage() {
     const { data: overviewData } = useGetSalesOverviewQuery();
     const { data: channelBreakdownData } = useGetChannelBreakdownQuery();
 
+
+    console.log('channel contribution:', channelBreakdownData)
     const { data: invoicesData, refetch: refetchInvoices } = useGetInvoicesQuery({
         ...queryParams,
         invoice_type: (queryParams.invoice_type as 'b2c' | 'b2b' | 'quotation' | undefined)
     });
-    
+
     const { data: ordersData, refetch: refetchOrders } = useGetOrdersQuery({
         ...queryParams,
         channel: queryParams.source
@@ -164,43 +166,43 @@ export default function SalesDashboardPage() {
 
     // Process chart data from APIs
     useEffect(() => {
-    const newChartData = {
-        weekly: {
-            dataPoints: [] as any[],
-            totalRevenue: 0,
-            changePercentage: 0
-        },
-        monthly: {
-            dataPoints: [] as any[],
-            totalRevenue: 0,
-            changePercentage: 0
+        const newChartData = {
+            weekly: {
+                dataPoints: [] as any[],
+                totalRevenue: 0,
+                changePercentage: 0
+            },
+            monthly: {
+                dataPoints: [] as any[],
+                totalRevenue: 0,
+                changePercentage: 0
+            }
+        };
+
+        // Process weekly data
+        if (weeklyData?.data?.daily_breakdown) {
+            newChartData.weekly.dataPoints = weeklyData.data.daily_breakdown.map((d: any) => ({
+                day: new Date(d.date).toLocaleDateString('en-US', { weekday: 'short' }),
+                revenue: parseFloat(d.revenue) || 0
+            }));
+            newChartData.weekly.totalRevenue = parseFloat(weeklyData.data.summary?.total_revenue || 0);
+            newChartData.weekly.changePercentage = weeklyData.data.comparison?.revenue_change_percentage || 0;
         }
-    };
 
-    // Process weekly data
-    if (weeklyData?.data?.daily_breakdown) {
-        newChartData.weekly.dataPoints = weeklyData.data.daily_breakdown.map((d: any) => ({
-            day: new Date(d.date).toLocaleDateString('en-US', { weekday: 'short' }),
-            revenue: parseFloat(d.revenue) || 0
-        }));
-        newChartData.weekly.totalRevenue = parseFloat(weeklyData.data.summary?.total_revenue || 0);
-        newChartData.weekly.changePercentage = weeklyData.data.comparison?.revenue_change_percentage || 0;
-    }
+        // Process monthly data
+        if (monthlyData?.data?.daily_sales) {
+            newChartData.monthly.dataPoints = monthlyData.data.daily_sales.map((d: any) => ({
+                day: `Day ${d.day}`,
+                revenue: parseFloat(d.revenue) || 0
+            }));
+            newChartData.monthly.totalRevenue = parseFloat(monthlyData.data.summary?.total_revenue || 0);
+            newChartData.monthly.changePercentage = monthlyData.data.comparison?.revenue_change_percentage || 0;
+        }
 
-    // Process monthly data
-    if (monthlyData?.data?.daily_sales) {
-        newChartData.monthly.dataPoints = monthlyData.data.daily_sales.map((d: any) => ({
-            day: `Day ${d.day}`,
-            revenue: parseFloat(d.revenue) || 0
-        }));
-        newChartData.monthly.totalRevenue = parseFloat(monthlyData.data.summary?.total_revenue || 0);
-        newChartData.monthly.changePercentage = monthlyData.data.comparison?.revenue_change_percentage || 0;
-    }
 
-  
 
-    setProcessedChartData(newChartData);
-}, [weeklyData, monthlyData]);
+        setProcessedChartData(newChartData);
+    }, [weeklyData, monthlyData]);
 
     // Refetch when filters change
     useEffect(() => {
@@ -210,6 +212,7 @@ export default function SalesDashboardPage() {
 
     // Safely extract data with fallbacks
     const invoiceStatsData: any = invoiceStats?.data || {};
+    console.log('invoice stats:', invoiceStatsData)
 
     // Get invoices and orders data
     const invoices = invoicesData?.data?.data || [];
@@ -240,8 +243,8 @@ export default function SalesDashboardPage() {
             orderId: inv?.invoice_number || 'N/A',
             source: inv?.source || 'Manual',
             type: 'Invoice',
-            invoiceType: inv?.invoice_type === 'b2c' ? 'Sales Invoice' : 
-                        inv?.invoice_type === 'b2b' ? 'B2B Invoice' : 'Quotation',
+            invoiceType: inv?.invoice_type === 'b2c' ? 'Sales Invoice' :
+                inv?.invoice_type === 'b2b' ? 'B2B Invoice' : 'Quotation',
             customer: inv?.customer_name || inv?.company_name || '—',
             date: inv?.created_at || '',
             displayDate: inv?.created_at ? new Date(inv.created_at).toLocaleDateString('en-CA') : '—',
@@ -268,34 +271,49 @@ export default function SalesDashboardPage() {
 
     // Apply client-side filters for customer type
     const filteredTransactions = allTransactions.filter((transaction: any) => {
-    // Customer Type filter
-    if (filters.customerType && filters.customerType !== 'Customer Type') {
-        if (filters.customerType === 'B2C' && transaction.customerType !== 'B2C') return false;
-        if (filters.customerType === 'B2B' && transaction.customerType !== 'B2B') return false;
-    }
-    return true;
-}).sort((a, b) => {
-    if (!a.date || !b.date) return 0;
-    return new Date(b.date).getTime() - new Date(a.date).getTime();
-});
+        // Customer Type filter
+        if (filters.customerType && filters.customerType !== 'Customer Type') {
+            if (filters.customerType === 'B2C' && transaction.customerType !== 'B2C') return false;
+            if (filters.customerType === 'B2B' && transaction.customerType !== 'B2B') return false;
+        }
+        return true;
+    }).sort((a, b) => {
+        if (!a.date || !b.date) return 0;
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+    });
 
-const [currentPage, setCurrentPage] = useState(1);
-const itemsPerPage = 5;
-const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
-const paginatedTransactions = filteredTransactions.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 5;
+    const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
+    const paginatedTransactions = filteredTransactions.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
 
     const recentTransactions = paginatedTransactions.slice(0, 5);
 
 
     // Calculate stats with safe fallbacks
-    const totalSalesToday = invoiceStatsData.total_revenue || 0;
-    const totalOrdersToday = orders.length;
-    const b2bCount = Array.isArray(invoiceStatsData.by_type) 
-        ? invoiceStatsData.by_type.find((t: any) => t?.invoice_type === 'b2b')?.count || 0 
+    // Calculate total revenue from by_type array since total_revenue is returning 0
+    const totalSales = invoiceStatsData.by_type?.reduce(
+        (sum: number, type: any) => sum + parseFloat(type.total || 0), 0
+    ) || invoiceStatsData.total_revenue || 0;
+
+
+    console.log('todat sales:', totalSales)
+
+
+    const totalOrders = orders.length || invoiceStatsData.total_invoices || 0;
+
+    const b2bCount = Array.isArray(invoiceStatsData.by_type)
+        ? invoiceStatsData.by_type.reduce((sum: number, t: any) => {
+            if (t?.invoice_type === 'b2b') return sum + (t.count || 0);
+            return sum;
+        }, 0)
         : 0;
+
+    console.log('b2bCount', b2bCount)
+
     const unpaidInvoices = invoiceStatsData.unpaid_amount || 0;
     const unpaidCount = invoiceStatsData.unpaid_count || 0;
 
@@ -371,7 +389,7 @@ const paginatedTransactions = filteredTransactions.slice(
                         <div className="flex justify-between">
                             <div>
                                 <p className="text-lg font-medium text-gray-600">Total Sales</p>
-                                <p className="text-[24px] font-semibold text-gray-900 mt-10">KWD {formatKWD(totalSalesToday)}</p>
+                                <p className="text-[24px] font-semibold text-gray-900 mt-10">KWD {formatKWD(totalSales)}</p>
                             </div>
                             <div className="w-12 h-12 rounded-lg bg-[#F7F9FB] flex items-center justify-center">
                                 <img src={icon_3} alt="" />
@@ -387,7 +405,7 @@ const paginatedTransactions = filteredTransactions.slice(
                         <div className="flex justify-between">
                             <div>
                                 <p className="text-lg font-medium text-gray-600">Total Orders</p>
-                                <p className="text-[24px] font-semibold text-gray-900 mt-10">{totalOrdersToday}</p>
+                                <p className="text-[24px] font-semibold text-gray-900 mt-10">{totalOrders}</p>
                             </div>
                             <div className="w-12 h-12 rounded-lg bg-[#F7F9FB] flex items-center justify-center">
                                 <img src={icon_4} alt="" />
@@ -402,8 +420,8 @@ const paginatedTransactions = filteredTransactions.slice(
                     <div className="bg-white rounded-lg p-6">
                         <div className="flex justify-between">
                             <div>
-                                <p className="text-lg font-medium text-gray-600">B2B</p>
-                                <p className="text-[24px] font-semibold text-gray-900 mt-10">{b2bCount}</p>
+                                <p className="text-lg font-medium text-gray-600">Total Invoices</p>
+                                <p className="text-[24px] font-semibold text-gray-900 mt-10">{invoiceStatsData.total_invoices || 0}</p>
                             </div>
                             <div className="w-12 h-12 rounded-lg bg-[#F7F9FB] flex items-center justify-center">
                                 <img src={icon_1} alt="" />
@@ -411,7 +429,9 @@ const paginatedTransactions = filteredTransactions.slice(
                         </div>
                         <div className='flex flex-row items-center mt-2'>
                             <img src={icon_8} alt="" className='w-6 h-6 mr-2' />
-                            <p className="text-md font-semibold text-red-600">+ {b2bCount} New Items</p>
+                            <p className="text-md font-semibold text-blue-600">
+                                {invoiceStatsData.by_type?.map((t: any) => `${t.invoice_type?.toUpperCase()}: ${t.count}`).join(' · ') || 'No invoices'}
+                            </p>
                         </div>
                     </div>
 
@@ -485,7 +505,7 @@ const paginatedTransactions = filteredTransactions.slice(
                                 {/* Revenue Total */}
                                 <div className="mb-6">
                                     <p className="text-3xl font-bold items-center text-gray-900">
-                                        KWD {currentData.totalRevenue.toLocaleString(undefined, {minimumFractionDigits: 3, maximumFractionDigits: 3})}   
+                                        KWD {currentData.totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 3 })}
                                         <span className="bg-gray-100 rounded-full p-2 text-sm font-medium text-green-600 ml-2">
                                             +{currentData.changePercentage}%
                                         </span>
@@ -522,18 +542,20 @@ const paginatedTransactions = filteredTransactions.slice(
                             </div>
 
                             {/* Right Column - Revenue Table */}
+                            {/* Right Column - Revenue Table */}
                             <div className="bg-white rounded-xl p-6">
                                 <h3 className="text-lg font-semibold text-gray-900 mb-6">Channels Contribution</h3>
 
-                                {/* Three Concentric Circles - Dynamic Data from Orders */}
+                                {/* Three Concentric Circles - Dynamic Data from API */}
                                 <div className="relative w-64 h-64 mx-auto mb-6">
-                                    {channelBreakdownArray.length > 0 ? (
-                                        channelBreakdownArray.slice(0, 3).map((channel: any, index: number) => {
-                                            const percentage = totalRevenueFromOrders > 0 ? (channel.revenue / totalRevenueFromOrders) * 100 : 0;
+                                    {channelBreakdownData?.data?.channel_breakdown && channelBreakdownData.data.channel_breakdown.length > 0 ? (
+                                        channelBreakdownData.data.channel_breakdown.slice(0, 3).map((channel: any, index: number) => {
+                                            const totalRevenue = channelBreakdownData.data.summary?.total_revenue || 1;
+                                            const percentage = (parseFloat(channel.total_revenue) / totalRevenue) * 100;
                                             const colors = ['#91C0EECC', '#1773CF99', '#91C0EE80'];
                                             const sizes = [45, 35, 25];
                                             const rotations = [-190, -100, -30];
-                                            
+
                                             return (
                                                 <div key={channel.channel} className="absolute inset-0" style={{ padding: index > 0 ? `${index * 8}px` : '0' }}>
                                                     <svg className="w-full h-full" viewBox="0 0 100 100">
@@ -554,6 +576,7 @@ const paginatedTransactions = filteredTransactions.slice(
                                             );
                                         })
                                     ) : (
+                                        // Fallback static circles
                                         <>
                                             <div className="absolute inset-0">
                                                 <svg className="w-full h-full" viewBox="0 0 100 100">
@@ -576,8 +599,8 @@ const paginatedTransactions = filteredTransactions.slice(
                                     {/* Center Average */}
                                     <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
                                         <div className="text-3xl font-bold text-gray-900">
-                                            {channelBreakdownArray.length > 0 
-                                                ? Math.round(channelBreakdownArray.reduce((acc: number, c: any) => acc + (c.revenue / totalRevenueFromOrders) * 100, 0) / channelBreakdownArray.length) 
+                                            {channelBreakdownData?.data?.channel_breakdown && channelBreakdownData.data.channel_breakdown.length > 0
+                                                ? Math.round(channelBreakdownData.data.channel_breakdown.reduce((acc: number, c: any) => acc + (parseFloat(c.total_revenue) / (channelBreakdownData.data.summary?.total_revenue || 1)) * 100, 0) / channelBreakdownData.data.channel_breakdown.length)
                                                 : 30}%
                                         </div>
                                     </div>
@@ -585,20 +608,30 @@ const paginatedTransactions = filteredTransactions.slice(
 
                                 {/* Sales Amount Details */}
                                 <div className="space-y-3">
-                                    {channelBreakdownArray.length > 0 ? (
-                                        channelBreakdownArray.map((channel: any) => {
-                                            const percentage = totalRevenueFromOrders > 0 ? ((channel.revenue / totalRevenueFromOrders) * 100).toFixed(1) : '0.0';
+                                    {channelBreakdownData?.data?.channel_breakdown && channelBreakdownData.data.channel_breakdown.length > 0 ? (
+                                        channelBreakdownData.data.channel_breakdown.map((channel: any) => {
+                                            const totalRevenue = channelBreakdownData.data.summary?.total_revenue || 1;
+                                            const percentage = ((parseFloat(channel.total_revenue) / totalRevenue) * 100).toFixed(1);
                                             return (
                                                 <div key={channel.channel} className="flex items-center justify-between">
                                                     <div>
                                                         <div className="text-md font-medium text-gray-500">
                                                             {channel.channel}: <span className="text-md text-gray-500">{percentage}%</span>
                                                         </div>
+                                                        <div className="text-xs text-gray-400">
+                                                            {channel.total_orders} orders · KWD {parseFloat(channel.total_revenue).toFixed(3)}
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <div className="text-sm font-semibold text-gray-700">
+                                                            KWD {parseFloat(channel.total_revenue).toFixed(3)}
+                                                        </div>
                                                     </div>
                                                 </div>
                                             );
                                         })
                                     ) : (
+                                        // Fallback static data
                                         <>
                                             <div className="flex items-center justify-between">
                                                 <div>
@@ -704,7 +737,7 @@ const paginatedTransactions = filteredTransactions.slice(
 
                             {/* Invoice Type Filter */}
                             <div className="flex-1 min-w-50 relative">
-                                <select 
+                                <select
                                     value={filters.invoiceType}
                                     onChange={(e) => handleFilterChange('invoiceType', e.target.value)}
                                     className="w-full px-4 py-2.5 shadow rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-semibold appearance-none bg-white pr-10"
@@ -721,7 +754,7 @@ const paginatedTransactions = filteredTransactions.slice(
 
                             {/* Order Source Filter */}
                             <div className="flex-1 min-w-50 relative">
-                                <select 
+                                <select
                                     value={filters.orderSource}
                                     onChange={(e) => handleFilterChange('orderSource', e.target.value)}
                                     className="w-full px-4 py-2.5 shadow rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-semibold appearance-none bg-white pr-10"
@@ -739,7 +772,7 @@ const paginatedTransactions = filteredTransactions.slice(
 
                             {/* Payment Status Filter */}
                             <div className="flex-1 min-w-50 relative">
-                                <select 
+                                <select
                                     value={filters.paymentStatus}
                                     onChange={(e) => handleFilterChange('paymentStatus', e.target.value)}
                                     className="w-full px-4 py-2.5 shadow rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-semibold appearance-none bg-white pr-10"
@@ -757,7 +790,7 @@ const paginatedTransactions = filteredTransactions.slice(
 
                             {/* Customer Type Filter */}
                             <div className="flex-1 min-w-50 relative">
-                                <select 
+                                <select
                                     value={filters.customerType}
                                     onChange={(e) => handleFilterChange('customerType', e.target.value)}
                                     className="w-full px-4 py-2.5 shadow rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-semibold appearance-none bg-white pr-10"
@@ -773,7 +806,7 @@ const paginatedTransactions = filteredTransactions.slice(
 
                             {/* Filter Actions */}
                             <div className="shrink-0 flex gap-2">
-                                <button 
+                                <button
                                     onClick={handleClearFilters}
                                     className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
                                 >
@@ -907,13 +940,12 @@ const paginatedTransactions = filteredTransactions.slice(
                                                     <div className="text-[14px] text-gray-900">{transaction.payment}</div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    <span className={`inline-flex px-3 py-2 text-xs font-medium rounded-lg ${
-                                                        transaction.status === 'Paid' ? 'bg-green-100 text-green-800' :
-                                                        transaction.status === 'Unpaid' ? 'bg-red-100 text-red-800' :
-                                                        transaction.status === 'Partially Paid' ? 'bg-yellow-100 text-yellow-800' :
-                                                        transaction.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-                                                        'bg-gray-100 text-gray-800'
-                                                    }`}>
+                                                    <span className={`inline-flex px-3 py-2 text-xs font-medium rounded-lg ${transaction.status === 'Paid' ? 'bg-green-100 text-green-800' :
+                                                            transaction.status === 'Unpaid' ? 'bg-red-100 text-red-800' :
+                                                                transaction.status === 'Partially Paid' ? 'bg-yellow-100 text-yellow-800' :
+                                                                    transaction.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                                                                        'bg-gray-100 text-gray-800'
+                                                        }`}>
                                                         {transaction.status}
                                                     </span>
                                                 </td>
@@ -930,61 +962,60 @@ const paginatedTransactions = filteredTransactions.slice(
                             </table>
                         </div>
                     </div>
-                    
-                   {/* Pagination */}
-<div className="px-6 py-4">
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="text-sm text-gray-500">
-            Showing <span className="font-medium">1</span> to <span className="font-medium">{Math.min(recentTransactions.length, 10)}</span> of <span className="font-medium">{filteredTransactions.length}</span> transactions
-        </div>
-        <div className="flex items-center space-x-2">
-            <button 
-                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                disabled={currentPage === 1}
-                className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-                Previous
-            </button>
-            
-            {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
-                const pageNum = i + 1;
-                return (
-                    <button
-                        key={pageNum}
-                        onClick={() => setCurrentPage(pageNum)}
-                        className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
-                            currentPage === pageNum 
-                                ? 'bg-blue-600 text-white' 
-                                : 'text-gray-700 hover:bg-gray-100'
-                        }`}
-                    >
-                        {pageNum}
-                    </button>
-                );
-            })}
-            
-            {totalPages > 3 && (
-                <>
-                    <span className="px-2 text-gray-400">...</span>
-                    <button
-                        onClick={() => setCurrentPage(totalPages)}
-                        className="px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg"
-                    >
-                        {totalPages}
-                    </button>
-                </>
-            )}
-            
-            <button 
-                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                disabled={currentPage === totalPages}
-                className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-                Next
-            </button>
-        </div>
-    </div>
-</div>
+
+                    {/* Pagination */}
+                    <div className="px-6 py-4">
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <div className="text-sm text-gray-500">
+                                Showing <span className="font-medium">1</span> to <span className="font-medium">{Math.min(recentTransactions.length, 10)}</span> of <span className="font-medium">{filteredTransactions.length}</span> transactions
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <button
+                                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                                    disabled={currentPage === 1}
+                                    className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Previous
+                                </button>
+
+                                {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
+                                    const pageNum = i + 1;
+                                    return (
+                                        <button
+                                            key={pageNum}
+                                            onClick={() => setCurrentPage(pageNum)}
+                                            className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${currentPage === pageNum
+                                                    ? 'bg-blue-600 text-white'
+                                                    : 'text-gray-700 hover:bg-gray-100'
+                                                }`}
+                                        >
+                                            {pageNum}
+                                        </button>
+                                    );
+                                })}
+
+                                {totalPages > 3 && (
+                                    <>
+                                        <span className="px-2 text-gray-400">...</span>
+                                        <button
+                                            onClick={() => setCurrentPage(totalPages)}
+                                            className="px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg"
+                                        >
+                                            {totalPages}
+                                        </button>
+                                    </>
+                                )}
+
+                                <button
+                                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                                    disabled={currentPage === totalPages}
+                                    className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </DashboardLayout>

@@ -12,6 +12,10 @@ import barcode_icon from '../../../../assets/icons/barcode_icon.svg';
 import search_icon from '../../../../assets/icons/search_icon.svg';
 import arrow_back_icon from '../../../../assets/icons/arrow_back_icon.svg';
 
+
+const API_BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://erp-backend.ttexpresskw.com';
+
+
 interface MappedProduct {
   id: string;
   product_id: number;
@@ -60,9 +64,10 @@ export default function AddOrderProducts() {
       ) || 0;
 
 
-      const imagePath = product.primary_image?.image_path 
-  ? `/storage/${product.primary_image.image_path}` 
+     const imagePath = product.primary_image?.image_path 
+  ? `${API_BASE_URL}/storage/${product.primary_image.image_path}` 
   : 'https://images.unsplash.com/photo-1541275055241-329bbdf9a191?w=500&auto=format&fit=crop&q=60';
+
 
       return {
         id: product.id.toString(),
@@ -75,7 +80,9 @@ export default function AddOrderProducts() {
         stock: totalStock,
         outOfStock: totalStock <= 0,
         image: imagePath,
-        image_url: product.primary_image?.image_path || '',
+        image_url: product.primary_image?.image_path 
+  ? `${API_BASE_URL}/storage/${product.primary_image.image_path}` 
+  : '',
         category: product.category?.category_name || 'All Items',
       };
     });

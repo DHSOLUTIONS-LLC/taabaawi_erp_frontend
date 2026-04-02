@@ -528,14 +528,21 @@ console.log('customers',customers)
                             <td className="px-4 py-3">
                               <div className="flex items-center gap-3">
                                 <img
-                                  src={product.image_url || product.image}
-                                  alt={product.name}
-                                  className="w-10 h-10 rounded-lg object-cover"
-                                  onError={(e) => {
-                                    (e.target as HTMLImageElement).src = 
-                                      'https://images.unsplash.com/photo-1541275055241-329bbdf9a191?w=100&auto=format&fit=crop';
-                                  }}
-                                />
+  src={(() => {
+    const imgSrc = product.image_url || product.image;
+    if (imgSrc && imgSrc.startsWith('/storage/')) {
+      const API_BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://erp-backend.ttexpresskw.com';
+      return `${API_BASE_URL}${imgSrc}`;
+    }
+    return imgSrc || 'https://images.unsplash.com/photo-1541275055241-329bbdf9a191?w=100&auto=format&fit=crop';
+  })()}
+  alt={product.name}
+  className="w-10 h-10 rounded-lg object-cover"
+  onError={(e) => {
+    (e.target as HTMLImageElement).src = 
+      'https://images.unsplash.com/photo-1541275055241-329bbdf9a191?w=100&auto=format&fit=crop';
+  }}
+/>
                                 <div>
                                   <div className="text-sm font-medium text-gray-900">{product.name}</div>
                                   {product.size && product.size !== 'Default' && (

@@ -22,6 +22,9 @@ interface CreateInvoiceProps {
   updateInvoice?: any;
 }
 
+
+
+
 export default function CreateInvoice({ isEditMode = false, invoiceId, updateInvoice }: CreateInvoiceProps) {
   const { user } = useAppSelector((state: RootState) => state.auth);
   const dispatch = useAppDispatch();
@@ -32,6 +35,7 @@ export default function CreateInvoice({ isEditMode = false, invoiceId, updateInv
 
   // ─── Everything from Redux — survives navigation ──────────────
   const selectedProducts = useAppSelector((state: RootState) => state.sales.invoiceProducts);
+  console.log('selected products:', selectedProducts)
   const form = useAppSelector((state: RootState) => state.sales.invoiceForm);
 
   // One dispatcher for all form fields

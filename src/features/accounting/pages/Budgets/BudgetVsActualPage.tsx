@@ -21,6 +21,7 @@ export default function BudgetVsActualPage() {
 
   const budgetId = id ? parseInt(id, 10) : 0;
   const { data, isLoading, refetch } = useGetBudgetVsActualQuery(budgetId);
+  console.log('budget lines:', data)
 
   const report = (data as any)?.data;
 

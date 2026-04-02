@@ -10,6 +10,7 @@ import {
   useGetBalanceSheetQuery,
   useGetAccountsPayableQuery,
   useGetAccountsReceivableQuery,
+  useGetJournalEntriesQuery,
 } from '../../../services/accountingApi';
 import FinancialChart from '../components/FinancialChart';
 import StatusBadge from '../components/StatusBadge';
@@ -57,30 +58,78 @@ export default function AccountingDashboard() {
     per_page: 5,
   });
 
+  // Fetch journal entries for chart data
+  const { data: journalEntriesData } = useGetJournalEntriesQuery({
+    start_date: dateRange.start_date,
+    end_date: dateRange.end_date,
+    per_page: 100,
+  });
+
   const trialBalance = (trialBalanceData as any)?.data;
   const profitLoss = (profitLossData as any)?.data;
   const balanceSheet = (balanceSheetData as any)?.data;
   const recentAP = (apData as any)?.data?.data || [];
   const recentAR = (arData as any)?.data?.data || [];
+  const journalEntries = (journalEntriesData as any)?.data?.data || [];
 
-  // Chart data for revenue/expense trend
-  const chartData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-    datasets: [
-      {
-        label: 'Revenue',
-        data: [12500, 15000, 18500, 17000, 21000, 19500],
-        backgroundColor: '#10B981',
-        borderColor: '#059669',
-      },
-      {
-        label: 'Expenses',
-        data: [9800, 11200, 13400, 12800, 15600, 14300],
-        backgroundColor: '#EF4444',
-        borderColor: '#DC2626',
-      },
-    ],
+  // Calculate revenue vs expense chart data from journal entries
+  const getMonthlyChartData = () => {
+    const monthlyData: Record<string, { revenue: number; expense: number }> = {};
+    const last6Months = [];
+    const today = new Date();
+    
+    for (let i = 5; i >= 0; i--) {
+      const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      const monthKey = date.toLocaleString('default', { month: 'short' });
+      monthlyData[monthKey] = { revenue: 0, expense: 0 };
+      last6Months.push(monthKey);
+    }
+
+    journalEntries.forEach((entry: any) => {
+      if (entry.status === 'Posted') {
+        const entryDate = new Date(entry.entry_date);
+        const monthKey = entryDate.toLocaleString('default', { month: 'short' });
+        
+        if (monthlyData[monthKey]) {
+          // This would need actual account type mapping from lines
+          // For now, use total_debit as revenue indicator
+          monthlyData[monthKey].revenue += num(entry.total_debit);
+          monthlyData[monthKey].expense += num(entry.total_credit);
+        }
+      }
+    });
+
+    return {
+      labels: last6Months,
+      datasets: [
+        {
+          label: 'Revenue',
+          data: last6Months.map(m => monthlyData[m]?.revenue || 0),
+          backgroundColor: '#10B981',
+          borderColor: '#059669',
+        },
+        {
+          label: 'Expenses',
+          data: last6Months.map(m => monthlyData[m]?.expense || 0),
+          backgroundColor: '#EF4444',
+          borderColor: '#DC2626',
+        },
+      ],
+    };
   };
+
+  // Calculate financial health metrics
+  const totalAssets = num(balanceSheet?.assets?.total);
+  const totalLiabilities = num(balanceSheet?.liabilities?.total);
+  const totalEquity = num(balanceSheet?.equity?.total);
+  
+  const currentRatio = totalLiabilities > 0 ? totalAssets / totalLiabilities : 0;
+  const profitMargin = profitLoss?.revenue?.total > 0 
+    ? (profitLoss.net_profit / profitLoss.revenue.total) * 100 
+    : 0;
+  const debtToEquity = totalEquity > 0 ? totalLiabilities / totalEquity : 0;
+
+  const chartData = getMonthlyChartData();
 
   const quickActions = [
     {
@@ -143,7 +192,7 @@ export default function AccountingDashboard() {
           <div className="bg-white rounded-xl p-6 shadow-sm">
             <p className="text-sm text-gray-500">Total Assets</p>
             <p className="text-2xl font-bold text-blue-600 mt-1">
-              KWD {num(balanceSheet?.assets?.total).toFixed(3)}
+              KWD {totalAssets.toFixed(3)}
             </p>
             <p className="text-xs text-gray-400 mt-1">As of {new Date(dateRange.as_of_date).toLocaleDateString()}</p>
           </div>
@@ -151,7 +200,7 @@ export default function AccountingDashboard() {
           <div className="bg-white rounded-xl p-6 shadow-sm">
             <p className="text-sm text-gray-500">Total Liabilities</p>
             <p className="text-2xl font-bold text-orange-600 mt-1">
-              KWD {num(balanceSheet?.liabilities?.total).toFixed(3)}
+              KWD {totalLiabilities.toFixed(3)}
             </p>
             <p className="text-xs text-gray-400 mt-1">As of {new Date(dateRange.as_of_date).toLocaleDateString()}</p>
           </div>
@@ -220,28 +269,37 @@ export default function AccountingDashboard() {
               <div>
                 <div className="flex justify-between text-sm mb-1">
                   <span className="text-gray-600">Current Ratio</span>
-                  <span className="font-medium text-gray-900">2.5</span>
+                  <span className="font-medium text-gray-900">{currentRatio.toFixed(2)}</span>
                 </div>
                 <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div className="h-full bg-green-500" style={{ width: '75%' }} />
+                  <div 
+                    className="h-full bg-green-500" 
+                    style={{ width: `${Math.min(currentRatio / 3 * 100, 100)}%` }} 
+                  />
                 </div>
               </div>
               <div>
                 <div className="flex justify-between text-sm mb-1">
                   <span className="text-gray-600">Profit Margin</span>
-                  <span className="font-medium text-gray-900">18.5%</span>
+                  <span className="font-medium text-gray-900">{profitMargin.toFixed(1)}%</span>
                 </div>
                 <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div className="h-full bg-blue-500" style={{ width: '65%' }} />
+                  <div 
+                    className="h-full bg-blue-500" 
+                    style={{ width: `${Math.min(profitMargin, 100)}%` }} 
+                  />
                 </div>
               </div>
               <div>
                 <div className="flex justify-between text-sm mb-1">
                   <span className="text-gray-600">Debt to Equity</span>
-                  <span className="font-medium text-gray-900">0.8</span>
+                  <span className="font-medium text-gray-900">{debtToEquity.toFixed(2)}</span>
                 </div>
                 <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div className="h-full bg-orange-500" style={{ width: '40%' }} />
+                  <div 
+                    className="h-full bg-orange-500" 
+                    style={{ width: `${Math.min(debtToEquity / 2 * 100, 100)}%` }} 
+                  />
                 </div>
               </div>
             </div>
@@ -342,36 +400,7 @@ export default function AccountingDashboard() {
           </div>
         </div>
 
-        {/* Report Links */}
-        <div className="bg-white rounded-xl p-6">
-          <h2 className="text-base font-semibold text-gray-900 mb-4">Financial Reports</h2>
-          <div className="grid grid-cols-4 gap-4">
-            <button
-              onClick={() => navigate(`${basePath}/accounting/financial-reports/trial-balance`)}
-              className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors text-center"
-            >
-              <span className="text-sm font-medium text-gray-700">Trial Balance</span>
-            </button>
-            <button
-              onClick={() => navigate(`${basePath}/accounting/financial-reports/profit-loss`)}
-              className="p-4 border border-gray-200 rounded-lg hover:border-green-300 hover:bg-green-50 transition-colors text-center"
-            >
-              <span className="text-sm font-medium text-gray-700">Profit & Loss</span>
-            </button>
-            <button
-              onClick={() => navigate(`${basePath}/accounting/financial-reports/balance-sheet`)}
-              className="p-4 border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-colors text-center"
-            >
-              <span className="text-sm font-medium text-gray-700">Balance Sheet</span>
-            </button>
-            <button
-              onClick={() => navigate(`${basePath}/accounting/financial-reports/general-ledger`)}
-              className="p-4 border border-gray-200 rounded-lg hover:border-orange-300 hover:bg-orange-50 transition-colors text-center"
-            >
-              <span className="text-sm font-medium text-gray-700">General Ledger</span>
-            </button>
-          </div>
-        </div>
+      
       </div>
     </DashboardLayout>
   );

@@ -13,6 +13,10 @@ import {
   useGetChartOfAccountsQuery
 } from '../../../../services/accountingApi';
 
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+
 import arrow_back_icon from '../../../../assets/icons/arrow_back_icon.svg';
 import download_icon from '../../../../assets/icons/download_icon.png';
 import print_icon from '../../../../assets/icons/print_icon.png';
@@ -151,10 +155,66 @@ export default function FinancialReportsPage() {
     }
   };
 
-  const handleExport = (format: 'pdf' | 'excel') => {
-    console.log(`Exporting ${activeTab} as ${format}`);
-    // Implement export logic
-  };
+  // Add these imports at the top of the file
+
+
+// Add these functions after handlePrint (around line 200)
+const handleExportExcel = () => {
+  const exportData = getExportData();
+  if (!exportData) return;
+  
+  const ws = XLSX.utils.json_to_sheet(
+    exportData.rows.map((row: any) => {
+      const obj: any = {};
+      exportData.headers.forEach((header, idx) => {
+        obj[header] = row[idx];
+      });
+      return obj;
+    })
+  );
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, exportData.title);
+  XLSX.writeFile(wb, `${exportData.filename}.xlsx`);
+};
+
+const handleExportPDF = () => {
+  const exportData = getExportData();
+  if (!exportData) return;
+  
+  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+  
+  doc.setFontSize(18);
+  doc.setFont('helvetica', 'bold');
+  doc.text(exportData.title, 14, 20);
+  
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(100);
+  doc.text(exportData.subtitle, 14, 28);
+  doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 34);
+  
+  autoTable(doc, {
+    head: [exportData.headers],
+    body: exportData.rows,
+    startY: 40,
+    styles: { fontSize: 8, cellPadding: 3 },
+    headStyles: { fillColor: [23, 115, 207], textColor: 255, fontStyle: 'bold' },
+    alternateRowStyles: { fillColor: [245, 245, 245] },
+  });
+  
+  doc.save(`${exportData.filename}.pdf`);
+};
+
+
+  // Replace the existing handleExport function with:
+const handleExport = (format: 'pdf' | 'excel') => {
+  if (format === 'pdf') {
+    handleExportPDF();
+  } else {
+    handleExportExcel();
+  }
+};
+
 
   const handlePrint = () => {
     window.print();
@@ -163,6 +223,92 @@ export default function FinancialReportsPage() {
   const handleTabChange = (tab: ReportTab) => {
     setActiveTab(tab);
   };
+
+
+  const getExportData = () => {
+  if (!report) return null;
+  
+  switch (activeTab) {
+    case 'trial-balance': {
+      const accounts = report?.accounts || [];
+      return {
+        headers: ['Account Code', 'Account Name', 'Account Type', 'Debit (KWD)', 'Credit (KWD)'],
+        rows: accounts.map((acc: any) => [
+          acc.account_code,
+          acc.account_name,
+          acc.account_type,
+          acc.debit?.toFixed(3) || '0.000',
+          acc.credit?.toFixed(3) || '0.000',
+        ]),
+        title: 'Trial Balance',
+        subtitle: `As of ${new Date(asOfDate).toLocaleDateString()}`,
+        filename: `trial_balance_${asOfDate}`,
+      };
+    }
+    
+    case 'profit-loss': {
+      const revenueRows = report.revenue.details.map((item: any) => [
+        item.account_code,
+        item.account_name,
+        'Revenue',
+        item.amount.toFixed(3),
+      ]);
+      const expenseRows = report.operating_expenses.details.map((item: any) => [
+        item.account_code,
+        item.account_name,
+        'Expense',
+        item.amount.toFixed(3),
+      ]);
+      return {
+        headers: ['Account Code', 'Account Name', 'Type', 'Amount (KWD)'],
+        rows: [
+          ...revenueRows,
+          ['', '', 'Gross Profit', report.gross_profit.toFixed(3)],
+          ...expenseRows,
+          ['', '', 'Net Profit', report.net_profit.toFixed(3)],
+        ],
+        title: 'Profit & Loss Statement',
+        subtitle: `${new Date(startDate).toLocaleDateString()} - ${new Date(endDate).toLocaleDateString()}`,
+        filename: `profit_loss_${startDate}_to_${endDate}`,
+      };
+    }
+    
+    case 'balance-sheet': {
+      const assetRows = report.assets.details.map((item: any) => [
+        item.account_name,
+        'Asset',
+        item.amount.toFixed(3),
+      ]);
+      const liabilityRows = report.liabilities.details.map((item: any) => [
+        item.account_name,
+        'Liability',
+        item.amount.toFixed(3),
+      ]);
+      const equityRows = report.equity.details.map((item: any) => [
+        item.account_name,
+        'Equity',
+        item.amount.toFixed(3),
+      ]);
+      return {
+        headers: ['Account Name', 'Type', 'Amount (KWD)'],
+        rows: [
+          ...assetRows,
+          ['Total Assets', '', report.assets.total.toFixed(3)],
+          ...liabilityRows,
+          ['Total Liabilities', '', report.liabilities.total.toFixed(3)],
+          ...equityRows,
+          ['Total Equity', '', report.equity.total.toFixed(3)],
+        ],
+        title: 'Balance Sheet',
+        subtitle: `As of ${new Date(asOfDate).toLocaleDateString()}`,
+        filename: `balance_sheet_${asOfDate}`,
+      };
+    }
+    
+    default:
+      return null;
+  }
+};
 
   // Render date filters based on active tab
   const renderDateFilters = () => {
@@ -740,28 +886,40 @@ export default function FinancialReportsPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button
-              onClick={handleRefresh}
-              className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-              title="Refresh"
-            >
-              <img src={refresh_icon} alt="" className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() => handleExport('pdf')}
-              className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-              title="Export as PDF"
-            >
-              <img src={download_icon} alt="" className="w-5 h-5" />
-            </button>
-            <button
-              onClick={handlePrint}
-              className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-              title="Print"
-            >
-              <img src={print_icon} alt="" className="w-5 h-5" />
-            </button>
-          </div>
+  <button
+    onClick={handleRefresh}
+    className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+    title="Refresh"
+  >
+    <img src={refresh_icon} alt="" className="w-5 h-5" />
+  </button>
+  <div className="relative group">
+    <button className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+      <img src={download_icon} alt="" className="w-5 h-5" />
+    </button>
+    <div className="absolute right-0 mt-1 w-32 bg-white border border-gray-300 rounded-lg shadow-lg hidden group-hover:block z-50">
+      <button 
+        onClick={handleExportPDF} 
+        className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50"
+      >
+        Export PDF
+      </button>
+      <button 
+        onClick={handleExportExcel} 
+        className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50"
+      >
+        Export Excel
+      </button>
+    </div>
+  </div>
+  <button
+    onClick={handlePrint}
+    className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+    title="Print"
+  >
+    <img src={print_icon} alt="" className="w-5 h-5" />
+  </button>
+</div>
         </div>
 
         {/* Tabs */}

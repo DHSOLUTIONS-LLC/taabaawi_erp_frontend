@@ -42,13 +42,15 @@ export default function CreateBudgetPage() {
 
   // Fetch accounts for budget lines
   const { data: accountsData } = useGetChartOfAccountsQuery({
-    account_type: 'Revenue',
+    // account_type: 'Revenue',
     is_active: 1 as any,
     per_page: 1000,
   });
 
-  const accounts = accountsData?.data ?? [];
-  console.log('bugets lines accounts:', accounts)
+const allAccounts = accountsData?.data?.data || accountsData?.data || [];
+const accounts = allAccounts.filter((acc: any) => 
+  ['Revenue', 'Expense', 'Cost of Goods Sold'].includes(acc.account_type)
+);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;

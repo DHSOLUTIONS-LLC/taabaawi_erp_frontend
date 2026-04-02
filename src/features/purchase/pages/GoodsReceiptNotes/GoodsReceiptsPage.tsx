@@ -44,6 +44,7 @@ export default function GoodsReceiptsPage() {
   });
 
   const receipts = (data as any)?.data?.data || (data as any)?.data || [];
+  console.log('goods reciepts:', receipts)
   const pagination = (data as any)?.data;
 
   return (
@@ -158,7 +159,7 @@ export default function GoodsReceiptsPage() {
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">PO Number</th>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Supplier</th>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Receipt Date</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Items</th>
+                    {/* <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Items</th> */}
                     <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase">Status</th>
                     <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase">Actions</th>
                   </tr>
@@ -183,14 +184,14 @@ export default function GoodsReceiptsPage() {
                         </button>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900">
-                        {receipt.purchaseOrder?.supplier?.supplier_name ?? '—'}
+                        {receipt.purchase_order?.supplier?.contact_person_name ?? '—'}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-700">
                         {new Date(receipt.receipt_date).toLocaleDateString()}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-700">
+                      {/* <td className="px-6 py-4 text-sm text-gray-700">
                         {receipt.items?.length || 0} items
-                      </td>
+                      </td> */}
                       <td className="px-6 py-4 text-center">
                         <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${STATUS_COLORS[receipt.status] ?? 'bg-gray-100 text-gray-700'}`}>
                           {receipt.status}

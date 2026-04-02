@@ -23,6 +23,8 @@ import check_icon from '../../../../assets/icons/check_icon.png';
 import close_icon from '../../../../assets/icons/cross_icon.svg';
 import send_icon from '../../../../assets/icons/send_icon.png';
 import delete_icon from '../../../../assets/icons/delete-icon.png';
+import print_icon from '../../../../assets/icons/print_icon.png';
+
 
 const METHOD_COLORS: Record<string, string> = {
   Cash: 'bg-green-100 text-green-700',
@@ -130,6 +132,91 @@ export default function PurchaseOrderDetailPage() {
   const canPay     = ['Approved', 'Ordered', 'Partially Received', 'Received'].includes(po.status)
                      && po.payment_status !== 'Paid';
 
+
+                     const handlePrintPR = () => {
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) return;
+  
+  const itemsHtml = po.items?.map((item: any) => `
+    <tr>
+      <td style="border: 1px solid #ddd; padding: 8px;">
+        <img src="${item.image_url || ''}" style="width: 50px; height: 50px; object-fit: cover;" onerror="this.style.display='none'" />
+      </td>
+      <td style="border: 1px solid #ddd; padding: 8px;">${item.product_name}</td>
+      <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${item.quantity_ordered}</td>
+      <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${po.currency} ${parseFloat(item.unit_price).toFixed(3)}</td>
+      <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${po.currency} ${(parseFloat(item.unit_price) * item.quantity_ordered).toFixed(3)}</td>
+    </tr>
+  `).join('');
+
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>PR-${po.po_number}</title>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .title { font-size: 24px; font-weight: bold; margin-bottom: 5px; }
+        .subtitle { color: #666; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; font-weight: bold; }
+        .total-row { font-weight: bold; background-color: #f9f9f9; }
+        .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #666; }
+        .section-title { font-size: 14px; font-weight: bold; margin-top: 20px; margin-bottom: 10px; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .info-item { font-size: 12px; }
+        .info-label { font-weight: bold; }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <div class="title">PURCHASE REQUEST / ORDER</div>
+        <div class="subtitle">${po.po_number}</div>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-item"><span class="info-label">Supplier:</span> ${po.supplier?.supplier_name || 'N/A'}</div>
+        <div class="info-item"><span class="info-label">Order Date:</span> ${new Date(po.order_date).toLocaleDateString()}</div>
+        <div class="info-item"><span class="info-label">Currency:</span> ${po.currency}</div>
+        <div class="info-item"><span class="info-label">Exchange Rate:</span> ${po.exchange_rate || 1}</div>
+        <div class="info-item"><span class="info-label">Expected Delivery:</span> ${po.expected_delivery_date ? new Date(po.expected_delivery_date).toLocaleDateString() : 'N/A'}</div>
+        <div class="info-item"><span class="info-label">Status:</span> ${po.status}</div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Image</th><th>Product</th><th>Qty</th><th>Unit Price</th><th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${itemsHtml}
+        </tbody>
+        <tfoot>
+          <tr class="total-row"><td colspan="4" style="text-align: right;">Subtotal:</td><td style="text-align: right;">${po.currency} ${(po.subtotal).toFixed(3)}</td></tr>
+          <tr><td colspan="4" style="text-align: right;">Discount:</td><td style="text-align: right;">- ${po.currency} ${(po.discount_amount).toFixed(3)}</td></tr>
+          <tr><td colspan="4" style="text-align: right;">Tax:</td><td style="text-align: right;">${po.currency} ${(po.tax_amount).toFixed(3)}</td></tr>
+          <tr><td colspan="4" style="text-align: right;">Shipping:</td><td style="text-align: right;">${po.currency} ${(po.shipping_cost).toFixed(3)}</td></tr>
+          <tr class="total-row"><td colspan="4" style="text-align: right;">GRAND TOTAL:</td><td style="text-align: right;">${po.currency} ${(po.total_amount).toFixed(3)}</td></tr>
+        </tfoot>
+      </table>
+
+      ${po.terms_and_conditions ? `<div class="section-title">Terms & Conditions</div><div>${po.terms_and_conditions}</div>` : ''}
+      ${po.notes ? `<div class="section-title">Notes</div><div>${po.notes}</div>` : ''}
+
+      <div class="footer">Generated on ${new Date().toLocaleString()} | ERP System</div>
+    </body>
+    </html>
+  `);
+  printWindow.document.close();
+  printWindow.print();
+  printWindow.close();
+};
+
+
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -166,6 +253,19 @@ export default function PurchaseOrderDetailPage() {
                 <img src={edit_icon} alt="" className="w-4 h-4" /> Edit
               </button>
             )}
+
+            {/* Add this button next to Edit button */}
+<button
+  onClick={handlePrintPR}
+  className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+>
+  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+  </svg>
+  Print PR
+</button>
+
+
             {canPay && (
               <button onClick={() => setShowPaymentModal(true)}
                 className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">

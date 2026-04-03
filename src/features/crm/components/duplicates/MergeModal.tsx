@@ -19,19 +19,19 @@ interface Customer {
   nationality?: string;
   id_number?: string;
   id_type?: 'National' | 'Passport' | 'Civil ID';
-  
+
   // Address
   address?: string;
   city?: string;
   state?: string;
   country?: string;
   postal_code?: string;
-  
+
   // Company info
   company_name?: string;
   company_vat?: string;
   job_title?: string;
-  
+
   // Preferences
   preferred_contact_method?: 'Email' | 'Phone' | 'SMS' | 'WhatsApp';
   preferred_language?: string;
@@ -40,24 +40,24 @@ interface Customer {
     sms: boolean;
     whatsapp: boolean;
   };
-  
+
   // Loyalty
   loyalty_points: number;
   lifetime_points: number;
   loyalty_tier?: 'Bronze' | 'Silver' | 'Gold' | 'Platinum';
   loyalty_enrolled_date?: string;
-  
+
   // Statistics
   total_orders: number;
   total_spent: number;
   average_order_value: number;
   last_order_date?: string;
-  
+
   // Status
   status: 'Active' | 'Inactive' | 'Blocked' | 'Lead';
   is_active: boolean;
   is_verified: boolean;
-  
+
   // Metadata
   notes?: string;
   tags?: string[];
@@ -65,27 +65,27 @@ interface Customer {
   created_at: string;
   updated_at: string;
   deleted_at?: string;
-  
+
   // Relations
   createdBy?: any;
 }
 
 const COMPARE_FIELDS: { label: string; key: keyof Customer }[] = [
-  { label: 'Full Name',    key: 'full_name' },
-  { label: 'Email',        key: 'email' },
-  { label: 'Phone',        key: 'phone' },
-  { label: 'Alt Phone',    key: 'alternative_phone' },
-  { label: 'DOB',          key: 'date_of_birth' },
-  { label: 'Gender',       key: 'gender' },
-  { label: 'Nationality',  key: 'nationality' },
-  { label: 'City',         key: 'city' },
-  { label: 'Country',      key: 'country' },
-  { label: 'Company',      key: 'company_name' },
-  { label: 'Status',       key: 'status' },
-  { label: 'Tier',         key: 'loyalty_tier' },
-  { label: 'Points',       key: 'loyalty_points' },
+  { label: 'Full Name', key: 'full_name' },
+  { label: 'Email', key: 'email' },
+  { label: 'Phone', key: 'phone' },
+  { label: 'Alt Phone', key: 'alternative_phone' },
+  { label: 'DOB', key: 'date_of_birth' },
+  { label: 'Gender', key: 'gender' },
+  { label: 'Nationality', key: 'nationality' },
+  { label: 'City', key: 'city' },
+  { label: 'Country', key: 'country' },
+  { label: 'Company', key: 'company_name' },
+  { label: 'Status', key: 'status' },
+  { label: 'Tier', key: 'loyalty_tier' },
+  { label: 'Points', key: 'loyalty_points' },
   { label: 'Total Orders', key: 'total_orders' },
-  { label: 'Total Spent',  key: 'total_spent' },
+  { label: 'Total Spent', key: 'total_spent' },
 ];
 
 export const MergeModal = () => {
@@ -130,22 +130,20 @@ export const MergeModal = () => {
             <span className="text-blue-700 font-medium shrink-0">Keep as primary:</span>
             <button
               onClick={() => setPrimaryId(c1.id)}
-              className={`flex-1 px-3 py-1.5 rounded-lg border text-center transition-colors ${
-                primaryId === c1.id
+              className={`flex-1 px-3 py-1.5 rounded-lg border text-center transition-colors ${primaryId === c1.id
                   ? 'bg-blue-600 text-white border-blue-600'
                   : 'bg-white text-gray-700 border-gray-200 hover:border-blue-300'
-              }`}
+                }`}
             >
               {c1.full_name}
             </button>
             <ArrowRight className="h-4 w-4 text-gray-400 shrink-0" />
             <button
               onClick={() => setPrimaryId(c2.id)}
-              className={`flex-1 px-3 py-1.5 rounded-lg border text-center transition-colors ${
-                primaryId === c2.id
+              className={`flex-1 px-3 py-1.5 rounded-lg border text-center transition-colors ${primaryId === c2.id
                   ? 'bg-blue-600 text-white border-blue-600'
                   : 'bg-white text-gray-700 border-gray-200 hover:border-blue-300'
-              }`}
+                }`}
             >
               {c2.full_name}
             </button>

@@ -59,23 +59,23 @@ interface Customer {
 }
 
 const typeIcon: Record<CustomerInteraction['interaction_type'], any> = {
-  Call:      Phone,
-  Email:     Mail,
-  Meeting:   Users,
-  Note:      FileText,
-  Support:   Headphones,
+  Call: Phone,
+  Email: Mail,
+  Meeting: Users,
+  Note: FileText,
+  Support: Headphones,
   Complaint: AlertCircle,
-  Other:     MoreHorizontal,
+  Other: MoreHorizontal,
 };
 
 const typeColor: Record<CustomerInteraction['interaction_type'], string> = {
-  Call:      'bg-blue-50 text-blue-600',
-  Email:     'bg-purple-50 text-purple-600',
-  Meeting:   'bg-green-50 text-green-600',
-  Note:      'bg-gray-50 text-gray-600',
-  Support:   'bg-orange-50 text-orange-600',
+  Call: 'bg-blue-50 text-blue-600',
+  Email: 'bg-purple-50 text-purple-600',
+  Meeting: 'bg-green-50 text-green-600',
+  Note: 'bg-gray-50 text-gray-600',
+  Support: 'bg-orange-50 text-orange-600',
   Complaint: 'bg-red-50 text-red-600',
-  Other:     'bg-gray-50 text-gray-500',
+  Other: 'bg-gray-50 text-gray-500',
 };
 
 
@@ -150,11 +150,10 @@ export const InteractionTimeline = ({ customer, interactions: propInteractions, 
                       </td>
                       <td className="px-3 py-2.5">
                         {interaction.sentiment ? (
-                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                            interaction.sentiment === 'Positive' ? 'bg-green-100 text-green-700' :
-                            interaction.sentiment === 'Negative' ? 'bg-red-100 text-red-700' :
-                            'bg-gray-100 text-gray-500'
-                          }`}>
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${interaction.sentiment === 'Positive' ? 'bg-green-100 text-green-700' :
+                              interaction.sentiment === 'Negative' ? 'bg-red-100 text-red-700' :
+                                'bg-gray-100 text-gray-500'
+                            }`}>
                             {interaction.sentiment}
                           </span>
                         ) : '0'}

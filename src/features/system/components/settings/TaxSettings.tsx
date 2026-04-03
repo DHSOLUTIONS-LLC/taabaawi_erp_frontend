@@ -14,7 +14,7 @@ const TaxSettings: React.FC<Props> = ({ register, watch }) => {
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-semibold text-gray-800 mb-4">Tax Settings</h2>
-      
+
       <div className="space-y-4">
         {/* Enable Tax */}
         <div className="flex items-center">
@@ -79,9 +79,7 @@ const TaxSettings: React.FC<Props> = ({ register, watch }) => {
 
             <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mt-4">
               <div className="flex">
-                <div className="flex-shrink-0">
-                  <span className="text-blue-400">ℹ️</span>
-                </div>
+
                 <div className="ml-3">
                   <p className="text-sm text-blue-700">
                     Tax will be calculated based on these settings. You can override tax rates for specific products.

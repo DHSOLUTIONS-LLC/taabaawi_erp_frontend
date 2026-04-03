@@ -216,22 +216,22 @@ export const crmApi = api.injectEndpoints({
       query: (params) => ({ url: '/customers', params }),
       providesTags: ['Customers'],
       transformResponse: (response: any) => {
-  const paginator = response?.data;
-  if (paginator?.data && Array.isArray(paginator.data)) {
-    return {
-      data: paginator.data,
-      meta: {
-        total:        paginator.total,
-        per_page:     paginator.per_page,
-        current_page: paginator.current_page,
-        last_page:    paginator.last_page,
-        from:         paginator.from,
-        to:           paginator.to,
+        const paginator = response?.data;
+        if (paginator?.data && Array.isArray(paginator.data)) {
+          return {
+            data: paginator.data,
+            meta: {
+              total: paginator.total,
+              per_page: paginator.per_page,
+              current_page: paginator.current_page,
+              last_page: paginator.last_page,
+              from: paginator.from,
+              to: paginator.to,
+            },
+          };
+        }
+        return { data: [] };
       },
-    };
-  }
-  return { data: [] };
-},
     }),
 
     getCustomerById: builder.query<{ data: Customer }, number>({

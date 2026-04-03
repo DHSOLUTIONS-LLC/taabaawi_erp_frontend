@@ -7,15 +7,19 @@ import DashboardLayout from '../../../../layouts/DashboardLayout';
 import { useAppSelector } from '../../../../app/hooks';
 import type { RootState } from '../../../../app/store';
 
+
+const API_BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://erp-backend.ttexpresskw.com';
+
+
 const BlogPostDetailPage: React.FC = () => {
 
 
-    
-            const { user } = useAppSelector((state: RootState) => state.auth);
-      
-        const isSuperAdmin = user?.role?.role_name === 'Super Admin';
-        const basePath = isSuperAdmin ? '/admin' : '';
-    
+
+  const { user } = useAppSelector((state: RootState) => state.auth);
+
+  const isSuperAdmin = user?.role?.role_name === 'Super Admin';
+  const basePath = isSuperAdmin ? '/admin' : '';
+
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const postId = parseInt(id || '0');
@@ -24,6 +28,7 @@ const BlogPostDetailPage: React.FC = () => {
   const [deletePost] = useDeleteBlogPostMutation();
 
   const post = data?.data;
+  console.log('posts:', post)
 
   const handleDelete = async () => {
     if (!window.confirm('Are you sure you want to delete this post?')) return;
@@ -82,7 +87,7 @@ const BlogPostDetailPage: React.FC = () => {
           og_image: post.featured_image,
         }}
       /> */}
-      
+
       <DashboardLayout>
         <div className="container mx-auto px-4 py-8 max-w-4xl">
           {/* Navigation */}
@@ -114,9 +119,14 @@ const BlogPostDetailPage: React.FC = () => {
             {/* Featured Image */}
             {post.featured_image && (
               <img
-                src={post.featured_image}
+                src={post.featured_image.startsWith('http')
+                  ? post.featured_image
+                  : `${API_BASE_URL}/storage/${post.featured_image}`}
                 alt={post.image_alt_text || post.title}
                 className="w-full h-96 object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=No+Image';
+                }}
               />
             )}
 
@@ -131,7 +141,7 @@ const BlogPostDetailPage: React.FC = () => {
                     </span>
                   )}
                   <span className="text-sm text-gray-500">
-                    {post.published_at 
+                    {post.published_at
                       ? format(new Date(post.published_at), 'MMMM dd, yyyy')
                       : format(new Date(post.created_at), 'MMMM dd, yyyy')}
                   </span>
@@ -175,7 +185,7 @@ const BlogPostDetailPage: React.FC = () => {
               )}
 
               {/* Content */}
-              <div 
+              <div
                 className="prose max-w-none"
                 dangerouslySetInnerHTML={{ __html: post.content }}
               />

@@ -2,6 +2,10 @@ import React from 'react';
 import { format } from 'date-fns';
 import type { BlogPost } from '../../../../types/blog';
 
+
+const API_BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://erp-backend.ttexpresskw.com';
+
+
 interface Props {
   post: BlogPost;
   onClick?: () => void;
@@ -29,16 +33,17 @@ const BlogPostCard: React.FC<Props> = ({ post, onClick }) => {
       className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer border border-gray-200"
     >
       {/* Featured Image */}
-      {post.featured_image ? (
+      {post.featured_image && (
         <img
-          src={post.featured_image}
+          src={post.featured_image.startsWith('http')
+            ? post.featured_image
+            : `${API_BASE_URL}/storage/${post.featured_image}`}
           alt={post.image_alt_text || post.title}
-          className="w-full h-48 object-cover"
+          className="w-full h-50 object-cover"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=No+Image';
+          }}
         />
-      ) : (
-        <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
-          <span className="text-gray-400">No image</span>
-        </div>
       )}
 
       <div className="p-4">

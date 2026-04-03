@@ -8,32 +8,32 @@ import { useAppSelector } from '../../../../app/hooks';
 import type { RootState } from '../../../../app/store';
 
 export const CustomerTable = () => {
-  const dispatch     = useDispatch();
-  const navigate     = useNavigate();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [deleteCustomer] = useDeleteCustomerMutation();
-  const { user }     = useAppSelector((s: RootState) => s.auth);
-  const filters      = useSelector((s: RootState) => s.crm.customerFilters);
+  const { user } = useAppSelector((s: RootState) => s.auth);
+  const filters = useSelector((s: RootState) => s.crm.customerFilters);
 
   // ✅ Exact same pattern as CrmDashboard
   const { data: customersData, isLoading } = useGetCustomersQuery({
     ...filters,
-    is_active:  filters.is_active  ?? undefined,
+    is_active: filters.is_active ?? undefined,
     start_date: filters.start_date ?? undefined,
-    end_date:   filters.end_date   ?? undefined,
+    end_date: filters.end_date ?? undefined,
   });
 
-  const customers  = Array.isArray(customersData?.data) ? customersData.data : [];
-  const meta       = customersData?.meta;
-  const page       = filters.page;
-  const perPage    = filters.per_page;
-  const sortBy     = filters.sort_by;
-  const sortOrder  = filters.sort_order;
+  const customers = Array.isArray(customersData?.data) ? customersData.data : [];
+  const meta = customersData?.meta;
+  const page = filters.page;
+  const perPage = filters.per_page;
+  const sortBy = filters.sort_by;
+  const sortOrder = filters.sort_order;
   const totalPages = meta ? Math.ceil(meta.total / perPage) : 1;
-  const basePath   = user?.role?.role_name === 'Super Admin' ? '/admin' : '';
+  const basePath = user?.role?.role_name === 'Super Admin' ? '/admin' : '';
 
   const setSort = (col: string) =>
     dispatch(setCustomerFilters({
-      sort_by:    col,
+      sort_by: col,
       sort_order: sortBy === col && sortOrder === 'asc' ? 'desc' : 'asc',
       page: 1,
     }));
@@ -50,14 +50,14 @@ export const CustomerTable = () => {
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
               {[
-                { label: 'Customer',    col: 'first_name'      },
-                { label: 'Email',       col: 'email'           },
-                { label: 'Phone',       col: 'phone'           },
-                { label: 'Status',      col: 'customer_status' },
-                { label: 'Tier',        col: 'loyalty_tier'    },
-                { label: 'Orders',      col: 'total_orders'    },
-                { label: 'Total Spent', col: 'total_spent'     },
-                { label: 'Joined',      col: 'created_at'      },
+                { label: 'Customer', col: 'first_name' },
+                { label: 'Email', col: 'email' },
+                { label: 'Phone', col: 'phone' },
+                { label: 'Status', col: 'customer_status' },
+                { label: 'Tier', col: 'loyalty_tier' },
+                { label: 'Orders', col: 'total_orders' },
+                { label: 'Total Spent', col: 'total_spent' },
+                { label: 'Joined', col: 'created_at' },
               ].map(({ label, col }) => (
                 <th
                   key={col}
@@ -74,48 +74,48 @@ export const CustomerTable = () => {
           <tbody className="divide-y divide-gray-100">
             {isLoading
               ? Array.from({ length: perPage }).map((_, i) => (
-                  <tr key={i} className="animate-pulse">
-                    {Array.from({ length: 9 }).map((_, j) => (
-                      <td key={j} className="px-4 py-3"><div className="h-4 bg-gray-100 rounded w-3/4" /></td>
-                    ))}
-                  </tr>
-                ))
-              : customers.length === 0
-              ? (
-                <tr>
-                  <td colSpan={9} className="px-4 py-10 text-center text-gray-400">
-                    No customers found
-                  </td>
-                </tr>
-              )
-              : customers.map((c: any) => (
-                <tr key={c.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-3">
-                    <div className="font-medium text-gray-900">{c.first_name} {c.last_name}</div>
-                    {c.company_name && <div className="text-xs text-gray-400">{c.company_name}</div>}
-                  </td>
-                  <td className="px-4 py-3 text-gray-600">{c.email ?? '0'}</td>
-                  <td className="px-4 py-3 text-gray-600">{c.phone ?? c.mobile ?? '0'}</td>
-                  <td className="px-4 py-3"><CustomerStatusBadge status={c.customer_status ?? c.status} /></td>
-                  <td className="px-4 py-3"><TierBadge tier={c.loyalty_tier} /></td>
-                  <td className="px-4 py-3 text-gray-600">{c.total_orders || 0}</td>
-                  <td className="px-4 py-3 text-gray-600">${Number(c.total_spent || 0).toLocaleString()}</td>
-                  <td className="px-4 py-3 text-gray-400 text-xs">{new Date(c.created_at).toLocaleDateString()}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center justify-end gap-1">
-                      <button onClick={() => navigate(`${basePath}/crm/customers/${c.id}`)} className="p-1.5 hover:bg-blue-50 text-gray-400 hover:text-blue-600 rounded" title="View">
-                        <Eye className="h-4 w-4" />
-                      </button>
-                      <button onClick={() => dispatch(openCustomerModal({ mode: 'edit', customer: c }))} className="p-1.5 hover:bg-yellow-50 text-gray-400 hover:text-yellow-600 rounded" title="Edit">
-                        <Edit2 className="h-4 w-4" />
-                      </button>
-                      <button onClick={async () => { if (!confirm(`Delete ${c.first_name} ${c.last_name}?`)) return; await deleteCustomer(c.id); }} className="p-1.5 hover:bg-red-50 text-gray-400 hover:text-red-600 rounded" title="Delete">
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </td>
+                <tr key={i} className="animate-pulse">
+                  {Array.from({ length: 9 }).map((_, j) => (
+                    <td key={j} className="px-4 py-3"><div className="h-4 bg-gray-100 rounded w-3/4" /></td>
+                  ))}
                 </tr>
               ))
+              : customers.length === 0
+                ? (
+                  <tr>
+                    <td colSpan={9} className="px-4 py-10 text-center text-gray-400">
+                      No customers found
+                    </td>
+                  </tr>
+                )
+                : customers.map((c: any) => (
+                  <tr key={c.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-4 py-3">
+                      <div className="font-medium text-gray-900">{c.first_name} {c.last_name}</div>
+                      {c.company_name && <div className="text-xs text-gray-400">{c.company_name}</div>}
+                    </td>
+                    <td className="px-4 py-3 text-gray-600">{c.email ?? '0'}</td>
+                    <td className="px-4 py-3 text-gray-600">{c.phone ?? c.mobile ?? '0'}</td>
+                    <td className="px-4 py-3"><CustomerStatusBadge status={c.customer_status ?? c.status} /></td>
+                    <td className="px-4 py-3"><TierBadge tier={c.loyalty_tier} /></td>
+                    <td className="px-4 py-3 text-gray-600">{c.total_orders || 0}</td>
+                    <td className="px-4 py-3 text-gray-600">${Number(c.total_spent || 0).toLocaleString()}</td>
+                    <td className="px-4 py-3 text-gray-400 text-xs">{new Date(c.created_at).toLocaleDateString()}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center justify-end gap-1">
+                        <button onClick={() => navigate(`${basePath}/crm/customers/${c.id}`)} className="p-1.5 hover:bg-blue-50 text-gray-400 hover:text-blue-600 rounded" title="View">
+                          <Eye className="h-4 w-4" />
+                        </button>
+                        <button onClick={() => dispatch(openCustomerModal({ mode: 'edit', customer: c }))} className="p-1.5 hover:bg-yellow-50 text-gray-400 hover:text-yellow-600 rounded" title="Edit">
+                          <Edit2 className="h-4 w-4" />
+                        </button>
+                        <button onClick={async () => { if (!confirm(`Delete ${c.first_name} ${c.last_name}?`)) return; await deleteCustomer(c.id); }} className="p-1.5 hover:bg-red-50 text-gray-400 hover:text-red-600 rounded" title="Delete">
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
             }
           </tbody>
         </table>

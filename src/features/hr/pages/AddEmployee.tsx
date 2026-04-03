@@ -55,7 +55,7 @@ export default function AddEmployee() {
     const { user } = useAppSelector((state: RootState) => state.auth);
     const [createUser, { isLoading }] = useCreateEmpMutation();
     const [isEditingAllowances, setIsEditingAllowances] = useState(false);
-    
+
     // State with backend-compatible fields
     const [formData, setFormData] = useState({
         // Required fields
@@ -68,7 +68,7 @@ export default function AddEmployee() {
         role_id: '',
         branch_id: '',
         is_active: true,
-        
+
         // Optional HR fields
         national_id: '',
         gender: '',
@@ -80,7 +80,7 @@ export default function AddEmployee() {
         address: '',
         emergency_contact_name: '',
         emergency_contact_phone: '',
-        
+
         // Allowances
         basic_salary: '',
         transportation_allowance: '',
@@ -107,11 +107,11 @@ export default function AddEmployee() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         try {
             // Combine first and last name
             const fullName = `${formData.firstName} ${formData.lastName}`.trim();
-            
+
             // Prepare data for API
             const employeeData: CreateEmployeeData = {
                 name: fullName,
@@ -122,7 +122,7 @@ export default function AddEmployee() {
                 role_id: Number(formData.role_id),
                 branch_id: Number(formData.branch_id),
                 is_active: formData.is_active,
-                
+
                 // Optional fields (only send if not empty)
                 ...(formData.national_id && { national_id: formData.national_id }),
                 ...(formData.date_of_birth && { date_of_birth: formData.date_of_birth }),
@@ -134,7 +134,7 @@ export default function AddEmployee() {
                 ...(formData.address && { address: formData.address }),
                 ...(formData.emergency_contact_name && { emergency_contact_name: formData.emergency_contact_name }),
                 ...(formData.emergency_contact_phone && { emergency_contact_phone: formData.emergency_contact_phone }),
-                
+
                 // Allowances (convert to numbers)
                 ...(formData.basic_salary && { basic_salary: parseFloat(formData.basic_salary) }),
                 ...(formData.transportation_allowance && { transportation_allowance: parseFloat(formData.transportation_allowance) }),
@@ -147,7 +147,7 @@ export default function AddEmployee() {
             await createUser(employeeData).unwrap();
             console.log('emp created:', employeeData)
             alert('Employee created successfully!');
-            
+
         } catch (error) {
             console.error('Failed to create employee:', error);
             alert('Failed to create employee. Please check all fields.');
@@ -204,7 +204,7 @@ export default function AddEmployee() {
                                     type="text"
                                     required
                                     value={formData.firstName}
-                                    onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                                     placeholder="Enter first name"
                                 />
@@ -218,7 +218,7 @@ export default function AddEmployee() {
                                     type="text"
                                     required
                                     value={formData.lastName}
-                                    onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                                     placeholder="Enter last name"
                                 />
@@ -231,7 +231,7 @@ export default function AddEmployee() {
                                 <input
                                     type="text"
                                     value={formData.national_id}
-                                    onChange={(e) => setFormData({...formData, national_id: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, national_id: e.target.value })}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                                     placeholder="Enter national ID"
                                 />
@@ -244,7 +244,7 @@ export default function AddEmployee() {
                                 <div className="relative">
                                     <select
                                         value={formData.gender}
-                                        onChange={(e) => setFormData({...formData, gender: e.target.value})}
+                                        onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
                                         className="w-full px-4 py-3 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                                     >
                                         <option value="">Select Gender</option>
@@ -264,7 +264,7 @@ export default function AddEmployee() {
                                 <input
                                     type="date"
                                     value={formData.date_of_birth}
-                                    onChange={(e) => setFormData({...formData, date_of_birth: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, date_of_birth: e.target.value })}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                                 />
                             </div>
@@ -276,7 +276,7 @@ export default function AddEmployee() {
                                 <div className="relative">
                                     <select
                                         value={formData.marital_status}
-                                        onChange={(e) => setFormData({...formData, marital_status: e.target.value})}
+                                        onChange={(e) => setFormData({ ...formData, marital_status: e.target.value })}
                                         className="w-full px-4 py-3 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                                     >
                                         <option value="">Select Status</option>
@@ -305,7 +305,7 @@ export default function AddEmployee() {
                                     type="tel"
                                     required
                                     value={formData.phone}
-                                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                                     placeholder="+965 XXXXXXXX"
                                 />
@@ -319,7 +319,7 @@ export default function AddEmployee() {
                                     type="email"
                                     required
                                     value={formData.email}
-                                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                                     placeholder="employee@company.com"
                                 />
@@ -332,7 +332,7 @@ export default function AddEmployee() {
                                 <input
                                     type="text"
                                     value={formData.address}
-                                    onChange={(e) => setFormData({...formData, address: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                                     placeholder="Enter full address"
                                 />
@@ -345,7 +345,7 @@ export default function AddEmployee() {
                                 <input
                                     type="text"
                                     value={formData.emergency_contact_name}
-                                    onChange={(e) => setFormData({...formData, emergency_contact_name: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, emergency_contact_name: e.target.value })}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                                     placeholder="Emergency contact name"
                                 />
@@ -358,7 +358,7 @@ export default function AddEmployee() {
                                 <input
                                     type="tel"
                                     value={formData.emergency_contact_phone}
-                                    onChange={(e) => setFormData({...formData, emergency_contact_phone: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, emergency_contact_phone: e.target.value })}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                                     placeholder="Emergency contact phone"
                                 />
@@ -378,7 +378,7 @@ export default function AddEmployee() {
                                     <select
                                         required
                                         value={formData.branch_id}
-                                        onChange={(e) => setFormData({...formData, branch_id: e.target.value})}
+                                        onChange={(e) => setFormData({ ...formData, branch_id: e.target.value })}
                                         className="w-full px-4 py-3 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                                     >
                                         <option value="">Select Branch</option>
@@ -401,7 +401,7 @@ export default function AddEmployee() {
                                 <input
                                     type="text"
                                     value={formData.department}
-                                    onChange={(e) => setFormData({...formData, department: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, department: e.target.value })}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                                     placeholder="Department"
                                 />
@@ -415,7 +415,7 @@ export default function AddEmployee() {
                                     <select
                                         required
                                         value={formData.role_id}
-                                        onChange={(e) => setFormData({...formData, role_id: e.target.value})}
+                                        onChange={(e) => setFormData({ ...formData, role_id: e.target.value })}
                                         className="w-full px-4 py-3 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                                     >
                                         <option value="">Select Role</option>
@@ -438,7 +438,7 @@ export default function AddEmployee() {
                                 <input
                                     type="text"
                                     value={formData.job_title}
-                                    onChange={(e) => setFormData({...formData, job_title: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, job_title: e.target.value })}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                                     placeholder="Job title"
                                 />
@@ -451,7 +451,7 @@ export default function AddEmployee() {
                                 <input
                                     type="date"
                                     value={formData.joining_date}
-                                    onChange={(e) => setFormData({...formData, joining_date: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, joining_date: e.target.value })}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                                 />
                             </div>
@@ -463,7 +463,7 @@ export default function AddEmployee() {
                                 <div className="relative">
                                     <select
                                         value={formData.is_active ? 'active' : 'inactive'}
-                                        onChange={(e) => setFormData({...formData, is_active: e.target.value === 'active'})}
+                                        onChange={(e) => setFormData({ ...formData, is_active: e.target.value === 'active' })}
                                         className="w-full px-4 py-3 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                                     >
                                         <option value="active">Active</option>
@@ -489,7 +489,7 @@ export default function AddEmployee() {
                                     type="number"
                                     step="0.001"
                                     value={formData.basic_salary}
-                                    onChange={(e) => setFormData({...formData, basic_salary: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, basic_salary: e.target.value })}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                                     placeholder="Enter basic salary"
                                 />
@@ -600,7 +600,7 @@ export default function AddEmployee() {
                                     type="number"
                                     step="0.001"
                                     value={formData.transportation_allowance}
-                                    onChange={(e) => setFormData({...formData, transportation_allowance: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, transportation_allowance: e.target.value })}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                                     placeholder="0.000"
                                 />
@@ -614,7 +614,7 @@ export default function AddEmployee() {
                                     type="number"
                                     step="0.001"
                                     value={formData.housing_allowance}
-                                    onChange={(e) => setFormData({...formData, housing_allowance: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, housing_allowance: e.target.value })}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                                     placeholder="0.000"
                                 />
@@ -628,7 +628,7 @@ export default function AddEmployee() {
                                     type="number"
                                     step="0.001"
                                     value={formData.communication_allowance}
-                                    onChange={(e) => setFormData({...formData, communication_allowance: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, communication_allowance: e.target.value })}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                                     placeholder="0.000"
                                 />
@@ -642,7 +642,7 @@ export default function AddEmployee() {
                                     type="number"
                                     step="0.001"
                                     value={formData.meal_allowance}
-                                    onChange={(e) => setFormData({...formData, meal_allowance: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, meal_allowance: e.target.value })}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                                     placeholder="0.000"
                                 />
@@ -656,7 +656,7 @@ export default function AddEmployee() {
                                     type="number"
                                     step="0.001"
                                     value={formData.accommodation_allowance}
-                                    onChange={(e) => setFormData({...formData, accommodation_allowance: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, accommodation_allowance: e.target.value })}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                                     placeholder="0.000"
                                 />
@@ -676,7 +676,7 @@ export default function AddEmployee() {
                                     type="password"
                                     required
                                     value={formData.password}
-                                    onChange={(e) => setFormData({...formData, password: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                                     placeholder="Enter password"
                                 />
@@ -690,7 +690,7 @@ export default function AddEmployee() {
                                     type="password"
                                     required
                                     value={formData.password_confirmation}
-                                    onChange={(e) => setFormData({...formData, password_confirmation: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, password_confirmation: e.target.value })}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                                     placeholder="Confirm password"
                                 />
@@ -714,7 +714,7 @@ export default function AddEmployee() {
                         >
                             {isLoading ? 'Creating...' : 'Save Employee'}
                         </button>
-                        
+
                     </div>
                 </form>
             </div>

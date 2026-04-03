@@ -279,7 +279,7 @@ export const CrmDashboard = () => {
             <CardHeader title="Customers by Status" />
             <div className="p-5">
               <StatusDistribution
-                data={stats?.by_status}   // ✅ was customers_by_status
+                data={stats?.by_status}  
                 loading={statsLoading}
               />
             </div>

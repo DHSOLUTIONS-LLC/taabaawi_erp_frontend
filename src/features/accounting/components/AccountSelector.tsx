@@ -74,9 +74,8 @@ export default function AccountSelector({
         {/* Selected Account Display / Input */}
         <div
           onClick={() => !disabled && setShowDropdown(!showDropdown)}
-          className={`w-full px-4 py-3 border rounded-lg bg-white cursor-pointer flex items-center justify-between ${
-            error ? 'border-red-500' : 'border-gray-300'
-          } ${disabled ? 'bg-gray-50 cursor-not-allowed' : 'hover:border-blue-400'}`}
+          className={`w-full px-4 py-3 border rounded-lg bg-white cursor-pointer flex items-center justify-between ${error ? 'border-red-500' : 'border-gray-300'
+            } ${disabled ? 'bg-gray-50 cursor-not-allowed' : 'hover:border-blue-400'}`}
         >
           {selectedAccount ? (
             <div className="flex-1">
@@ -95,9 +94,9 @@ export default function AccountSelector({
           ) : (
             <span className="text-sm text-gray-400">Select an account...</span>
           )}
-          <img 
-            src={dropdown_arrow_icon} 
-            alt="" 
+          <img
+            src={dropdown_arrow_icon}
+            alt=""
             className={`w-4 h-4 transition-transform ${showDropdown ? 'rotate-180' : ''}`}
           />
         </div>

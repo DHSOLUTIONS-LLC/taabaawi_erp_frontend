@@ -12,12 +12,12 @@ interface Props {
 }
 
 const BlogPostsList: React.FC<Props> = ({ filters, onSelect }) => {
-    
+
   const navigate = useNavigate();
   const { data, isLoading, error } = useGetBlogPostsQuery(filters);
-const posts = data?.data?.data ?? [];
+  const posts = data?.data?.data ?? [];
 
-      const { user } = useAppSelector((state: RootState) => state.auth);
+  const { user } = useAppSelector((state: RootState) => state.auth);
 
   const isSuperAdmin = user?.role?.role_name === 'Super Admin';
   const basePath = isSuperAdmin ? '/admin' : '';
@@ -39,7 +39,7 @@ const posts = data?.data?.data ?? [];
     );
   }
 
-  
+
 
   if (posts.length === 0) {
     return (
@@ -56,7 +56,7 @@ const posts = data?.data?.data ?? [];
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
       {posts.map((post: any) => (
         <BlogPostCard
           key={post.id}

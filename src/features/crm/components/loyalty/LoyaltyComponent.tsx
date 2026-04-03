@@ -158,7 +158,7 @@ export const LoyaltyTransactionTable = ({ customerId }: { customerId: number }) 
   const { data, isLoading } = useGetLoyaltyTransactionsQuery({ customerId, per_page: 10 });
   const transactions = data?.data?.data;
   // const transactions = Array.isArray(data?.data) ? data.data : 
-  //                     Array.isArray(data) ? data : [];
+  //                   Array.isArray(data) ? data : [];
 
   // console.log('transaction logs:', transactions)
 

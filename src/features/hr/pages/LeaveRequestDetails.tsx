@@ -8,11 +8,11 @@ import active_icon from '../../../assets/icons/active_rounded_icon.svg';
 import view_icon from '../../../assets/icons/view-icon.png';
 import delete_icon from '../../../assets/icons/delete-icon.png';
 import close_icon from '../../../assets/icons/cross_icon.svg';
-import { 
-    useGetEmployeeByIdQuery, 
-    useGetLeaveBalanceQuery, 
-    useGetLeaveRequestByIdQuery, 
-    useGetLeaveRequestsQuery, 
+import {
+    useGetEmployeeByIdQuery,
+    useGetLeaveBalanceQuery,
+    useGetLeaveRequestByIdQuery,
+    useGetLeaveRequestsQuery,
     useGetBonusesQuery,
     useDeleteBonusMutation,
     useUpdateBonusMutation,
@@ -69,13 +69,13 @@ export default function LeaveRequestDetails() {
     const [personalDetailsOpen, setPersonalDetailsOpen] = useState(false);
     const [employmentDetailsOpen, setEmploymentDetailsOpen] = useState(false);
     const [editingField, setEditingField] = useState<string | null>(null);
-    
+
     // Modal states
     const [showSummaryModal, setShowSummaryModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [selectedBonus, setSelectedBonus] = useState<Bonus | null>(null);
-    
+
     // Edit form state
     const [editFormData, setEditFormData] = useState({
         bonus_type: '',
@@ -86,7 +86,7 @@ export default function LeaveRequestDetails() {
 
     const params = useParams<{ id: string }>();
     const id = params.id;
-    
+
     // Queries
     const { data: employeeResponse, isLoading, refetch: refetchEmployee } = useGetEmployeeByIdQuery(Number(id));
     const { data: leaveBalancesResponse } = useGetLeaveBalanceQuery(Number(id));
@@ -96,7 +96,7 @@ export default function LeaveRequestDetails() {
     const { data: bonusSummaryResponse, refetch: refetchSummary } = useGetUserBonusSummaryQuery(Number(id), {
         skip: !showSummaryModal // Only fetch when modal is open
     });
-    
+
     // Mutations
     const [deleteBonus, { isLoading: isDeleting }] = useDeleteBonusMutation();
     const [updateBonus, { isLoading: isUpdating }] = useUpdateBonusMutation();
@@ -201,7 +201,7 @@ export default function LeaveRequestDetails() {
 
     const handleConfirmDelete = async () => {
         if (!selectedBonus) return;
-        
+
         try {
             await deleteBonus(selectedBonus.id).unwrap();
             alert('Bonus deleted successfully');
@@ -218,7 +218,7 @@ export default function LeaveRequestDetails() {
     // Handle update bonus
     const handleUpdateBonus = async () => {
         if (!selectedBonus) return;
-        
+
         try {
             await updateBonus({
                 id: selectedBonus.id,
@@ -227,7 +227,7 @@ export default function LeaveRequestDetails() {
                     amount: parseFloat(editFormData.amount).toFixed(3)
                 }
             }).unwrap();
-            
+
             alert('Bonus updated successfully');
             refetchBonuses();
             setShowEditModal(false);
@@ -691,7 +691,7 @@ export default function LeaveRequestDetails() {
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                     {formatDate(bonus.bonus_date)}
                                                 </td>
-                                                 
+
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                     {bonus.description || '-'}
                                                 </td>
@@ -842,7 +842,7 @@ export default function LeaveRequestDetails() {
                                 </label>
                                 <select
                                     value={editFormData.bonus_type}
-                                    onChange={(e) => setEditFormData({...editFormData, bonus_type: e.target.value})}
+                                    onChange={(e) => setEditFormData({ ...editFormData, bonus_type: e.target.value })}
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 >
                                     <option value="">Select Bonus Type</option>
@@ -860,7 +860,7 @@ export default function LeaveRequestDetails() {
                                     step="0.001"
                                     min="0"
                                     value={editFormData.amount}
-                                    onChange={(e) => setEditFormData({...editFormData, amount: e.target.value})}
+                                    onChange={(e) => setEditFormData({ ...editFormData, amount: e.target.value })}
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 />
                             </div>
@@ -871,7 +871,7 @@ export default function LeaveRequestDetails() {
                                 <input
                                     type="date"
                                     value={editFormData.bonus_date}
-                                    onChange={(e) => setEditFormData({...editFormData, bonus_date: e.target.value})}
+                                    onChange={(e) => setEditFormData({ ...editFormData, bonus_date: e.target.value })}
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 />
                             </div>
@@ -881,7 +881,7 @@ export default function LeaveRequestDetails() {
                                 </label>
                                 <textarea
                                     value={editFormData.description}
-                                    onChange={(e) => setEditFormData({...editFormData, description: e.target.value})}
+                                    onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
                                     rows={3}
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     placeholder="Enter bonus description..."
@@ -901,11 +901,10 @@ export default function LeaveRequestDetails() {
                             <button
                                 onClick={handleUpdateBonus}
                                 disabled={isUpdating || !editFormData.bonus_type || !editFormData.amount || !editFormData.bonus_date}
-                                className={`px-4 py-2 rounded-lg transition-colors ${
-                                    isUpdating || !editFormData.bonus_type || !editFormData.amount || !editFormData.bonus_date
-                                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                        : 'bg-blue-600 text-white hover:bg-blue-700'
-                                }`}
+                                className={`px-4 py-2 rounded-lg transition-colors ${isUpdating || !editFormData.bonus_type || !editFormData.amount || !editFormData.bonus_date
+                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                                    }`}
                             >
                                 {isUpdating ? 'Updating...' : 'Update Bonus'}
                             </button>
@@ -940,11 +939,10 @@ export default function LeaveRequestDetails() {
                             <button
                                 onClick={handleConfirmDelete}
                                 disabled={isDeleting}
-                                className={`px-4 py-2 rounded-lg transition-colors ${
-                                    isDeleting
-                                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                        : 'bg-red-600 text-white hover:bg-red-700'
-                                }`}
+                                className={`px-4 py-2 rounded-lg transition-colors ${isDeleting
+                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    : 'bg-red-600 text-white hover:bg-red-700'
+                                    }`}
                             >
                                 {isDeleting ? 'Deleting...' : 'Delete'}
                             </button>

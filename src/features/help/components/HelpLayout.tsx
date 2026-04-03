@@ -14,12 +14,12 @@ interface HelpLayoutProps {
 
 export default function HelpLayout({ children, showSearch = true }: HelpLayoutProps) {
   const navigate = useNavigate();
-    const { user } = useAppSelector((state: RootState) => state.auth);
- const isSuperAdmin = user?.role?.role_name === 'Super Admin';
-    const basePath = isSuperAdmin ? '/admin' : '';
+  const { user } = useAppSelector((state: RootState) => state.auth);
+  const isSuperAdmin = user?.role?.role_name === 'Super Admin';
+  const basePath = isSuperAdmin ? '/admin' : '';
   const isAdmin = user?.role?.role_name === 'Super Admin' || user?.role?.role_name === 'Admin';
 
-        
+
 
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
@@ -44,7 +44,7 @@ export default function HelpLayout({ children, showSearch = true }: HelpLayoutPr
                   {/* <img src={help_icon} alt="Help" className="w-6 h-6" /> */}
                   <span className="text-lg font-semibold text-gray-900">Help Center</span>
                 </Link>
-                
+
                 <nav className="hidden md:flex space-x-4 ml-8">
                   <Link to={`${basePath}/help`} className="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium">
                     Dashboard
@@ -52,10 +52,10 @@ export default function HelpLayout({ children, showSearch = true }: HelpLayoutPr
                   <Link to={`${basePath}/help/browse`} className="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium">
                     Browse
                   </Link>
-                 
-                  <Link to={`${basePath}/help/saved`} className="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium">
+
+                  {/* <Link to={`${basePath}/help/saved`} className="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium">
                     Saved
-                  </Link>
+                  </Link> */}
                   {isAdmin && (
                     <Link to={`${basePath}/help/management`} className="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium">
                       Manage
@@ -67,10 +67,10 @@ export default function HelpLayout({ children, showSearch = true }: HelpLayoutPr
               {showSearch && (
                 <form onSubmit={handleSearch} className="flex-1 max-w-lg ml-4">
                   <div className="relative">
-                    <img 
-                      src={search_icon} 
-                      alt="" 
-                      className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" 
+                    <img
+                      src={search_icon}
+                      alt=""
+                      className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
                     />
                     <input
                       type="text"

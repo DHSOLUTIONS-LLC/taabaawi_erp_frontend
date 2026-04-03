@@ -10,7 +10,7 @@ import type { RootState } from '../../../app/store';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import { useNavigate } from 'react-router-dom';
 import { useAppSelector } from '../../../app/hooks';
-import {  TierBadge } from '../components/customers/CustomerStatusBadge';
+import { TierBadge } from '../components/customers/CustomerStatusBadge';
 
 
 
@@ -31,8 +31,8 @@ const Skeleton = ({ className = '' }: { className?: string }) => (
 
 
 export const CustomersPage = () => {
-      const { user } = useAppSelector((state: RootState) => state.auth);
-  
+  const { user } = useAppSelector((state: RootState) => state.auth);
+
   const dispatch = useDispatch();
   const { isCustomerModalOpen } = useSelector((s: RootState) => s.crm);
   const { data: statsData, isLoading: statsLoading, refetch } = useGetCustomerStatisticsQuery({});
@@ -40,9 +40,9 @@ export const CustomersPage = () => {
   console.log('stats:', stats)
   const navigate = useNavigate();
 
-   const { data: loyaltyData, isLoading: loyaltyLoading } =
-      useGetLoyaltyStatisticsQuery({});
-       const loyalty = loyaltyData?.data;
+  const { data: loyaltyData, isLoading: loyaltyLoading } =
+    useGetLoyaltyStatisticsQuery({});
+  const loyalty = loyaltyData?.data;
   // Check user role
   const isSuperAdmin = user?.role?.role_name === "Super Admin";
   const isEmp = user?.role?.role_name;
@@ -71,37 +71,37 @@ export const CustomersPage = () => {
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard label="Total Customers"  value={stats?.total_customers?.toLocaleString() ?? '0'}                                         icon={Users}     color="blue"   loading={statsLoading} />
-          <StatCard label="Active Customers" value={stats?.active_customers?.toLocaleString() ?? '0'}                                        icon={UserCheck} color="green"  loading={statsLoading} />
-          <StatCard label="New This Month"   value={stats?.new_customers_this_month?.toLocaleString() ?? '0'}                                 icon={UserPlus}  color="purple" loading={statsLoading} />
-          <StatCard label="Total Revenue"    value={stats?.total_spent_all ? `$${stats.total_spent_all.toLocaleString()}` : '0'} sub={`Avg order: $${stats?.average_order_value_all?.toLocaleString() ?? '0'}`} icon={TrendingUp} color="orange" loading={statsLoading} />
+          <StatCard label="Total Customers" value={stats?.total_customers?.toLocaleString() ?? '0'} icon={Users} color="blue" loading={statsLoading} />
+          <StatCard label="Active Customers" value={stats?.active_customers?.toLocaleString() ?? '0'} icon={UserCheck} color="green" loading={statsLoading} />
+          <StatCard label="New This Month" value={stats?.new_customers_this_month?.toLocaleString() ?? '0'} icon={UserPlus} color="purple" loading={statsLoading} />
+          <StatCard label="Total Revenue" value={stats?.total_spent_all ? `$${stats.total_spent_all.toLocaleString()}` : '0'} sub={`Avg order: $${stats?.average_order_value_all?.toLocaleString() ?? '0'}`} icon={TrendingUp} color="orange" loading={statsLoading} />
         </div>
 
         <CustomerFilters />
 
         <Card>
-        <CardHeader
-          title="Top Loyalty Members"
-        />
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-100">
-              <tr>
-                {['#', 'Customer', 'Tier', 'Lifetime Points', 'Orders', 'Total Spent'].map(h => (
-                  <th key={h} className="px-4 py-3 text-left text-xs font-medium text-gray-500">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {loyaltyLoading || statsLoading
-                ? Array.from({ length: 5 }).map((_, i) => (
+          <CardHeader
+            title="Top Loyalty Members"
+          />
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 border-b border-gray-100">
+                <tr>
+                  {['#', 'Customer', 'Tier', 'Lifetime Points', 'Orders', 'Total Spent'].map(h => (
+                    <th key={h} className="px-4 py-3 text-left text-xs font-medium text-gray-500">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {loyaltyLoading || statsLoading
+                  ? Array.from({ length: 5 }).map((_, i) => (
                     <tr key={i} className="animate-pulse">
                       {Array.from({ length: 7 }).map((_, j) => (
                         <td key={j} className="px-4 py-3"><Skeleton className="h-4 w-3/4" /></td>
                       ))}
                     </tr>
                   ))
-                : (loyalty?.top_members ?? stats?.top_customers ?? []).slice(0, 5).map((m: any, i) => (
+                  : (loyalty?.top_members ?? stats?.top_customers ?? []).slice(0, 5).map((m: any, i) => (
                     <tr
                       key={m.id}
                       className="hover:bg-gray-50 cursor-pointer transition-colors"
@@ -124,7 +124,7 @@ export const CustomersPage = () => {
                         </div>
                       </td>
                       <td className="px-4 py-3"><TierBadge tier={m.loyalty_tier} /></td>
-                      
+
                       <td className="px-4 py-3 text-gray-600">
                         {(m.lifetime_points ?? 0).toLocaleString()}
                       </td>
@@ -134,11 +134,11 @@ export const CustomersPage = () => {
                       </td>
                     </tr>
                   ))
-              }
-            </tbody>
-          </table>
-        </div>
-      </Card>
+                }
+              </tbody>
+            </table>
+          </div>
+        </Card>
 
         {isCustomerModalOpen && <CustomerModal />}
       </div>

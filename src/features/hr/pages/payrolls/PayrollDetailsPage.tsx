@@ -1,7 +1,7 @@
 // src/features/hr/payrolls/PayrollDetailsPage.tsx
 import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { 
+import {
     useGetPayrollByIdQuery,
     useApprovePayrollMutation,
     useMarkPayrollAsPaidMutation,
@@ -15,8 +15,8 @@ import { useAppSelector } from '../../../../app/hooks';
 import type { RootState } from '../../../../app/store';
 
 export default function PayrollDetailsPage() {
-            const { user } = useAppSelector((state: RootState) => state.auth);
-    
+    const { user } = useAppSelector((state: RootState) => state.auth);
+
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const [showPaidModal, setShowPaidModal] = useState(false);
@@ -28,7 +28,7 @@ export default function PayrollDetailsPage() {
     const [markAsPaid, { isLoading: isMarkingPaid }] = useMarkPayrollAsPaidMutation();
     const [deletePayroll, { isLoading: isDeleting }] = useDeletePayrollMutation();
 
-         // Check user role
+    // Check user role
     const isSuperAdmin = user?.role?.role_name === 'Super Admin';
     const isHR = user?.role?.role_name === 'HR';
     // console.log('is hr: ', isHR)

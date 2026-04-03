@@ -251,9 +251,8 @@ export default function CouponsPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {coupons.map((coupon: any) => (
-              <div key={coupon.id} className={`bg-white rounded-xl shadow-sm border-2 overflow-hidden ${
-                !coupon.is_active ? 'border-gray-200 opacity-70' : isExpired(coupon.valid_until) ? 'border-red-200' : 'border-transparent'
-              }`}>
+              <div key={coupon.id} className={`bg-white rounded-xl shadow-sm border-2 overflow-hidden ${!coupon.is_active ? 'border-gray-200 opacity-70' : isExpired(coupon.valid_until) ? 'border-red-200' : 'border-transparent'
+                }`}>
                 {/* Card Top */}
                 <div className="bg-gradient-to-r from-[#1773CF] to-blue-400 px-5 py-4">
                   <div className="flex items-center justify-between">
@@ -278,13 +277,12 @@ export default function CouponsPage() {
                       {coupon.description && <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">{coupon.description}</p>}
                     </div>
                     <div className="flex gap-1.5">
-                      <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
-                        coupon.is_active && !isExpired(coupon.valid_until)
+                      <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${coupon.is_active && !isExpired(coupon.valid_until)
                           ? 'bg-green-100 text-green-700'
                           : isExpired(coupon.valid_until)
-                          ? 'bg-red-100 text-red-700'
-                          : 'bg-gray-100 text-gray-600'
-                      }`}>
+                            ? 'bg-red-100 text-red-700'
+                            : 'bg-gray-100 text-gray-600'
+                        }`}>
                         {isExpired(coupon.valid_until) ? 'Expired' : coupon.is_active ? 'Active' : 'Inactive'}
                       </span>
                       {isExpiringSoon(coupon.valid_until) && (

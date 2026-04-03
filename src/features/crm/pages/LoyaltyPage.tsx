@@ -80,29 +80,29 @@ export const LoyaltyPage = () => {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           label="Total Members"
-          value={stats?.total_members?.toLocaleString() ?? '—'}
+          value={stats?.total_members?.toLocaleString() ?? '0'}
           icon={Users}
           color="blue"
           loading={statsLoading}
         />
         <StatCard
           label="Points Earned"
-          value={stats?.total_points_earned?.toLocaleString() ?? '—'}
+          value={stats?.total_points_earned?.toLocaleString() ?? '0'}
           icon={Star}
           color="orange"
           loading={statsLoading}
         />
         <StatCard
           label="Points Redeemed"
-          value={stats?.total_points_redeemed?.toLocaleString() ?? '—'}
+          value={stats?.total_points_redeemed?.toLocaleString() ?? '0'}
           icon={Gift}
           color="purple"
           loading={statsLoading}
         />
         <StatCard
           label="Redemption Rate"
-          value={stats?.redemption_rate ? `${stats.redemption_rate.toFixed(1)}%` : '—'}
-          sub={`Avg ${stats?.average_points_per_customer?.toLocaleString() ?? '—'} pts/member`}
+          value={stats?.redemption_rate ? `${stats.redemption_rate.toFixed(1)}%` : '0'}
+          sub={`Avg ${stats?.average_points_per_customer?.toLocaleString() ?? '0'} pts/member`}
           icon={TrendingUp}
           color="green"
           loading={statsLoading}

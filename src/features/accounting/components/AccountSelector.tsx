@@ -88,7 +88,7 @@ export default function AccountSelector({
               </span>
               {showBalance && (
                 <span className="text-xs text-gray-500 ml-2">
-                  (Bal: {num(selectedAccount.current_balance).toFixed(3)})
+                  (Balance: {num(selectedAccount.current_balance).toFixed(3)})
                 </span>
               )}
             </div>

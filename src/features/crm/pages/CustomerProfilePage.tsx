@@ -36,13 +36,14 @@ export const CustomerProfilePage = () => {
   const { data, isLoading } = useGetCustomerByIdQuery(Number(id));
   const customer = data?.data;
 
-  const { data: ordersData, isLoading: ordersLoading } = useGetCustomerPurchaseHistoryQuery(
-    { id: Number(id), per_page: 10 },
-    { skip: activeTab !== 'orders' }
-  );
-  const orders = Array.isArray(ordersData?.data) ? ordersData.data : [];
-console.log('orders:', orders);
-
+ // Try to get orders from customer data first, fallback to API
+const customerOrders = (customer as any)?.orders || [];
+const { data: ordersData, isLoading: ordersLoading } = useGetCustomerPurchaseHistoryQuery(
+  { id: Number(id), per_page: 10 },
+  { skip: activeTab !== 'orders' || customerOrders.length > 0 }
+);
+const orders = Array.isArray(ordersData?.data) ? ordersData.data : customerOrders;
+console.log('customer orders:', orders)
 
 
 const { data: interactionsData, isLoading: interactionsLoading } = useGetCustomerInteractionsQuery(
@@ -233,7 +234,7 @@ const interactions = interactionsData?.data || [];
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                {['Order #', 'Date', 'Items', 'Total', 'Status'].map(h => (
+                {['Order #', 'Date', 'Channel', 'Total', 'Status'].map(h => (
                   <th key={h} className="px-4 py-3 text-left font-medium text-gray-500">{h}</th>
                 ))}
               </tr>
@@ -253,10 +254,10 @@ const interactions = interactionsData?.data || [];
                     <tr key={o.id} className="hover:bg-gray-50">
                       <td className="px-4 py-3 font-medium text-blue-600">#{o.order_number ?? o.id}</td>
                       <td className="px-4 py-3 text-gray-500">{new Date(o.created_at).toLocaleDateString()}</td>
-                      <td className="px-4 py-3 text-gray-500">{o.items_count ?? '—'}</td>
-                      <td className="px-4 py-3 text-gray-700">${o.total?.toLocaleString()}</td>
+                      <td className="px-4 py-3 text-gray-500">{o.channel ?? '0'}</td>
+                      <td className="px-4 py-3 text-gray-700">${o.total_amount?.toLocaleString()}</td>
                       <td className="px-4 py-3">
-                        <span className="px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-600">{o.status}</span>
+                        <span className="px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-600">{o.order_status}</span>
                       </td>
                     </tr>
                   ))

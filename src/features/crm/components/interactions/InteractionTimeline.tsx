@@ -146,7 +146,7 @@ export const InteractionTimeline = ({ customer, interactions: propInteractions, 
                       </td>
                       <td className="px-3 py-2.5 font-medium text-gray-800">{interaction.subject}</td>
                       <td className="px-3 py-2.5 text-gray-500 max-w-xs truncate" title={interaction.description}>
-                        {interaction.description ?? '—'}
+                        {interaction.description ?? '0'}
                       </td>
                       <td className="px-3 py-2.5">
                         {interaction.sentiment ? (
@@ -157,7 +157,7 @@ export const InteractionTimeline = ({ customer, interactions: propInteractions, 
                           }`}>
                             {interaction.sentiment}
                           </span>
-                        ) : '—'}
+                        ) : '0'}
                       </td>
                       <td className="px-3 py-2.5 text-gray-400 text-xs whitespace-nowrap">
                         {new Date(interaction.interaction_date ?? interaction.created_at).toLocaleDateString()}

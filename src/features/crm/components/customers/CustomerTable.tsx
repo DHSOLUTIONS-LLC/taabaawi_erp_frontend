@@ -94,8 +94,8 @@ export const CustomerTable = () => {
                     <div className="font-medium text-gray-900">{c.first_name} {c.last_name}</div>
                     {c.company_name && <div className="text-xs text-gray-400">{c.company_name}</div>}
                   </td>
-                  <td className="px-4 py-3 text-gray-600">{c.email ?? '—'}</td>
-                  <td className="px-4 py-3 text-gray-600">{c.phone ?? c.mobile ?? '—'}</td>
+                  <td className="px-4 py-3 text-gray-600">{c.email ?? '0'}</td>
+                  <td className="px-4 py-3 text-gray-600">{c.phone ?? c.mobile ?? '0'}</td>
                   <td className="px-4 py-3"><CustomerStatusBadge status={c.customer_status ?? c.status} /></td>
                   <td className="px-4 py-3"><TierBadge tier={c.loyalty_tier} /></td>
                   <td className="px-4 py-3 text-gray-600">{c.total_orders || 0}</td>

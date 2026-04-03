@@ -71,10 +71,10 @@ export const CustomersPage = () => {
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard label="Total Customers"  value={stats?.total_customers?.toLocaleString() ?? '—'}                                         icon={Users}     color="blue"   loading={statsLoading} />
-          <StatCard label="Active Customers" value={stats?.active_customers?.toLocaleString() ?? '—'}                                        icon={UserCheck} color="green"  loading={statsLoading} />
-          <StatCard label="New This Month"   value={stats?.new_customers_this_month?.toLocaleString() ?? '—'}                                 icon={UserPlus}  color="purple" loading={statsLoading} />
-          <StatCard label="Total Revenue"    value={stats?.total_spent_all ? `$${stats.total_spent_all.toLocaleString()}` : '—'} sub={`Avg order: $${stats?.average_order_value_all?.toLocaleString() ?? '—'}`} icon={TrendingUp} color="orange" loading={statsLoading} />
+          <StatCard label="Total Customers"  value={stats?.total_customers?.toLocaleString() ?? '0'}                                         icon={Users}     color="blue"   loading={statsLoading} />
+          <StatCard label="Active Customers" value={stats?.active_customers?.toLocaleString() ?? '0'}                                        icon={UserCheck} color="green"  loading={statsLoading} />
+          <StatCard label="New This Month"   value={stats?.new_customers_this_month?.toLocaleString() ?? '0'}                                 icon={UserPlus}  color="purple" loading={statsLoading} />
+          <StatCard label="Total Revenue"    value={stats?.total_spent_all ? `$${stats.total_spent_all.toLocaleString()}` : '0'} sub={`Avg order: $${stats?.average_order_value_all?.toLocaleString() ?? '0'}`} icon={TrendingUp} color="orange" loading={statsLoading} />
         </div>
 
         <CustomerFilters />
@@ -128,9 +128,9 @@ export const CustomersPage = () => {
                       <td className="px-4 py-3 text-gray-600">
                         {(m.lifetime_points ?? 0).toLocaleString()}
                       </td>
-                      <td className="px-4 py-3 text-gray-600">{m.total_orders ?? '—'}</td>
+                      <td className="px-4 py-3 text-gray-600">{m.total_orders ?? '0'}</td>
                       <td className="px-4 py-3 text-gray-600">
-                        {m.total_spent ? `$${m.total_spent.toLocaleString()}` : '—'}
+                        {m.total_spent ? `$${m.total_spent.toLocaleString()}` : '0'}
                       </td>
                     </tr>
                   ))

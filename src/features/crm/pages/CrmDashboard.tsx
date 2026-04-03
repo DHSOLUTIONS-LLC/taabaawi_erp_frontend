@@ -57,7 +57,7 @@ const StatCard = ({ label, value, change, changeUp, icon: Icon, color, loading, 
       <p className="text-xs text-gray-500 mb-1">{label}</p>
       {loading
         ? <Skeleton className="h-7 w-24 mb-1" />
-        : <p className="text-2xl font-bold text-gray-900 tracking-tight">{value ?? '—'}</p>
+        : <p className="text-2xl font-bold text-gray-900 tracking-tight">{value ?? '0'}</p>
       }
       {change && !loading && (
         <p className={`text-xs font-medium ${changeUp ? 'text-green-600' : 'text-red-500'}`}>
@@ -165,6 +165,7 @@ export const CrmDashboard = () => {
   const stats   = statsData?.data;
   console.log('stats dash:',stats)
   const loyalty = loyaltyData?.data;
+  console.log('loyalty:', loyalty)
   const dupes   = Array.isArray(dupData?.data)    ? dupData.data    : [];
   const recent  = Array.isArray(recentData?.data) ? recentData.data : [];
 
@@ -249,14 +250,14 @@ export const CrmDashboard = () => {
           />
           <StatCard
             label="Points Earned"
-            value={loyalty?.total_points_earned ? `${(loyalty.total_points_earned / 1000).toFixed(0)}k` : '—'}
+            value={loyalty?.total_points_earned ? `${(loyalty.total_points_earned / 1000).toFixed(0)}k` : '0'}
             icon={Award}
             color="bg-amber-50 text-amber-600"
             loading={loyaltyLoading}
           />
           <StatCard
             label="Redemption Rate"
-            value={redemptionRate ? `${redemptionRate}%` : '—'}   // ✅ calculated
+            value={redemptionRate ? `${redemptionRate}%` : '0'}   // ✅ calculated
             icon={Activity}
             color="bg-teal-50 text-teal-600"
             loading={loyaltyLoading}
@@ -402,7 +403,7 @@ export const CrmDashboard = () => {
                         )}
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
-                        <CustomerStatusBadge status={c.customer_status ?? c.status} />  // ✅ customer_status
+                        <CustomerStatusBadge status={c.customer_status ?? c.status} /> 
                         <span className="text-xs text-gray-400">
                           {new Date(c.created_at).toLocaleDateString()}
                         </span>
@@ -519,7 +520,7 @@ export const CrmDashboard = () => {
                     ))
                   : !(loyalty?.top_members ?? []).length
                   ? <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-400">No loyalty members yet</td></tr>
-                  : (loyalty?.top_members ?? []).slice(0, 5).map((m: any, i: number) => (   // ✅ top_members from loyalty
+                  : (loyalty?.top_members ?? []).slice(0, 5).map((m: any, i: number) => (  
                       <tr
                         key={m.id}
                         className="hover:bg-gray-50 cursor-pointer transition-colors"
@@ -539,10 +540,10 @@ export const CrmDashboard = () => {
                             </div>
                           </div>
                         </td>
-                        <td className="px-4 py-3"><TierBadge tier={m.loyalty_tier} /></td>
+                        <td className="px-4 py-3"><TierBadge tier={m.loyalty_tier || 'Basic'} /></td>
                         <td className="px-4 py-3 text-gray-600">{(m.lifetime_points ?? 0).toLocaleString()}</td>
-                        <td className="px-4 py-3 text-gray-600">{m.total_orders ?? '—'}</td>
-                        <td className="px-4 py-3 text-gray-600">{m.total_spent ? `$${Number(m.total_spent).toLocaleString()}` : '—'}</td>
+                        <td className="px-4 py-3 text-gray-600">{m.total_orders ?? '0'}</td>
+                        <td className="px-4 py-3 text-gray-600">{m.total_spent ? `$${Number(m.total_spent).toLocaleString()}` : '0'}</td>
                       </tr>
                     ))
                 }

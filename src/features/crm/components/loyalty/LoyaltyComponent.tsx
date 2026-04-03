@@ -15,10 +15,10 @@ import { TierBadge } from '../customers/CustomerStatusBadge';
 import type { RootState } from '../../../../app/store';
 
 const tierProgress: Record<string, { next: string; max: number }> = {
-  Bronze:   { next: 'Silver',   max: 1000 },
-  Silver:   { next: 'Gold',     max: 5000 },
-  Gold:     { next: 'Platinum', max: 15000 },
-  Platinum: { next: 'Max',      max: 15000 },
+  Bronze: { next: 'Silver', max: 1000 },
+  Silver: { next: 'Gold', max: 5000 },
+  Gold: { next: 'Platinum', max: 15000 },
+  Platinum: { next: 'Max', max: 15000 },
 };
 
 
@@ -36,19 +36,19 @@ interface Customer {
   nationality?: string;
   id_number?: string;
   id_type?: 'National' | 'Passport' | 'Civil ID';
-  
+
   // Address
   address?: string;
   city?: string;
   state?: string;
   country?: string;
   postal_code?: string;
-  
+
   // Company info
   company_name?: string;
   company_vat?: string;
   job_title?: string;
-  
+
   // Preferences
   preferred_contact_method?: 'Email' | 'Phone' | 'SMS' | 'WhatsApp';
   preferred_language?: string;
@@ -57,24 +57,24 @@ interface Customer {
     sms: boolean;
     whatsapp: boolean;
   };
-  
+
   // Loyalty
   loyalty_points: number;
   lifetime_points: number;
   loyalty_tier?: 'Bronze' | 'Silver' | 'Gold' | 'Platinum';
   loyalty_enrolled_date?: string;
-  
+
   // Statistics
   total_orders: number;
   total_spent: number;
   average_order_value: number;
   last_order_date?: string;
-  
+
   // Status
   status: 'Active' | 'Inactive' | 'Blocked' | 'Lead';
   is_active: boolean;
   is_verified: boolean;
-  
+
   // Metadata
   notes?: string;
   tags?: string[];
@@ -82,7 +82,7 @@ interface Customer {
   created_at: string;
   updated_at: string;
   deleted_at?: string;
-  
+
   // Relations
   createdBy?: any;
 }
@@ -129,7 +129,7 @@ export const LoyaltyCard = ({ customer }: { customer: Customer }) => {
           <p className="text-xs text-gray-400">Lifetime</p>
         </div>
         <div className="bg-gray-50 rounded-lg p-3">
-          <p className="text-xl font-semibold text-gray-800">{balance?.points_expiring_soon ?? '—'}</p>
+          <p className="text-xl font-semibold text-gray-800">{balance?.points_expiring_soon ?? '0'}</p>
           <p className="text-xs text-gray-400">Expiring Soon</p>
         </div>
       </div>
@@ -156,47 +156,47 @@ export const LoyaltyCard = ({ customer }: { customer: Customer }) => {
 // ── Loyalty Transaction Table ─────────────────────────────────────────────────
 export const LoyaltyTransactionTable = ({ customerId }: { customerId: number }) => {
   const { data, isLoading } = useGetLoyaltyTransactionsQuery({ customerId, per_page: 10 });
-const transactions = data?.data?.data;
-// const transactions = Array.isArray(data?.data) ? data.data : 
-//                     Array.isArray(data) ? data : [];
+  const transactions = data?.data?.data;
+  // const transactions = Array.isArray(data?.data) ? data.data : 
+  //                     Array.isArray(data) ? data : [];
 
-                    // console.log('transaction logs:', transactions)
+  // console.log('transaction logs:', transactions)
 
   const typeColor: Record<string, string> = {
-    Earned:   'text-green-600',
+    Earned: 'text-green-600',
     Redeemed: 'text-red-600',
-    Bonus:    'text-purple-600',
+    Bonus: 'text-purple-600',
     Adjusted: 'text-blue-600',
-    Expired:  'text-gray-400',
+    Expired: 'text-gray-400',
   };
 
   return (
     <div className="space-y-2">
       <h3 className="font-medium text-gray-800 text-sm">Point History</h3>
       {isLoading
-        ? <div className="animate-pulse space-y-2">{Array.from({length:5}).map((_,i)=>(
-            <div key={i} className="h-10 bg-gray-50 rounded" />
-          ))}</div>
+        ? <div className="animate-pulse space-y-2">{Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="h-10 bg-gray-50 rounded" />
+        ))}</div>
         : transactions.length === 0
-        ? <p className="text-sm text-gray-400 text-center py-6">No transactions yet</p>
-        : (
-          <div className="divide-y divide-gray-50">
-            {transactions.map((t: any) => (
-              <div key={t.id} className="flex items-center justify-between py-2.5">
-                <div>
-                  <p className="text-sm text-gray-700">{t.description}</p>
-                  <p className="text-xs text-gray-400">{new Date(t.created_at).toLocaleDateString()}</p>
+          ? <p className="text-sm text-gray-400 text-center py-6">No transactions yet</p>
+          : (
+            <div className="divide-y divide-gray-50">
+              {transactions.map((t: any) => (
+                <div key={t.id} className="flex items-center justify-between py-2.5">
+                  <div>
+                    <p className="text-sm text-gray-700">{t.description}</p>
+                    <p className="text-xs text-gray-400">{new Date(t.created_at).toLocaleDateString()}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className={`text-sm font-medium ${typeColor[t.transaction_type] ?? ''}`}>
+                      {t.points > 0 ? '+' : ''}{t.points.toLocaleString()}
+                    </p>
+                    <p className="text-xs text-gray-400">Balance: {t.balance_after.toLocaleString()}</p>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className={`text-sm font-medium ${typeColor[t.transaction_type] ?? ''}`}>
-                    {t.points > 0 ? '+' : ''}{t.points.toLocaleString()}
-                  </p>
-                  <p className="text-xs text-gray-400">Bal: {t.balance_after.toLocaleString()}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )
+              ))}
+            </div>
+          )
       }
     </div>
   );

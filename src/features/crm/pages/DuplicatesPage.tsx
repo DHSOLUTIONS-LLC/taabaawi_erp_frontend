@@ -62,8 +62,8 @@ export const DuplicatesPage = () => {
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-        <StatCard label="Pending Review"  value={meta?.total ?? '—'} icon={Copy}    color="orange" loading={isLoading} />
-        <StatCard label="Total Merged"    value={historyData?.meta?.total ?? '—'} icon={RefreshCw} color="green"  loading={historyLoading} />
+        <StatCard label="Pending Review"  value={meta?.total ?? '0'} icon={Copy}    color="orange" loading={isLoading} />
+        <StatCard label="Total Merged"    value={historyData?.meta?.total ?? '0'} icon={RefreshCw} color="green"  loading={historyLoading} />
         <StatCard label="Min Match Score" value={`${filters.min_score}%`} icon={ScanSearch} color="blue" />
       </div>
 
@@ -152,7 +152,7 @@ export const DuplicatesPage = () => {
                         <td className="px-4 py-3 text-gray-600">{h.merged_customer_ids?.length}</td>
                         <td className="px-4 py-3 text-gray-600">{h.orders_merged}</td>
                         <td className="px-4 py-3 text-gray-600">{h.points_merged?.toLocaleString()}</td>
-                        <td className="px-4 py-3 text-gray-500">{h.mergedBy?.name ?? '—'}</td>
+                        <td className="px-4 py-3 text-gray-500">{h.mergedBy?.name ?? '0'}</td>
                         <td className="px-4 py-3 text-gray-400 text-xs">
                           {new Date(h.merged_at).toLocaleDateString()}
                         </td>

@@ -40,12 +40,12 @@ export const OverviewTab = () => {
             <RefreshCw className={`h-3.5 w-3.5 ${recalculating ? 'animate-spin' : ''}`} />
             Recalculate All
           </button>
-          <button
+          {/* <button
             onClick={() => dispatch(openKpiModal({ mode: 'create' }))}
             className="flex items-center gap-1 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
             <Plus className="h-3.5 w-3.5" /> New KPI
-          </button>
+          </button> */}
         </div>
       </div>
 

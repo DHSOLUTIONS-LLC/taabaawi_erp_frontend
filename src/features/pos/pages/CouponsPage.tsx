@@ -449,7 +449,7 @@ export default function CouponsPage() {
                   <select value={form.discount_type} onChange={(e) => F('discount_type', e.target.value)}
                     className="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none">
                     <option value="Percentage">Percentage (%)</option>
-                    <option value="Fixed Amount">Fixed Amount (KD)</option>
+                    <option value="Fixed Amount">Fixed Amount (KWD)</option>
                   </select>
                 </div>
                 <div>
@@ -462,7 +462,7 @@ export default function CouponsPage() {
                     placeholder="10" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Min Purchase Amount (KD)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Min Purchase Amount (KWD)</label>
                   <input type="number" value={form.min_purchase_amount} onChange={(e) => F('min_purchase_amount', e.target.value)}
                     step="0.001" min="0"
                     className="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -470,7 +470,7 @@ export default function CouponsPage() {
                 </div>
                 {form.discount_type === 'Percentage' && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Max Discount Amount (KD)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Max Discount Amount (KWD)</label>
                     <input type="number" value={form.max_discount_amount} onChange={(e) => F('max_discount_amount', e.target.value)}
                       step="0.001" min="0"
                       className="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"

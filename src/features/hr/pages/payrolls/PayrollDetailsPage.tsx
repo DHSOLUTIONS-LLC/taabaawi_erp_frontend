@@ -42,6 +42,7 @@ export default function PayrollDetailsPage() {
 
 
     const payroll = response?.data;
+    console.log('payroad data:', payroll)
 
     const formatCurrency = (value: string) => {
         return `KD ${parseFloat(value).toFixed(3)}`;

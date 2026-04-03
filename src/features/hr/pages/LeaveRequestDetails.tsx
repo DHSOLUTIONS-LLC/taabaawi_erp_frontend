@@ -272,6 +272,8 @@ export default function LeaveRequestDetails() {
         attendance: emp?.attendances ?? [],
     };
 
+    console.log('employeeData', employeeData)
+
     const personalFields = [
         { key: 'employeeId', label: 'Employee ID' },
         { key: 'employeeName', label: 'Employee Name' },
@@ -348,9 +350,6 @@ export default function LeaveRequestDetails() {
                         >
                             <span className="text-lg font-medium text-gray-900">Personal Details</span>
                             <div className="flex items-center cursor-pointer">
-                                {personalDetailsOpen && (
-                                    <img src={edit_icon} alt="Edit" className="w-5 h-5 mr-3" />
-                                )}
                                 <img
                                     src={dropdown_icon}
                                     alt="Dropdown"
@@ -402,9 +401,6 @@ export default function LeaveRequestDetails() {
                         >
                             <span className="text-lg font-medium text-gray-900">Employment Details</span>
                             <div className="flex items-center">
-                                {employmentDetailsOpen && (
-                                    <img src={edit_icon} alt="Edit" className="w-5 h-5 mr-3" />
-                                )}
                                 <img
                                     src={dropdown_icon}
                                     alt="Dropdown"
@@ -857,7 +853,7 @@ export default function LeaveRequestDetails() {
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Amount (KD) <span className="text-red-500">*</span>
+                                    Amount (KWD) <span className="text-red-500">*</span>
                                 </label>
                                 <input
                                     type="number"

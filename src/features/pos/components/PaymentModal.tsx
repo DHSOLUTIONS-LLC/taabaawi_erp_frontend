@@ -282,7 +282,7 @@ export default function PaymentModal({
             <div className="space-y-3">
               {paymentMethod === 'Mixed' && (
                 <div>
-                  <label className="text-sm font-medium text-gray-700 mb-1 block">Card Amount (KD)</label>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">Card Amount (KWD)</label>
                   <input
                     type="number"
                     step="0.001"

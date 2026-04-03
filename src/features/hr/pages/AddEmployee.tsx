@@ -184,7 +184,7 @@ export default function AddEmployee() {
             <div className="space-y-6 p-4 md:p-6">
                 {/* Header */}
                 <div className='flex flex-row justify-between items-center'>
-                    <Link to={`${basePath}/employees`} className='flex flex-row items-center'>
+                    <Link to={`${basePath}/hr`} className='flex flex-row items-center'>
                         <img src={arrow_back_icon} alt="Back" className='w-6 h-6 md:w-8 md:h-8' />
                         <span className='px-2 font-semibold text-sm md:text-base'>Add New Employee</span>
                     </Link>

@@ -508,7 +508,7 @@ export default function AddBonusesPage() {
                                 </div>
                                 <div>
                                     <label className="block text-md font-medium text-gray-400 mb-2">
-                                        Amount (KD) <span className="text-red-500">*</span>
+                                        Amount (KWD) <span className="text-red-500">*</span>
                                     </label>
                                     <input
                                         type="number"

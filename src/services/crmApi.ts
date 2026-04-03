@@ -149,6 +149,7 @@ export interface LoyaltyTransaction {
 export interface CustomerStatistics {
   total_customers: number;
   active_customers: number;
+  new_customers: string;
   new_customers_this_month: number;
   leads_count: number;
   customers_by_status: {
@@ -164,6 +165,9 @@ export interface CustomerStatistics {
   recent_customers: Customer[];
   total_spent_all: number;
   average_order_value_all: number;
+  verified_customers: string;
+  by_status: string;
+  top_spenders: string;
 }
 
 export interface LoyaltyStatistics {

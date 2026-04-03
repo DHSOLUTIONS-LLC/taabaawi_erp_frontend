@@ -52,7 +52,7 @@ export const KpiCard = ({ kpi }: { kpi: KpiMetric }) => {
 
       <div className="mt-3 flex items-end gap-2">
         <span className="text-2xl font-bold">
-          {kpi.current_value?.toLocaleString() ?? '—'}
+          {kpi.current_value?.toLocaleString() ?? '0'}
         </span>
         <span className="text-xs opacity-70 mb-1">{kpi.unit}</span>
         <TrendIcon className="h-4 w-4 mb-1 ml-auto opacity-60" />

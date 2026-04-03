@@ -542,7 +542,6 @@ export default function SalesDashboardPage() {
                             </div>
 
                             {/* Right Column - Revenue Table */}
-                            {/* Right Column - Revenue Table */}
                             <div className="bg-white rounded-xl p-6">
                                 <h3 className="text-lg font-semibold text-gray-900 mb-6">Channels Contribution</h3>
 

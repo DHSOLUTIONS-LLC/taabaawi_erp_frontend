@@ -6,6 +6,10 @@ import ProductDetailsSidebar from "../components/ProductDetailSidebar";
 import EditProductModal from "../components/Editproductmodal";
 import BulkTransferModal from '../components/BulkTransferModal';
 import BulkDiscountModal from '../components/BulkDiscountModal';
+import { getImageUrl } from '../../../utils/imageHelpers';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://erp-backend.ttexpresskw.com';
+
 
 // Import the API hook - adjust path as needed
 import {
@@ -1581,20 +1585,17 @@ export default function DashboardPage() {
 
                               {/* Image Column */}
                               <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="w-8 h-8 rounded-full overflow-hidden">
-                                  <img
-                                    src={product.primary_image?.image_path
-                                      ? `https://erp-backend.ttexpresskw.com/storage/${product.primary_image.image_path}`
-                                      : "https://images.unsplash.com/photo-1457089328109-e5d9bd499191?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fGZsb3dlcnN8ZW58MHwxfDB8fHww"
-                                    }
-                                    alt={product.product_name}
-                                    className="w-full h-full object-cover"
-                                    onError={(e) => {
-                                      e.currentTarget.src = "https://images.unsplash.com/photo-1457089328109-e5d9bd499191?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fGZsb3dlcnN8ZW58MHwxfDB8fHww";
-                                    }}
-                                  />
-                                </div>
-                              </td>
+  <div className="w-8 h-8 rounded-full overflow-hidden">
+    <img
+      src={getImageUrl(product.primary_image?.image_path)}
+      alt={product.product_name}
+      className="w-full h-full object-cover"
+      onError={(e) => {
+        e.currentTarget.src = "https://images.unsplash.com/photo-1457089328109-e5d9bd499191?w=500&auto=format&fit=crop&q=60";
+      }}
+    />
+  </div>
+</td>
 
                               {/* Product Name */}
                               <td className="px-6 py-4 whitespace-nowrap">

@@ -1,6 +1,6 @@
 // src/features/pos/components/CartSidebar.tsx
 import { useEffect, useState } from 'react';
-import { useValidateCouponMutation } from '../../../services/posApi';
+import { useValidateCouponMutation ,useValidateDiscountMutation } from '../../../services/posApi';
 import PaymentModal from './PaymentModal';
 import ReceiptModal from './ReceiptModal';
 import { useAppSelector } from '../../../app/hooks';
@@ -56,6 +56,9 @@ export default function CartSidebar({
   const [completedSaleId, setCompletedSaleId] = useState<number | null>(null);
 
   const [validateCoupon, { isLoading: validatingCoupon }] = useValidateCouponMutation();
+  const [validateDiscount] = useValidateDiscountMutation();
+const [discountError, setDiscountError] = useState<Record<string, string>>({});
+
   // DEBUG - remove after fixing
 console.log('CartSidebar props:', { registerId, branchId });
 console.log('localStorage pos_session:', localStorage.getItem('pos_session'));
@@ -109,10 +112,49 @@ console.log('Parsed session:', JSON.parse(localStorage.getItem('pos_session') ||
     setCouponError('');
   };
 
-  const handleSetItemDiscount = (itemId: string, pct: number) => {
-    setItemDiscounts(prev => ({ ...prev, [itemId]: Math.max(0, Math.min(100, pct)) }));
+ const handleSetItemDiscount = async (itemId: string, pct: number) => {
+  setDiscountError(prev => ({ ...prev, [itemId]: '' }));
+  
+  if (pct === 0) {
+    setItemDiscounts(prev => ({ ...prev, [itemId]: 0 }));
     setEditingDiscountId(null);
-  };
+    return;
+  }
+
+  try {
+    console.log('Calling validateDiscount with:', {
+      discount_percentage: pct,
+      branch_id: branchId || 0,
+    });
+
+    const result = await validateDiscount({
+      discount_percentage: pct,
+      branch_id: branchId || 0,
+    }).unwrap();
+
+    console.log('Validation result:', result);
+
+    if (result.data.allowed) {
+      setItemDiscounts(prev => ({ ...prev, [itemId]: pct }));
+      setEditingDiscountId(null);
+      setDiscountError(prev => ({ ...prev, [itemId]: '' }));
+    } else {
+      setDiscountError(prev => ({ 
+        ...prev, 
+        [itemId]: result.data.message || `Maximum allowed discount is ${result.data.max_discount}%` 
+      }));
+      setItemDiscounts(prev => ({ ...prev, [itemId]: 0 }));
+    }
+  } catch (err: any) {
+    console.error('Validation error:', err);
+    console.error('Error response:', err?.data);
+    setDiscountError(prev => ({ 
+      ...prev, 
+      [itemId]: err?.data?.message || 'Failed to validate discount' 
+    }));
+    setItemDiscounts(prev => ({ ...prev, [itemId]: 0 }));
+  }
+};
 
   const handleSaleSuccess = (sale: any) => {
     setCompletedSaleId(sale.id);
@@ -242,26 +284,33 @@ console.log('Parsed session:', JSON.parse(localStorage.getItem('pos_session') ||
                           </div>
 
                           {/* Discount */}
-                          <div className="mt-2">
-                            {editingDiscountId === item.id ? (
-                              <div className="flex items-center gap-1">
-                                <input
-                                  type="number" min="0" max="100" defaultValue={discPct}
-                                  autoFocus
-                                  onBlur={(e) => handleSetItemDiscount(item.id, parseFloat(e.target.value) || 0)}
-                                  onKeyDown={(e) => e.key === 'Enter' && handleSetItemDiscount(item.id, parseFloat((e.target as HTMLInputElement).value) || 0)}
-                                  className="w-16 px-2 py-0.5 border rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                  placeholder="%"
-                                />
-                                <span className="text-xs text-gray-500">% off</span>
-                              </div>
-                            ) : (
-                              <button onClick={() => setEditingDiscountId(item.id)}
-                                className="text-xs text-[#1773CF] hover:underline">
-                                {discPct > 0 ? `${discPct}% discount applied` : '+ Add discount'}
-                              </button>
-                            )}
-                          </div>
+<div className="mt-2">
+  {editingDiscountId === item.id ? (
+    <div className="flex flex-col gap-1">
+      <div className="flex items-center gap-1">
+        <input
+          type="number" min="0" max="100" defaultValue={discPct}
+          autoFocus
+          onBlur={(e) => handleSetItemDiscount(item.id, parseFloat(e.target.value) || 0)}
+          onKeyDown={(e) => e.key === 'Enter' && handleSetItemDiscount(item.id, parseFloat((e.target as HTMLInputElement).value) || 0)}
+          className="w-16 px-2 py-0.5 border rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+          placeholder="%"
+        />
+        <span className="text-xs text-gray-500">% off</span>
+      </div>
+      {discountError[item.id] && (
+        <p className="text-xs text-red-500">{discountError[item.id]}</p>
+      )}
+    </div>
+  ) : (
+    <button 
+      onClick={() => setEditingDiscountId(item.id)}
+      className="text-xs text-[#1773CF] hover:underline"
+    >
+      {discPct > 0 ? `${discPct}% discount applied` : '+ Add discount'}
+    </button>
+  )}
+</div>
                         </div>
                       </div>
                     </div>

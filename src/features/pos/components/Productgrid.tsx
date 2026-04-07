@@ -51,41 +51,48 @@ export default function ProductGrid({
   ];
 
   // Use useMemo to prevent recreating products on every render
-  const products = useMemo(() => {
+ const products = useMemo(() => {
   const apiProducts = productsResponse?.data?.data || [];
-  console.log('products on pos page:', apiProducts)
+  
+  // Check if user is Super Admin (no branch restriction)
+  const isSuperAdmin = !branchId;
+  
   return apiProducts
     .map((product: any) => {
-      // Find inventory for this specific branch
-      const branchInventory = branchId
-        ? product.inventory?.find((inv: any) => inv.branch_id === branchId)
-        : null;
-
-      // If branchId is set and product has NO inventory record for this branch → exclude
-      if (branchId && !branchInventory) return null;
-
-      const branchStock = branchInventory?.available_quantity ?? branchInventory?.quantity ?? 0;
-const imagePath = product.primary_image?.image_path 
-  ? `/storage/${product.primary_image.image_path}` 
-  : 'https://images.unsplash.com/photo-1541275055241-329bbdf9a191?w=500&auto=format&fit=crop&q=60';
-
+      let stock = 0;
+      
+      if (isSuperAdmin) {
+        // Super Admin: Show total stock across ALL branches
+        stock = product.inventory?.reduce(
+          (sum: number, inv: any) => sum + (inv.available_quantity ?? inv.quantity ?? 0), 0
+        ) || 0;
+      } else {
+        // Other users: Filter by specific branch
+        const branchInventory = product.inventory?.find((inv: any) => inv.branch_id === branchId);
+        if (!branchInventory) return null; // Product not available in this branch
+        stock = branchInventory.available_quantity ?? branchInventory.quantity ?? 0;
+      }
+      
+      const imagePath = product.primary_image?.image_path 
+        ? `/storage/${product.primary_image.image_path}` 
+        : 'https://images.unsplash.com/photo-1541275055241-329bbdf9a191?w=500&auto=format&fit=crop&q=60';
+      
       return {
         id: product.id.toString(),
-        product_id: product.id,           // ← needed for sale creation
+        product_id: product.id,
         name: product.product_name || '',
         sku: product.sku || '',
         price: typeof product.selling_price === 'string'
           ? parseFloat(product.selling_price)
           : product.selling_price || 0,
-        stock: branchStock,               // ← branch-specific stock
-        outOfStock: branchStock <= 0,     // ← flag for UI
+        stock: stock,
+        outOfStock: stock <= 0,
         image: imagePath,
         image_url: imagePath,
-        category:
-          product.category?.category_name || 'All Items',
+        category: product.category?.category_name || 'All Items',
       };
     })
-    .filter(Boolean); // remove nulls (products not in this branch)
+    .filter(Boolean);
 }, [productsResponse, branchId]);
 
   // Filter products when search, category, or products change

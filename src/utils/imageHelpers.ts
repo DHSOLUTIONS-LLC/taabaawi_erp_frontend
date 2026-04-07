@@ -7,21 +7,24 @@
  * @returns Full URL to the image or fallback
  */
 export const getStorageImageUrl = (
-    imagePath: string | null | undefined,
-    fallbackUrl = 'https://images.unsplash.com/photo-1457089328109-e5d9bd499191?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fGZsb3dlcnN8ZW58MHwxfDB8fHww&auto=format&fit=crop&q=60&ixlib=rb-4.1.0'
+  imagePath: string | null | undefined,
+  fallbackUrl = "https://images.unsplash.com/photo-1457089328109-e5d9bd499191?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fGZsb3dlcnN8ZW58MHwxfDB8fHww&auto=format&fit=crop&q=60&ixlib=rb-4.1.0",
 ): string => {
-    if (!imagePath) return fallbackUrl;
+  if (!imagePath) return fallbackUrl;
 
-    // If already a full URL, return as is
-    if (imagePath.startsWith('http://storage') || imagePath.startsWith('https://storage')) {
-        return imagePath;
-    }
+  // If already a full URL, return as is
+  if (
+    imagePath.startsWith("http://storage") ||
+    imagePath.startsWith("https://storage")
+  ) {
+    return imagePath;
+  }
 
-    // Get base URL from environment and construct storage URL
-    const apiUrl = import.meta.env.VITE_API_URL || '';
-    const baseUrl = apiUrl.replace(/\/api\/?$/, ''); 
+  // Get base URL from environment and construct storage URL
+  const apiUrl = import.meta.env.VITE_API_URL || "";
+  const baseUrl = apiUrl.replace(/\/api\/?$/, "");
 
-    return `${baseUrl}/storage/${imagePath}`;
+  return `${baseUrl}/storage/${imagePath}`;
 };
 
 /**
@@ -29,23 +32,39 @@ export const getStorageImageUrl = (
  * Handles multiple possible image field structures
  */
 export const getProductImageUrl = (product: {
-    primary_image?: { image_path?: string } | null;
-    image?: string;
-    image_url?: string;
+  primary_image?: { image_path?: string } | null;
+  image?: string;
+  image_url?: string;
 }): string => {
-    const imagePath =
-        product.primary_image?.image_path ||
-        product.image ||
-        product.image_url;
+  const imagePath =
+    product.primary_image?.image_path || product.image || product.image_url;
 
-    return getStorageImageUrl(imagePath);
+  return getStorageImageUrl(imagePath);
 };
 
 /**
  * Gets category image URL
  */
-export const getCategoryImageUrl = (category: {
-    image?: string;
-}): string => {
-    return getStorageImageUrl(category.image);
+export const getCategoryImageUrl = (category: { image?: string }): string => {
+  return getStorageImageUrl(category.image);
+};
+
+
+
+const API_BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://unintervolved-maude-ingrately.ngrok-free.dev';
+
+export const getImageUrl = (imagePath: string | null | undefined): string => {
+  if (!imagePath) {
+    return 'https://images.unsplash.com/photo-1457089328109-e5d9bd499191?w=500&auto=format&fit=crop&q=60';
+  }
+  
+  // If it's already a full URL, return as is
+  if (imagePath.startsWith('http')) {
+    return imagePath;
+  }
+  
+  // Remove leading slash if present to avoid double slash
+  const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
+  
+  return `${API_BASE_URL}/storage/${cleanPath}`;
 };

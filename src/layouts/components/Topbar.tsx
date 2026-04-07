@@ -359,7 +359,7 @@ export default function Topbar({ pageTitle = "Dashboard Overview", toggleMobileM
               <span className="font-medium">Shift {shiftDuration && `(${shiftDuration})`}</span>
             </button>
           )}
-          {(user?.role?.role_name === 'Cashier' || user?.role?.role_name === 'cashier') && !currentRegister && (
+          {(user?.role?.role_name === 'Cashier' || user?.role?.role_name === 'cashier' || user?.role?.role_name === 'Super Admin' || user?.role?.role_name === 'Super Admin') && !currentRegister && (
             <div className="hidden lg:flex items-center space-x-2 px-3 py-2 md:px-4 md:py-2 bg-gray-300 text-gray-500 rounded-lg text-sm cursor-not-allowed">
               <img src={history_icon_2} alt="Shift Closed" className="w-4 h-4 opacity-50" />
               <span className="font-medium">Shift Closed</span>

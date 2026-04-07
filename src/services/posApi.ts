@@ -240,6 +240,23 @@ export const posApi = api.injectEndpoints({
             providesTags: ['Sales'],
         }),
 
+
+        validateDiscount: builder.mutation<{ 
+  success: boolean; 
+  data: { 
+    allowed: boolean; 
+    max_discount: number; 
+    message?: string; 
+    requires_authorization?: boolean;
+  } 
+}, { discount_percentage: number; branch_id: number }>({
+  query: (body) => ({
+    url: '/sales/validate-discount',
+    method: 'POST',
+    body,
+  }),
+}),
+
         // ===== RETURNS ENDPOINTS =====
         getReturns: builder.query<any, ReturnsFilters>({
             query: (params) => ({ url: '/returns', params }),
@@ -391,6 +408,7 @@ export const {
     useGetSaleByIdQuery,
     useGetSaleReceiptQuery,
     useGetSalesStatisticsQuery,
+    useValidateDiscountMutation,
 
     // Returns
     useGetReturnsQuery,

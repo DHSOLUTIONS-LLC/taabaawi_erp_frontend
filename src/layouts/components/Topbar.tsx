@@ -50,12 +50,18 @@ export default function Topbar({ pageTitle = "Dashboard Overview", toggleMobileM
   const [showShiftModal, setShowShiftModal] = useState(false);
   const [shiftDuration, setShiftDuration] = useState('');
 
+  // Get current POS session for ALL users (including Super Admin)
   const { data: currentRegisterResponse, refetch: refetchCurrentRegister } = useGetCurrentPOSQuery(undefined, {
-    skip: !user?.id || (user?.role?.role_name !== 'Cashier' && user?.role?.role_name !== 'cashier'),
+    skip: !user?.id,
     pollingInterval: 60000,
   });
 
   const currentRegister = currentRegisterResponse?.data;
+  const isSuperAdmin = user?.role?.role_name === 'Super Admin';
+  const isCashier = user?.role?.role_name === 'Cashier' || user?.role?.role_name === 'cashier';
+  
+  // Show shift button for both Cashier and Super Admin when they have an open register
+  const showShiftButton = (isCashier || isSuperAdmin) && currentRegister;
 
   useEffect(() => {
     if (currentRegister?.opened_at) {
@@ -107,13 +113,11 @@ export default function Topbar({ pageTitle = "Dashboard Overview", toggleMobileM
     }
   };
 
-  // ── THE KEY FIX: invalidate all cached data when branch switches ──────────
   const handleBranchSelect = (branchId: number | null) => {
     if (!userCanSwitchBranch) return;
 
     dispatch(setSelectedBranch(branchId));
 
-    // Force every active RTK Query to refetch with the new X-Branch-Id header
     dispatch(api.util.invalidateTags([
       'Products', 'Sales', 'Orders', 'Invoices', 'Customers',
       'PurchaseOrders', 'GoodsReceiptNotes', 'PurchaseReturns', 'SupplierPayments',
@@ -128,11 +132,8 @@ export default function Topbar({ pageTitle = "Dashboard Overview", toggleMobileM
     ]));
 
     setShowBranchDropdown(false);
-    console.log(`Branch switched to: ${branchId === null ? 'All Branches' : branchId}`);
   };
-  // ─────────────────────────────────────────────────────────────────────────
 
-  const isSuperAdmin = user?.role?.role_name === 'Super Admin';
   const isHR = user?.role?.role_name === 'HR' || user?.role?.role_name === 'HR Manager';
 
   const hasCreateRolePermission = () => {
@@ -166,17 +167,18 @@ export default function Topbar({ pageTitle = "Dashboard Overview", toggleMobileM
   };
 
   return (
-    <header className="sticky top-0 h-16 sm:h-18 bg-white border-b border-gray-200" style={{ zIndex: 60 }}>
-      <div className="flex items-center justify-between h-full px-3 sm:px-4 md:px-6">
+    <header className="sticky top-0 h-16 bg-white border-b border-gray-200 z-50">
+      <div className="flex items-center justify-between h-full px-3 sm:px-4 md:px-6 gap-2 sm:gap-4">
 
         {/* Left Section */}
-        <div className="flex items-center space-x-2 sm:space-x-4 md:space-x-6">
+        <div className="flex items-center gap-2 sm:gap-4 md:gap-6 min-w-0">
+          {/* Mobile Menu Button */}
           <button
             onClick={handleMobileMenuToggle}
-            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors relative z-50"
+            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors flex-shrink-0"
             aria-label="Toggle menu"
           >
-            <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               {mobileMenuOpen ? (
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
               ) : (
@@ -185,17 +187,18 @@ export default function Topbar({ pageTitle = "Dashboard Overview", toggleMobileM
             </svg>
           </button>
 
-          <h1 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 truncate max-w-[120px] sm:max-w-none">
+          {/* Page Title */}
+          <h1 className="text-sm sm:text-base md:text-xl font-bold text-gray-900 truncate">
             {pageTitle}
           </h1>
 
-          {/* Branch Selector */}
-          <div className="relative hidden sm:block">
+          {/* Branch Selector - Desktop */}
+          <div className="relative hidden md:block">
             {userCanSwitchBranch ? (
               <>
                 <button
                   onClick={() => setShowBranchDropdown(!showBranchDropdown)}
-                  className="flex items-center space-x-1 sm:space-x-2 px-2 py-1.5 sm:px-3 sm:py-2 md:px-4 md:py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm"
+                  className="flex items-center gap-1 sm:gap-2 px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm"
                   disabled={branchesLoading || !!branchesError}
                 >
                   {branchesLoading ? (
@@ -204,7 +207,8 @@ export default function Topbar({ pageTitle = "Dashboard Overview", toggleMobileM
                     <span className="text-red-600">Error</span>
                   ) : (
                     <>
-                      <span className="font-medium text-gray-700 truncate max-w-[100px] sm:max-w-none">
+                      <img src={market_icon} alt="" className="w-4 h-4" />
+                      <span className="font-medium text-gray-700 max-w-[120px] truncate">
                         {getCurrentBranchDisplay()}
                       </span>
                       <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500 flex-shrink-0" />
@@ -220,7 +224,6 @@ export default function Topbar({ pageTitle = "Dashboard Overview", toggleMobileM
                         <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                           Select Branch
                         </div>
-
                         <button
                           onClick={() => handleBranchSelect(null)}
                           className={`w-full text-left px-3 py-2 rounded text-sm transition-colors ${
@@ -231,9 +234,7 @@ export default function Topbar({ pageTitle = "Dashboard Overview", toggleMobileM
                         >
                           All Branches
                         </button>
-
                         <div className="border-t border-gray-200 my-1" />
-
                         {branches.map((branch) => (
                           <button
                             key={branch.id}
@@ -253,9 +254,9 @@ export default function Topbar({ pageTitle = "Dashboard Overview", toggleMobileM
                 )}
               </>
             ) : (
-              <div className="flex items-center space-x-1 sm:space-x-2 px-2 py-1.5 sm:px-3 sm:py-2 md:px-4 md:py-2 rounded-lg border border-gray-300 bg-gray-50 text-xs sm:text-sm">
-                <span className="flex flex-row font-medium text-gray-600 truncate max-w-[100px] sm:max-w-none">
-                  <img src={market_icon} alt="" className='px-2' />
+              <div className="flex items-center gap-1 sm:gap-2 px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg border border-gray-300 bg-gray-50 text-xs sm:text-sm">
+                <img src={market_icon} alt="" className="w-4 h-4" />
+                <span className="font-medium text-gray-600 max-w-[120px] truncate">
                   {getCurrentBranchDisplay()}
                 </span>
               </div>
@@ -264,18 +265,18 @@ export default function Topbar({ pageTitle = "Dashboard Overview", toggleMobileM
         </div>
 
         {/* Right Section */}
-        <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
+        <div className="flex items-center gap-1 sm:gap-2 md:gap-3">
 
-          {/* Create Menu — Mobile */}
-          <div className="relative xl:hidden">
+          {/* Menu - Mobile */}
+          <div className="relative block xl:hidden">
             <button
               onClick={() => setShowCreateMenu(!showCreateMenu)}
-              className="flex items-center space-x-1 sm:space-x-2 px-3 py-2 text-black border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors text-sm"
+              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 text-black border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors text-xs sm:text-sm"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
               </svg>
-              <span className="font-medium hidden sm:inline">Create</span>
+              <span className="font-medium hidden xs:inline">Create</span>
             </button>
 
             {showCreateMenu && (
@@ -285,32 +286,32 @@ export default function Topbar({ pageTitle = "Dashboard Overview", toggleMobileM
                   <div className="p-2">
                     {canSeeAdminButtons && canCreateRole && (
                       <Link to={isSuperAdmin ? "/admin/hr/create_role" : "/hr/create_role"} onClick={() => setShowCreateMenu(false)}>
-                        <button className="w-full flex items-center space-x-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded transition-colors text-sm">
+                        <button className="w-full flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded transition-colors text-sm">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
-                          <span>Create Role</span>
+                          <span>Role</span>
                         </button>
                       </Link>
                     )}
                     {canSeeAdminButtons && canCreateUser && (
                       <Link to={isSuperAdmin ? "/admin/hr/add_staff" : "/hr/add_staff"} onClick={() => setShowCreateMenu(false)}>
-                        <button className="w-full flex items-center space-x-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded transition-colors text-sm">
+                        <button className="w-full flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded transition-colors text-sm">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
-                          <span>Add Staff</span>
+                          <span>Staff</span>
                         </button>
                       </Link>
                     )}
                     <Link to={isSuperAdmin ? "/admin/sales/create_invoice" : "/sales/create_invoice"} onClick={() => setShowCreateMenu(false)}>
-                      <button className="w-full flex items-center space-x-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded transition-colors text-sm">
+                      <button className="w-full flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded transition-colors text-sm">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
-                        <span>Create Invoice</span>
+                        <span>Invoice</span>
                       </button>
                     </Link>
                     <button
                       onClick={() => { setShowCreateMenu(false); setShowCategoryPopup(true); }}
-                      className="w-full flex items-center space-x-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded transition-colors text-sm"
+                      className="w-full flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded transition-colors text-sm"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
-                      <span>Create Category</span>
+                      <span>Category</span>
                     </button>
                   </div>
                 </div>
@@ -318,51 +319,57 @@ export default function Topbar({ pageTitle = "Dashboard Overview", toggleMobileM
             )}
           </div>
 
-          {/* Create Buttons — Desktop */}
-          {canSeeAdminButtons && canCreateRole && (
-            <Link to={isSuperAdmin ? "/admin/hr/create_role" : "/hr/create_role"}>
-              <button className="hidden xl:flex items-center space-x-2 px-3 py-2 md:px-4 md:py-2 text-black border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors cursor-pointer text-sm">
+          {/* Buttons - Desktop */}
+          <div className="hidden xl:flex items-center gap-2">
+            {canSeeAdminButtons && canCreateRole && (
+              <Link to={isSuperAdmin ? "/admin/hr/create_role" : "/hr/create_role"}>
+                <button className="flex items-center gap-2 px-3 py-2 text-black border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors cursor-pointer text-sm">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
+                  <span className="font-medium">Role</span>
+                </button>
+              </Link>
+            )}
+            {canSeeAdminButtons && canCreateUser && (
+              <Link to={isSuperAdmin ? "/admin/hr/add_staff" : "/hr/add_staff"}>
+                <button className="flex items-center gap-2 px-3 py-2 text-black border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors cursor-pointer text-sm">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
+                  <span className="font-medium">Staff</span>
+                </button>
+              </Link>
+            )}
+            <Link to={isSuperAdmin ? "/admin/sales/create_invoice" : "/sales/create_invoice"}>
+              <button className="flex items-center gap-2 px-3 py-2 text-black border border-blue-600 rounded-lg cursor-pointer transition-colors text-sm">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
-                <span className="font-medium">Create Role</span>
+                <span className="font-medium">Invoice</span>
               </button>
             </Link>
-          )}
-          {canSeeAdminButtons && canCreateUser && (
-            <Link to={isSuperAdmin ? "/admin/hr/add_staff" : "/hr/add_staff"}>
-              <button className="hidden xl:flex items-center space-x-2 px-3 py-2 md:px-4 md:py-2 text-black border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors cursor-pointer text-sm">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
-                <span className="font-medium">Add Staff</span>
-              </button>
-            </Link>
-          )}
-          <Link to={isSuperAdmin ? "/admin/sales/create_invoice" : "/sales/create_invoice"}>
-            <button className="hidden xl:flex items-center space-x-2 px-3 py-2 md:px-4 md:py-2 text-black border border-blue-600 rounded-lg cursor-pointer transition-colors text-sm">
+            <button
+              onClick={() => setShowCategoryPopup(true)}
+              className="flex items-center gap-2 px-3 py-2 text-black border border-blue-600 rounded-lg cursor-pointer transition-colors hover:bg-blue-50 text-sm"
+            >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
-              <span className="font-medium">Create Invoice</span>
+              <span className="font-medium">Category</span>
             </button>
-          </Link>
-          <button
-            onClick={() => setShowCategoryPopup(true)}
-            className="hidden xl:flex items-center space-x-2 px-3 py-2 md:px-4 md:py-2 text-black border border-blue-600 rounded-lg cursor-pointer transition-colors hover:bg-blue-50 text-sm"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
-            <span className="font-medium">Create Category</span>
-          </button>
+          </div>
 
-          {/* Shift Close Button */}
-          {(user?.role?.role_name === 'Cashier' || user?.role?.role_name === 'cashier' || user?.role?.role_name === 'Super Admin' || user?.role?.role_name === 'Super Admin') && currentRegister && (
+          {/* Shift Close Button - Now works for Super Admin too */}
+          {showShiftButton && (
             <button
               onClick={handleCloseShift}
-              className="hidden lg:flex items-center space-x-2 px-3 py-2 md:px-4 md:py-2 bg-[#FF5F57] text-white rounded-lg hover:bg-[#FF4A42] transition-colors text-sm"
+              className="hidden sm:flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-[#FF5F57] text-white rounded-lg hover:bg-[#FF4A42] transition-colors text-xs sm:text-sm"
             >
-              <img src={history_icon_2} alt="Shift Close" className="w-4 h-4" />
-              <span className="font-medium">Shift {shiftDuration && `(${shiftDuration})`}</span>
+              <img src={history_icon_2} alt="Shift Close" className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="font-medium">
+                Shift {shiftDuration && `(${shiftDuration})`}
+              </span>
             </button>
           )}
-          {(user?.role?.role_name === 'Cashier' || user?.role?.role_name === 'cashier' || user?.role?.role_name === 'Super Admin' || user?.role?.role_name === 'Super Admin') && !currentRegister && (
-            <div className="hidden lg:flex items-center space-x-2 px-3 py-2 md:px-4 md:py-2 bg-gray-300 text-gray-500 rounded-lg text-sm cursor-not-allowed">
-              <img src={history_icon_2} alt="Shift Closed" className="w-4 h-4 opacity-50" />
-              <span className="font-medium">Shift Closed</span>
+
+          {/* Shift Closed Indicator */}
+          {(isCashier || isSuperAdmin) && !currentRegister && (
+            <div className="hidden sm:flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-gray-300 text-gray-500 rounded-lg text-xs sm:text-sm cursor-not-allowed">
+              <img src={history_icon_2} alt="Shift Closed" className="w-3 h-3 sm:w-4 sm:h-4 opacity-50" />
+              <span className="font-medium hidden xs:inline">Shift Closed</span>
             </div>
           )}
 
@@ -382,7 +389,7 @@ export default function Topbar({ pageTitle = "Dashboard Overview", toggleMobileM
             {showNotifications && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setShowNotifications(false)} />
-                <div className="absolute right-0 mt-2 w-72 sm:w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                <div className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
                   <div className="p-4">
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="font-medium text-gray-900">Notifications</h3>
@@ -405,7 +412,7 @@ export default function Topbar({ pageTitle = "Dashboard Overview", toggleMobileM
           </div>
 
           {/* Settings */}
-          <button className="p-1.5 sm:p-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors" aria-label="Settings">
+          <button className="p-1.5 sm:p-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors hidden sm:block" aria-label="Settings">
             <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -416,16 +423,16 @@ export default function Topbar({ pageTitle = "Dashboard Overview", toggleMobileM
           <div className="relative">
             <button
               onClick={() => setShowProfileMenu(!showProfileMenu)}
-              className="flex items-center space-x-1 sm:space-x-2 md:space-x-3 focus:outline-none"
+              className="flex items-center gap-1 sm:gap-2 focus:outline-none"
             >
-              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-linear-to-r from-blue-500 to-blue-600 flex items-center justify-center">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center">
                 <span className="text-white text-xs sm:text-sm font-semibold">
                   {user?.name?.charAt(0) || 'U'}
                 </span>
               </div>
-              <div className="hidden lg:block text-left">
-                <p className="text-sm font-medium text-gray-900 truncate max-w-[100px]">{user?.name || 'User'}</p>
-                <p className="text-xs text-gray-500 truncate max-w-[100px]">{user?.role?.role_name || 'Role'}</p>
+              <div className="hidden md:block text-left">
+                <p className="text-sm font-medium text-gray-900 max-w-[100px] truncate">{user?.name || 'User'}</p>
+                <p className="text-xs text-gray-500 max-w-[100px] truncate">{user?.role?.role_name || 'Role'}</p>
               </div>
               <ChevronDown className="hidden md:block w-3 h-3 sm:w-4 sm:h-4 text-gray-500" />
             </button>
@@ -441,17 +448,17 @@ export default function Topbar({ pageTitle = "Dashboard Overview", toggleMobileM
                       <p className="text-xs text-blue-600 font-medium mt-1">{user?.role?.role_name}</p>
                     </div>
                     <Link to="/profile">
-                      <button onClick={() => setShowProfileMenu(false)} className="cursor-pointer w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors">
+                      <button onClick={() => setShowProfileMenu(false)} className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors">
                         My Profile
                       </button>
                     </Link>
                     <Link to="/my-leaves">
-                      <button onClick={() => setShowProfileMenu(false)} className="cursor-pointer w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors">
+                      <button onClick={() => setShowProfileMenu(false)} className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors">
                         My Leaves
                       </button>
                     </Link>
                     <Link to="/my-leaves/request">
-                      <button onClick={() => setShowProfileMenu(false)} className="cursor-pointer w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors">
+                      <button onClick={() => setShowProfileMenu(false)} className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors">
                         My Leaves Requests
                       </button>
                     </Link>
@@ -481,6 +488,7 @@ export default function Topbar({ pageTitle = "Dashboard Overview", toggleMobileM
         />
       )}
 
+      {/* Shift Close Modal */}
       {showShiftModal && currentRegister && (
         <CloseRegisterPage
           register={currentRegister}

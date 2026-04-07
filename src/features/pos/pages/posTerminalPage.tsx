@@ -24,15 +24,16 @@ export default function POSTerminalPage() {
   const [selectedBranch, setSelectedBranch] = useState<string>('');
   const [openingCash, setOpeningCash] = useState('');
   const [selectedBranchId, setSelectedBranchId] = useState<number | null>(null);
-  const [redirectAttempted, setRedirectAttempted] = useState(false);
   const [showBranchDropdown, setShowBranchDropdown] = useState(false);
 
   const isSuperAdmin = user?.role?.role_name === 'Super Admin';
   const isEmp = user?.role?.role_name;
   const basePath = isSuperAdmin ? '/admin' : isEmp ? '/' : '';
 
-  const { data: currentRegisterResponse, isLoading: checkingRegister, error: currentRegisterError } = useGetCurrentPOSQuery(undefined, {
-    skip: !user?.id
+  // Check if user already has an open register
+  const { data: currentRegisterResponse, isLoading: checkingRegister, refetch: refetchCurrent } = useGetCurrentPOSQuery(undefined, {
+    skip: !user?.id,
+    pollingInterval: 30000, // Poll every 30 seconds to keep session info fresh
   });
 
   const { data: branchRegistersResponse } = useGetPOSsQuery(
@@ -46,18 +47,22 @@ export default function POSTerminalPage() {
   const branches = Array.isArray(branchesData) ? branchesData : [];
   const userCanSwitchBranch = canSwitchBranch(user?.role?.role_name);
 
-  // Redirect only for non-super-admin users with open register
+  const hasActiveSession = currentRegisterResponse?.success === true && currentRegisterResponse?.data;
+  const currentRegister = currentRegisterResponse?.data;
+
+  // Update localStorage whenever API returns active session
   useEffect(() => {
-    if (redirectAttempted || checkingRegister || isSuperAdmin) return;
-    
-    if (currentRegisterResponse?.success === true && currentRegisterResponse?.data) {
-      setRedirectAttempted(true);
-      navigate(`${basePath}/pos`, { 
-        replace: true,
-        state: { existingRegister: true, register: currentRegisterResponse.data }
-      });
+    if (hasActiveSession && currentRegister) {
+      localStorage.setItem('pos_session', JSON.stringify({
+        registerId: currentRegister.id,
+        branchId: currentRegister.branch_id,
+        branchName: currentRegister.branch?.branch_name,
+        terminal: selectedTerminal,
+        openingBalance: currentRegister.opening_balance,
+        openedAt: currentRegister.opened_at
+      }));
     }
-  }, [currentRegisterResponse, checkingRegister, navigate, basePath, redirectAttempted, isSuperAdmin]);
+  }, [hasActiveSession, currentRegister, selectedTerminal]);
 
   useEffect(() => {
     if (branches.length > 0) {
@@ -125,19 +130,20 @@ export default function POSTerminalPage() {
       const response = await openCashRegister({
         branch_id: selectedBranchId,
         opening_balance: cashAmount,
-        opening_notes: `Morning shift - ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
+        opening_notes: `Shift - ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
       }).unwrap();
 
+      // Save to localStorage
       localStorage.setItem('pos_session', JSON.stringify({
         registerId: response.data.id,
-        branchId: selectedBranchId,
+        branchId: response.data.branch_id,
         branchName: selectedBranch,
         terminal: selectedTerminal,
         openingBalance: cashAmount,
         openedAt: new Date().toISOString()
       }));
 
-      setRedirectAttempted(true);
+      // Navigate to POS page
       navigate(`${basePath}/pos`, { 
         replace: true,
         state: { register: response.data }
@@ -145,16 +151,13 @@ export default function POSTerminalPage() {
       
     } catch (error: any) {
       console.error('Failed to open cash register:', error);
-      
-      if (error.data?.message?.includes('already have an open cash register')) {
-        alert('You already have an open cash register. Please close it first.');
-        setRedirectAttempted(true);
-        navigate(`${basePath}/pos`, { replace: true });
-      } else {
-        alert(error?.data?.message || 'Failed to open cash register. Please try again.');
-      }
+      alert(error?.data?.message || 'Failed to open cash register. Please try again.');
     }
   };
+
+  // const handleGoToPOS = () => {
+  //   navigate(`${basePath}/pos`);
+  // };
 
   if (checkingRegister) {
     return (
@@ -162,6 +165,57 @@ export default function POSTerminalPage() {
         <div className="min-h-screen flex items-center justify-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
           <span className="ml-3">Checking existing sessions...</span>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Show active session card instead of form
+  if (hasActiveSession) {
+    return (
+      <DashboardLayout>
+        <div className="min-h-screen flex items-center justify-center p-4">
+          <div className="max-w-md w-full">
+            <div className="bg-green-50 border border-green-200 rounded-xl p-6 text-center">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Active POS Session</h3>
+              
+              <div className="bg-white rounded-lg p-4 mb-4 text-left space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Register #:</span>
+                  <span className="font-semibold">{currentRegister?.register_number}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Branch:</span>
+                  <span className="font-semibold">{currentRegister?.branch?.branch_name}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Opened:</span>
+                  <span className="font-semibold">{currentRegister?.opened_at ? new Date(currentRegister.opened_at).toLocaleString() : 'N/A'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Opening Balance:</span>
+                  <span className="font-semibold">KD {parseFloat(currentRegister?.opening_balance || '0').toFixed(3)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Cashier:</span>
+                  <span className="font-semibold">{currentRegister?.user?.name || user?.name}</span>
+                </div>
+              </div>
+              
+              {/* <button
+                onClick={handleGoToPOS}
+                className="w-full py-3 bg-[#1773CF] text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+              >
+                Continue to POS Terminal
+              </button> */}
+            </div>
+          </div>
         </div>
       </DashboardLayout>
     );

@@ -1,4 +1,3 @@
-// src/features/auth/pages/DashboardPage.tsx
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import { useAppSelector } from '../../../app/hooks';
 import type { RootState } from '../../../app/store';
@@ -11,11 +10,22 @@ import icon_6 from '../../../assets/icons/icon_6.svg';
 import icon_7 from '../../../assets/icons/icon_7.svg';
 import icon_8 from '../../../assets/icons/icon_8.svg';
 import { useEffect, useMemo, useState } from 'react';
-import { XAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, Legend } from 'recharts';
+import {
+  XAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  BarChart, Bar, PieChart, Pie, Cell, Legend,
+  YAxis
+} from 'recharts';
 import { useGetLowStockProductsQuery } from '../../../services/inventoryApi';
 import { useGetActivityLogsQuery } from '../../../services/securityApi';
-import { useGetSalesWeeklyQuery, useGetSalesMonthlyQuery, useGetChannelBreakdownQuery } from '../../../services/salesApi';
-import { useGetPendingApprovalsQuery as useGetPurchasePendingApprovalsQuery, useGetPurchaseOrderStatisticsQuery } from '../../../services/purchaseApi';
+import {
+  useGetSalesWeeklyQuery,
+  useGetSalesMonthlyQuery,
+  useGetChannelBreakdownQuery
+} from '../../../services/salesApi';
+import {
+  useGetPendingApprovalsQuery as useGetPurchasePendingApprovalsQuery,
+  useGetPurchaseOrderStatisticsQuery
+} from '../../../services/purchaseApi';
 import { format } from 'date-fns';
 import { Link } from 'react-router-dom';
 
@@ -35,18 +45,24 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
+const EMPTY_BAR_DATA = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(name => ({ name, revenue: 0 }));
+const EMPTY_PIE_DATA = [{ name: 'No Data', value: 1 }];
+
+const Spinner = () => (
+  <div className="flex items-center justify-center h-full">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+  </div>
+);
+
 export default function DashboardPage() {
   const [selectedTimeframe, setSelectedTimeframe] = useState<'weekly' | 'monthly'>('weekly');
   const [currentPage, setCurrentPage] = useState(1);
 
   const selectedBranchId = useAppSelector((state: RootState) => state.branch?.selectedBranchId);
 
-  // Fetch real sales data
   const { data: weeklyData, isLoading: weeklyLoading } = useGetSalesWeeklyQuery();
   const { data: monthlyData, isLoading: monthlyLoading } = useGetSalesMonthlyQuery();
   const { data: channelData, isLoading: channelLoading } = useGetChannelBreakdownQuery();
-  
-  // Fetch pending approvals from purchase module
   const { data: purchasePendingData } = useGetPurchasePendingApprovalsQuery({ per_page: 1 });
   const { data: purchaseStatsData } = useGetPurchaseOrderStatisticsQuery({});
 
@@ -54,26 +70,24 @@ export default function DashboardPage() {
     { branch_id: selectedBranchId ?? undefined } as any,
   );
 
-  useEffect(() => {
-    refetch();
-  }, [selectedBranchId, refetch]);
-
   const { data: activityLogsData, isLoading: logsLoading } = useGetActivityLogsQuery(
     { page: currentPage, per_page: 10, branch_id: selectedBranchId ?? undefined } as any,
   );
+
+  useEffect(() => { refetch(); }, [selectedBranchId, refetch]);
 
   const activityLogs = (activityLogsData as any)?.data?.data || [];
   const paginationMeta = (activityLogsData as any)?.data;
   const totalPages = paginationMeta?.last_page || 1;
 
-  // Process sales data for chart
   const processedSalesData = useMemo(() => {
     if (selectedTimeframe === 'weekly' && weeklyData?.data?.daily_breakdown) {
       return weeklyData.data.daily_breakdown.map((item: any) => ({
         name: format(new Date(item.date), 'EEE'),
         revenue: parseFloat(item.revenue) || 0,
       }));
-    } else if (selectedTimeframe === 'monthly' && monthlyData?.data?.daily_sales) {
+    }
+    if (selectedTimeframe === 'monthly' && monthlyData?.data?.daily_sales) {
       return monthlyData.data.daily_sales.map((item: any) => ({
         name: `Day ${item.day}`,
         revenue: parseFloat(item.revenue) || 0,
@@ -82,71 +96,51 @@ export default function DashboardPage() {
     return [];
   }, [weeklyData, monthlyData, selectedTimeframe]);
 
-  // Process channel breakdown data for pie chart
   const channelPieData = useMemo(() => {
     if (!channelData?.data?.channel_breakdown) return [];
     return channelData.data.channel_breakdown.map((channel: any) => ({
       name: channel.channel,
       value: parseFloat(channel.total_revenue) || 0,
       orders: channel.total_orders || 0,
-      percentage: ((parseFloat(channel.total_revenue) / (channelData.data.summary?.total_revenue || 1)) * 100).toFixed(1)
+      percentage: (
+        (parseFloat(channel.total_revenue) / (channelData.data.summary?.total_revenue || 1)) * 100
+      ).toFixed(1),
     }));
   }, [channelData]);
 
   const totalRevenue = useMemo(() => {
-    if (selectedTimeframe === 'weekly' && weeklyData?.data?.summary?.total_revenue) {
-      return parseFloat(weeklyData.data.summary.total_revenue) || 0;
-    } else if (selectedTimeframe === 'monthly' && monthlyData?.data?.summary?.total_revenue) {
-      return parseFloat(monthlyData.data.summary.total_revenue) || 0;
-    }
-    return 0;
+    if (selectedTimeframe === 'weekly') return parseFloat(weeklyData?.data?.summary?.total_revenue) || 0;
+    return parseFloat(monthlyData?.data?.summary?.total_revenue) || 0;
   }, [weeklyData, monthlyData, selectedTimeframe]);
 
   const revenueChange = useMemo(() => {
-    if (selectedTimeframe === 'weekly' && weeklyData?.data?.comparison?.revenue_change_percentage) {
-      return parseFloat(weeklyData.data.comparison.revenue_change_percentage) || 0;
-    } else if (selectedTimeframe === 'monthly' && monthlyData?.data?.comparison?.revenue_change_percentage) {
-      return parseFloat(monthlyData.data.comparison.revenue_change_percentage) || 0;
-    }
-    return 0;
+    if (selectedTimeframe === 'weekly') return parseFloat(weeklyData?.data?.comparison?.revenue_change_percentage) || 0;
+    return parseFloat(monthlyData?.data?.comparison?.revenue_change_percentage) || 0;
   }, [weeklyData, monthlyData, selectedTimeframe]);
 
   const isLoading = selectedTimeframe === 'weekly' ? weeklyLoading : monthlyLoading;
 
-  // Get pending orders count from orders data
-  const pendingOrdersCount = useMemo(() => {
-    return (weeklyData?.data?.summary?.pending_orders || monthlyData?.data?.summary?.pending_orders || 0);
-  }, [weeklyData, monthlyData]);
+  const pendingOrdersCount = useMemo(() => (
+    weeklyData?.data?.summary?.pending_orders || monthlyData?.data?.summary?.pending_orders || 0
+  ), [weeklyData, monthlyData]);
 
-  // Get pending approvals count from purchase module
-  const pendingApprovalsCount = useMemo(() => {
-    const purchasePending = (purchasePendingData as any)?.data?.data?.length || 0;
-    return purchasePending;
-  }, [purchasePendingData]);
+  const pendingApprovalsCount = useMemo(() => (
+    (purchasePendingData as any)?.data?.data?.length || 0
+  ), [purchasePendingData]);
+
+  const statistics = useMemo(() => ({
+    lowStockCount: (lowStockResponse?.data || []).length,
+  }), [lowStockResponse]);
 
   const mapLogToRow = (log: any) => {
-    let statusText = 'Completed';
-    let statusColor = 'bg-green-100 text-green-800';
-    if (log.action === 'created') {
-      statusText = 'Completed';
-      statusColor = 'bg-green-100 text-green-800';
-    } else if (log.action === 'updated') {
-      statusText = 'In Progress';
-      statusColor = 'bg-blue-100 text-blue-800';
-    } else if (log.action === 'deleted') {
-      statusText = 'Warning';
-      statusColor = 'bg-red-100 text-red-800';
-    } else if (log.action === 'login') {
-      statusText = 'Completed';
-      statusColor = 'bg-green-100 text-green-800';
-    } else if (log.action === 'logout') {
-      statusText = 'Completed';
-      statusColor = 'bg-gray-100 text-gray-800';
-    } else {
-      statusText = 'Pending';
-      statusColor = 'bg-yellow-100 text-yellow-800';
-    }
-
+    const statusMap: Record<string, { text: string; color: string }> = {
+      created: { text: 'Completed', color: 'bg-green-100 text-green-800' },
+      updated: { text: 'In Progress', color: 'bg-blue-100 text-blue-800' },
+      deleted: { text: 'Warning', color: 'bg-red-100 text-red-800' },
+      login: { text: 'Completed', color: 'bg-green-100 text-green-800' },
+      logout: { text: 'Completed', color: 'bg-gray-100 text-gray-800' },
+    };
+    const status = statusMap[log.action] || { text: 'Pending', color: 'bg-yellow-100 text-yellow-800' };
     const name = log.user_name || 'System';
     const initials = name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase();
 
@@ -157,365 +151,327 @@ export default function DashboardPage() {
       date: format(new Date(log.created_at), 'MMM dd, yyyy'),
       time: format(new Date(log.created_at), 'hh:mm a'),
       user: { name, initials },
-      status: { text: statusText, color: statusColor }
+      status,
     };
   };
 
-  const statistics = useMemo(() => {
-    const lowStockData = lowStockResponse?.data || [];
-    return { lowStockCount: lowStockData.length };
-  }, [lowStockResponse]);
-
-  // Custom pie chart label
   const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
+    if (percent < 0.05) return null;
     const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
     const x = cx + radius * Math.cos(-midAngle * Math.PI / 180);
     const y = cy + radius * Math.sin(-midAngle * Math.PI / 180);
-
     return (
-      <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" className="text-xs font-medium">
+      <text x={x} y={y} fill="white" textAnchor="middle" dominantBaseline="central" fontSize={11} fontWeight={500}>
         {`${(percent * 100).toFixed(0)}%`}
       </text>
     );
   };
 
+  const statCards = [
+    {
+      label: 'Total Revenue',
+      value: isLoading ? '...' : `KWD ${totalRevenue.toFixed(3)}`,
+      icon: icon_3,
+      badge: icon_6,
+      sub: `${revenueChange >= 0 ? '+' : ''}${revenueChange}% vs last period`,
+      subColor: 'text-green-600',
+    },
+    {
+      label: 'Pending Orders',
+      value: String(pendingOrdersCount),
+      icon: icon_4,
+      badge: icon_7,
+      sub: pendingOrdersCount > 0 ? `${pendingOrdersCount} orders pending` : 'No pending orders',
+      subColor: 'text-red-600',
+    },
+    {
+      label: 'Low Stock Alerts',
+      value: lowStockLoading ? '...' : String(statistics.lowStockCount),
+      icon: icon_1,
+      badge: icon_8,
+      sub: lowStockLoading ? 'Loading...' : statistics.lowStockCount > 0 ? `${statistics.lowStockCount} Items Need Restock` : 'All Stock Levels Good',
+      subColor: 'text-red-600',
+    },
+    {
+      label: 'Pending Approvals',
+      value: String(pendingApprovalsCount),
+      icon: icon_2,
+      badge: icon_5,
+      sub: pendingApprovalsCount > 0 ? `${pendingApprovalsCount} requests awaiting approval` : 'No pending approvals',
+      subColor: 'text-gray-600',
+    },
+  ];
+
+  const pageNumbers = useMemo(() => {
+    const start = Math.max(1, currentPage - 2);
+    const end = Math.min(totalPages, start + 4);
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }, [currentPage, totalPages]);
+
   return (
     <DashboardLayout>
-      <div className="space-y-6 overflow-x-hidden">
-        {/* Stats Grid - Responsive */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-          {/* Card 1 - Total Revenue */}
-          <div className="bg-white rounded-lg p-4 md:p-6">
-            <div className="flex justify-between">
-              <div>
-                <p className="text-sm md:text-lg font-medium text-gray-600">Total Revenue</p>
-                <p className="text-xl md:text-[24px] font-semibold text-gray-900 mt-4 md:mt-10">
-                  KWD {isLoading ? '...' : totalRevenue.toFixed(3)}
-                </p>
-              </div>
-              <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-[#F7F9FB] flex items-center justify-center">
-                <img src={icon_3} alt="" className="w-5 h-5 md:w-6 md:h-6" />
-              </div>
-            </div>
-            <div className='flex flex-row items-center mt-2'>
-              <img src={icon_6} alt="" className='w-5 h-5 md:w-6 md:h-6 mr-1 md:mr-2' />
-              <p className="text-sm md:text-md font-semibold text-green-600">
-                {revenueChange >= 0 ? '+' : ''}{revenueChange}% vs last period
-              </p>
-            </div>
-          </div>
+      <div className="space-y-4 md:space-y-6 overflow-x-hidden min-w-0">
 
-          {/* Card 2 - Pending Orders */}
-          <div className="bg-white rounded-lg p-4 md:p-6">
-            <div className="flex justify-between">
-              <div>
-                <p className="text-sm md:text-lg font-medium text-gray-600">Pending Orders</p>
-                <p className="text-xl md:text-[24px] font-semibold text-gray-900 mt-4 md:mt-10">
-                  {pendingOrdersCount}
-                </p>
+        {/* Stat Cards */}
+        <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 xl:gap-6">
+          {statCards.map((card) => (
+            <div key={card.label} className="bg-white rounded-lg p-4 md:p-5 xl:p-6 min-w-0">
+              <div className="flex justify-between items-start">
+                <div className="min-w-0 flex-1 pr-2">
+                  <p className="text-sm md:text-base font-medium text-gray-600 truncate">{card.label}</p>
+                  <p className="text-lg md:text-xl xl:text-2xl font-semibold text-gray-900 mt-6 md:mt-8 break-words">
+                    {card.value}
+                  </p>
+                </div>
+                <div className="w-10 h-10 rounded-lg bg-[#F7F9FB] flex items-center justify-center shrink-0">
+                  <img src={card.icon} alt="" className="w-5 h-5" />
+                </div>
               </div>
-              <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-[#F7F9FB] flex items-center justify-center">
-                <img src={icon_4} alt="" className="w-5 h-5 md:w-6 md:h-6" />
-              </div>
-            </div>
-            <div className='flex flex-row items-center mt-2'>
-              <img src={icon_7} alt="" className='w-5 h-5 md:w-6 md:h-6 mr-1 md:mr-2' />
-              <p className="text-sm md:text-md font-semibold text-red-600">
-                {pendingOrdersCount > 0 ? `${pendingOrdersCount} orders pending` : 'No pending orders'}
-              </p>
-            </div>
-          </div>
-
-          {/* Card 3 - Low Stock Alerts */}
-          <div className="bg-white rounded-lg p-4 md:p-6">
-            <div className="flex justify-between">
-              <div>
-                <p className="text-sm md:text-lg font-medium text-gray-600">Low Stock Alerts</p>
-                <p className="text-xl md:text-[24px] font-semibold text-gray-900 mt-4 md:mt-10">
-                  {lowStockLoading ? <span className="animate-pulse">...</span> : statistics.lowStockCount}
-                </p>
-              </div>
-              <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-[#F7F9FB] flex items-center justify-center">
-                <img src={icon_1} alt="" className="w-5 h-5 md:w-6 md:h-6" />
+              <div className="flex items-center mt-2 gap-1">
+                <img src={card.badge} alt="" className="w-4 h-4 md:w-5 md:h-5 shrink-0" />
+                <p className={`text-xs md:text-sm font-semibold truncate ${card.subColor}`}>{card.sub}</p>
               </div>
             </div>
-            <div className='flex flex-row items-center mt-2'>
-              <img src={icon_8} alt="" className='w-5 h-5 md:w-6 md:h-6 mr-1 md:mr-2' />
-              <p className="text-sm md:text-md font-semibold text-red-600">
-                {lowStockLoading ? 'Loading...' : statistics.lowStockCount > 0
-                  ? `${statistics.lowStockCount} Items Need Restock`
-                  : 'All Stock Levels Good'}
-              </p>
-            </div>
-          </div>
-
-          {/* Card 4 - Pending Approvals */}
-          <div className="bg-white rounded-lg p-4 md:p-6">
-            <div className="flex justify-between">
-              <div>
-                <p className="text-sm md:text-lg font-medium text-gray-600">Pending Approvals</p>
-                <p className="text-xl md:text-[24px] font-semibold text-gray-900 mt-4 md:mt-10">
-                  {pendingApprovalsCount}
-                </p>
-              </div>
-              <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-[#F7F9FB] flex items-center justify-center">
-                <img src={icon_2} alt="" className="w-5 h-5 md:w-6 md:h-6" />
-              </div>
-            </div>
-            <div className='flex flex-row items-center mt-2'>
-              <img src={icon_5} alt="" className='w-5 h-5 md:w-6 md:h-6 mr-1 md:mr-2' />
-              <p className="text-sm md:text-md font-semibold text-gray-600">
-                {pendingApprovalsCount > 0 ? `${pendingApprovalsCount} requests awaiting approval` : 'No pending approvals'}
-              </p>
-            </div>
-          </div>
+          ))}
         </div>
 
-        {/* Revenue Analysis Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 bg-white rounded-md p-4 md:p-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
-              <div>
-                <h2 className="text-base md:text-lg font-semibold text-gray-900">Revenue Analysis</h2>
-                <p className="text-xs md:text-sm text-gray-600 mt-1">Sales performance across all channels</p>
+        {/* Revenue + Channel */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-6">
+
+          {/* Revenue Bar Chart */}
+          <div className="xl:col-span-2 bg-white rounded-lg p-4 md:p-5 xl:p-6 min-w-0">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
+              <div className="min-w-0">
+                <h2 className="text-sm md:text-base xl:text-lg font-semibold text-gray-900">Revenue Analysis</h2>
+                <p className="text-xs md:text-sm text-gray-500 mt-0.5">Sales performance across all channels</p>
               </div>
-              <div className="flex space-x-2 mt-3 sm:mt-0">
-                {(['weekly', 'monthly'] as const).map((timeframe) => (
+              <div className="flex gap-2 shrink-0">
+                {(['weekly', 'monthly'] as const).map((tf) => (
                   <button
-                    key={timeframe}
-                    onClick={() => setSelectedTimeframe(timeframe)}
-                    className={`px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium rounded-lg transition-colors ${
-                      selectedTimeframe === timeframe
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    key={tf}
+                    onClick={() => setSelectedTimeframe(tf)}
+                    className={`px-3 py-1.5 text-xs md:text-sm font-medium rounded-lg transition-colors ${
+                      selectedTimeframe === tf ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
-                    {timeframe === 'weekly' ? 'Weekly' : 'Monthly'}
+                    {tf === 'weekly' ? 'Weekly' : 'Monthly'}
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="mb-6">
-              <p className="text-2xl md:text-3xl font-bold items-center text-gray-900">
+            <div className="mb-4">
+              <p className="text-xl md:text-2xl xl:text-3xl font-bold text-gray-900 flex items-center flex-wrap gap-2">
                 KWD {isLoading ? '...' : totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 3 })}
-                <span className="bg-gray-100 rounded-full p-1.5 md:p-2 text-xs md:text-sm font-medium text-green-600 ml-2">
+                <span className="bg-gray-100 rounded-full px-2 py-1 text-xs md:text-sm font-medium text-green-600">
                   {revenueChange >= 0 ? '+' : ''}{revenueChange}%
                 </span>
               </p>
             </div>
 
-            <div className="h-64 w-full">
+            <div className="h-56 md:h-64 xl:h-72 w-full">
               {isLoading ? (
-                <div className="flex items-center justify-center h-full">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                </div>
-              ) : processedSalesData.length > 0 ? (
+                <Spinner />
+              ) : (
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={processedSalesData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <BarChart
+                    data={processedSalesData.length > 0 ? processedSalesData : EMPTY_BAR_DATA}
+                    margin={{ top: 10, right: 5, left: 0, bottom: 20 }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" vertical={false} />
-                    <XAxis 
-                      dataKey="name" 
-                      axisLine={false} 
-                      tickLine={false} 
+                    <XAxis
+                      dataKey="name"
+                      axisLine={false}
+                      tickLine={false}
                       tick={{ fill: '#6B7280', fontSize: 11 }}
                       interval={0}
                       angle={-20}
                       textAnchor="end"
-                      height={50}
+                      height={40}
                     />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Bar dataKey="revenue" fill="#00C0E8" radius={[20, 20, 20, 20]} barSize={30} />
+                    <YAxis
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fill: '#6B7280', fontSize: 10 }}
+                      width={55}
+                      tickFormatter={(v) => v.toFixed(0)}
+                      domain={processedSalesData.length === 0 ? [0, 10] : undefined}
+                    />
+                    <Tooltip content={processedSalesData.length > 0 ? <CustomTooltip /> : <></>} />
+                    <Bar
+                      dataKey="revenue"
+                      fill={processedSalesData.length > 0 ? '#00C0E8' : '#E5E7EB'}
+                      radius={[8, 8, 8, 8]}
+                      maxBarSize={40}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
-              ) : (
-                <div className="flex items-center justify-center h-full text-gray-500">
-                  No revenue data available
-                </div>
               )}
             </div>
           </div>
 
-          <div className="bg-white rounded-lg p-4 md:p-6">
-            <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-6">Channels Contribution</h3>
-            
+          {/* Pie Chart */}
+          <div className="bg-white rounded-lg p-4 md:p-5 xl:p-6 min-w-0">
+            <h3 className="text-sm md:text-base xl:text-lg font-semibold text-gray-900 mb-4">Channels Contribution</h3>
+
             {channelLoading ? (
-              <div className="flex items-center justify-center h-64">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              </div>
-            ) : channelPieData.length > 0 ? (
+              <div className="h-64"><Spinner /></div>
+            ) : (
               <>
-                <div className="h-64 w-full">
+                <div className="h-52 md:h-60 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
-                        data={channelPieData}
+                        data={channelPieData.length > 0 ? channelPieData : EMPTY_PIE_DATA}
                         cx="50%"
                         cy="50%"
-                        innerRadius={60}
-                        outerRadius={80}
-                        fill="#8884d8"
-                        paddingAngle={5}
+                        innerRadius="40%"
+                        outerRadius="65%"
+                        paddingAngle={channelPieData.length > 0 ? 4 : 0}
                         dataKey="value"
-                        label={renderCustomizedLabel}
+                        label={channelPieData.length > 0 ? renderCustomizedLabel : false}
                         labelLine={false}
+                        stroke="none"
                       >
-                        {channelPieData.map((_entry: any, index: number) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
+                        {channelPieData.length > 0
+                          ? channelPieData.map((_: any, index: number) => (
+                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            ))
+                          : <Cell fill="#E5E7EB" />
+                        }
                       </Pie>
-                      <Tooltip formatter={(value: any) => `KWD ${parseFloat(value).toFixed(3)}`} />
-                      <Legend />
+                      {channelPieData.length > 0 && (
+                        <Tooltip formatter={(value: any) => `KWD ${parseFloat(value).toFixed(3)}`} />
+                      )}
+                      {channelPieData.length > 0 && (
+                        <Legend iconSize={10} wrapperStyle={{ fontSize: '12px' }} />
+                      )}
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
-                <div className="mt-4 space-y-2">
-                  {channelPieData.map((channel: any, idx: number) => (
-                    <div key={idx} className="flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[idx % COLORS.length] }} />
-                        <span className="text-gray-600">{channel.name}</span>
+                {channelPieData.length > 0 ? (
+                  <div className="mt-3 space-y-2 overflow-y-auto max-h-40">
+                    {channelPieData.map((channel: any, idx: number) => (
+                      <div key={idx} className="flex items-center justify-between text-xs md:text-sm gap-2">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: COLORS[idx % COLORS.length] }} />
+                          <span className="text-gray-600 truncate">{channel.name}</span>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <div className="font-medium text-gray-900">KWD {channel.value.toFixed(3)}</div>
+                          <div className="text-xs text-gray-400">{channel.orders} orders ({channel.percentage}%)</div>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <div className="font-medium text-gray-900">KWD {channel.value.toFixed(3)}</div>
-                        <div className="text-xs text-gray-500">{channel.orders} orders ({channel.percentage}%)</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-center text-xs text-gray-400 mt-3">No channel data available</p>
+                )}
               </>
-            ) : (
-              <div className="flex items-center justify-center h-64 text-gray-500">
-                No channel data available
-              </div>
             )}
           </div>
         </div>
 
-        {/* Recent Activity - With Horizontal Scroll for Mobile */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <div className="lg:col-span-3 rounded-lg overflow-hidden">
-            <div className="p-4 md:p-6 bg-white rounded-t-xl">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between">
-                <h2 className="text-base md:text-lg font-semibold text-gray-900">Recent Activities</h2>
-                <Link to='/admin/security' className="text-blue-600 hover:text-blue-800 hover:underline font-medium text-xs md:text-sm mt-2 sm:mt-0">
-                  View All
-                </Link>
-              </div>
+        {/* Activity Table + Low Stock */}
+        <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+
+          {/* Activity Table */}
+          <div className="xl:col-span-3 rounded-lg overflow-hidden bg-white min-w-0">
+            <div className="p-4 md:p-5 xl:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <h2 className="text-sm md:text-base xl:text-lg font-semibold text-gray-900">Recent Activities</h2>
+              <Link to="/admin/security" className="text-blue-600 hover:text-blue-800 hover:underline font-medium text-xs md:text-sm">
+                View All
+              </Link>
             </div>
 
-            {/* Table with horizontal scroll on small screens */}
             <div className="overflow-x-auto w-full">
-              <div className="min-w-[800px] md:min-w-full">
-                <table className="w-full divide-y divide-gray-200">
-                  <thead className="bg-transparent">
+              <table className="w-full divide-y divide-gray-200" style={{ minWidth: '680px' }}>
+                <thead className="bg-gray-50">
+                  <tr>
+                    {['Activity ID', 'Module', 'Description', 'Date', 'User', 'Status'].map((h) => (
+                      <th key={h} className="px-4 md:px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-100">
+                  {logsLoading ? (
                     <tr>
-                      <th className="px-4 md:px-6 py-3 md:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Activity ID</th>
-                      <th className="px-4 md:px-6 py-3 md:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Module</th>
-                      <th className="px-4 md:px-6 py-3 md:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                      <th className="px-4 md:px-6 py-3 md:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                      <th className="px-4 md:px-6 py-3 md:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                      <th className="px-4 md:px-6 py-3 md:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                      <td colSpan={6} className="py-12 text-center">
+                        <div className="flex justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" /></div>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {logsLoading ? (
-                      <tr>
-                        <td colSpan={6} className="px-4 md:px-6 py-8 text-center">
-                          <div className="flex justify-center">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                          </div>
-                        </td>
-                      </tr>
-                    ) : activityLogs.length === 0 ? (
-                      <tr>
-                        <td colSpan={6} className="px-4 md:px-6 py-8 text-center text-gray-500">No recent activities found</td>
-                      </tr>
-                    ) : (
-                      activityLogs.map((log: any) => {
-                        const row = mapLogToRow(log);
-                        return (
-                          <tr key={log.id} className="hover:bg-gray-50">
-                            <td className="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap">
-                              <div className="text-sm font-medium text-gray-900">{row.id}</div>
-                            </td>
-                            <td className="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">{row.module}</div>
-                            </td>
-                            <td className="px-4 md:px-6 py-3 md:py-4">
-                              <div className="text-sm text-gray-900 max-w-xs">
-                                <div className="line-clamp-1">{row.description}</div>
-                                <div className="text-xs text-gray-500 mt-1">Activity details</div>
+                  ) : activityLogs.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="py-12 text-center text-gray-500 text-sm">No recent activities found</td>
+                    </tr>
+                  ) : (
+                    activityLogs.map((log: any) => {
+                      const row = mapLogToRow(log);
+                      return (
+                        <tr key={log.id} className="hover:bg-gray-50 transition-colors">
+                          <td className="px-4 md:px-5 py-3 md:py-4 whitespace-nowrap text-sm font-medium text-gray-900">{row.id}</td>
+                          <td className="px-4 md:px-5 py-3 md:py-4 whitespace-nowrap text-sm text-gray-700">{row.module}</td>
+                          <td className="px-4 md:px-5 py-3 md:py-4 max-w-[200px]">
+                            <div className="text-sm text-gray-900 line-clamp-1">{row.description}</div>
+                            <div className="text-xs text-gray-400 mt-0.5">Activity details</div>
+                          </td>
+                          <td className="px-4 md:px-5 py-3 md:py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-600">{row.date}</div>
+                            <div className="text-xs text-gray-400">{row.time}</div>
+                          </td>
+                          <td className="px-4 md:px-5 py-3 md:py-4 whitespace-nowrap">
+                            <div className="flex items-center gap-2">
+                              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-blue-600 text-xs font-semibold shrink-0">
+                                {row.user.initials}
                               </div>
-                            </td>
-                            <td className="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-500">{row.date}</div>
-                              <div className="text-xs text-gray-400">{row.time}</div>
-                            </td>
-                            <td className="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap">
-                              <div className="flex items-center">
-                                <div className="shrink-0 w-8 h-8 md:w-10 md:h-10 rounded-full bg-linear-to-br from-blue-100 to-blue-200 flex items-center justify-center text-blue-600 text-xs md:text-sm font-semibold">
-                                  {row.user.initials}
-                                </div>
-                                <div className="ml-2 md:ml-3">
-                                  <div className="text-sm font-medium text-gray-900">{row.user.name}</div>
-                                  <div className="text-xs text-gray-500">Staff ID: {log.user?.employee_id || 'N/A'}</div>
-                                </div>
+                              <div className="min-w-0">
+                                <div className="text-sm font-medium text-gray-900 truncate">{row.user.name}</div>
+                                <div className="text-xs text-gray-400">ID: {log.user?.employee_id || 'N/A'}</div>
                               </div>
-                            </td>
-                            <td className="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap">
-                              <span className={`inline-flex items-center px-2 md:px-3 py-1 md:py-1.5 rounded-full text-xs font-medium ${row.status.color}`}>
-                                <span className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full mr-1 md:mr-2 bg-current opacity-70"></span>
-                                {row.status.text}
-                              </span>
-                            </td>
-                          </tr>
-                        );
-                      })
-                    )}
-                  </tbody>
-                </table>
-              </div>
+                            </div>
+                          </td>
+                          <td className="px-4 md:px-5 py-3 md:py-4 whitespace-nowrap">
+                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${row.status.color}`}>
+                              <span className="w-1.5 h-1.5 rounded-full bg-current opacity-70" />
+                              {row.status.text}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
             </div>
 
-            {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 px-3 pb-4 border-t border-gray-200">
-                <div className="text-sm text-gray-500 order-2 sm:order-1">Page {currentPage} of {totalPages}</div>
-                <div className="flex flex-wrap justify-center gap-1 sm:gap-2 order-1 sm:order-2">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 md:px-5 py-3 border-t border-gray-100">
+                <span className="text-xs md:text-sm text-gray-500">Page {currentPage} of {totalPages}</span>
+                <div className="flex items-center gap-1">
                   <button
                     onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                     disabled={currentPage === 1}
-                    className="px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-2.5 py-1.5 text-xs md:text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                   >
-                    Previous
+                    Prev
                   </button>
-                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                    let pageNum;
-                    if (totalPages <= 5) {
-                      pageNum = i + 1;
-                    } else {
-                      const start = Math.max(1, currentPage - 2);
-                      const end = Math.min(totalPages, start + 4);
-                      pageNum = start + i;
-                      if (pageNum > end) return null;
-                    }
-                    return (
-                      <button
-                        key={pageNum}
-                        onClick={() => setCurrentPage(pageNum)}
-                        className={`px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm font-medium rounded-lg transition-colors ${
-                          currentPage === pageNum ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'
-                        }`}
-                      >
-                        {pageNum}
-                      </button>
-                    );
-                  })}
+                  {pageNumbers.map((num) => (
+                    <button
+                      key={num}
+                      onClick={() => setCurrentPage(num)}
+                      className={`w-8 h-8 text-xs md:text-sm font-medium rounded-lg transition-colors ${
+                        currentPage === num ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'
+                      }`}
+                    >
+                      {num}
+                    </button>
+                  ))}
                   <button
                     onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                     disabled={currentPage === totalPages}
-                    className="px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-2.5 py-1.5 text-xs md:text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                   >
                     Next
                   </button>
@@ -524,57 +480,55 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* Low Stock Alerts */}
-          <div className="bg-white rounded-xl p-4 md:p-6">
-            <div className='flex flex-row items-center mb-2'>
-              <img src={icon_1} alt="" className="w-5 h-5 md:w-6 md:h-6" />
-              <h2 className="text-base md:text-lg font-semibold text-gray-900 ml-2">Low Stock Alerts</h2>
+          {/* Low Stock */}
+          <div className="bg-white rounded-xl p-4 md:p-5 xl:p-6 min-w-0">
+            <div className="flex items-center gap-2 mb-4">
+              <img src={icon_1} alt="" className="w-5 h-5 shrink-0" />
+              <h2 className="text-sm md:text-base xl:text-lg font-semibold text-gray-900">Low Stock Alerts</h2>
             </div>
 
             {lowStockLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              </div>
+              <div className="h-40"><Spinner /></div>
             ) : (lowStockResponse?.data || []).length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <svg className="w-12 h-12 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <div className="flex flex-col items-center justify-center py-10 text-gray-400 text-center gap-2">
+                <svg className="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <p className="font-medium">All Stock Levels Good</p>
-                <p className="text-xs md:text-sm mt-1">No items need restocking</p>
+                <p className="text-sm font-medium text-gray-600">All Stock Levels Good</p>
+                <p className="text-xs text-gray-400">No items need restocking</p>
               </div>
             ) : (
-              <div className="space-y-3 md:space-y-4 max-h-[400px] overflow-y-auto">
+              <div className="space-y-3 max-h-[380px] overflow-y-auto pr-1">
                 {(lowStockResponse?.data || []).slice(0, 5).map((item: any, index: number) => (
-                  <div key={index} className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
-                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-2">
-                      <div className="flex-1">
-                        <h3 className="text-sm font-medium text-gray-900 break-words">{item.product_name}</h3>
-                        <p className="text-xs text-gray-500 mt-1">SKU: {item.sku}</p>
-                        <p className="text-xs text-gray-500">Branch: {item.branch_name}</p>
+                  <div key={index} className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <div className="min-w-0 flex-1">
+                        <h3 className="text-sm font-medium text-gray-900 truncate">{item.product_name}</h3>
+                        <p className="text-xs text-gray-400 mt-0.5">SKU: {item.sku}</p>
+                        <p className="text-xs text-gray-400">Branch: {item.branch_name}</p>
                       </div>
                       <div className="text-right shrink-0">
-                        <div className={`text-base md:text-lg font-bold p-1 rounded-xl ${
+                        <div className={`text-sm font-bold px-2 py-1 rounded-lg ${
                           item.current_stock === 0 ? 'bg-red-100 text-red-600' : 'bg-yellow-100 text-yellow-600'
                         }`}>
                           {item.current_stock} Left
                         </div>
-                        <button className="mt-1 text-blue-600 text-xs md:text-sm font-medium rounded transition-colors hover:underline">
+                        <button className="mt-1 text-blue-600 text-xs font-medium hover:underline">
                           Restock
                         </button>
                       </div>
                     </div>
-                    <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-gray-500 mt-2">
+                    <div className="flex items-center justify-between text-xs text-gray-400">
                       <span>Reorder: {item.reorder_point}</span>
-                      <span className="text-red-600 font-medium">Need: {item.quantity_needed}</span>
+                      <span className="text-red-500 font-medium">Need: {item.quantity_needed}</span>
                     </div>
                   </div>
                 ))}
               </div>
             )}
 
-            <div className="mt-4">
-              <button className="w-full py-2 text-blue-600 hover:text-blue-800 hover:underline font-medium text-xs md:text-sm">
+            <div className="mt-4 pt-3 border-t border-gray-100">
+              <button className="w-full py-2 text-blue-600 hover:text-blue-800 hover:underline font-medium text-xs md:text-sm transition-colors">
                 View All Alerts ({lowStockLoading ? '...' : statistics.lowStockCount}) →
               </button>
             </div>

@@ -160,9 +160,9 @@ export default function CashRegistersPage() {
   return (
     <DashboardLayout>
       <div className="min-h-screen">
-        <div className="p-6">
+        <div className="">
           {/* Header with Dropdowns */}
-          <div className="bg-white px-8 py-4 rounded-lg grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
+          <div className="bg-white px-4 py-4 rounded-lg grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
             {/* Date Selector */}
             <div className="relative">
               <div className="relative">
@@ -313,7 +313,8 @@ export default function CashRegistersPage() {
             <div className="px-6 py-4 border-b">
               <h2 className="text-xl font-bold">Cash Registers</h2>
             </div>
-            <div className="overflow-x-auto">
+               <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+ <div className="xl:col-span-4 overflow-x-auto">
               <table className="min-w-full">
                 <thead className="bg-gray-50">
                   <tr>
@@ -368,8 +369,10 @@ export default function CashRegistersPage() {
                     ))
                   )}
                 </tbody>
-              </table>
+              </table>  
             </div>
+               </div>
+           
 
             {/* Pagination */}
             {pagination && pagination.last_page > 1 && (
@@ -411,7 +414,7 @@ export default function CashRegistersPage() {
               <button onClick={() => setShowRegisterDetails(false)} className="text-gray-500 hover:text-gray-700 text-2xl">×</button>
             </div>
             
-            <div className="p-6">
+            <div>
               {/* Summary Cards */}
               <div className="grid grid-cols-3 gap-4 mb-6">
                 <div className="bg-blue-50 p-4 rounded-lg">

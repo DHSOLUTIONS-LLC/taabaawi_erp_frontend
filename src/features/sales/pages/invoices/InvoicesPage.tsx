@@ -64,83 +64,90 @@ export default function InvoicesPage() {
     <DashboardLayout>
       <div className="space-y-6">
 
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Invoices</h1>
-            <p className="text-sm text-gray-500 mt-1">Manage B2C, B2B invoices and quotations</p>
-          </div>
-          <button
-            onClick={() => navigate(`${basePath}/sales/create_invoice`)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer font-medium"
-          >
-            <img src={add_icon} alt="" className="w-4 h-4 " />
-            Create Invoice
-          </button>
-        </div>
-
-        {/* Stats Row */}
-        <div className="grid grid-cols-4 gap-4">
-          {stats.map((stat) => (
-            <div key={stat.label} className="bg-white rounded-xl p-5 shadow-sm">
-              <p className="text-sm text-gray-500">{stat.label}</p>
-              <p className={`text-2xl font-bold mt-1 ${stat.color}`}>{stat.value}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Filters */}
-        <div className="bg-white rounded-xl p-4 flex flex-wrap gap-3 items-center">
-          {/* Search */}
-          <div className="relative flex-1 min-w-[220px]">
-            <img src={search_icon} alt="" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-              placeholder="Search invoice no, customer..."
-              className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-            />
-          </div>
-
-          {/* Type Filter */}
-         <select
-    value={typeFilter || ''}
-    onChange={(e) => { 
-      setTypeFilter(e.target.value as InvoiceType || undefined); 
-      setPage(1); 
-    }}
-    className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white cursor-pointer"
+      {/* Header */}
+<div className="flex flex-col sm:flex-row lg:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+  <div>
+    <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Invoices</h1>
+    <p className="text-xs sm:text-sm text-gray-500 mt-0.5 sm:mt-1">Manage B2C, B2B invoices and quotations</p>
+  </div>
+  <button
+    onClick={() => navigate(`${basePath}/sales/create_invoice`)}
+    className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer font-medium text-sm sm:text-base"
   >
-          </select>
-
-          {/* Status Filter */}
-          <select
-            value={statusFilter}
-            onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-            className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white cursor-pointer"
-          >
-            <option value="">All Statuses</option>
-            <option value="Paid">Paid</option>
-            <option value="Unpaid">Unpaid</option>
-            <option value="Partially Paid">Partially Paid</option>
-          </select>
-
-          {/* Clear */}
-          {(search || typeFilter || statusFilter) && (
-           <button
-    onClick={() => { 
-      setSearch(''); 
-      setTypeFilter(undefined); 
-      setStatusFilter(''); 
-      setPage(1); 
-    }}
-    className="px-4 py-2.5 text-sm text-gray-500 hover:text-red-500 border border-gray-300 rounded-lg transition-colors cursor-pointer"
-  >
-    Clear
+    <img src={add_icon} alt="" className="w-4 h-4" />
+    Create Invoice
   </button>
-          )}
-        </div>
+</div>
+
+{/* Stats Row - Responsive Grid */}
+<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+  {stats.map((stat) => (
+    <div key={stat.label} className="bg-white rounded-xl p-4 sm:p-5 shadow-sm">
+      <p className="text-xs sm:text-sm text-gray-500">{stat.label}</p>
+      <p className={`text-xl sm:text-2xl font-bold mt-1 ${stat.color}`}>{stat.value}</p>
+    </div>
+  ))}
+</div>
+
+{/* Filters - Responsive */}
+<div className="bg-white rounded-xl p-3 sm:p-4">
+  <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+    {/* Search */}
+    <div className="relative flex-1 min-w-[0] sm:min-w-[220px]">
+      <img src={search_icon} alt="" className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4" />
+      <input
+        type="text"
+        value={search}
+        onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+        placeholder="Search invoice no, customer..."
+        className="w-full pl-8 sm:pl-9 pr-3 sm:pr-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+      />
+    </div>
+
+    {/* Type Filter */}
+    <select
+      value={typeFilter || ''}
+      onChange={(e) => { 
+        setTypeFilter(e.target.value as InvoiceType || undefined); 
+        setPage(1); 
+      }}
+      className="w-full sm:w-auto px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white cursor-pointer"
+    >
+      <option value="">All Types</option>
+      {/* Add your type options here */}
+      <option value="B2C">B2C</option>
+      <option value="B2B">B2B</option>
+      <option value="Quotation">Quotation</option>
+    </select>
+
+    {/* Status Filter */}
+    <select
+      value={statusFilter}
+      onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+      className="w-full sm:w-auto px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white cursor-pointer"
+    >
+      <option value="">All Statuses</option>
+      <option value="Paid">Paid</option>
+      <option value="Unpaid">Unpaid</option>
+      <option value="Partially Paid">Partially Paid</option>
+    </select>
+
+    {/* Clear Button */}
+    {(search || typeFilter || statusFilter) && (
+      <button
+        onClick={() => { 
+          setSearch(''); 
+          setTypeFilter(undefined); 
+          setStatusFilter(''); 
+          setPage(1); 
+        }}
+        className="w-full sm:w-auto px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm text-gray-500 hover:text-red-500 border border-gray-300 rounded-lg transition-colors cursor-pointer"
+      >
+        Clear
+      </button>
+    )}
+  </div>
+</div>
 
         {/* Table */}
         <div className="bg-white rounded-xl overflow-hidden shadow-sm">
@@ -164,7 +171,8 @@ export default function InvoicesPage() {
               <p className="text-gray-400 text-sm mt-1">Try adjusting your filters or create a new invoice</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+              <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+  <div className="xl:col-span-4 overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
@@ -232,6 +240,8 @@ export default function InvoicesPage() {
                 </tbody>
               </table>
             </div>
+              </div>
+          
           )}
         </div>
 

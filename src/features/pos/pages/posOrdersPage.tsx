@@ -6,8 +6,7 @@ import { useGetBranchesQuery } from "../../../services/superAdminApi";
 import { useAppSelector } from "../../../app/hooks";
 import type { RootState } from "../../../app/store";
 import { canSwitchBranch } from "../../../utils/roleHelpers";
-import CreateReturnModal from '../components/CreateReturnModal';
-
+import CreateReturnModal from "../components/CreateReturnModal";
 
 import search_icon from "../../../assets/icons/search_icon.svg";
 import export_pdf from "../../../assets/icons/export_pdf.svg";
@@ -20,12 +19,31 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import jsPDF from "jspdf";
 
+
+
+import {
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  flexRender,
+} from "@tanstack/react-table";
+
+import type {
+  ColumnDef,
+  SortingState,
+} from "@tanstack/react-table";
+
+
+import { ChevronUp, ChevronDown } from "lucide-react";
+
 export default function POSOrdersPage() {
   const { user } = useAppSelector((state: RootState) => state.auth);
   const userCanSwitchBranch = canSwitchBranch(user?.role?.role_name);
 
   const [returnSaleId, setReturnSaleId] = useState<number | null>(null);
-const [showReturnModal, setShowReturnModal] = useState(false);
+  const [showReturnModal, setShowReturnModal] = useState(false);
 
   const [selectedBranchId, setSelectedBranchId] = useState<string>("");
   const [startDate, setStartDate] = useState("");
@@ -37,10 +55,18 @@ const [showReturnModal, setShowReturnModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
+
+  
+const [sorting, setSorting] = useState<SortingState>([]);
+const [globalFilter, setGlobalFilter] = useState("");
+
+
+
+
   const { data: branchesData } = useGetBranchesQuery();
   const branches = Array.isArray(branchesData) ? branchesData : [];
 
-  console.log('return sale id', returnSaleId)
+  console.log("return sale id", returnSaleId);
   // Lock branch-restricted users to their own branch automatically
   useEffect(() => {
     if (!userCanSwitchBranch && user?.branch_id) {
@@ -64,7 +90,7 @@ const [showReturnModal, setShowReturnModal] = useState(false);
 
   const totalRevenue = sales.reduce(
     (sum: number, s: any) => sum + parseFloat(s.total_amount || "0"),
-    0
+    0,
   );
 
   // Search suggestions from live data
@@ -73,9 +99,12 @@ const [showReturnModal, setShowReturnModal] = useState(false);
     const query = searchQuery.toLowerCase();
     const suggestions = new Set<string>();
     sales.forEach((s: any) => {
-      if (s.sale_number?.toLowerCase().includes(query)) suggestions.add(s.sale_number);
-      if (s.cashier?.name?.toLowerCase().includes(query)) suggestions.add(s.cashier.name);
-      if (s.branch?.branch_name?.toLowerCase().includes(query)) suggestions.add(s.branch.branch_name);
+      if (s.sale_number?.toLowerCase().includes(query))
+        suggestions.add(s.sale_number);
+      if (s.cashier?.name?.toLowerCase().includes(query))
+        suggestions.add(s.cashier.name);
+      if (s.branch?.branch_name?.toLowerCase().includes(query))
+        suggestions.add(s.branch.branch_name);
     });
     return Array.from(suggestions).slice(0, 5);
   }, [searchQuery, sales]);
@@ -136,8 +165,10 @@ const [showReturnModal, setShowReturnModal] = useState(false);
       XLSX.utils.book_append_sheet(wb, ws, "Orders Report");
       const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
       saveAs(
-        new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }),
-        `orders_report_${new Date().toISOString().split("T")[0]}.xlsx`
+        new Blob([buf], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        }),
+        `orders_report_${new Date().toISOString().split("T")[0]}.xlsx`,
       );
     } catch (e) {
       console.error("Excel export failed:", e);
@@ -146,7 +177,10 @@ const [showReturnModal, setShowReturnModal] = useState(false);
 
   // Export PDF
   const handleExportToPDF = () => {
-    if (!sales.length) { alert("No orders to export"); return; }
+    if (!sales.length) {
+      alert("No orders to export");
+      return;
+    }
     try {
       const doc = new jsPDF("portrait", "mm", "a4");
       const marginLeft = 10;
@@ -160,10 +194,23 @@ const [showReturnModal, setShowReturnModal] = useState(false);
       doc.setFontSize(10);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(100);
-      doc.text(`Generated: ${new Date().toLocaleDateString()}`, marginLeft, yPos);
-      doc.text(`Total Orders: ${pagination?.total || sales.length}`, 200, yPos, { align: "right" });
+      doc.text(
+        `Generated: ${new Date().toLocaleDateString()}`,
+        marginLeft,
+        yPos,
+      );
+      doc.text(
+        `Total Orders: ${pagination?.total || sales.length}`,
+        200,
+        yPos,
+        { align: "right" },
+      );
       yPos += 5;
-      doc.text(`Total Revenue: KD ${totalRevenue.toFixed(3)}`, marginLeft, yPos);
+      doc.text(
+        `Total Revenue: KD ${totalRevenue.toFixed(3)}`,
+        marginLeft,
+        yPos,
+      );
       yPos += 8;
 
       doc.setDrawColor(200, 200, 200);
@@ -188,11 +235,17 @@ const [showReturnModal, setShowReturnModal] = useState(false);
       doc.setTextColor(0);
       doc.setFont("helvetica", "normal");
       sales.forEach((s: any, rowIndex: number) => {
-        if (yPos > 270) { doc.addPage("portrait"); yPos = 20; }
+        if (yPos > 270) {
+          doc.addPage("portrait");
+          yPos = 20;
+        }
         if (rowIndex % 2 === 0) {
           doc.setFillColor(248, 248, 248);
           xPos = marginLeft;
-          colWidths.forEach((w) => { doc.rect(xPos, yPos, w, 8, "F"); xPos += w; });
+          colWidths.forEach((w) => {
+            doc.rect(xPos, yPos, w, 8, "F");
+            xPos += w;
+          });
         }
         xPos = marginLeft;
         const row = [
@@ -209,7 +262,9 @@ const [showReturnModal, setShowReturnModal] = useState(false);
           while (doc.getTextWidth(text) > maxW && text.length > 3) {
             text = text.substring(0, text.length - 4) + "...";
           }
-          doc.text(text, xPos + colWidths[i] / 2, yPos + 5.5, { align: "center" });
+          doc.text(text, xPos + colWidths[i] / 2, yPos + 5.5, {
+            align: "center",
+          });
           xPos += colWidths[i];
         });
         yPos += 8;
@@ -239,137 +294,413 @@ const [showReturnModal, setShowReturnModal] = useState(false);
     return map[method] || "bg-gray-100 text-gray-600";
   };
 
+
+
+  const columns: ColumnDef<any>[] = useMemo(
+  () => [
+    {
+      accessorKey: "sale_number",
+      header: ({ column }) => (
+        <button
+          onClick={() => column.toggleSorting()}
+          className="flex items-center gap-1 group"
+        >
+          Order
+          {column.getIsSorted() === "asc" ? (
+            <ChevronUp className="w-3 h-3" />
+          ) : column.getIsSorted() === "desc" ? (
+            <ChevronDown className="w-3 h-3" />
+          ) : (
+            <ChevronUp className="w-3 h-3 opacity-0 group-hover:opacity-30" />
+          )}
+        </button>
+      ),
+      cell: ({ row }) => (
+        <div className="text-sm font-medium text-gray-900">
+          {row.original.sale_number}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "branch.branch_name",
+      header: ({ column }) => (
+        <button
+          onClick={() => column.toggleSorting()}
+          className="flex items-center gap-1 group"
+        >
+          Branch
+          {column.getIsSorted() === "asc" ? (
+            <ChevronUp className="w-3 h-3" />
+          ) : column.getIsSorted() === "desc" ? (
+            <ChevronDown className="w-3 h-3" />
+          ) : (
+            <ChevronUp className="w-3 h-3 opacity-0 group-hover:opacity-30" />
+          )}
+        </button>
+      ),
+      cell: ({ row }) => (
+        <div className="text-sm text-gray-900">
+          {row.original.branch?.branch_name}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "cashier.name",
+      header: ({ column }) => (
+        <button
+          onClick={() => column.toggleSorting()}
+          className="flex items-center gap-1 group"
+        >
+          Cashier
+          {column.getIsSorted() === "asc" ? (
+            <ChevronUp className="w-3 h-3" />
+          ) : column.getIsSorted() === "desc" ? (
+            <ChevronDown className="w-3 h-3" />
+          ) : (
+            <ChevronUp className="w-3 h-3 opacity-0 group-hover:opacity-30" />
+          )}
+        </button>
+      ),
+      cell: ({ row }) => (
+        <div className="text-sm text-gray-900">
+          {row.original.cashier?.name}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "payment_method",
+      header: ({ column }) => (
+        <button
+          onClick={() => column.toggleSorting()}
+          className="flex items-center gap-1 group"
+        >
+          Pay
+          {column.getIsSorted() === "asc" ? (
+            <ChevronUp className="w-3 h-3" />
+          ) : column.getIsSorted() === "desc" ? (
+            <ChevronDown className="w-3 h-3" />
+          ) : (
+            <ChevronUp className="w-3 h-3 opacity-0 group-hover:opacity-30" />
+          )}
+        </button>
+      ),
+      cell: ({ row }) => {
+        const paymentMethod = row.original.payment_method;
+        const paymentBadge = (method: string) => {
+          const map: Record<string, string> = {
+            Cash: "bg-green-100 text-green-800",
+            Card: "bg-blue-100 text-blue-800",
+            "K-Net": "bg-purple-100 text-purple-800",
+            "Mobile Payment": "bg-orange-100 text-orange-800",
+            Mixed: "bg-gray-100 text-gray-800",
+          };
+          return map[method] || "bg-gray-100 text-gray-600";
+        };
+        return (
+          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${paymentBadge(paymentMethod)}`}>
+            <span className="w-1.5 h-1.5 rounded-full bg-current opacity-70" />
+            {paymentMethod}
+          </span>
+        );
+      },
+    },
+    {
+      accessorKey: "status",
+      header: ({ column }) => (
+        <button
+          onClick={() => column.toggleSorting()}
+          className="flex items-center gap-1 group"
+        >
+          Status
+          {column.getIsSorted() === "asc" ? (
+            <ChevronUp className="w-3 h-3" />
+          ) : column.getIsSorted() === "desc" ? (
+            <ChevronDown className="w-3 h-3" />
+          ) : (
+            <ChevronUp className="w-3 h-3 opacity-0 group-hover:opacity-30" />
+          )}
+        </button>
+      ),
+      cell: ({ row }) => {
+        const status = row.original.status;
+        const statusClass = status === "Completed"
+          ? "bg-green-100 text-green-800"
+          : status === "Refunded"
+            ? "bg-red-100 text-red-800"
+            : status === "Partially Refunded"
+              ? "bg-yellow-100 text-yellow-800"
+              : "bg-gray-100 text-gray-600";
+        return (
+          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${statusClass}`}>
+            <span className="w-1.5 h-1.5 rounded-full bg-current opacity-70" />
+            {status}
+          </span>
+        );
+      },
+    },
+    {
+      accessorKey: "total_amount",
+      header: ({ column }) => (
+        <button
+          onClick={() => column.toggleSorting()}
+          className="flex items-center gap-1 group"
+        >
+          Total
+          {column.getIsSorted() === "asc" ? (
+            <ChevronUp className="w-3 h-3" />
+          ) : column.getIsSorted() === "desc" ? (
+            <ChevronDown className="w-3 h-3" />
+          ) : (
+            <ChevronUp className="w-3 h-3 opacity-0 group-hover:opacity-30" />
+          )}
+        </button>
+      ),
+      cell: ({ row }) => (
+        <div className="text-sm font-semibold text-gray-900">
+          KD {parseFloat(row.original.total_amount).toFixed(3)}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "sale_date",
+      header: ({ column }) => (
+        <button
+          onClick={() => column.toggleSorting()}
+          className="flex items-center gap-1 group"
+        >
+          Date
+          {column.getIsSorted() === "asc" ? (
+            <ChevronUp className="w-3 h-3" />
+          ) : column.getIsSorted() === "desc" ? (
+            <ChevronDown className="w-3 h-3" />
+          ) : (
+            <ChevronUp className="w-3 h-3 opacity-0 group-hover:opacity-30" />
+          )}
+        </button>
+      ),
+      cell: ({ row }) => (
+        <div className="text-sm text-gray-500">
+          {new Date(row.original.sale_date).toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          })}
+        </div>
+      ),
+    },
+    {
+      id: "actions",
+      header: "Action",
+      cell: ({ row }) => (
+        <button
+          onClick={() => {
+            setReturnSaleId(row.original.id);
+            setShowReturnModal(true);
+          }}
+          className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors"
+        >
+          <img src={returns} alt="" className="w-3.5 h-3.5" />
+          <span>Return</span>
+        </button>
+      ),
+    },
+  ],
+  []
+);
+
+// Create table instance
+const table = useReactTable({
+  data: sales,
+  columns,
+  state: {
+    sorting,
+    globalFilter,
+  },
+  onSortingChange: setSorting,
+  onGlobalFilterChange: setGlobalFilter,
+  getCoreRowModel: getCoreRowModel(),
+  getFilteredRowModel: getFilteredRowModel(),
+  // getPaginationRowModel: getPaginationRowModel(),
+  getSortedRowModel: getSortedRowModel(),
+  // initialState: {
+  //   pagination: {
+  //     pageSize: 10,
+  //   },
+  // },
+});
+
+
   return (
     <DashboardLayout>
-      <div className="min-h-screen">
-        {/* Header Section — same 3-col layout as original */}
-        <div className="bg-white px-8 py-4 rounded-lg grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-
+      <div className="min-h-screen flex flex-col gap-4 sm:gap-6 overflow-x-hidden min-w-0">
+        {/* HEADER SECTION */}
+        <div
+          className="bg-white rounded-lg grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6"
+          style={{
+            padding: "12px 24px",
+            width: "100%",
+            boxSizing: "border-box",
+            flexShrink: 0,
+          }}
+        >
           {/* Start Date */}
           <div className="relative">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10">
-              <img src={date_icon} alt="" className="w-5 h-5" />
+            <div className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10">
+              <img src={date_icon} alt="" className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <input
               type="date"
               value={startDate}
-              onChange={(e) => { setStartDate(e.target.value); setCurrentPage(1); }}
-              className="w-full pl-12 pr-10 py-3.5 bg-white border border-gray-200 rounded-xl text-gray-900 font-medium text-base appearance-none cursor-pointer hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200
-                [&::-webkit-calendar-picker-indicator]:opacity-0 
-                [&::-webkit-calendar-picker-indicator]:absolute 
-                [&::-webkit-calendar-picker-indicator]:w-full 
-                [&::-webkit-calendar-picker-indicator]:h-full 
-                [&::-webkit-calendar-picker-indicator]:cursor-pointer"
-              placeholder="Start Date"
+              onChange={(e) => {
+                setStartDate(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full pl-9 sm:pl-12 pr-7 sm:pr-10 py-2 sm:py-3.5 bg-white border border-gray-200 rounded-xl text-gray-900 font-medium text-xs sm:text-sm md:text-base appearance-none cursor-pointer hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200
+            [&::-webkit-calendar-picker-indicator]:opacity-0
+            [&::-webkit-calendar-picker-indicator]:absolute
+            [&::-webkit-calendar-picker-indicator]:w-full
+            [&::-webkit-calendar-picker-indicator]:h-full
+            [&::-webkit-calendar-picker-indicator]:cursor-pointer"
             />
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-              <img src={dropdown_arrow_icon} alt="" className="w-5 h-5" />
+            <div className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+              <img
+                src={dropdown_arrow_icon}
+                alt=""
+                className="w-3 h-3 sm:w-4 sm:h-4"
+              />
             </div>
           </div>
 
           {/* End Date */}
           <div className="relative">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10">
-              <img src={date_icon} alt="" className="w-5 h-5" />
+            <div className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10">
+              <img src={date_icon} alt="" className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <input
               type="date"
               value={endDate}
               min={startDate}
-              onChange={(e) => { setEndDate(e.target.value); setCurrentPage(1); }}
-              className="w-full pl-12 pr-10 py-3.5 bg-white border border-gray-200 rounded-xl text-gray-900 font-medium text-base appearance-none cursor-pointer hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200
-                [&::-webkit-calendar-picker-indicator]:opacity-0 
-                [&::-webkit-calendar-picker-indicator]:absolute 
-                [&::-webkit-calendar-picker-indicator]:w-full 
-                [&::-webkit-calendar-picker-indicator]:h-full 
-                [&::-webkit-calendar-picker-indicator]:cursor-pointer"
-              placeholder="End Date"
+              onChange={(e) => {
+                setEndDate(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full pl-9 sm:pl-12 pr-7 sm:pr-10 py-2 sm:py-3.5 bg-white border border-gray-200 rounded-xl text-gray-900 font-medium text-xs sm:text-sm md:text-base appearance-none cursor-pointer hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200
+            [&::-webkit-calendar-picker-indicator]:opacity-0
+            [&::-webkit-calendar-picker-indicator]:absolute
+            [&::-webkit-calendar-picker-indicator]:w-full
+            [&::-webkit-calendar-picker-indicator]:h-full
+            [&::-webkit-calendar-picker-indicator]:cursor-pointer"
             />
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-              <img src={dropdown_arrow_icon} alt="" className="w-5 h-5" />
+            <div className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+              <img
+                src={dropdown_arrow_icon}
+                alt=""
+                className="w-3 h-3 sm:w-4 sm:h-4"
+              />
             </div>
           </div>
 
-          {/* Branch — Super Admin sees all + can switch, others see only their branch */}
+          {/* Branch */}
           <div className="relative">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-              <img src={market_icon} alt="" />
+            <div className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+              <img src={market_icon} alt="" className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             {userCanSwitchBranch ? (
               <select
                 value={selectedBranchId}
-                onChange={(e) => { setSelectedBranchId(e.target.value); setCurrentPage(1); }}
-                className="w-full pl-12 pr-10 py-3.5 bg-white border border-gray-200 rounded-xl text-gray-900 font-medium text-base appearance-none cursor-pointer hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                onChange={(e) => {
+                  setSelectedBranchId(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="w-full pl-9 sm:pl-12 pr-7 sm:pr-10 py-2 sm:py-3.5 bg-white border border-gray-200 rounded-xl text-gray-900 font-medium text-xs sm:text-sm md:text-base appearance-none cursor-pointer hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
               >
                 <option value="">All Branches</option>
                 {branches.map((b: any) => (
-                  <option key={b.id} value={b.id}>{b.branch_name}</option>
+                  <option key={b.id} value={b.id}>
+                    {b.branch_name}
+                  </option>
                 ))}
               </select>
             ) : (
-              // Read-only for cashiers / branch-restricted roles
-              <div className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 font-medium text-base">
-                {branches.find((b: any) => b.id === user?.branch_id)?.branch_name || "My Branch"}
+              <div className="w-full pl-9 sm:pl-12 pr-4 py-2 sm:py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 font-medium text-xs sm:text-sm md:text-base truncate">
+                {branches.find((b: any) => b.id === user?.branch_id)
+                  ?.branch_name || "My Branch"}
               </div>
             )}
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-              <img src={dropdown_arrow_icon} alt="" className="w-5 h-5" />
+            <div className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+              <img
+                src={dropdown_arrow_icon}
+                alt=""
+                className="w-3 h-3 sm:w-4 sm:h-4"
+              />
             </div>
           </div>
         </div>
 
-        {/* Table Section */}
-        <div className="relative my-6 rounded-xl bg-white px-4">
-          {/* Search and Actions Row */}
-          <div className="pt-6">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-
-              {/* Search with autocomplete suggestions */}
-              <div className="relative w-full sm:w-auto">
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
-                    <img src={search_icon} alt="Search" className="w-5 h-5 text-gray-400" />
-                  </div>
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={handleSearchChange}
-                    onFocus={() => searchQuery.length >= 2 && setShowSuggestions(true)}
-                    onBlur={handleSearchBlur}
-                    placeholder="Search by Order, Branch, Cashier, Payment Method..."
-                    className="pl-10 pr-4 py-2.5 border border-[#00000080] rounded-lg focus:border-blue-500 w-full sm:w-[400px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+        {/* TABLE CARD */}
+        <div className="bg-white rounded-xl w-full min-w-0 flex-shrink-0">
+          {/* Search + Filters Row */}
+          <div className="p-5 pb-0 w-full">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+              {/* Search input */}
+              <div className="relative flex-1 min-w-[200px] sm:max-w-[400px]">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
+                  <img
+                    src={search_icon}
+                    alt="Search"
+                    className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400"
                   />
-                  {showSuggestions && searchSuggestions.length > 0 && (
-                    <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg">
-                      <ul className="py-1 max-h-60 overflow-auto">
-                        {searchSuggestions.map((s, i) => (
-                          <li
-                            key={i}
-                            className="px-4 py-2.5 hover:bg-gray-50 cursor-pointer text-gray-700 hover:text-gray-900 border-b border-gray-100 last:border-b-0"
-                            onClick={() => handleSuggestionClick(s)}
-                          >
-                            <div className="flex items-center space-x-2">
-                              <img src={search_icon} alt="" className="w-4 h-4 text-gray-400" />
-                              <span className="text-sm">{s}</span>
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                      <div className="px-4 py-2 text-xs text-gray-500 bg-gray-50 border-t border-gray-200">
-                        {searchSuggestions.length} suggestion{searchSuggestions.length !== 1 ? "s" : ""}
-                      </div>
-                    </div>
-                  )}
                 </div>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  onFocus={() =>
+                    searchQuery.length >= 2 && setShowSuggestions(true)
+                  }
+                  onBlur={handleSearchBlur}
+                  placeholder="Search by Order, Branch, Cashier, Payment..."
+                  className="w-full pl-9 sm:pl-10 pr-4 py-2 sm:py-2.5 border border-gray-400 rounded-lg focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm"
+                />
+                {showSuggestions && searchSuggestions.length > 0 && (
+                  <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg">
+                    <ul className="py-1 max-h-48 sm:max-h-60 overflow-auto">
+                      {searchSuggestions.map((s, i) => (
+                        <li
+                          key={i}
+                          className="px-3 sm:px-4 py-2 hover:bg-gray-50 cursor-pointer text-gray-700 hover:text-gray-900 border-b border-gray-100 last:border-b-0"
+                          onClick={() => handleSuggestionClick(s)}
+                        >
+                          <div className="flex items-center space-x-2">
+                            <img
+                              src={search_icon}
+                              alt=""
+                              className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400"
+                            />
+                            <span className="text-xs sm:text-sm">{s}</span>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="px-3 sm:px-4 py-2 text-[10px] sm:text-xs text-gray-500 bg-gray-50 border-t border-gray-200">
+                      {searchSuggestions.length} suggestion
+                      {searchSuggestions.length !== 1 ? "s" : ""}
+                    </div>
+                  </div>
+                )}
               </div>
 
-              {/* Payment + Status filters + Export buttons */}
-              <div className="flex items-center space-x-3 w-full sm:w-auto">
+              {/* Filters + Export */}
+              <div className="flex flex-wrap gap-2 items-center justify-end">
+                {/* Payment Filter */}
                 <div className="relative">
                   <select
                     value={paymentFilter}
-                    onChange={(e) => { setPaymentFilter(e.target.value); setCurrentPage(1); }}
-                    className="px-3 py-2.5 border border-gray-300 rounded-lg text-sm appearance-none bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 pr-8"
+                    onChange={(e) => {
+                      setPaymentFilter(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    className="pl-3 pr-7 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm appearance-none bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[110px]"
                   >
                     <option value="">All Payments</option>
                     <option value="Cash">Cash</option>
@@ -379,211 +710,228 @@ const [showReturnModal, setShowReturnModal] = useState(false);
                     <option value="Mixed">Mixed</option>
                   </select>
                   <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
-                    <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
+                    <img
+                      src={dropdown_arrow_icon}
+                      alt=""
+                      className="w-3 h-3 sm:w-4 sm:h-4"
+                    />
                   </div>
                 </div>
 
+                {/* Status Filter */}
                 <div className="relative">
                   <select
                     value={statusFilter}
-                    onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-                    className="px-3 py-2.5 border border-gray-300 rounded-lg text-sm appearance-none bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 pr-8"
+                    onChange={(e) => {
+                      setStatusFilter(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    className="pl-3 pr-7 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm appearance-none bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[110px]"
                   >
                     <option value="">All Status</option>
                     <option value="Completed">Completed</option>
                     <option value="Refunded">Refunded</option>
-                    <option value="Partially Refunded">Partially Refunded</option>
+                    <option value="Partially Refunded">
+                      Partially Refunded
+                    </option>
                     <option value="Cancelled">Cancelled</option>
                   </select>
                   <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
-                    <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
+                    <img
+                      src={dropdown_arrow_icon}
+                      alt=""
+                      className="w-3 h-3 sm:w-4 sm:h-4"
+                    />
                   </div>
                 </div>
 
+                {/* Export PDF */}
                 <button
                   onClick={handleExportToPDF}
-                  className="flex items-center justify-center space-x-2 px-4 py-2.5 border border-gray-300 rounded-lg cursor-pointer transition-colors w-full sm:w-auto hover:bg-gray-50"
+                  className="flex items-center justify-center gap-1 sm:gap-2 px-3 py-2 sm:py-2.5 border border-gray-300 rounded-lg cursor-pointer transition-colors hover:bg-gray-50"
                 >
-                  <img src={export_pdf} alt="Add" className="w-7 h-7" />
-                  <span className="text-lg font-medium text-black">Export PDF</span>
+                  <img
+                    src={export_pdf}
+                    alt="PDF"
+                    className="w-4 h-4 sm:w-5 sm:h-5"
+                  />
+                  <span className="text-xs sm:text-sm font-medium text-black">
+                    PDF
+                  </span>
                 </button>
 
+                {/* Export Excel */}
                 <button
                   onClick={handleExportToExcel}
-                  className="flex items-center justify-center space-x-2 px-4 py-2.5 border border-gray-300 rounded-lg cursor-pointer transition-colors w-full sm:w-auto hover:bg-gray-50"
+                  className="flex items-center justify-center gap-1 sm:gap-2 px-3 py-2 sm:py-2.5 border border-gray-300 rounded-lg cursor-pointer transition-colors hover:bg-gray-50"
                 >
-                  <img src={export_excel} alt="Export" className="w-7 h-7" />
-                  <span className="text-lg font-medium text-gray-700">Export Excel</span>
+                  <img
+                    src={export_excel}
+                    alt="Excel"
+                    className="w-4 h-4 sm:w-5 sm:h-5"
+                  />
+                  <span className="text-xs sm:text-sm font-medium text-gray-700">
+                    Excel
+                  </span>
                 </button>
               </div>
             </div>
           </div>
 
-          {/* Table */}
-          <div className="overflow-x-auto shadow rounded-lg my-4">
-            <div className="px-6 py-2">
-              <h2 className="text-xl font-bold text-gray-900">Orders</h2>
-              {(searchQuery || selectedBranchId || paymentFilter || statusFilter) && (
-                <p className="text-sm text-gray-600 mt-1">
-                  Showing {pagination?.total || sales.length} orders
-                  {searchQuery && ` for "${searchQuery}"`}
-                </p>
-              )}
-            </div>
-
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead>
-                <tr className="bg-gray-50">
-                  <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">Order</th>
-                  <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">Branch</th>
-                  <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">Cashier</th>
-                  <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">Pay</th>
-                  <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">Total</th>
-                  <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">Date</th>
-                  <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">Action</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white">
-                {isLoading ? (
-                  <tr>
-                    <td colSpan={7} className="px-6 py-12 text-center">
-                      <div className="flex items-center justify-center gap-2 text-gray-500">
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-                        Loading orders...
-                      </div>
-                    </td>
-                  </tr>
-                ) : sales.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="px-6 py-8 text-center">
-                      <div className="text-gray-500 text-lg">
-                        {searchQuery ? `No orders found matching your search.` : "No orders available."}
-                      </div>
-                    </td>
-                  </tr>
-                ) : (
-                  sales.map((sale: any) => (
-                    <tr key={sale.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-[14px] font-medium text-gray-900">{sale.sale_number}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-[14px] text-gray-900">{sale.branch?.branch_name}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-[14px] text-gray-900">{sale.cashier?.name}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-3 py-2 text-xs font-medium rounded-lg ${paymentBadge(sale.payment_method)}`}>
-                          {sale.payment_method}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                          sale.status === "Completed" ? "bg-green-100 text-green-800" :
-                          sale.status === "Refunded" ? "bg-red-100 text-red-800" :
-                          sale.status === "Partially Refunded" ? "bg-yellow-100 text-yellow-800" :
-                          "bg-gray-100 text-gray-600"
-                        }`}>
-                          {sale.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-[14px] font-semibold text-gray-900">
-                          KD {parseFloat(sale.total_amount).toFixed(3)}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-[14px] text-gray-500">
-                          {new Date(sale.sale_date).toLocaleDateString("en-GB", {
-                            day: "2-digit", month: "short", year: "numeric",
-                          })}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-  <button
-  
-    onClick={() => { setReturnSaleId(sale.id); setShowReturnModal(true); }}
-    className="px-3 py-1.5 text-xs bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 font-medium cursor-pointer"
-  >
-    <div className="flex flex-row items-center">
-      <img src={returns} alt="" className="w-8 px-1"/><span>Return</span>
-    </div>
-  </button>
-</td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+          {/* Table Title */}
+          <div className="px-5 pt-4 pb-2">
+            <h2 className="text-base sm:text-lg md:text-xl font-bold text-gray-900">
+              Orders
+            </h2>
+            {(searchQuery ||
+              selectedBranchId ||
+              paymentFilter ||
+              statusFilter) && (
+              <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                Showing {pagination?.total || sales.length} orders
+                {searchQuery && ` for "${searchQuery}"`}
+              </p>
+            )}
           </div>
+
+         {/* Table Area with Horizontal Scroll Only */}
+           <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+<div className="xl:col-span-4 overflow-x-auto w-full">
+  <table className="w-full divide-y divide-gray-200" style={{ minWidth: '680px' }}>
+    <thead className="bg-gray-50">
+      {table.getHeaderGroups().map((headerGroup) => (
+        <tr key={headerGroup.id}>
+          {headerGroup.headers.map((header) => (
+            <th
+              key={header.id}
+              className="px-4 md:px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap"
+            >
+              {header.isPlaceholder
+                ? null
+                : flexRender(header.column.columnDef.header, header.getContext())}
+            </th>
+          ))}
+        </tr>
+      ))}
+    </thead>
+    <tbody className="bg-white divide-y divide-gray-100">
+      {isLoading ? (
+        <tr>
+          <td colSpan={columns.length} className="py-12 text-center">
+            <div className="flex justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+            </div>
+          </td>
+        </tr>
+      ) : table.getRowModel().rows.length === 0 ? (
+        <tr>
+          <td colSpan={columns.length} className="py-12 text-center text-gray-500 text-sm">
+            {searchQuery
+              ? `No orders found matching your search.`
+              : "No orders available."}
+          </td>
+        </tr>
+      ) : (
+        table.getRowModel().rows.map((row) => (
+          <tr key={row.id} className="hover:bg-gray-50 transition-colors">
+            {row.getVisibleCells().map((cell) => (
+              <td
+                key={cell.id}
+                className="px-4 md:px-5 py-3 md:py-4 whitespace-nowrap"
+              >
+                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+              </td>
+            ))}
+          </tr>
+        ))
+      )}
+    </tbody>
+  </table>
+</div>
+           </div>
+
 
           {/* Pagination */}
-          <div className="px-6 py-4">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="text-sm text-gray-500">
-                {pagination ? (
-                  <>Showing <span className="font-medium">{pagination.from}</span> to{" "}
-                  <span className="font-medium">{pagination.to}</span> of{" "}
-                  <span className="font-medium">{pagination.total}</span> orders</>
-                ) : (
-                  `${sales.length} orders`
-                )}
-              </div>
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
-                    currentPage === 1
-                      ? "text-gray-400 bg-gray-100 cursor-not-allowed"
-                      : "text-gray-700 bg-gray-100 hover:bg-gray-200"
-                  }`}
-                >
-                  Previous
-                </button>
+<div className="px-5 py-4 border-t border-gray-100">
+  <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+    <div className="text-xs sm:text-sm text-gray-500 text-center sm:text-left">
+      {pagination ? (
+        <>
+          Showing{" "}
+          <span className="font-medium">{pagination.from}</span> to{" "}
+          <span className="font-medium">{pagination.to}</span> of{" "}
+          <span className="font-medium">{pagination.total}</span>{" "}
+          orders
+        </>
+      ) : (
+        `${sales.length} orders`
+      )}
+    </div>
+    <div className="flex items-center flex-wrap justify-center gap-1">
+      <button
+        onClick={() => handlePageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+        className={`px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium rounded-lg transition-colors ${
+          currentPage === 1
+            ? "text-gray-400 bg-gray-100 cursor-not-allowed"
+            : "text-gray-700 bg-gray-100 hover:bg-gray-200"
+        }`}
+      >
+        Prev
+      </button>
 
-                {getPageNumbers().map((page, index) =>
-                  page === "..." ? (
-                    <span key={`ellipsis-${index}`} className="px-3 py-1.5 text-sm text-gray-500">...</span>
-                  ) : (
-                    <button
-                      key={`page-${page}`}
-                      onClick={() => handlePageChange(page as number)}
-                      className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
-                        currentPage === page
-                          ? "text-blue-600 bg-blue-50 hover:bg-blue-100"
-                          : "text-gray-700 hover:bg-gray-100"
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  )
-                )}
+      {getPageNumbers().map((page, index) =>
+        page === "..." ? (
+          <span
+            key={`ellipsis-${index}`}
+            className="px-2 sm:px-3 py-1 text-xs sm:text-sm text-gray-500"
+          >
+            ...
+          </span>
+        ) : (
+          <button
+            key={`page-${page}`}
+            onClick={() => handlePageChange(page as number)}
+            className={`px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium rounded-lg transition-colors ${
+              currentPage === page
+                ? "text-blue-600 bg-blue-50 hover:bg-blue-100"
+                : "text-gray-700 hover:bg-gray-100"
+            }`}
+          >
+            {page}
+          </button>
+        ),
+      )}
 
-                <button
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
-                    currentPage === totalPages
-                      ? "text-gray-400 bg-gray-100 cursor-not-allowed"
-                      : "text-gray-700 bg-gray-100 hover:bg-gray-200"
-                  }`}
-                >
-                  Next
-                </button>
-              </div>
-            </div>
-          </div>
+      <button
+        onClick={() => handlePageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+        className={`px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium rounded-lg transition-colors ${
+          currentPage === totalPages
+            ? "text-gray-400 bg-gray-100 cursor-not-allowed"
+            : "text-gray-700 bg-gray-100 hover:bg-gray-200"
+        }`}
+      >
+        Next
+      </button>
+    </div>
+  </div>
+</div>
         </div>
       </div>
+
       <CreateReturnModal
-  isOpen={showReturnModal}
-  onClose={() => { setShowReturnModal(false); setReturnSaleId(null); }}
-  onSuccess={() => { setShowReturnModal(false); setReturnSaleId(null); }}
-  saleId={returnSaleId ?? undefined}
-/>
+        isOpen={showReturnModal}
+        onClose={() => {
+          setShowReturnModal(false);
+          setReturnSaleId(null);
+        }}
+        onSuccess={() => {
+          setShowReturnModal(false);
+          setReturnSaleId(null);
+        }}
+        saleId={returnSaleId ?? undefined}
+      />
     </DashboardLayout>
   );
 }

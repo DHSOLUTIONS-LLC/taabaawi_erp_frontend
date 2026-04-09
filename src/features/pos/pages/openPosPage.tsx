@@ -65,7 +65,6 @@ console.log('POSPage session:', session);
   };
 
   const handleScanBarcode = () => {
-    // Implement barcode scanning logic
     alert("Barcode scanner activated");
   };
 
@@ -74,7 +73,7 @@ console.log('POSPage session:', session);
       <div className="relative ">
         {/* Header with Search */}
         <div className="sticky  backdrop-blur-lg ">
-          <div className="max-w-[1920px]  px-4 sm:px-6 py-4">
+          <div className="max-w-[1920px]  px-2 py-2">
             {/* Search Bar */}
             <div className="relative">
               <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">

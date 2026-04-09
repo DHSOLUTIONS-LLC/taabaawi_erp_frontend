@@ -151,442 +151,448 @@ export default function CreateInvoice({ isEditMode = false, invoiceId, updateInv
 
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
+   <DashboardLayout>
+  <div className="space-y-4 sm:space-y-6 sm:p-0">
 
-        {/* Header */}
-        <div className="flex flex-row justify-between mb-8 items-center">
-          <Link to={`${basePath}/sales`}>
-            <img src={arrow_back_icon} alt="" className="w-8 h-8" />
-          </Link>
-          <h1 className="text-xl font-bold text-gray-900">
-            {isEditMode ? 'Edit Invoice' : 'Create New Invoice'}
-          </h1>
-          <div className="w-8"></div> {/* Spacer for alignment */}
-        </div>
+    {/* Header */}
+    <div className="flex flex-row justify-between items-center gap-4 mb-4 sm:mb-8">
+      <Link to={`${basePath}/sales`} className="flex-shrink-0">
+        <img src={arrow_back_icon} alt="" className="w-6 h-6 sm:w-8 sm:h-8" />
+      </Link>
+      <h1 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 text-center">
+        {isEditMode ? 'Edit Invoice' : 'Create New Invoice'}
+      </h1>
+      <div className="w-6 sm:w-8"></div> {/* Spacer for alignment */}
+    </div>
 
-        <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
 
-          {/* ── Invoice Type ── */}
-          <div className="bg-white space-y-6 p-6 rounded-xl">
-            <div className="flex gap-4">
-              {(['b2c', 'b2b', 'quotation'] as const).map((type) => (
-                <button
-                  key={type}
-                  onClick={() => setField({ invoiceType: type })}
-                  disabled={isEditMode} // Disable type change in edit mode
-                  className={`flex-1 px-6 py-3 rounded-lg border-2 transition-all ${
-                    form.invoiceType === type ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white'
-                  } ${isEditMode ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className={`text-sm font-medium ${form.invoiceType === type ? 'text-blue-700' : 'text-gray-700'}`}>
-                      {type === 'b2c' ? 'B2C Sales Invoice' : type === 'b2b' ? 'B2B Sales Invoice' : 'Quotation'}
-                    </span>
-                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${form.invoiceType === type ? 'border-blue-500' : 'border-gray-300'}`}>
-                      {form.invoiceType === type && <div className="w-3 h-3 rounded-full bg-blue-500" />}
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* ── B2C Form ── */}
-          {form.invoiceType === 'b2c' && (
-            <>
-              <div className="space-y-4 bg-white rounded-xl p-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-2">Source</label>
-                    <div className="relative">
-                      <select value={form.source} onChange={(e) => setField({ source: e.target.value })}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-10">
-                        <option value="Manual">Manual</option>
-                        <option value="POS">POS</option>
-                        <option value="Website">Website</option>
-                        <option value="Mobile App">Mobile App</option>
-                      </select>
-                      <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                        <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
-                      </div>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-2">Branch</label>
-                    <div className="relative">
-                      <select value={form.branchId} onChange={(e) => setField({ branchId: e.target.value })}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-10">
-                        <option value="">Select Branch</option>
-                        {branches.map((b: any) => (
-                          <option key={b.id} value={b.id}>{b.branch_name}</option>
-                        ))}
-                      </select>
-                      <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                        <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-2">Cashier</label>
-                  <input type="text" value={user?.name || ''} readOnly
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-2">Date</label>
-                  <input type="text" readOnly
-                    value={new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed" />
+      {/* ── Invoice Type ── */}
+      <div className="bg-white space-y-4 sm:space-y-6 lg:p-4  rounded-xl">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+          {(['b2c', 'b2b', 'quotation'] as const).map((type) => (
+            <button
+              key={type}
+              onClick={() => setField({ invoiceType: type })}
+              disabled={isEditMode}
+              className={`w-full sm:flex-1 px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg border-2 transition-all ${
+                form.invoiceType === type ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white'
+              } ${isEditMode ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+            >
+              <div className="flex items-center justify-between">
+                <span className={`text-xs sm:text-sm font-medium ${form.invoiceType === type ? 'text-blue-700' : 'text-gray-700'}`}>
+                  {type === 'b2c' ? 'B2C Sales Invoice' : type === 'b2b' ? 'B2B Sales Invoice' : 'Quotation'}
+                </span>
+                <div className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center ${form.invoiceType === type ? 'border-blue-500' : 'border-gray-300'}`}>
+                  {form.invoiceType === type && <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-blue-500" />}
                 </div>
               </div>
-
-              <div className="space-y-4 bg-white rounded-xl p-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-2">Customer Name</label>
-                  <input type="text" value={form.customerName}
-                    onChange={(e) => setField({ customerName: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter customer name" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-2">Phone</label>
-                  <input type="text" value={form.customerPhone}
-                    onChange={(e) => setField({ customerPhone: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    placeholder="+965 XXXX XXXX" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-2">Customer Type</label>
-                  <input type="text" value={form.customerType} readOnly
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed"
-                    placeholder="B2C" />
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* ── B2B Form ── */}
-          {form.invoiceType === 'b2b' && (
-            <>
-              <div className="space-y-4 bg-white rounded-lg p-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-2">Source</label>
-                    <div className="relative">
-                      <select value={form.source} onChange={(e) => setField({ source: e.target.value })}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-10">
-                        <option value="Manual">Manual</option>
-                        <option value="POS">POS</option>
-                        <option value="Website">Website</option>
-                        <option value="Mobile App">Mobile App</option>
-                      </select>
-                      <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                        <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
-                      </div>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-2">Branch</label>
-                    <div className="relative">
-                      <select value={form.branchId} onChange={(e) => setField({ branchId: e.target.value })}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-10">
-                        <option value="">Select Branch</option>
-                        {branches.map((b: any) => (
-                          <option key={b.id} value={b.id}>{b.branch_name}</option>
-                        ))}
-                      </select>
-                      <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                        <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-2">Bank Account (Auto)</label>
-                  <input type="text" readOnly value="Qurain – Main Account"
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-2">Sales Rep</label>
-                  <input type="text" value={user?.name || ''} readOnly
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed" />
-                </div>
-              </div>
-
-              <div className="space-y-4 bg-white rounded-lg p-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-2">Company Name</label>
-                  <input type="text" value={form.companyName}
-                    onChange={(e) => setField({ companyName: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter company name" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-2">Contact Person</label>
-                  <input type="text" value={form.contactPerson}
-                    onChange={(e) => setField({ contactPerson: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    placeholder="Shahzad Diyal" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-2">Phone</label>
-                  <input type="text" value={form.companyPhone}
-                    onChange={(e) => setField({ companyPhone: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    placeholder="+965 55 213 445" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-2">Address</label>
-                  <input type="text" value={form.companyAddress}
-                    onChange={(e) => setField({ companyAddress: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    placeholder="Kuwait City" />
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* ── Quotation Form ── */}
-          {form.invoiceType === 'quotation' && (
-            <div className="space-y-4 bg-white rounded-xl p-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-2">Customer / Company</label>
-                  <input type="text" value={form.quotationCustomer}
-                    onChange={(e) => setField({ quotationCustomer: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    placeholder="BlueTech LLC" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-2">Valid Till</label>
-                  <input type="date" value={form.validTill}
-                    onChange={(e) => setField({ validTill: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-600 mb-2">Status</label>
-                <div className="relative">
-                  <select value={form.quotationStatus}
-                    onChange={(e) => setField({ quotationStatus: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-10">
-                    <option value="Draft">Draft</option>
-                    <option value="Sent">Sent</option>
-                    <option value="Accepted">Accepted</option>
-                    <option value="Rejected">Rejected</option>
-                  </select>
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                    <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
-                  </div>
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-600 mb-2">IncoTerms</label>
-                <input type="text" value={form.incoTerms}
-                  onChange={(e) => setField({ incoTerms: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  placeholder="CIF" />
-              </div>
-            </div>
-          )}
-
-          {/* ── Products Section ── */}
-          <div className="space-y-6">
-            <div>
-              <div className="flex items-center justify-between bg-white p-6">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  Products
-                  {selectedProducts.length > 0 && (
-                    <span className="ml-2 text-sm font-normal text-blue-600">({selectedProducts.length} items)</span>
-                  )}
-                </h3>
-                <button onClick={handleAddProduct}
-                  className="flex items-center gap-2 px-4 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors cursor-pointer">
-                  <img src={add_icon} alt="" />
-                  <span className="font-medium">Add Product</span>
-                </button>
-              </div>
-
-              {/* Products Table */}
-              {selectedProducts.length > 0 && (
-                <div className="bg-white rounded-lg overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="w-full shadow-lg">
-                      <thead className="bg-gray-50 border-b border-gray-200">
-                        <tr>
-                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Image</th>
-                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Product</th>
-                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">SKU</th>
-                          <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Qty</th>
-                          <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Price</th>
-                          <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Tax (5%)</th>
-                          <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Total</th>
-                          <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Remove</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-200">
-                        {selectedProducts.map((product) => {
-                          const itemSubtotal = product.price * product.quantity;
-                          const itemTax = itemSubtotal * TAX_RATE;
-                          const itemTotal = itemSubtotal + itemTax;
-                          return (
-                            <tr key={product.id} className="hover:bg-gray-50 transition-colors">
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <img src={product.image_url || product.image} alt={product.name}
-                                  className="w-12 h-12 object-cover rounded-md"
-                                  onError={(e) => {
-                                    (e.target as HTMLImageElement).src =
-                                      'https://images.unsplash.com/photo-1541275055241-329bbdf9a191?w=100&auto=format&fit=crop';
-                                  }} />
-                              </td>
-                              <td className="px-6 py-4">
-                                <div className="text-sm font-medium text-gray-900">{product.name}</div>
-                                {product.size && product.size !== 'Default' && (
-                                  <div className="text-xs text-gray-500">Variant: {product.size}</div>
-                                )}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-900">{product.sku}</div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="flex items-center justify-center gap-2">
-                                  <button onClick={() => handleUpdateQuantity(product.id, product.quantity - 1)}
-                                    className="w-7 h-7 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded transition-colors">
-                                    <span className="text-gray-600 font-semibold">-</span>
-                                  </button>
-                                  <span className="w-10 text-center font-medium text-gray-900">{product.quantity}</span>
-                                  <button onClick={() => handleUpdateQuantity(product.id, product.quantity + 1)}
-                                    className="w-7 h-7 flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors">
-                                    <span className="font-semibold">+</span>
-                                  </button>
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-right">
-                                <div className="text-sm font-medium text-gray-900">KWD {product.price.toFixed(3)}</div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-right">
-                                <div className="text-sm text-gray-900">KWD {itemTax.toFixed(3)}</div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-right">
-                                <div className="text-sm font-semibold text-gray-900">KWD {itemTotal.toFixed(3)}</div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-center">
-                                <button onClick={() => handleRemoveProduct(product.id)}
-                                  className="inline-flex items-center justify-center p-2 text-red-500 hover:bg-red-50 rounded-md transition-colors">
-                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                  </svg>
-                                </button>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-
-              {/* Empty state */}
-              {selectedProducts.length === 0 && (
-                <div className="bg-white p-12 flex flex-col items-center justify-center text-center">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-3">
-                    <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                    </svg>
-                  </div>
-                  <p className="text-gray-500 text-sm">No products added yet. Click "Add Product" to get started.</p>
-                </div>
-              )}
-            </div>
-
-            {/* Summary */}
-            <div className="bg-white rounded-lg p-6">
-              <h4 className="text-base font-semibold mb-4">Summary</h4>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600 uppercase">Subtotal</span>
-                  <span className="text-sm font-medium text-gray-900">
-                    {selectedProducts.length > 0 ? `KWD ${subtotal.toFixed(3)}` : '-'}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600 uppercase">Tax (5%)</span>
-                  <span className="text-sm font-medium text-gray-900">
-                    {selectedProducts.length > 0 ? `KWD ${taxAmount.toFixed(3)}` : '-'}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600 uppercase">Discount</span>
-                  <span className="text-sm font-medium text-gray-900">KWD 0.000</span>
-                </div>
-                <div className="flex items-center justify-between pt-3 border-t border-gray-200">
-                  <span className="text-sm text-gray-900 font-semibold uppercase">Grand Total</span>
-                  <span className="text-lg font-semibold text-gray-900">
-                    {selectedProducts.length > 0 ? `KWD ${grandTotal.toFixed(3)}` : '-'}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Payment — hidden for quotation */}
-            {selectedProducts.length > 0 && form.invoiceType !== 'quotation' && (
-              <div className="bg-white rounded-lg p-6 space-y-6">
-                <div>
-                  <h4 className="text-base font-semibold mb-4">Payment Method</h4>
-                  <div className="space-y-3">
-                    {(['CASH', 'CARD', 'KNET'] as const).map((method) => (
-                      <label key={method} className="flex items-center justify-between cursor-pointer">
-                        <span className="text-sm text-gray-700">{method}</span>
-                        <input type="radio" name="paymentMethod" value={method}
-                          checked={form.paymentMethod === method}
-                          onChange={() => setField({ paymentMethod: method })}
-                          className="w-5 h-5 text-blue-600" />
-                      </label>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <h4 className="text-base font-semibold mb-4">Payment Status</h4>
-                  <div className="space-y-3">
-                    {(['Paid', 'Unpaid', 'Partially Paid'] as const).map((status) => (
-                      <label key={status} className="flex items-center justify-between cursor-pointer">
-                        <span className="text-sm text-gray-700">{status}</span>
-                        <input type="radio" name="paymentStatus" value={status}
-                          checked={form.paymentStatus === status}
-                          onChange={() => setField({ paymentStatus: status })}
-                          className="w-5 h-5 text-blue-600" />
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Action Buttons */}
-            {selectedProducts.length > 0 && (
-              <div className="grid grid-cols-3 gap-4 pt-4">
-                <button onClick={() => window.print()}
-                  className="px-6 py-3 bg-white border border-blue-300 rounded-lg text-gray-700 font-medium hover:bg-blue-500 hover:text-white transition-colors cursor-pointer">
-                  Print
-                </button>
-                <button onClick={handleSaveInvoice} disabled={isSaving}
-                  className="px-6 py-3 bg-blue-600 rounded-lg text-white font-medium hover:bg-blue-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
-                  {isSaving ? 'Saving...' : (isEditMode ? 'Update Invoice' : 'Save Invoice')}
-                </button>
-                <button onClick={() => window.print()}
-                  className="px-6 py-3 bg-white border border-blue-300 rounded-lg text-gray-700 font-medium hover:bg-blue-500 hover:text-white transition-colors cursor-pointer">
-                  Export PDF
-                </button>
-              </div>
-            )}
-          </div>
-
+            </button>
+          ))}
         </div>
       </div>
-    </DashboardLayout>
+
+      {/* ── B2C Form ── */}
+      {form.invoiceType === 'b2c' && (
+        <>
+          <div className="space-y-3 sm:space-y-4 bg-white rounded-xl lg:p-4 sm:p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              <div>
+                <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">Source</label>
+                <div className="relative">
+                  <select value={form.source} onChange={(e) => setField({ source: e.target.value })}
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10">
+                    <option value="Manual">Manual</option>
+                    <option value="POS">POS</option>
+                    <option value="Website">Website</option>
+                    <option value="Mobile App">Mobile App</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:pr-3 pointer-events-none">
+                    <img src={dropdown_arrow_icon} alt="" className="w-3 h-3 sm:w-4 sm:h-4" />
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">Branch</label>
+                <div className="relative">
+                  <select value={form.branchId} onChange={(e) => setField({ branchId: e.target.value })}
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10">
+                    <option value="">Select Branch</option>
+                    {branches.map((b: any) => (
+                      <option key={b.id} value={b.id}>{b.branch_name}</option>
+                    ))}
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:pr-3 pointer-events-none">
+                    <img src={dropdown_arrow_icon} alt="" className="w-3 h-3 sm:w-4 sm:h-4" />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">Cashier</label>
+              <input type="text" value={user?.name || ''} readOnly
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-200 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed" />
+            </div>
+            <div>
+              <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">Date</label>
+              <input type="text" readOnly
+                value={new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-200 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed" />
+            </div>
+          </div>
+
+          <div className="space-y-3 sm:space-y-4 bg-white rounded-xl p-4 sm:p-6">
+            <div>
+              <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">Customer Name</label>
+              <input type="text" value={form.customerName}
+                onChange={(e) => setField({ customerName: e.target.value })}
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter customer name" />
+            </div>
+            <div>
+              <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">Phone</label>
+              <input type="text" value={form.customerPhone}
+                onChange={(e) => setField({ customerPhone: e.target.value })}
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                placeholder="+965 XXXX XXXX" />
+            </div>
+            <div>
+              <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">Customer Type</label>
+              <input type="text" value={form.customerType} readOnly
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-200 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed"
+                placeholder="B2C" />
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ── B2B Form ── */}
+      {form.invoiceType === 'b2b' && (
+        <>
+          <div className="space-y-3 sm:space-y-4 bg-white rounded-lg p-4 sm:p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              <div>
+                <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">Source</label>
+                <div className="relative">
+                  <select value={form.source} onChange={(e) => setField({ source: e.target.value })}
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10">
+                    <option value="Manual">Manual</option>
+                    <option value="POS">POS</option>
+                    <option value="Website">Website</option>
+                    <option value="Mobile App">Mobile App</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:pr-3 pointer-events-none">
+                    <img src={dropdown_arrow_icon} alt="" className="w-3 h-3 sm:w-4 sm:h-4" />
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">Branch</label>
+                <div className="relative">
+                  <select value={form.branchId} onChange={(e) => setField({ branchId: e.target.value })}
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10">
+                    <option value="">Select Branch</option>
+                    {branches.map((b: any) => (
+                      <option key={b.id} value={b.id}>{b.branch_name}</option>
+                    ))}
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:pr-3 pointer-events-none">
+                    <img src={dropdown_arrow_icon} alt="" className="w-3 h-3 sm:w-4 sm:h-4" />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">Bank Account (Auto)</label>
+              <input type="text" readOnly value="Qurain – Main Account"
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-200 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed" />
+            </div>
+            <div>
+              <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">Sales Rep</label>
+              <input type="text" value={user?.name || ''} readOnly
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-200 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed" />
+            </div>
+          </div>
+
+          <div className="space-y-3 sm:space-y-4 bg-white rounded-lg p-4 sm:p-6">
+            <div>
+              <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">Company Name</label>
+              <input type="text" value={form.companyName}
+                onChange={(e) => setField({ companyName: e.target.value })}
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter company name" />
+            </div>
+            <div>
+              <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">Contact Person</label>
+              <input type="text" value={form.contactPerson}
+                onChange={(e) => setField({ contactPerson: e.target.value })}
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                placeholder="Shahzad Diyal" />
+            </div>
+            <div>
+              <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">Phone</label>
+              <input type="text" value={form.companyPhone}
+                onChange={(e) => setField({ companyPhone: e.target.value })}
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                placeholder="+965 55 213 445" />
+            </div>
+            <div>
+              <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">Address</label>
+              <input type="text" value={form.companyAddress}
+                onChange={(e) => setField({ companyAddress: e.target.value })}
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                placeholder="Kuwait City" />
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ── Quotation Form ── */}
+      {form.invoiceType === 'quotation' && (
+        <div className="space-y-3 sm:space-y-4 bg-white rounded-xl p-4 sm:p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <div>
+              <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">Customer / Company</label>
+              <input type="text" value={form.quotationCustomer}
+                onChange={(e) => setField({ quotationCustomer: e.target.value })}
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                placeholder="BlueTech LLC" />
+            </div>
+            <div>
+              <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">Valid Till</label>
+              <input type="date" value={form.validTill}
+                onChange={(e) => setField({ validTill: e.target.value })}
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">Status</label>
+            <div className="relative">
+              <select value={form.quotationStatus}
+                onChange={(e) => setField({ quotationStatus: e.target.value })}
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10">
+                <option value="Draft">Draft</option>
+                <option value="Sent">Sent</option>
+                <option value="Accepted">Accepted</option>
+                <option value="Rejected">Rejected</option>
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:pr-3 pointer-events-none">
+                <img src={dropdown_arrow_icon} alt="" className="w-3 h-3 sm:w-4 sm:h-4" />
+              </div>
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">IncoTerms</label>
+            <input type="text" value={form.incoTerms}
+              onChange={(e) => setField({ incoTerms: e.target.value })}
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              placeholder="CIF" />
+          </div>
+        </div>
+      )}
+
+      {/* ── Products Section ── */}
+      <div className="space-y-4 sm:space-y-6">
+        <div>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white p-4 sm:p-6">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900">
+              Products
+              {selectedProducts.length > 0 && (
+                <span className="ml-2 text-xs sm:text-sm font-normal text-blue-600">({selectedProducts.length} items)</span>
+              )}
+            </h3>
+            <button onClick={handleAddProduct}
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors cursor-pointer text-sm">
+              <img src={add_icon} alt="" className="w-4 h-4" />
+              <span className="font-medium">Add Product</span>
+            </button>
+          </div>
+
+          {/* Products Table */}
+          {selectedProducts.length > 0 && (
+            <div className="bg-white rounded-lg overflow-hidden">
+                <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+                   <div className="xl:col-span-4 overflow-x-auto">
+                <div className="min-w-[800px] lg:min-w-full">
+                  <table className="w-full shadow-lg">
+                    <thead className="bg-gray-50 border-b border-gray-200">
+                      <tr>
+                        <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Image</th>
+                        <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Product</th>
+                        <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider hidden md:table-cell">SKU</th>
+                        <th className="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Qty</th>
+                        <th className="px-3 sm:px-6 py-3 sm:py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Price</th>
+                        <th className="px-3 sm:px-6 py-3 sm:py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider hidden sm:table-cell">Tax (5%)</th>
+                        <th className="px-3 sm:px-6 py-3 sm:py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Total</th>
+                        <th className="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Remove</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {selectedProducts.map((product) => {
+                        const itemSubtotal = product.price * product.quantity;
+                        const itemTax = itemSubtotal * TAX_RATE;
+                        const itemTotal = itemSubtotal + itemTax;
+                        return (
+                          <tr key={product.id} className="hover:bg-gray-50 transition-colors">
+                            <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                              <img src={product.image_url || product.image} alt={product.name}
+                                className="w-10 h-10 sm:w-12 sm:h-12 object-cover rounded-md"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src =
+                                    'https://images.unsplash.com/photo-1541275055241-329bbdf9a191?w=100&auto=format&fit=crop';
+                                }} />
+                             </td>
+                            <td className="px-3 sm:px-6 py-3 sm:py-4">
+                              <div className="text-xs sm:text-sm font-medium text-gray-900 break-words">{product.name}</div>
+                              {product.size && product.size !== 'Default' && (
+                                <div className="text-xs text-gray-500">Variant: {product.size}</div>
+                              )}
+                              <div className="text-xs text-gray-500 md:hidden mt-1">SKU: {product.sku}</div>
+                             </td>
+                            <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap hidden md:table-cell">
+                              <div className="text-xs sm:text-sm text-gray-900">{product.sku}</div>
+                             </td>
+                            <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                              <div className="flex items-center justify-center gap-1 sm:gap-2">
+                                <button onClick={() => handleUpdateQuantity(product.id, product.quantity - 1)}
+                                  className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded transition-colors">
+                                  <span className="text-gray-600 font-semibold text-sm">-</span>
+                                </button>
+                                <span className="w-8 sm:w-10 text-center font-medium text-gray-900 text-sm">{product.quantity}</span>
+                                <button onClick={() => handleUpdateQuantity(product.id, product.quantity + 1)}
+                                  className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors">
+                                  <span className="font-semibold text-sm">+</span>
+                                </button>
+                              </div>
+                             </td>
+                            <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-right">
+                              <div className="text-xs sm:text-sm font-medium text-gray-900">KWD {product.price.toFixed(3)}</div>
+                             </td>
+                            <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-right hidden sm:table-cell">
+                              <div className="text-xs sm:text-sm text-gray-900">KWD {itemTax.toFixed(3)}</div>
+                             </td>
+                            <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-right">
+                              <div className="text-xs sm:text-sm font-semibold text-gray-900">KWD {itemTotal.toFixed(3)}</div>
+                              </td>
+                            <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-center">
+                              <button onClick={() => handleRemoveProduct(product.id)}
+                                className="inline-flex items-center justify-center p-1.5 sm:p-2 text-red-500 hover:bg-red-50 rounded-md transition-colors">
+                                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              </button>
+                             </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+                </div>
+             
+            </div>
+          )}
+
+          {/* Empty state */}
+          {selectedProducts.length === 0 && (
+            <div className="bg-white p-8 sm:p-12 flex flex-col items-center justify-center text-center">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gray-100 rounded-full flex items-center justify-center mb-3">
+                <svg className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+              </div>
+              <p className="text-gray-500 text-xs sm:text-sm">No products added yet. Click "Add Product" to get started.</p>
+            </div>
+          )}
+        </div>
+
+        {/* Summary */}
+        <div className="bg-white rounded-lg p-4 sm:p-6">
+          <h4 className="text-sm sm:text-base font-semibold mb-3 sm:mb-4">Summary</h4>
+          <div className="space-y-2 sm:space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs sm:text-sm text-gray-600 uppercase">Subtotal</span>
+              <span className="text-xs sm:text-sm font-medium text-gray-900">
+                {selectedProducts.length > 0 ? `KWD ${subtotal.toFixed(3)}` : '-'}
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs sm:text-sm text-gray-600 uppercase">Tax (5%)</span>
+              <span className="text-xs sm:text-sm font-medium text-gray-900">
+                {selectedProducts.length > 0 ? `KWD ${taxAmount.toFixed(3)}` : '-'}
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs sm:text-sm text-gray-600 uppercase">Discount</span>
+              <span className="text-xs sm:text-sm font-medium text-gray-900">KWD 0.000</span>
+            </div>
+            <div className="flex items-center justify-between pt-2 sm:pt-3 border-t border-gray-200">
+              <span className="text-xs sm:text-sm text-gray-900 font-semibold uppercase">Grand Total</span>
+              <span className="text-base sm:text-lg font-semibold text-gray-900">
+                {selectedProducts.length > 0 ? `KWD ${grandTotal.toFixed(3)}` : '-'}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Payment — hidden for quotation */}
+        {selectedProducts.length > 0 && form.invoiceType !== 'quotation' && (
+          <div className="bg-white rounded-lg p-4 sm:p-6 space-y-4 sm:space-y-6">
+            <div>
+              <h4 className="text-sm sm:text-base font-semibold mb-3 sm:mb-4">Payment Method</h4>
+              <div className="space-y-2 sm:space-y-3">
+                {(['CASH', 'CARD', 'KNET'] as const).map((method) => (
+                  <label key={method} className="flex items-center justify-between cursor-pointer">
+                    <span className="text-xs sm:text-sm text-gray-700">{method}</span>
+                    <input type="radio" name="paymentMethod" value={method}
+                      checked={form.paymentMethod === method}
+                      onChange={() => setField({ paymentMethod: method })}
+                      className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h4 className="text-sm sm:text-base font-semibold mb-3 sm:mb-4">Payment Status</h4>
+              <div className="space-y-2 sm:space-y-3">
+                {(['Paid', 'Unpaid', 'Partially Paid'] as const).map((status) => (
+                  <label key={status} className="flex items-center justify-between cursor-pointer">
+                    <span className="text-xs sm:text-sm text-gray-700">{status}</span>
+                    <input type="radio" name="paymentStatus" value={status}
+                      checked={form.paymentStatus === status}
+                      onChange={() => setField({ paymentStatus: status })}
+                      className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Action Buttons */}
+        {selectedProducts.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 pt-4">
+            <button onClick={() => window.print()}
+              className="w-full px-4 sm:px-6 py-2 sm:py-3 bg-white border border-blue-300 rounded-lg text-gray-700 font-medium hover:bg-blue-500 hover:text-white transition-colors cursor-pointer text-sm">
+              Print
+            </button>
+            <button onClick={handleSaveInvoice} disabled={isSaving}
+              className="w-full px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 rounded-lg text-white font-medium hover:bg-blue-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-sm">
+              {isSaving ? 'Saving...' : (isEditMode ? 'Update Invoice' : 'Save Invoice')}
+            </button>
+            <button onClick={() => window.print()}
+              className="w-full px-4 sm:px-6 py-2 sm:py-3 bg-white border border-blue-300 rounded-lg text-gray-700 font-medium hover:bg-blue-500 hover:text-white transition-colors cursor-pointer text-sm">
+              Export PDF
+            </button>
+          </div>
+        )}
+      </div>
+
+    </div>
+  </div>
+</DashboardLayout>
   );
 }

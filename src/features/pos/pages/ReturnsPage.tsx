@@ -130,7 +130,7 @@ export default function ReturnsPage() {
     <DashboardLayout>
       <div className="min-h-screen">
         {/* Filters Header */}
-        <div className="bg-white px-8 py-4 rounded-lg grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
+        <div className="bg-white px-4 py-4 rounded-lg grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
           <div className="relative">
             <div className="absolute left-4 top-1/2 -translate-y-1/2"><img src={date_icon} alt="" /></div>
             <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)}
@@ -177,49 +177,70 @@ export default function ReturnsPage() {
           ].map((card) => (
             <div key={card.label} className="bg-white rounded-xl p-5 shadow-sm">
               <p className="text-sm text-gray-500 mb-1">{card.label}</p>
-              <p className={`text-2xl font-bold ${card.color}`}>{card.value}</p>
+              <p className={`text-[18px] lg:text-2xl font-bold ${card.color}`}>{card.value}</p>
             </div>
           ))}
         </div>
 
         {/* Table Section */}
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-          {/* Search + Filters */}
-          <div className="px-6 py-4 border-b flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-3 flex-wrap">
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <img src={search_icon} alt="" className="w-4 h-4" />
-                </div>
-                <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search returns..."
-                  className="pl-9 pr-4 py-2 border rounded-lg w-56 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
-              </div>
-              <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="">All Statuses</option>
-                <option value="Pending">Pending</option>
-                <option value="Approved">Approved</option>
-                <option value="Rejected">Rejected</option>
-              </select>
-              <select value={refundMethodFilter} onChange={(e) => setRefundMethodFilter(e.target.value)}
-                className="px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="">All Methods</option>
-                <option value="Cash">Cash</option>
-                <option value="Card">Card</option>
-                <option value="Store Credit">Store Credit</option>
-              </select>
-            </div>
-            <div className="flex gap-2">
-              <button onClick={handleExportExcel} className="flex items-center gap-2 px-3 py-2 border rounded-lg hover:bg-gray-50 text-sm">
-                <img src={export_excel} alt="" className="w-5 h-5" />
-                Export
-              </button>
-            </div>
-          </div>
+       {/* Search + Filters */}
+<div className="px-4 sm:px-6 py-3 sm:py-4 border-b flex flex-col lg:flex-row flex-wrap items-start lg:items-center justify-between gap-3 sm:gap-4">
+  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
+    {/* Search Input */}
+    <div className="relative w-full sm:w-auto">
+      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <img src={search_icon} alt="" className="w-4 h-4" />
+      </div>
+      <input 
+        type="text" 
+        value={searchQuery} 
+        onChange={(e) => setSearchQuery(e.target.value)}
+        placeholder="Search returns..."
+        className="w-full sm:w-56 pl-9 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" 
+      />
+    </div>
+    
+    {/* Status Filter */}
+    <select 
+      value={statusFilter} 
+      onChange={(e) => setStatusFilter(e.target.value)}
+      className="w-full sm:w-auto px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+    >
+      <option value="">All Statuses</option>
+      <option value="Pending">Pending</option>
+      <option value="Approved">Approved</option>
+      <option value="Rejected">Rejected</option>
+    </select>
+    
+    {/* Refund Method Filter */}
+    <select 
+      value={refundMethodFilter} 
+      onChange={(e) => setRefundMethodFilter(e.target.value)}
+      className="w-full sm:w-auto px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+    >
+      <option value="">All Methods</option>
+      <option value="Cash">Cash</option>
+      <option value="Card">Card</option>
+      <option value="Store Credit">Store Credit</option>
+    </select>
+  </div>
+  
+  {/* Export Button */}
+  <div className="w-full sm:w-auto">
+    <button 
+      onClick={handleExportExcel} 
+      className="w-full sm:w-auto flex items-center justify-center gap-2 px-3 py-2 border rounded-lg hover:bg-gray-50 text-sm transition-colors"
+    >
+      <img src={export_excel} alt="" className="w-5 h-5" />
+      Export
+    </button>
+  </div>
+</div>
 
           {/* Table */}
-          <div className="overflow-x-auto">
+           <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+ <div className="xl:col-span-4 overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
@@ -273,6 +294,8 @@ export default function ReturnsPage() {
               </tbody>
             </table>
           </div>
+           </div>
+         
 
           {/* Pagination */}
           {pagination?.last_page > 1 && (

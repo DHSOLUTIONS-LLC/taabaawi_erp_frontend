@@ -131,7 +131,7 @@ export default function AddPurchaseOrderProducts() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-[1920px] mx-auto px-4 sm:px-6 mb-4">
+      <div className="max-w-[1920px] mx-auto mb-4">
         {/* Header */}
         <div className="flex flex-row justify-between mb-8 items-center">
           <button onClick={handleBack}>

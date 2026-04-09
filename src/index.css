@@ -1,5 +1,41 @@
 @import "tailwindcss";
 
+
+/* Force horizontal scroll on table containers */
+.table-scroll-container {
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+.table-scroll-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.table-scroll-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.table-scroll-container::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.table-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.force-scroll-table {
+  min-width: 1200px !important;
+  width: 1200px !important;
+  display: table !important;
+}
+
+.force-scroll-table td,
+.force-scroll-table th {
+  white-space: nowrap !important;
+}
 /* 
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;

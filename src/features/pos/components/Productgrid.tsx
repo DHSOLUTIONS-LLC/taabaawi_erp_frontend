@@ -171,12 +171,12 @@ export default function ProductGrid({
 
   return (
     <div className="max-w-480 mx-auto px-4 sm:px-6 bg-white rounded-lg">
-      <div className="grid grid-cols-5 gap-3 mt-4 py-6">
+      <div className="flex flex-wrap  gap-3 mt-4 py-6">
         {categories.map((category) => (
           <button
             key={category}
             onClick={() => setSelectedCategory(category)}
-            className={`px-6 py-3 rounded-md font-medium text-sm whitespace-nowrap transition-all duration-200 cursor-pointer ${
+            className={`px-2 py-1 rounded-md font-medium text-md whitespace-nowrap transition-all duration-200 cursor-pointer ${
               selectedCategory === category
                 ? "border border-[#1773CF] text-black shadow-md shadow-blue-200"
                 : "bg-white text-gray-700 border border-gray-200 hover:border-blue-300 hover:text-blue-600"
@@ -187,7 +187,7 @@ export default function ProductGrid({
         ))}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-5 lg:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
         {filteredProducts.map((product) => (
           <ProductCard
             key={product.id}

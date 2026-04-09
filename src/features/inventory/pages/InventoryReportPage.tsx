@@ -214,7 +214,7 @@ export default function InventoryReportsPage() {
     // Process inventory movements
     const inventoryMovementData: InventoryMovementItem[] = useMemo(() => {
         const movements = inventoryResponse?.data?.data || [];
-        
+        console.log('movement data:', movements)
         return movements.map((movement: any) => ({
             id: movement.id,
             date: new Date(movement.movement_date).toLocaleDateString(),
@@ -263,11 +263,11 @@ export default function InventoryReportsPage() {
     // Process transfer history
     const transferHistoryData: TransferHistoryItem[] = useMemo(() => {
         const transfers = transferHistoryResponse?.data?.data || [];
-        
+        console.log('transfer :', transfers)
         return transfers.map((transfer: any) => ({
             id: transfer.id,
             transfer_number: transfer.transfer_number || `TRF-${transfer.id}`,
-            from: transfer.fromBranch?.branch_name || '-',
+            from: transfer.from_branch?.branch_name || '-',
             to: transfer.toBranch?.branch_name || '-',
             products: transfer.items?.map((item: any) => item.product?.product_name).join(', ') || '-',
             units: transfer.items?.reduce((sum: number, item: any) => sum + (item.approved_quantity || 0), 0) || 0,
@@ -611,9 +611,6 @@ export default function InventoryReportsPage() {
             }
 
             const worksheet = XLSX.utils.json_to_sheet(exportData);
-            const maxWidth = exportData.reduce((w, r) => Math.max(w, Object.keys(r).reduce((a, k) => Math.max(a, k.length), 0)), 10);
-            worksheet['!cols'] = Array(Object.keys(exportData[0] || {}).length).fill({ wch: maxWidth });
-
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
 
@@ -732,36 +729,36 @@ export default function InventoryReportsPage() {
         switch (activeTab) {
             case 'stock-summary':
                 return (
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
+                    <div className="">
+                        <table className="min-w-[800px] md:min-w-full divide-y divide-gray-200">
                             <thead>
                                 <tr className="bg-gray-50">
                                     {showBulkTransfer && (
-                                        <th className="px-6 py-3 text-left">
+                                        <th className="px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left">
                                             <input
                                                 type="checkbox"
                                                 checked={selectedProductIds.length === stockSummaryData.length && stockSummaryData.length > 0}
                                                 onChange={handleSelectAll}
-                                                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                                                className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
                                             />
                                         </th>
                                     )}
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">Image</th>
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">Product Name</th>
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">SKU</th>
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">Category</th>
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">Branch</th>
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">Available</th>
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">Reserved</th>
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">Total</th>
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">Status</th>
+                                    <th className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm md:text-md font-medium text-[#37638F] uppercase tracking-wider">Image</th>
+                                    <th className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm md:text-md font-medium text-[#37638F] uppercase tracking-wider">Product</th>
+                                    <th className="hidden sm:table-cell px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm md:text-md font-medium text-[#37638F] uppercase tracking-wider">SKU</th>
+                                    <th className="hidden lg:table-cell px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm md:text-md font-medium text-[#37638F] uppercase tracking-wider">Category</th>
+                                    <th className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm md:text-md font-medium text-[#37638F] uppercase tracking-wider">Branch</th>
+                                    <th className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm md:text-md font-medium text-[#37638F] uppercase tracking-wider">Available</th>
+                                    {/* <th className="hidden md:table-cell px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm md:text-md font-medium text-[#37638F] uppercase tracking-wider">Reserved</th> */}
+                                    <th className="hidden md:table-cell px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm md:text-md font-medium text-[#37638F] uppercase tracking-wider">Total</th>
+                                    <th className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm md:text-md font-medium text-[#37638F] uppercase tracking-wider">Status</th>
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
                                 {currentItems.length === 0 ? (
                                     <tr>
-                                        <td colSpan={showBulkTransfer ? 10 : 9} className="px-6 py-8 text-center">
-                                            <div className="text-gray-500 text-lg">
+                                        <td colSpan={showBulkTransfer ? 10 : 9} className="px-3 sm:px-6 py-8 text-center">
+                                            <div className="text-gray-500 text-sm sm:text-lg">
                                                 {searchQuery || selectedBranch || selectedStockStatus ? 
                                                     'No products found matching your filters.' : 
                                                     'No inventory data available.'
@@ -775,48 +772,49 @@ export default function InventoryReportsPage() {
                                         return (
                                             <tr key={`${product.product_id}-${product.branch_id}`} className="hover:bg-gray-50">
                                                 {showBulkTransfer && (
-                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                    <td className="px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
                                                         <input
                                                             type="checkbox"
                                                             checked={selectedProductIds.includes(product.product_id)}
                                                             onChange={() => handleProductSelect(product.product_id)}
-                                                            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                                                            className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
                                                         />
                                                     </td>
                                                 )}
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="w-8 h-8 rounded-full overflow-hidden">
+                                                <td className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
+                                                    <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full overflow-hidden">
                                                         <img src={product.image} alt={product.product_name} className="w-full h-full object-cover" />
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-[14px] font-medium text-gray-900">{product.product_name}</div>
+                                                <td className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
+                                                    <div className="text-xs sm:text-sm md:text-[14px] font-medium text-gray-900">{product.product_name}</div>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-[14px] text-gray-900 font-mono">{product.sku}</div>
+                                                <td className="hidden sm:table-cell px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
+                                                    <div className="text-xs sm:text-sm md:text-[14px] text-gray-900 font-mono">{product.sku}</div>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <span className="inline-flex px-3 py-1 text-xs font-medium">{product.category}</span>
+                                                <td className="hidden lg:table-cell px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
+                                                    <span className="inline-flex px-2 sm:px-3 py-0.5 sm:py-1 text-xs font-medium">{product.category}</span>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-[14px] text-gray-900">{product.branch}</div>
+                                                <td className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
+                                                    <div className="text-xs sm:text-sm md:text-[14px] text-gray-900">{product.branch}</div>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-[14px] font-medium text-green-600">{product.available_quantity}</div>
+                                                <td className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
+                                                    <div className="text-xs sm:text-sm md:text-[14px] font-medium text-green-600">{product.available_quantity}</div>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-[14px] font-medium text-blue-600">{product.reserved_quantity}</div>
+                                                {/* <td className="hidden md:table-cell px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
+                                                    <div className="text-xs sm:text-sm md:text-[14px] font-medium text-blue-600">{product.reserved_quantity}</div>
+                                                </td> */}
+                                                <td className="hidden md:table-cell px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
+                                                    <div className="text-xs sm:text-sm md:text-[14px] font-medium text-gray-900">{product.quantity}</div>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-[14px] font-medium text-gray-900">{product.quantity}</div>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <span className={`inline-flex px-3 py-2 text-xs font-medium rounded-lg ${
+                                                <td className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
+                                                    <span className={`inline-flex px-2 sm:px-3 py-1 sm:py-2 text-xs font-medium rounded-lg ${
                                                         product.status === 'In Stock' ? 'bg-green-100 text-green-800' :
                                                         product.status === 'Low Stock' ? 'bg-yellow-100 text-yellow-800' :
                                                         'bg-red-100 text-red-800'
                                                     }`}>
-                                                        {product.status}
+                                                        <span className="hidden xs:inline">{product.status}</span>
+                                                        <span className="xs:hidden">{product.status === 'In Stock' ? 'In' : product.status === 'Low Stock' ? 'Low' : 'Out'}</span>
                                                     </span>
                                                 </td>
                                             </tr>
@@ -830,27 +828,24 @@ export default function InventoryReportsPage() {
 
             case 'inventory-movement':
                 return (
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
+                    <div className="">
+                        <table className="min-w-[700px] md:min-w-full divide-y divide-gray-200">
                             <thead>
                                 <tr className="bg-gray-50">
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">Date</th>
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">Product</th>
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">Type</th>
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">From → To</th>
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">Quantity</th>
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">User</th>
+                                    <th className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm md:text-md font-medium text-[#37638F] uppercase tracking-wider">Date</th>
+                                    <th className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm md:text-md font-medium text-[#37638F] uppercase tracking-wider">Product</th>
+                                    <th className="hidden sm:table-cell px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm md:text-md font-medium text-[#37638F] uppercase tracking-wider">Type</th>
+                                    <th className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm md:text-md font-medium text-[#37638F] uppercase tracking-wider">From → To</th>
+                                    <th className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm md:text-md font-medium text-[#37638F] uppercase tracking-wider">Qty</th>
+                                    <th className="hidden lg:table-cell px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm md:text-md font-medium text-[#37638F] uppercase tracking-wider">User</th>
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
                                 {currentItems.length === 0 ? (
                                     <tr>
-                                        <td colSpan={6} className="px-6 py-8 text-center">
-                                            <div className="text-gray-500 text-lg">
-                                                {searchQuery || selectedBranch || selectedMovementType ? 
-                                                    'No inventory movements found matching your filters.' : 
-                                                    'No inventory movements available.'
-                                                }
+                                        <td colSpan={6} className="px-3 sm:px-6 py-8 text-center">
+                                            <div className="text-gray-500 text-sm sm:text-lg">
+                                                No inventory movements found.
                                             </div>
                                         </td>
                                     </tr>
@@ -859,14 +854,14 @@ export default function InventoryReportsPage() {
                                         const movement = item as InventoryMovementItem;
                                         return (
                                             <tr key={movement.id} className="hover:bg-gray-50">
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-[14px] text-gray-900">{movement.date}</div>
+                                                <td className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
+                                                    <div className="text-xs sm:text-sm md:text-[14px] text-gray-900">{movement.date}</div>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-[14px] font-medium text-gray-900">{movement.product}</div>
+                                                <td className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
+                                                    <div className="text-xs sm:text-sm md:text-[14px] font-medium text-gray-900">{movement.product}</div>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <span className={`inline-flex px-3 py-1 text-xs font-medium rounded-lg ${
+                                                <td className="hidden sm:table-cell px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
+                                                    <span className={`inline-flex px-2 sm:px-3 py-1 text-xs font-medium rounded-lg ${
                                                         movement.type === 'Transfer' ? 'bg-blue-100 text-blue-800' :
                                                         movement.type === 'Sale' ? 'bg-green-100 text-green-800' :
                                                         movement.type === 'Purchase' ? 'bg-purple-100 text-purple-800' :
@@ -875,16 +870,18 @@ export default function InventoryReportsPage() {
                                                         {movement.type}
                                                     </span>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-[14px] text-gray-900">{movement.from} → {movement.to}</div>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-[14px] font-semibold text-green-600">
-                                                        {movement.quantity}
+                                                <td className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
+                                                    <div className="text-xs sm:text-sm md:text-[14px] text-gray-900">
+                                                        <span className="hidden xs:inline">{movement.from} → </span>
+                                                        <span className="xs:hidden">{movement.from.substring(0, 3)}→</span>
+                                                        {movement.to}
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-[14px] text-gray-900">{movement.user}</div>
+                                                <td className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
+                                                    <div className="text-xs sm:text-sm md:text-[14px] font-semibold text-green-600">{movement.quantity}</div>
+                                                </td>
+                                                <td className="hidden lg:table-cell px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
+                                                    <div className="text-xs sm:text-sm md:text-[14px] text-gray-900">{movement.user}</div>
                                                 </td>
                                             </tr>
                                         );
@@ -897,28 +894,25 @@ export default function InventoryReportsPage() {
 
             case 'low-stock':
                 return (
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
+                    <div className="">
+                        <table className="min-w-[700px] md:min-w-full divide-y divide-gray-200">
                             <thead>
                                 <tr className="bg-gray-50">
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">Product</th>
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">SKU</th>
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">Branch</th>
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">Current Stock</th>
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">Reorder Point</th>
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">Quantity Needed</th>
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">Suggested Action</th>
+                                    <th className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm md:text-md font-medium text-[#37638F] uppercase tracking-wider">Product</th>
+                                    <th className="hidden sm:table-cell px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm md:text-md font-medium text-[#37638F] uppercase tracking-wider">SKU</th>
+                                    <th className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm md:text-md font-medium text-[#37638F] uppercase tracking-wider">Branch</th>
+                                    <th className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm md:text-md font-medium text-[#37638F] uppercase tracking-wider">Current</th>
+                                    <th className="hidden md:table-cell px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm md:text-md font-medium text-[#37638F] uppercase tracking-wider">Reorder</th>
+                                    <th className="hidden lg:table-cell px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm md:text-md font-medium text-[#37638F] uppercase tracking-wider">Needed</th>
+                                    <th className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm md:text-md font-medium text-[#37638F] uppercase tracking-wider">Action</th>
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
                                 {currentItems.length === 0 ? (
                                     <tr>
-                                        <td colSpan={7} className="px-6 py-8 text-center">
-                                            <div className="text-gray-500 text-lg">
-                                                {searchQuery || selectedBranch ? 
-                                                    'No low stock items found matching your filters.' : 
-                                                    'No low stock items available.'
-                                                }
+                                        <td colSpan={7} className="px-3 sm:px-6 py-8 text-center">
+                                            <div className="text-gray-500 text-sm sm:text-lg">
+                                                No low stock items found.
                                             </div>
                                         </td>
                                     </tr>
@@ -927,17 +921,17 @@ export default function InventoryReportsPage() {
                                         const lowStockItem = item as LowStockItem;
                                         return (
                                             <tr key={`${lowStockItem.product_id}-${lowStockItem.branch_id}-${index}`} className="hover:bg-gray-50">
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-[14px] font-medium text-gray-900">{lowStockItem.product_name}</div>
+                                                <td className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
+                                                    <div className="text-xs sm:text-sm md:text-[14px] font-medium text-gray-900">{lowStockItem.product_name}</div>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-[14px] text-gray-900 font-mono">{lowStockItem.sku}</div>
+                                                <td className="hidden sm:table-cell px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
+                                                    <div className="text-xs sm:text-sm md:text-[14px] text-gray-900 font-mono">{lowStockItem.sku}</div>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-[14px] text-gray-900">{lowStockItem.branch_name}</div>
+                                                <td className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
+                                                    <div className="text-xs sm:text-sm md:text-[14px] text-gray-900">{lowStockItem.branch_name}</div>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className={`text-[14px] font-semibold ${
+                                                <td className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
+                                                    <div className={`text-xs sm:text-sm md:text-[14px] font-semibold ${
                                                         lowStockItem.current_stock === 0 ? 'text-red-600' : 
                                                         lowStockItem.current_stock < 5 ? 'text-orange-600' : 
                                                         'text-yellow-600'
@@ -945,21 +939,28 @@ export default function InventoryReportsPage() {
                                                         {lowStockItem.current_stock}
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-[14px] text-gray-900">{lowStockItem.reorder_point}</div>
+                                                <td className="hidden md:table-cell px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
+                                                    <div className="text-xs sm:text-sm md:text-[14px] text-gray-900">{lowStockItem.reorder_point}</div>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-[14px] font-medium text-red-600">{lowStockItem.quantity_needed}</div>
+                                                <td className="hidden lg:table-cell px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
+                                                    <div className="text-xs sm:text-sm md:text-[14px] font-medium text-red-600">{lowStockItem.quantity_needed}</div>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <span className={`inline-flex px-3 py-1 text-xs font-medium rounded-lg ${
+                                                <td className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
+                                                    <span className={`inline-flex px-2 sm:px-3 py-1 text-xs font-medium rounded-lg whitespace-nowrap ${
                                                         lowStockItem.current_stock === 0 ? 'bg-red-100 text-red-800' :
                                                         lowStockItem.quantity_needed > 5 ? 'bg-orange-100 text-orange-800' :
                                                         'bg-yellow-100 text-yellow-800'
                                                     }`}>
-                                                        {lowStockItem.current_stock === 0 ? 'Critical - Reorder Immediately' :
-                                                         lowStockItem.quantity_needed > 5 ? 'Reorder Now' : 
-                                                         'Reorder Soon'}
+                                                        <span className="hidden xs:inline">
+                                                            {lowStockItem.current_stock === 0 ? 'Critical - Reorder' :
+                                                             lowStockItem.quantity_needed > 5 ? 'Reorder Now' : 
+                                                             'Reorder Soon'}
+                                                        </span>
+                                                        <span className="xs:hidden">
+                                                            {lowStockItem.current_stock === 0 ? 'Critical' :
+                                                             lowStockItem.quantity_needed > 5 ? 'Reorder' : 
+                                                             'Soon'}
+                                                        </span>
                                                     </span>
                                                 </td>
                                             </tr>
@@ -973,24 +974,24 @@ export default function InventoryReportsPage() {
 
             case 'damage-discard':
                 return (
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
+                    <div className="">
+                        <table className="min-w-[800px] md:min-w-full divide-y divide-gray-200">
                             <thead>
                                 <tr className="bg-gray-50">
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">Product</th>
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">Name</th>
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">Branch</th>
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">Quantity</th>
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">Status</th>
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">Financial Impact (KWD)</th>
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">Reference</th>
+                                    <th className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm md:text-md font-medium text-[#37638F] uppercase tracking-wider">Product</th>
+                                    <th className="hidden sm:table-cell px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm md:text-md font-medium text-[#37638F] uppercase tracking-wider">SKU</th>
+                                    <th className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm md:text-md font-medium text-[#37638F] uppercase tracking-wider">Branch</th>
+                                    <th className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm md:text-md font-medium text-[#37638F] uppercase tracking-wider">Qty</th>
+                                    <th className="hidden md:table-cell px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm md:text-md font-medium text-[#37638F] uppercase tracking-wider">Status</th>
+                                    <th className="hidden lg:table-cell px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm md:text-md font-medium text-[#37638F] uppercase tracking-wider">Impact</th>
+                                    <th className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm md:text-md font-medium text-[#37638F] uppercase tracking-wider">Reference</th>
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
                                 {currentItems.length === 0 ? (
                                     <tr>
-                                        <td colSpan={7} className="px-6 py-8 text-center">
-                                            <div className="text-gray-500 text-lg">
+                                        <td colSpan={7} className="px-3 sm:px-6 py-8 text-center">
+                                            <div className="text-gray-500 text-sm sm:text-lg">
                                                 No damage/discard records available.
                                             </div>
                                         </td>
@@ -1000,31 +1001,31 @@ export default function InventoryReportsPage() {
                                         const damageItem = item as DamageDiscardItem;
                                         return (
                                             <tr key={damageItem.id} className="hover:bg-gray-50">
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-[14px] font-medium text-gray-900">{damageItem.product}</div>
+                                                <td className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
+                                                    <div className="text-xs sm:text-sm md:text-[14px] font-medium text-gray-900">{damageItem.product}</div>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-[14px] text-gray-900 font-mono">{damageItem.name}</div>
+                                                <td className="hidden sm:table-cell px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
+                                                    <div className="text-xs sm:text-sm md:text-[14px] text-gray-900 font-mono">{damageItem.name}</div>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-[14px] text-gray-900">{damageItem.branch}</div>
+                                                <td className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
+                                                    <div className="text-xs sm:text-sm md:text-[14px] text-gray-900">{damageItem.branch}</div>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-[14px] font-medium text-gray-900">{damageItem.quantity}</div>
+                                                <td className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
+                                                    <div className="text-xs sm:text-sm md:text-[14px] font-medium text-gray-900">{damageItem.quantity}</div>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <span className={`inline-flex px-3 py-1 text-xs font-medium rounded-lg ${
+                                                <td className="hidden md:table-cell px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
+                                                    <span className={`inline-flex px-2 sm:px-3 py-1 text-xs font-medium rounded-lg ${
                                                         damageItem.status === 'Damaged' ? 'bg-orange-100 text-orange-800' :
                                                         'bg-red-100 text-red-800'
                                                     }`}>
                                                         {damageItem.status}
                                                     </span>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-[14px] font-semibold text-red-600">-{damageItem.financialImpact.toLocaleString()}</div>
+                                                <td className="hidden lg:table-cell px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
+                                                    <div className="text-xs sm:text-sm md:text-[14px] font-semibold text-red-600">-{damageItem.financialImpact}</div>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-[14px] text-gray-900 font-mono">{damageItem.reference}</div>
+                                                <td className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
+                                                    <div className="text-xs sm:text-sm md:text-[14px] text-gray-900 font-mono">{damageItem.reference}</div>
                                                 </td>
                                             </tr>
                                         );
@@ -1037,27 +1038,24 @@ export default function InventoryReportsPage() {
 
             case 'transfer-history':
                 return (
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
+                    <div className="">
+                        <table className="min-w-[800px] md:min-w-full divide-y divide-gray-200">
                             <thead>
                                 <tr className="bg-gray-50">
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">Transfer ID</th>
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">From → To</th>
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">Products</th>
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">Units</th>
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">Status</th>
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">Date</th>
+                                    <th className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm md:text-md font-medium text-[#37638F] uppercase tracking-wider">Transfer ID</th>
+                                    <th className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm md:text-md font-medium text-[#37638F] uppercase tracking-wider">From → To</th>
+                                    <th className="hidden lg:table-cell px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm md:text-md font-medium text-[#37638F] uppercase tracking-wider">Products</th>
+                                    <th className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm md:text-md font-medium text-[#37638F] uppercase tracking-wider">Units</th>
+                                    <th className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm md:text-md font-medium text-[#37638F] uppercase tracking-wider">Status</th>
+                                    <th className="hidden sm:table-cell px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm md:text-md font-medium text-[#37638F] uppercase tracking-wider">Date</th>
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
                                 {currentItems.length === 0 ? (
                                     <tr>
-                                        <td colSpan={6} className="px-6 py-8 text-center">
-                                            <div className="text-gray-500 text-lg">
-                                                {searchQuery || selectedBranch || selectedTransferStatus ? 
-                                                    'No transfer history found matching your filters.' : 
-                                                    'No transfer history available.'
-                                                }
+                                        <td colSpan={6} className="px-3 sm:px-6 py-8 text-center">
+                                            <div className="text-gray-500 text-sm sm:text-lg">
+                                                No transfer history found.
                                             </div>
                                         </td>
                                     </tr>
@@ -1066,20 +1064,27 @@ export default function InventoryReportsPage() {
                                         const transfer = item as TransferHistoryItem;
                                         return (
                                             <tr key={transfer.id} className="hover:bg-gray-50">
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-[14px] font-mono text-blue-600">{transfer.transfer_number}</div>
+                                                <td className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
+                                                    <div className="text-xs sm:text-sm md:text-[14px] font-mono text-blue-600">{transfer.transfer_number}</div>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-[14px] text-gray-900">{transfer.from} → {transfer.to}</div>
+                                                <td className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
+                                                    <div className="text-xs sm:text-sm md:text-[14px] text-gray-900">
+                                                        <span className="hidden xs:inline">{transfer.from} →</span>
+                                                        <span className="xs:hidden">{transfer.from.substring(0, 20)}→</span>
+                                                        <span className="hidden xs:inline"> {transfer.to}</span>
+                                                        <span className="xs:hidden">{transfer.to.substring(0, 3)}</span>
+                                                    </div>
                                                 </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="text-[14px] text-gray-900">{transfer.products}</div>
+                                                <td className="hidden lg:table-cell px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4">
+                                                    <div className="text-xs sm:text-sm md:text-[14px] text-gray-900 max-w-[200px] truncate" title={transfer.products}>
+                                                        {transfer.products}
+                                                    </div>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-[14px] font-medium text-gray-900">{transfer.units}</div>
+                                                <td className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
+                                                    <div className="text-xs sm:text-sm md:text-[14px] font-medium text-gray-900">{transfer.units}</div>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <span className={`inline-flex px-3 py-1 text-xs font-medium rounded-lg ${
+                                                <td className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
+                                                    <span className={`inline-flex px-2 sm:px-3 py-1 text-xs font-medium rounded-lg ${
                                                         transfer.status === 'Completed' ? 'bg-green-100 text-green-800' :
                                                         transfer.status === 'In Transit' ? 'bg-blue-100 text-blue-800' :
                                                         transfer.status === 'Approved' ? 'bg-purple-100 text-purple-800' :
@@ -1088,8 +1093,8 @@ export default function InventoryReportsPage() {
                                                         {transfer.status}
                                                     </span>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-[14px] text-gray-900">{transfer.date}</div>
+                                                <td className="hidden sm:table-cell px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
+                                                    <div className="text-xs sm:text-sm md:text-[14px] text-gray-900">{transfer.date}</div>
                                                 </td>
                                             </tr>
                                         );
@@ -1107,27 +1112,29 @@ export default function InventoryReportsPage() {
 
     return (
         <DashboardLayout>
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
                 {/* Inventory Reports Header */}
-                <div className="px-6">
+                <div className="px-2 xs:px-3 sm:px-4 md:px-6">
                     <div className='flex flex-row items-center'>
-                        <img src={history_icon} alt="" />
-                        <h1 className="text-2xl font-bold text-gray-900 mx-2">Inventory Reports</h1>
+                        <img src={history_icon} alt="" className="w-5 h-5 sm:w-6 sm:h-6" />
+                        <h1 className="text-base sm:text-xl md:text-2xl font-bold text-gray-900 mx-2">Inventory Reports</h1>
                     </div>
-                    <p className="text-[#33333399] mt-2 font-semibold">Track stock levels, inventory movement, and product performance across all branches.</p>
+                    <p className="text-xs sm:text-sm md:text-base text-[#33333399] mt-1 sm:mt-2 font-semibold">
+                        Track stock levels, inventory movement, and product performance across all branches.
+                    </p>
                 </div>
 
                 {/* Products Table Section */}
-                <div className="bg-white rounded-xl overflow-hidden">
+                <div className="bg-white rounded-xl overflow-hidden shadow-sm">
                     {/* Filters Row */}
-                    <div className="p-6">
-                        <div className="flex flex-wrap md:flex-nowrap items-center gap-4">
+                    <div className="p-3 xs:p-4 sm:p-6">
+                        <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
                             {/* Date Filter */}
-                            <div className="flex-1 min-w-50 relative">
+                            <div className="relative">
                                 <select 
                                     value={selectedDate}
                                     onChange={(e) => setSelectedDate(e.target.value)}
-                                    className="w-full px-4 py-2.5 shadow rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-semibold appearance-none bg-white pr-10"
+                                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm shadow rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-semibold appearance-none bg-white pr-8 sm:pr-10"
                                 >
                                     <option value="">Date</option>
                                     <option value="Today">Today</option>
@@ -1135,24 +1142,24 @@ export default function InventoryReportsPage() {
                                     <option value="This Month">This Month</option>
                                     <option value="This Year">This Year</option>
                                 </select>
-                                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                    <img src={dropdown_arrow_icon} alt="" />
+                                <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:pr-3 pointer-events-none">
+                                    <img src={dropdown_arrow_icon} alt="" className="w-3 h-3 sm:w-4 sm:h-4" />
                                 </div>
                             </div>
 
                             {/* Branches Filter */}
-                            <div className="flex-1 min-w-50 relative">
+                            <div className="relative">
                                 <select 
                                     value={selectedBranch}
                                     onChange={(e) => setSelectedBranch(e.target.value)}
-                                    className="w-full px-4 py-2.5 shadow rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-semibold appearance-none bg-white pr-10"
+                                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm shadow rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-semibold appearance-none bg-white pr-8 sm:pr-10"
                                     disabled={branchesLoading || !!branchesError}
                                 >
                                     <option value="">All Branches</option>
                                     {branchesLoading ? (
-                                        <option disabled>Loading branches...</option>
+                                        <option disabled>Loading...</option>
                                     ) : branchesError ? (
-                                        <option disabled>Failed to load branches</option>
+                                        <option disabled>Error</option>
                                     ) : branches.length > 0 ? (
                                         branches.map((branch) => (
                                             <option key={branch.id} value={branch.branch_name}>
@@ -1160,27 +1167,27 @@ export default function InventoryReportsPage() {
                                             </option>
                                         ))
                                     ) : (
-                                        <option disabled>No branches found</option>
+                                        <option disabled>No branches</option>
                                     )}
                                 </select>
-                                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                    <img src={dropdown_arrow_icon} alt="" />
+                                <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:pr-3 pointer-events-none">
+                                    <img src={dropdown_arrow_icon} alt="" className="w-3 h-3 sm:w-4 sm:h-4" />
                                 </div>
                             </div>
 
                             {/* Categories Filter */}
-                            <div className="flex-1 min-w-50 relative">
+                            <div className="relative">
                                 <select 
                                     value={selectedCategory}
                                     onChange={(e) => setSelectedCategory(e.target.value)}
-                                    className="w-full px-4 py-2.5 shadow rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-semibold appearance-none bg-white pr-10"
+                                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm shadow rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-semibold appearance-none bg-white pr-8 sm:pr-10"
                                     disabled={categoriesLoading || !!categoriesError}
                                 >
                                     <option value="">All Categories</option>
                                     {categoriesLoading ? (
-                                        <option disabled>Loading categories...</option>
+                                        <option disabled>Loading...</option>
                                     ) : categoriesError ? (
-                                        <option disabled>Failed to load categories</option>
+                                        <option disabled>Error</option>
                                     ) : activeCategories.length > 0 ? (
                                         activeCategories.map((category) => (
                                             <option key={category.id} value={category.id}>
@@ -1188,40 +1195,39 @@ export default function InventoryReportsPage() {
                                             </option>
                                         ))
                                     ) : (
-                                        <option disabled>No categories found</option>
+                                        <option disabled>No categories</option>
                                     )}
                                 </select>
-                                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                    <img src={dropdown_arrow_icon} alt="" />
+                                <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:pr-3 pointer-events-none">
+                                    <img src={dropdown_arrow_icon} alt="" className="w-3 h-3 sm:w-4 sm:h-4" />
                                 </div>
                             </div>
 
-                            {/* Stock Status Filter - Show conditionally */}
+                            {/* Conditional Filters */}
                             {(activeTab === 'stock-summary' || activeTab === 'low-stock') && (
-                                <div className="flex-1 min-w-50 relative">
+                                <div className="relative">
                                     <select 
                                         value={selectedStockStatus}
                                         onChange={(e) => setSelectedStockStatus(e.target.value)}
-                                        className="w-full px-4 py-2.5 shadow rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-semibold appearance-none bg-white pr-10"
+                                        className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm shadow rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-semibold appearance-none bg-white pr-8 sm:pr-10"
                                     >
                                         <option value="">Stock Status</option>
                                         <option value="In Stock">In Stock</option>
                                         <option value="Low Stock">Low Stock</option>
                                         <option value="Out of Stock">Out of Stock</option>
                                     </select>
-                                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                        <img src={dropdown_arrow_icon} alt="" />
+                                    <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:pr-3 pointer-events-none">
+                                        <img src={dropdown_arrow_icon} alt="" className="w-3 h-3 sm:w-4 sm:h-4" />
                                     </div>
                                 </div>
                             )}
 
-                            {/* Movement Type Filter - Show for inventory movement */}
                             {activeTab === 'inventory-movement' && (
-                                <div className="flex-1 min-w-50 relative">
+                                <div className="relative">
                                     <select 
                                         value={selectedMovementType}
                                         onChange={(e) => setSelectedMovementType(e.target.value)}
-                                        className="w-full px-4 py-2.5 shadow rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-semibold appearance-none bg-white pr-10"
+                                        className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm shadow rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-semibold appearance-none bg-white pr-8 sm:pr-10"
                                     >
                                         <option value="">Movement Type</option>
                                         <option value="Transfer">Transfer</option>
@@ -1230,37 +1236,35 @@ export default function InventoryReportsPage() {
                                         <option value="Restock">Restock</option>
                                         <option value="Damage">Damage</option>
                                     </select>
-                                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                        <img src={dropdown_arrow_icon} alt="" />
+                                    <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:pr-3 pointer-events-none">
+                                        <img src={dropdown_arrow_icon} alt="" className="w-3 h-3 sm:w-4 sm:h-4" />
                                     </div>
                                 </div>
                             )}
 
-                            {/* Damage Status Filter - Show for damage & discard */}
                             {activeTab === 'damage-discard' && (
-                                <div className="flex-1 min-w-50 relative">
+                                <div className="relative">
                                     <select 
                                         value={selectedDamageStatus}
                                         onChange={(e) => setSelectedDamageStatus(e.target.value)}
-                                        className="w-full px-4 py-2.5 shadow rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-semibold appearance-none bg-white pr-10"
+                                        className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm shadow rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-semibold appearance-none bg-white pr-8 sm:pr-10"
                                     >
                                         <option value="">Damage Status</option>
                                         <option value="Damaged">Damaged</option>
                                         <option value="Discarded">Discarded</option>
                                     </select>
-                                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                        <img src={dropdown_arrow_icon} alt="" />
+                                    <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:pr-3 pointer-events-none">
+                                        <img src={dropdown_arrow_icon} alt="" className="w-3 h-3 sm:w-4 sm:h-4" />
                                     </div>
                                 </div>
                             )}
 
-                            {/* Transfer Status Filter - Show for transfer history */}
                             {activeTab === 'transfer-history' && (
-                                <div className="flex-1 min-w-50 relative">
+                                <div className="relative">
                                     <select 
                                         value={selectedTransferStatus}
                                         onChange={(e) => setSelectedTransferStatus(e.target.value)}
-                                        className="w-full px-4 py-2.5 shadow rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-semibold appearance-none bg-white pr-10"
+                                        className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm shadow rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-semibold appearance-none bg-white pr-8 sm:pr-10"
                                     >
                                         <option value="">Transfer Status</option>
                                         <option value="Completed">Completed</option>
@@ -1268,32 +1272,32 @@ export default function InventoryReportsPage() {
                                         <option value="Pending">Pending</option>
                                         <option value="Approved">Approved</option>
                                     </select>
-                                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                        <img src={dropdown_arrow_icon} alt="" />
+                                    <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:pr-3 pointer-events-none">
+                                        <img src={dropdown_arrow_icon} alt="" className="w-3 h-3 sm:w-4 sm:h-4" />
                                     </div>
                                 </div>
                             )}
 
                             {/* Filter Icon Button */}
-                            <div className="shrink-0">
+                            <div className="flex justify-end xs:justify-start">
                                 <button 
-                                    className="w-14 h-14 flex items-center justify-center cursor-pointer hover:bg-gray-50 rounded-lg"
+                                    className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center cursor-pointer hover:bg-gray-50 rounded-lg border border-gray-200"
                                     onClick={resetFilters}
                                     title="Reset all filters"
                                 >
-                                    <img src={filterIcon} alt="Filter" className="w-7 h-7" />
+                                    <img src={filterIcon} alt="Filter" className="w-5 h-5 sm:w-6 sm:h-6" />
                                 </button>
                             </div>
                         </div>
 
                         {/* Search and Actions Row */}
-                        <div className="pt-6">
-                            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                                {/* Search Field with Auto-complete */}
-                                <div className="relative w-full sm:w-auto">
+                        <div className="pt-4 sm:pt-6">
+                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
+                                {/* Search Field */}
+                                <div className="relative w-full sm:w-auto flex-1">
                                     <div className="relative">
                                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
-                                            <img src={search_icon} alt="Search" className="w-5 h-5 text-gray-400" />
+                                            <img src={search_icon} alt="Search" className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
                                         </div>
                                         <input
                                             type="text"
@@ -1301,193 +1305,182 @@ export default function InventoryReportsPage() {
                                             onChange={handleSearchChange}
                                             onFocus={() => searchQuery.length >= 2 && setShowSuggestions(true)}
                                             onBlur={handleSearchBlur}
-                                            placeholder={
-                                                activeTab === 'stock-summary' ? 'Search by Product Name, SKU, Category...' :
-                                                activeTab === 'inventory-movement' ? 'Search by Product, Type, User...' :
-                                                activeTab === 'low-stock' ? 'Search by Product, SKU, Branch...' :
-                                                activeTab === 'damage-discard' ? 'Search by Product, SKU, Reference...' :
-                                                'Search by Transfer ID, Products, Status...'
-                                            }
-                                            className="pl-10 pr-4 py-2.5 border border-[#00000080] rounded-lg focus:border-blue-500 w-full sm:w-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            placeholder="Search..."
+                                            className="w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-2.5 text-sm border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         />
                                         
-                                        {/* Search Suggestions Dropdown */}
+                                        {/* Search Suggestions */}
                                         {showSuggestions && searchSuggestions.length > 0 && (
                                             <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg">
                                                 <ul className="py-1 max-h-60 overflow-auto">
                                                     {searchSuggestions.map((suggestion, index) => (
                                                         <li
                                                             key={index}
-                                                            className="px-4 py-2.5 hover:bg-gray-50 cursor-pointer text-gray-700 hover:text-gray-900 border-b border-gray-100 last:border-b-0"
+                                                            className="px-3 sm:px-4 py-2 hover:bg-gray-50 cursor-pointer text-gray-700 text-sm"
                                                             onClick={() => handleSuggestionClick(suggestion)}
                                                         >
                                                             <div className="flex items-center space-x-2">
-                                                                <img src={search_icon} alt="" className="w-4 h-4 text-gray-400" />
-                                                                <span className="text-sm">{suggestion}</span>
+                                                                <img src={search_icon} alt="" className="w-3 h-3 sm:w-4 sm:h-4" />
+                                                                <span>{suggestion}</span>
                                                             </div>
                                                         </li>
                                                     ))}
                                                 </ul>
-                                                <div className="px-4 py-2 text-xs text-gray-500 bg-gray-50 border-t border-gray-200">
-                                                    {searchSuggestions.length} suggestion{searchSuggestions.length !== 1 ? 's' : ''}
-                                                </div>
                                             </div>
                                         )}
                                     </div>
                                 </div>
 
                                 {/* Action Buttons */}
-                                <div className="flex items-center space-x-3 w-full sm:w-auto">
+                                <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
                                     <button 
                                         onClick={handleExportToPDF}
                                         disabled={filteredData.length === 0}
-                                        className="flex items-center justify-center space-x-2 px-4 py-2.5 border border-gray-300 rounded-lg cursor-pointer transition-colors w-full sm:w-auto hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg cursor-pointer transition-colors hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                                     >
-                                        <img src={export_pdf} alt="Export PDF" className="w-7 h-7" />
-                                        <span className="text-lg font-medium text-black">Export PDF</span>
+                                        <img src={export_pdf} alt="PDF" className="w-5 h-5 sm:w-6 sm:h-6" />
+                                        <span className="hidden xs:inline text-sm font-medium text-black">PDF</span>
                                     </button>
 
                                     <button 
                                         onClick={handleExportToExcel}
                                         disabled={filteredData.length === 0}
-                                        className="flex items-center justify-center space-x-2 px-4 py-2.5 border border-gray-300 rounded-lg cursor-pointer transition-colors w-full sm:w-auto hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg cursor-pointer transition-colors hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                                     >
-                                        <img src={export_excel} alt="Export Excel" className="w-7 h-7" />
-                                        <span className="text-lg font-medium text-gray-700">Export Excel</span>
+                                        <img src={export_excel} alt="Excel" className="w-5 h-5 sm:w-6 sm:h-6" />
+                                        <span className="hidden xs:inline text-sm font-medium text-gray-700">Excel</span>
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Table Container */}
-                    <div className="relative mx-6 shadow rounded-xl">
-                        {/* Tabs */}
-                        <div className="border-b border-gray-200">
-                            <nav className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 px-6 pt-4" aria-label="Tabs">
-                                <button
-                                    onClick={() => setActiveTab('stock-summary')}
-                                    className={`px-4 py-3 text-sm font-medium rounded-t-lg transition-colors whitespace-nowrap ${
-                                        activeTab === 'stock-summary'
-                                            ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700'
-                                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                                    }`}
-                                >
-                                    Stock Summary
-                                </button>
-                                <button
-                                    onClick={() => setActiveTab('inventory-movement')}
-                                    className={`px-4 py-3 text-sm font-medium rounded-t-lg transition-colors whitespace-nowrap ${
-                                        activeTab === 'inventory-movement'
-                                            ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700'
-                                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                                    }`}
-                                >
-                                    Inventory Movement
-                                </button>
-                                <button
-                                    onClick={() => setActiveTab('low-stock')}
-                                    className={`px-4 py-3 text-sm font-medium rounded-t-lg transition-colors whitespace-nowrap ${
-                                        activeTab === 'low-stock'
-                                            ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700'
-                                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                                    }`}
-                                >
-                                    Low Stock Report
-                                </button>
-                                <button
-                                    onClick={() => setActiveTab('damage-discard')}
-                                    className={`px-4 py-3 text-sm font-medium rounded-t-lg transition-colors whitespace-nowrap ${
-                                        activeTab === 'damage-discard'
-                                            ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700'
-                                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                                    }`}
-                                >
-                                    Damage & Discard Report
-                                </button>
-                                <button
-                                    onClick={() => setActiveTab('transfer-history')}
-                                    className={`px-4 py-3 text-sm font-medium rounded-t-lg transition-colors whitespace-nowrap ${
-                                        activeTab === 'transfer-history'
-                                            ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700'
-                                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                                    }`}
-                                >
-                                    Transfer History
-                                </button>
-                            </nav>
-                        </div>
+                    {/* Tabs */}
+                    <div className="border-b border-gray-200 px-3 xs:px-4 sm:px-6">
+                        <nav className="flex flex-wrap gap-1 sm:gap-2" aria-label="Tabs">
+                            <button
+                                onClick={() => setActiveTab('stock-summary')}
+                                className={`px-2 xs:px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium rounded-t-lg transition-colors whitespace-nowrap ${
+                                    activeTab === 'stock-summary'
+                                        ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700'
+                                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                                }`}
+                            >
+                                Stock Summary
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('inventory-movement')}
+                                className={`px-2 xs:px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium rounded-t-lg transition-colors whitespace-nowrap ${
+                                    activeTab === 'inventory-movement'
+                                        ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700'
+                                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                                }`}
+                            >
+                                Inventory Movement
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('low-stock')}
+                                className={`px-2 xs:px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium rounded-t-lg transition-colors whitespace-nowrap ${
+                                    activeTab === 'low-stock'
+                                        ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700'
+                                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                                }`}
+                            >
+                                Low Stock
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('damage-discard')}
+                                className={`px-2 xs:px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium rounded-t-lg transition-colors whitespace-nowrap ${
+                                    activeTab === 'damage-discard'
+                                        ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700'
+                                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                                }`}
+                            >
+                                Damage & Discard
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('transfer-history')}
+                                className={`px-2 xs:px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium rounded-t-lg transition-colors whitespace-nowrap ${
+                                    activeTab === 'transfer-history'
+                                        ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700'
+                                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                                }`}
+                            >
+                                Transfer History
+                            </button>
+                        </nav>
+                    </div>
 
-                        {/* Table Title */}
-                        <div className="px-6 py-3">
-                            <h2 className="text-xl font-bold text-gray-900">
-                                {activeTab === 'stock-summary' && 'PRODUCT LIST (MASTER INVENTORY)'}
-                                {activeTab === 'inventory-movement' && 'INVENTORY MOVEMENT LOG'}
-                                {activeTab === 'low-stock' && 'LOW STOCK ALERT'}
-                                {activeTab === 'damage-discard' && 'DAMAGE & DISCARD RECORDS'}
-                                {activeTab === 'transfer-history' && 'TRANSFER HISTORY'}
-                            </h2>
-                            {searchQuery && (
-                                <p className="text-sm text-gray-600 mt-1">
-                                    Showing {filteredData.length} of {getCurrentData().length} records
-                                    {searchQuery && ` for "${searchQuery}"`}
-                                </p>
-                            )}
-                        </div>
-
-                        {/* Table Content */}
-                        {renderTabContent()}
-
-                        {/* Bulk Transfer Button */}
-                        {showBulkTransfer && selectedProductIds.length > 0 && activeTab === 'stock-summary' && (
-                            <div className="px-6 py-4 bg-blue-50 border-t border-blue-200">
-                                <div className="flex items-center justify-between">
-                                    <span className="text-sm font-medium text-gray-700">
-                                        {selectedProductIds.length} product(s) selected
-                                    </span>
-                                    <button
-                                        onClick={handleBulkTransfer}
-                                        className="px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
-                                    >
-                                        Transfer Selected Products
-                                    </button>
-                                </div>
-                            </div>
+                    {/* Table Title */}
+                    <div className="px-3 xs:px-4 sm:px-6 py-2 sm:py-3">
+                        <h2 className="text-sm sm:text-base md:text-lg lg:text-xl font-bold text-gray-900">
+                            {activeTab === 'stock-summary' && 'PRODUCT LIST (MASTER INVENTORY)'}
+                            {activeTab === 'inventory-movement' && 'INVENTORY MOVEMENT LOG'}
+                            {activeTab === 'low-stock' && 'LOW STOCK ALERT'}
+                            {activeTab === 'damage-discard' && 'DAMAGE & DISCARD RECORDS'}
+                            {activeTab === 'transfer-history' && 'TRANSFER HISTORY'}
+                        </h2>
+                        {searchQuery && (
+                            <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                                Showing {filteredData.length} of {getCurrentData().length} records for "{searchQuery}"
+                            </p>
                         )}
                     </div>
 
+                    {/* Table Content */}
+                    <div className="mx-3 xs:mx-4 sm:mx-6 shadow rounded-xl overflow-hidden">
+                        {renderTabContent()}
+                    </div>
+
+                    {/* Bulk Transfer Button */}
+                    {showBulkTransfer && selectedProductIds.length > 0 && activeTab === 'stock-summary' && (
+                        <div className="px-3 xs:px-4 sm:px-6 py-3 sm:py-4 bg-blue-50 border-t border-blue-200">
+                            <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+                                <span className="text-xs sm:text-sm font-medium text-gray-700">
+                                    {selectedProductIds.length} product(s) selected
+                                </span>
+                                <button
+                                    onClick={handleBulkTransfer}
+                                    className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                                >
+                                    Transfer Selected Products
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Pagination */}
                     {filteredData.length > 0 && (
-                        <div className="px-6 py-4">
-                            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                                <div className="text-sm text-gray-500">
+                        <div className="px-3 xs:px-4 sm:px-6 py-3 sm:py-4">
+                            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+                                <div className="text-xs sm:text-sm text-gray-500">
                                     Showing <span className="font-medium">{startIndex + 1}</span> to <span className="font-medium">
                                         {Math.min(endIndex, filteredData.length)}
                                     </span> of <span className="font-medium">{filteredData.length}</span> records
                                 </div>
-                                <div className="flex items-center space-x-2">
+                                <div className="flex items-center flex-wrap justify-center gap-1 sm:gap-2">
                                     <button 
                                         onClick={handlePrevious}
                                         disabled={currentPage === 1}
-                                        className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+                                        className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg transition-colors ${
                                             currentPage === 1 
                                                 ? 'text-gray-400 bg-gray-100 cursor-not-allowed' 
                                                 : 'text-gray-700 bg-gray-100 hover:bg-gray-200'
                                         }`}
                                     >
-                                        Previous
+                                        Prev
                                     </button>
                                     
                                     {getPageNumbers().map((pageNumber, index) => (
                                         typeof pageNumber === 'string' ? (
-                                            <span key={`ellipsis-${index}`} className="px-3 py-1.5 text-sm text-gray-500">
+                                            <span key={`ellipsis-${index}`} className="px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm text-gray-500">
                                                 {pageNumber}
                                             </span>
                                         ) : (
                                             <button
                                                 key={`page-${pageNumber}`}
                                                 onClick={() => handlePageChange(pageNumber)}
-                                                className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+                                                className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg transition-colors ${
                                                     currentPage === pageNumber
                                                         ? 'text-blue-600 bg-blue-50 hover:bg-blue-100'
                                                         : 'text-gray-700 hover:bg-gray-100'
@@ -1501,7 +1494,7 @@ export default function InventoryReportsPage() {
                                     <button 
                                         onClick={handleNext}
                                         disabled={currentPage === totalPages}
-                                        className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+                                        className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg transition-colors ${
                                             currentPage === totalPages 
                                                 ? 'text-gray-400 bg-gray-100 cursor-not-allowed' 
                                                 : 'text-gray-700 bg-gray-100 hover:bg-gray-200'

@@ -201,6 +201,12 @@ export default function Sidebar({ onMenuSelect, mobileMenuOpen, closeMobileMenu 
       icon: hr_icon,
       path: `${basePath}/ai-content`,
     },
+    {
+      id: 'branches',
+      label: 'Branches',
+      icon: hr_icon,
+      path: `${basePath}/branches`,
+    },
     hasAnyPermission(['view_users', 'create_user', 'edit_user', 'delete_user']) && {
       id: 'System',
       label: 'Settings',
@@ -384,7 +390,7 @@ export default function Sidebar({ onMenuSelect, mobileMenuOpen, closeMobileMenu 
       {/* Backdrop overlay for mobile — closes sidebar when clicking outside */}
       {mobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-black/40 z-40 lg:hidden"
+          className="fixed inset-0 z-40 lg:hidden"
           onClick={closeMobileMenu}
         />
       )}

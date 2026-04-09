@@ -260,7 +260,9 @@ export default function OrdersPage() {
               className="bg-white rounded-xl p-5 shadow-sm border border-gray-100"
             >
               <p className="text-sm text-gray-500 mb-1">{card.label}</p>
-              <p className={`text-[18px] lg:text-2xl font-bold ${card.color}`}>{card.value}</p>
+              <p className={`text-[18px] lg:text-2xl font-bold ${card.color}`}>
+                {card.value}
+              </p>
             </div>
           ))}
         </div>
@@ -268,106 +270,114 @@ export default function OrdersPage() {
         {/* Table */}
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
           {/* Table header filters */}
-        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b flex flex-col lg:flex-row gap-3 sm:gap-4 items-start lg:items-center justify-between">
-  <div className="flex flex-col sm:flex-row lg:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
-    {/* Search Input */}
-    <div className="relative w-full sm:w-auto">
-      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-        <img src={search_icon} alt="" className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-      </div>
-      <input
-        type="text"
-        value={search}
-        onChange={(e) => {
-          setSearch(e.target.value);
-          setCurrentPage(1);
-        }}
-        placeholder="Search orders..."
-        className="w-full sm:w-56 pl-8 sm:pl-9 pr-3 sm:pr-4 py-1.5 sm:py-2 border rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-      />
-    </div>
-    
-    {/* Order Status Filter */}
-    <select
-      value={orderStatus}
-      onChange={(e) => {
-        setOrderStatus(e.target.value);
-        setCurrentPage(1);
-      }}
-      className="w-full sm:w-auto px-2 sm:px-3 py-1.5 sm:py-2 border rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-    >
-      <option value="">All Statuses</option>
-      {[
-        "Pending",
-        "Confirmed",
-        "Processing",
-        "Packed",
-        "Shipped",
-        "Out for Delivery",
-        "Delivered",
-        "Cancelled",
-        "Returned",
-      ].map((s) => (
-        <option key={s} value={s}>
-          {s}
-        </option>
-      ))}
-    </select>
-    
-    {/* Payment Status Filter */}
-    <select
-      value={paymentStatus}
-      onChange={(e) => {
-        setPaymentStatus(e.target.value);
-        setCurrentPage(1);
-      }}
-      className="w-full sm:w-auto px-2 sm:px-3 py-1.5 sm:py-2 border rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-    >
-      <option value="">All Payments</option>
-      {[
-        "Pending",
-        "Paid",
-        "Partially Paid",
-        "Refunded",
-        "Failed",
-      ].map((s) => (
-        <option key={s} value={s}>
-          {s}
-        </option>
-      ))}
-    </select>
-    
-    {/* Channel Filter */}
-    <select
-      value={channel}
-      onChange={(e) => {
-        setChannel(e.target.value);
-        setCurrentPage(1);
-      }}
-      className="w-full sm:w-auto px-2 sm:px-3 py-1.5 sm:py-2 border rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-    >
-      <option value="">All Channels</option>
-      {["Website", "Mobile App", "POS", "Phone", "Manual"].map(
-        (s) => (
-          <option key={s} value={s}>
-            {s}
-          </option>
-        ),
-      )}
-    </select>
-  </div>
-  
-  {/* Export Button */}
-  <div className="w-full sm:w-auto">
-    <button
-      onClick={handleExport}
-      className="w-full sm:w-auto flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 border rounded-lg hover:bg-gray-50 text-xs sm:text-sm transition-colors"
-    >
-      <img src={export_excel} alt="" className="w-4 h-4 sm:w-5 sm:h-5" />
-      <span>Export</span>
-    </button>
-  </div>
-</div>
+          <div className="px-4 sm:px-6 py-3 sm:py-4 border-b flex flex-col lg:flex-row gap-3 sm:gap-4 items-start lg:items-center justify-between">
+            <div className="flex flex-col sm:flex-row lg:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
+              {/* Search Input */}
+              <div className="relative w-full sm:w-auto">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <img
+                    src={search_icon}
+                    alt=""
+                    className="w-3.5 h-3.5 sm:w-4 sm:h-4"
+                  />
+                </div>
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  placeholder="Search orders..."
+                  className="w-full sm:w-56 pl-8 sm:pl-9 pr-3 sm:pr-4 py-1.5 sm:py-2 border rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Order Status Filter */}
+              <select
+                value={orderStatus}
+                onChange={(e) => {
+                  setOrderStatus(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="w-full sm:w-auto px-2 sm:px-3 py-1.5 sm:py-2 border rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">All Statuses</option>
+                {[
+                  "Pending",
+                  "Confirmed",
+                  "Processing",
+                  "Packed",
+                  "Shipped",
+                  "Out for Delivery",
+                  "Delivered",
+                  "Cancelled",
+                  "Returned",
+                ].map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+
+              {/* Payment Status Filter */}
+              <select
+                value={paymentStatus}
+                onChange={(e) => {
+                  setPaymentStatus(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="w-full sm:w-auto px-2 sm:px-3 py-1.5 sm:py-2 border rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">All Payments</option>
+                {[
+                  "Pending",
+                  "Paid",
+                  "Partially Paid",
+                  "Refunded",
+                  "Failed",
+                ].map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+
+              {/* Channel Filter */}
+              <select
+                value={channel}
+                onChange={(e) => {
+                  setChannel(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="w-full sm:w-auto px-2 sm:px-3 py-1.5 sm:py-2 border rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">All Channels</option>
+                {["Website", "Mobile App", "POS", "Phone", "Manual"].map(
+                  (s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ),
+                )}
+              </select>
+            </div>
+
+            {/* Export Button */}
+            <div className="w-full sm:w-auto">
+              <button
+                onClick={handleExport}
+                className="w-full sm:w-auto flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 border rounded-lg hover:bg-gray-50 text-xs sm:text-sm transition-colors"
+              >
+                <img
+                  src={export_excel}
+                  alt=""
+                  className="w-4 h-4 sm:w-5 sm:h-5"
+                />
+                <span>Export</span>
+              </button>
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
             <div className="xl:col-span-4 overflow-x-auto">

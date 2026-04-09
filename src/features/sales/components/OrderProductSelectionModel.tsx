@@ -1,15 +1,20 @@
 // src/features/sales/components/ProductSelectionModal.tsx
-import { useState, useEffect, useMemo } from 'react';
-import { useGetProductsQuery, useGetCategoriesQuery } from '../../../services/inventoryApi';
-import { useAppDispatch } from '../../../app/hooks';
-import { addOrderProduct } from '../salesSlice';
-import ProductCard from './Productcard';
-import ProductPopup from './Productpopup';
-import { XMarkIcon } from '@heroicons/react/24/outline';
-import search_icon from '../../../assets/icons/search_icon.svg';
-import barcode_icon from '../../../assets/icons/barcode_icon.svg';
+import { useState, useEffect, useMemo } from "react";
+import {
+  useGetProductsQuery,
+  useGetCategoriesQuery,
+} from "../../../services/inventoryApi";
+import { useAppDispatch } from "../../../app/hooks";
+import { addOrderProduct } from "../salesSlice";
+import ProductCard from "./Productcard";
+import ProductPopup from "./Productpopup";
+import { XMarkIcon } from "@heroicons/react/24/outline";
+import search_icon from "../../../assets/icons/search_icon.svg";
+import barcode_icon from "../../../assets/icons/barcode_icon.svg";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://erp-backend.ttexpresskw.com';
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL?.replace("/api", "") ||
+  "https://erp-backend.ttexpresskw.com";
 
 interface ProductSelectionModalProps {
   isOpen: boolean;
@@ -29,12 +34,17 @@ interface MappedProduct {
   outOfStock: boolean;
 }
 
-export default function ProductSelectionModal({ isOpen, onClose }: ProductSelectionModalProps) {
+export default function ProductSelectionModal({
+  isOpen,
+  onClose,
+}: ProductSelectionModalProps) {
   const dispatch = useAppDispatch();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All Items');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All Items");
   const [isProductPopupOpen, setIsProductPopupOpen] = useState(false);
-  const [currentProduct, setCurrentProduct] = useState<MappedProduct | null>(null);
+  const [currentProduct, setCurrentProduct] = useState<MappedProduct | null>(
+    null,
+  );
 
   // ─── Real API ─────────────────────────────────────────────────
   const { data: productsResponse, isLoading, error } = useGetProductsQuery();
@@ -43,7 +53,7 @@ export default function ProductSelectionModal({ isOpen, onClose }: ProductSelect
   const categories = useMemo(() => {
     const apiCategories = categoriesResponse?.data?.data || [];
     return [
-      'All Items',
+      "All Items",
       ...apiCategories
         .filter((cat: any) => cat.is_active)
         .map((cat: any) => cat.category_name),
@@ -54,27 +64,31 @@ export default function ProductSelectionModal({ isOpen, onClose }: ProductSelect
     const apiProducts = productsResponse?.data?.data || [];
 
     return apiProducts.map((product: any) => {
-      const totalStock = product.inventory?.reduce(
-        (sum: number, inv: any) => sum + (inv.available_quantity ?? inv.quantity ?? 0), 0
-      ) || 0;
+      const totalStock =
+        product.inventory?.reduce(
+          (sum: number, inv: any) =>
+            sum + (inv.available_quantity ?? inv.quantity ?? 0),
+          0,
+        ) || 0;
 
-      const imagePath = product.primary_image?.image_path 
-        ? `${API_BASE_URL}/storage/${product.primary_image.image_path}` 
-        : 'https://images.unsplash.com/photo-1541275055241-329bbdf9a191?w=500&auto=format&fit=crop&q=60';
+      const imagePath = product.primary_image?.image_path
+        ? `${API_BASE_URL}/storage/${product.primary_image.image_path}`
+        : "https://images.unsplash.com/photo-1541275055241-329bbdf9a191?w=500&auto=format&fit=crop&q=60";
 
       return {
         id: product.id.toString(),
         product_id: product.id,
-        name: product.product_name || '',
-        sku: product.sku || '',
-        price: typeof product.selling_price === 'string'
-          ? parseFloat(product.selling_price)
-          : product.selling_price || 0,
+        name: product.product_name || "",
+        sku: product.sku || "",
+        price:
+          typeof product.selling_price === "string"
+            ? parseFloat(product.selling_price)
+            : product.selling_price || 0,
         stock: totalStock,
         outOfStock: totalStock <= 0,
         image: imagePath,
-        image_url: product.primary_image?.image_path || '',
-        category: product.category?.category_name || 'All Items',
+        image_url: product.primary_image?.image_path || "",
+        category: product.category?.category_name || "All Items",
       };
     });
   }, [productsResponse]);
@@ -83,15 +97,17 @@ export default function ProductSelectionModal({ isOpen, onClose }: ProductSelect
 
   useEffect(() => {
     let filtered = products;
-    if (selectedCategory !== 'All Items') {
-      filtered = filtered.filter(p =>
-        p.category.toLowerCase().includes(selectedCategory.toLowerCase())
+    if (selectedCategory !== "All Items") {
+      filtered = filtered.filter((p) =>
+        p.category.toLowerCase().includes(selectedCategory.toLowerCase()),
       );
     }
-    if (searchQuery.trim() !== '') {
+    if (searchQuery.trim() !== "") {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(p =>
-        p.name.toLowerCase().includes(query) || p.sku.toLowerCase().includes(query)
+      filtered = filtered.filter(
+        (p) =>
+          p.name.toLowerCase().includes(query) ||
+          p.sku.toLowerCase().includes(query),
       );
     }
     setFilteredProducts(filtered);
@@ -103,23 +119,25 @@ export default function ProductSelectionModal({ isOpen, onClose }: ProductSelect
   };
 
   const handleAddToSelection = (productWithDetails: any) => {
-    const uniqueId = `${currentProduct?.product_id}-${productWithDetails.variant_id || 'default'}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    
-    const fullImageUrl = currentProduct?.image || '';
+    const uniqueId = `${currentProduct?.product_id}-${productWithDetails.variant_id || "default"}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-    dispatch(addOrderProduct({
-      id: uniqueId,
-      product_id: currentProduct?.product_id || 0,
-      name: productWithDetails.name || currentProduct?.name || '',
-      sku: productWithDetails.sku || currentProduct?.sku || '',
-      price: productWithDetails.price || currentProduct?.price || 0,
-      size: productWithDetails.size || 'Default',
-      variant_id: productWithDetails.variant_id ?? null,
-      quantity: productWithDetails.quantity || 1,
-      image: currentProduct?.image || '',
-      image_url: fullImageUrl,
-    }));
-    
+    const fullImageUrl = currentProduct?.image || "";
+
+    dispatch(
+      addOrderProduct({
+        id: uniqueId,
+        product_id: currentProduct?.product_id || 0,
+        name: productWithDetails.name || currentProduct?.name || "",
+        sku: productWithDetails.sku || currentProduct?.sku || "",
+        price: productWithDetails.price || currentProduct?.price || 0,
+        size: productWithDetails.size || "Default",
+        variant_id: productWithDetails.variant_id ?? null,
+        quantity: productWithDetails.quantity || 1,
+        image: currentProduct?.image || "",
+        image_url: fullImageUrl,
+      }),
+    );
+
     setIsProductPopupOpen(false);
     setCurrentProduct(null);
     onClose();
@@ -133,7 +151,9 @@ export default function ProductSelectionModal({ isOpen, onClose }: ProductSelect
       <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-7xl max-h-[90vh] sm:max-h-[85vh] overflow-y-auto">
         {/* Header - Sticky */}
         <div className="sticky top-0 bg-white border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between z-10">
-          <h2 className="text-base sm:text-lg md:text-xl font-bold text-gray-900">Select Products</h2>
+          <h2 className="text-base sm:text-lg md:text-xl font-bold text-gray-900">
+            Select Products
+          </h2>
           <button
             onClick={onClose}
             className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -156,11 +176,15 @@ export default function ProductSelectionModal({ isOpen, onClose }: ProductSelect
               placeholder="Search by product name, SKU, or barcode"
               className="w-full pl-9 sm:pl-12 pr-12 sm:pr-16 py-2.5 sm:py-3.5 bg-white border border-gray-300 rounded-lg sm:rounded-xl text-gray-900 placeholder-gray-400 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 shadow-sm"
             />
-            <button 
-              className="absolute right-1.5 sm:right-2 top-1/2 -translate-y-1/2 p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors" 
+            <button
+              className="absolute right-1.5 sm:right-2 top-1/2 -translate-y-1/2 p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors"
               title="Scan Barcode"
             >
-              <img src={barcode_icon} alt="" className="w-4 h-4 sm:w-5 sm:h-5" />
+              <img
+                src={barcode_icon}
+                alt=""
+                className="w-4 h-4 sm:w-5 sm:h-5"
+              />
             </button>
           </div>
 
@@ -174,8 +198,8 @@ export default function ProductSelectionModal({ isOpen, onClose }: ProductSelect
                     onClick={() => setSelectedCategory(category)}
                     className={`px-2.5 sm:px-3 md:px-4 lg:px-5 py-1.5 sm:py-2 md:py-2.5 rounded-md font-medium text-[10px] sm:text-xs md:text-sm whitespace-nowrap transition-all duration-200 cursor-pointer ${
                       selectedCategory === category
-                        ? 'border border-[#1773CF] text-black shadow-md shadow-blue-200 bg-white'
-                        : 'bg-white text-gray-700 border border-gray-200 hover:border-blue-300 hover:text-blue-600'
+                        ? "border border-[#1773CF] text-black shadow-md shadow-blue-200 bg-white"
+                        : "bg-white text-gray-700 border border-gray-200 hover:border-blue-300 hover:text-blue-600"
                     }`}
                   >
                     {category}
@@ -190,12 +214,16 @@ export default function ProductSelectionModal({ isOpen, onClose }: ProductSelect
             <div className="flex items-center justify-center py-12 sm:py-16 md:py-20">
               <div className="flex flex-col items-center gap-3">
                 <div className="animate-spin rounded-full h-8 w-8 sm:h-10 sm:w-10 border-b-2 border-blue-600" />
-                <p className="text-gray-500 text-xs sm:text-sm">Loading products...</p>
+                <p className="text-gray-500 text-xs sm:text-sm">
+                  Loading products...
+                </p>
               </div>
             </div>
           ) : error ? (
             <div className="flex items-center justify-center py-12 sm:py-16 md:py-20">
-              <p className="text-red-500 font-medium text-sm sm:text-base">Failed to load products. Please try again.</p>
+              <p className="text-red-500 font-medium text-sm sm:text-base">
+                Failed to load products. Please try again.
+              </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 min-[400px]:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 md:gap-4 lg:gap-5 xl:gap-6 p-2 sm:p-3 md:p-4">
@@ -213,12 +241,26 @@ export default function ProductSelectionModal({ isOpen, onClose }: ProductSelect
           {!isLoading && !error && filteredProducts.length === 0 && (
             <div className="flex flex-col items-center justify-center py-12 sm:py-16 md:py-20 px-4">
               <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gray-100 rounded-full flex items-center justify-center mb-3 sm:mb-4">
-                <svg className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                <svg
+                  className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+                  />
                 </svg>
               </div>
-              <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1 sm:mb-2">No products found</h3>
-              <p className="text-xs sm:text-sm text-gray-600 text-center max-w-sm">Try adjusting your search or filter.</p>
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1 sm:mb-2">
+                No products found
+              </h3>
+              <p className="text-xs sm:text-sm text-gray-600 text-center max-w-sm">
+                Try adjusting your search or filter.
+              </p>
             </div>
           )}
         </div>
@@ -228,7 +270,10 @@ export default function ProductSelectionModal({ isOpen, onClose }: ProductSelect
       {isProductPopupOpen && currentProduct && (
         <ProductPopup
           product={currentProduct}
-          onClose={() => { setIsProductPopupOpen(false); setCurrentProduct(null); }}
+          onClose={() => {
+            setIsProductPopupOpen(false);
+            setCurrentProduct(null);
+          }}
           onAdd={handleAddToSelection}
         />
       )}

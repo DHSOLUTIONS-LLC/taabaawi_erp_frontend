@@ -278,181 +278,183 @@ export default function ShippingMethodsPage() {
       </div>
 
       {/* Create/Edit Modal */}
-    {showModal && (
-  <div className="fixed inset-0 flex items-center justify-center z-50 p-2 sm:p-4 bg-black/50">
-    <div className="bg-white rounded-xl sm:rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden mx-2 sm:mx-0">
-      {/* Header */}
-      <div className="bg-[#1773CF] px-4 sm:px-6 py-4 sm:py-5">
-        <h2 className="text-base sm:text-lg font-bold text-white">
-          {editingMethod ? "Edit Shipping Method" : "New Shipping Method"}
-        </h2>
-      </div>
-      
-      {/* Form Body */}
-      <div className="p-4 sm:p-6 space-y-3 sm:space-y-4 max-h-[60vh] sm:max-h-[70vh] overflow-y-auto">
-        {/* Method Name */}
-        <div>
-          <label className="text-xs sm:text-sm font-medium text-gray-700 mb-1 block">
-            Method Name *
-          </label>
-          <input
-            value={form.method_name}
-            onChange={(e) =>
-              setForm((f) => ({ ...f, method_name: e.target.value }))
-            }
-            placeholder="e.g. Standard Delivery"
-            className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        
-        {/* Provider */}
-        <div>
-          <label className="text-xs sm:text-sm font-medium text-gray-700 mb-1 block">
-            Provider
-          </label>
-          <input
-            value={form.provider}
-            onChange={(e) =>
-              setForm((f) => ({ ...f, provider: e.target.value }))
-            }
-            placeholder="e.g. Aramex, DHL"
-            className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        
-        {/* Description */}
-        <div>
-          <label className="text-xs sm:text-sm font-medium text-gray-700 mb-1 block">
-            Description
-          </label>
-          <textarea
-            value={form.description}
-            onChange={(e) =>
-              setForm((f) => ({ ...f, description: e.target.value }))
-            }
-            rows={2}
-            placeholder="Short description"
-            className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        
-        {/* Cost Fields - Responsive Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-          <div>
-            <label className="text-xs sm:text-sm font-medium text-gray-700 mb-1 block">
-              Base Cost (KD) *
-            </label>
-            <input
-              type="number"
-              step="0.001"
-              value={form.base_cost}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, base_cost: e.target.value }))
-              }
-              placeholder="0.000"
-              className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+      {showModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-2 sm:p-4 bg-black/50">
+          <div className="bg-white rounded-xl sm:rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden mx-2 sm:mx-0">
+            {/* Header */}
+            <div className="bg-[#1773CF] px-4 sm:px-6 py-4 sm:py-5">
+              <h2 className="text-base sm:text-lg font-bold text-white">
+                {editingMethod ? "Edit Shipping Method" : "New Shipping Method"}
+              </h2>
+            </div>
+
+            {/* Form Body */}
+            <div className="p-4 sm:p-6 space-y-3 sm:space-y-4 max-h-[60vh] sm:max-h-[70vh] overflow-y-auto">
+              {/* Method Name */}
+              <div>
+                <label className="text-xs sm:text-sm font-medium text-gray-700 mb-1 block">
+                  Method Name *
+                </label>
+                <input
+                  value={form.method_name}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, method_name: e.target.value }))
+                  }
+                  placeholder="e.g. Standard Delivery"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Provider */}
+              <div>
+                <label className="text-xs sm:text-sm font-medium text-gray-700 mb-1 block">
+                  Provider
+                </label>
+                <input
+                  value={form.provider}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, provider: e.target.value }))
+                  }
+                  placeholder="e.g. Aramex, DHL"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="text-xs sm:text-sm font-medium text-gray-700 mb-1 block">
+                  Description
+                </label>
+                <textarea
+                  value={form.description}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, description: e.target.value }))
+                  }
+                  rows={2}
+                  placeholder="Short description"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Cost Fields - Responsive Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div>
+                  <label className="text-xs sm:text-sm font-medium text-gray-700 mb-1 block">
+                    Base Cost (KD) *
+                  </label>
+                  <input
+                    type="number"
+                    step="0.001"
+                    value={form.base_cost}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, base_cost: e.target.value }))
+                    }
+                    placeholder="0.000"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs sm:text-sm font-medium text-gray-700 mb-1 block">
+                    Cost per KG (KD)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.001"
+                    value={form.cost_per_kg}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, cost_per_kg: e.target.value }))
+                    }
+                    placeholder="0.000"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              {/* Estimated Days - Responsive Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div>
+                  <label className="text-xs sm:text-sm font-medium text-gray-700 mb-1 block">
+                    Min Days
+                  </label>
+                  <input
+                    type="number"
+                    value={form.estimated_days_min}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        estimated_days_min: e.target.value,
+                      }))
+                    }
+                    placeholder="1"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs sm:text-sm font-medium text-gray-700 mb-1 block">
+                    Max Days
+                  </label>
+                  <input
+                    type="number"
+                    value={form.estimated_days_max}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        estimated_days_max: e.target.value,
+                      }))
+                    }
+                    placeholder="5"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              {/* Active Toggle */}
+              <div className="flex items-center gap-3 pt-2">
+                <button
+                  onClick={() =>
+                    setForm((f) => ({ ...f, is_active: !f.is_active }))
+                  }
+                  className={`relative inline-flex h-5 w-10 sm:h-6 sm:w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    form.is_active ? "bg-green-500" : "bg-gray-300"
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-3.5 w-3.5 sm:h-4 sm:w-4 transform rounded-full bg-white transition-transform ${
+                      form.is_active
+                        ? "translate-x-5 sm:translate-x-6"
+                        : "translate-x-1"
+                    }`}
+                  />
+                </button>
+                <span className="text-xs sm:text-sm text-gray-700">
+                  {form.is_active ? "Active" : "Inactive"}
+                </span>
+              </div>
+            </div>
+
+            {/* Footer Buttons */}
+            <div className="px-4 sm:px-6 py-3 sm:py-4 border-t flex flex-col sm:flex-row gap-2 sm:gap-3">
+              <button
+                onClick={() => setShowModal(false)}
+                className="w-full sm:flex-1 py-2 sm:py-2.5 border rounded-xl font-medium text-gray-700 hover:bg-gray-50 transition-colors text-sm"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmit}
+                disabled={isCreating || isUpdating}
+                className="w-full sm:flex-1 py-2 sm:py-2.5 bg-[#1773CF] text-white rounded-xl font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors text-sm"
+              >
+                {isCreating || isUpdating
+                  ? "Saving..."
+                  : editingMethod
+                    ? "Update Method"
+                    : "Create Method"}
+              </button>
+            </div>
           </div>
-          <div>
-            <label className="text-xs sm:text-sm font-medium text-gray-700 mb-1 block">
-              Cost per KG (KD)
-            </label>
-            <input
-              type="number"
-              step="0.001"
-              value={form.cost_per_kg}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, cost_per_kg: e.target.value }))
-              }
-              placeholder="0.000"
-              className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
         </div>
-        
-        {/* Estimated Days - Responsive Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-          <div>
-            <label className="text-xs sm:text-sm font-medium text-gray-700 mb-1 block">
-              Min Days
-            </label>
-            <input
-              type="number"
-              value={form.estimated_days_min}
-              onChange={(e) =>
-                setForm((f) => ({
-                  ...f,
-                  estimated_days_min: e.target.value,
-                }))
-              }
-              placeholder="1"
-              className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div>
-            <label className="text-xs sm:text-sm font-medium text-gray-700 mb-1 block">
-              Max Days
-            </label>
-            <input
-              type="number"
-              value={form.estimated_days_max}
-              onChange={(e) =>
-                setForm((f) => ({
-                  ...f,
-                  estimated_days_max: e.target.value,
-                }))
-              }
-              placeholder="5"
-              className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-        </div>
-        
-        {/* Active Toggle */}
-        <div className="flex items-center gap-3 pt-2">
-          <button
-            onClick={() =>
-              setForm((f) => ({ ...f, is_active: !f.is_active }))
-            }
-            className={`relative inline-flex h-5 w-10 sm:h-6 sm:w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              form.is_active ? "bg-green-500" : "bg-gray-300"
-            }`}
-          >
-            <span
-              className={`inline-block h-3.5 w-3.5 sm:h-4 sm:w-4 transform rounded-full bg-white transition-transform ${
-                form.is_active ? "translate-x-5 sm:translate-x-6" : "translate-x-1"
-              }`}
-            />
-          </button>
-          <span className="text-xs sm:text-sm text-gray-700">
-            {form.is_active ? "Active" : "Inactive"}
-          </span>
-        </div>
-      </div>
-      
-      {/* Footer Buttons */}
-      <div className="px-4 sm:px-6 py-3 sm:py-4 border-t flex flex-col sm:flex-row gap-2 sm:gap-3">
-        <button
-          onClick={() => setShowModal(false)}
-          className="w-full sm:flex-1 py-2 sm:py-2.5 border rounded-xl font-medium text-gray-700 hover:bg-gray-50 transition-colors text-sm"
-        >
-          Cancel
-        </button>
-        <button
-          onClick={handleSubmit}
-          disabled={isCreating || isUpdating}
-          className="w-full sm:flex-1 py-2 sm:py-2.5 bg-[#1773CF] text-white rounded-xl font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors text-sm"
-        >
-          {isCreating || isUpdating
-            ? "Saving..."
-            : editingMethod
-              ? "Update Method"
-              : "Create Method"}
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+      )}
     </DashboardLayout>
   );
 }

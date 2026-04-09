@@ -272,39 +272,51 @@ export default function ShiftReportsPage() {
           </div>
         </div>
 
-       {/* Search and Export */}
-<div className="bg-white rounded-xl p-3 sm:p-4 mb-4 sm:mb-6">
-  <div className="flex flex-col lg:flex-row justify-between gap-4">
-    <div className="relative w-full lg:w-96">
-      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-        <img src={search_icon} alt="" className="w-4 h-4 sm:w-5 sm:h-5" />
-      </div>
-      <input
-        type="text"
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        placeholder="Search by cashier or branch..."
-        className="pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-2.5 text-sm sm:text-base border rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-      />
-    </div>
-    <div className="flex flex-col sm:flex-row lg:flex-row space-y-2 sm:space-y-0 sm:space-x-3 space-x-0 lg:space-x-3">
-      <button
-        onClick={handleExportToPDF}
-        className="flex items-center justify-center space-x-2 px-3 sm:px-4 py-1.5 sm:py-2 border rounded-lg hover:bg-gray-50 transition-colors"
-      >
-        <img src={export_pdf} alt="" className="w-4 h-4 sm:w-5 sm:h-5" />
-        <span className="text-sm sm:text-base">Export PDF</span>
-      </button>
-      <button
-        onClick={handleExportToExcel}
-        className="flex items-center justify-center space-x-2 px-3 sm:px-4 py-1.5 sm:py-2 border rounded-lg hover:bg-gray-50 transition-colors"
-      >
-        <img src={export_excel} alt="" className="w-4 h-4 sm:w-5 sm:h-5" />
-        <span className="text-sm sm:text-base">Export Excel</span>
-      </button>
-    </div>
-  </div>
-</div>
+        {/* Search and Export */}
+        <div className="bg-white rounded-xl p-3 sm:p-4 mb-4 sm:mb-6">
+          <div className="flex flex-col lg:flex-row justify-between gap-4">
+            <div className="relative w-full lg:w-96">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <img
+                  src={search_icon}
+                  alt=""
+                  className="w-4 h-4 sm:w-5 sm:h-5"
+                />
+              </div>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search by cashier or branch..."
+                className="pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-2.5 text-sm sm:text-base border rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div className="flex flex-col sm:flex-row lg:flex-row space-y-2 sm:space-y-0 sm:space-x-3 space-x-0 lg:space-x-3">
+              <button
+                onClick={handleExportToPDF}
+                className="flex items-center justify-center space-x-2 px-3 sm:px-4 py-1.5 sm:py-2 border rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <img
+                  src={export_pdf}
+                  alt=""
+                  className="w-4 h-4 sm:w-5 sm:h-5"
+                />
+                <span className="text-sm sm:text-base">Export PDF</span>
+              </button>
+              <button
+                onClick={handleExportToExcel}
+                className="flex items-center justify-center space-x-2 px-3 sm:px-4 py-1.5 sm:py-2 border rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <img
+                  src={export_excel}
+                  alt=""
+                  className="w-4 h-4 sm:w-5 sm:h-5"
+                />
+                <span className="text-sm sm:text-base">Export Excel</span>
+              </button>
+            </div>
+          </div>
+        </div>
 
         {/* Table */}
         <div className="bg-white rounded-xl shadow overflow-hidden">

@@ -21,10 +21,9 @@ export default function POSPage() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, _setSelectedCategory] = useState("All Items");
- 
-  const session = JSON.parse(localStorage.getItem('pos_session') || '{}');
-console.log('POSPage session:', session);
 
+  const session = JSON.parse(localStorage.getItem("pos_session") || "{}");
+  console.log("POSPage session:", session);
 
   const handleAddToCart = (product: any) => {
     const existingItem = cartItems.find((item) => item.id === product.id);
@@ -103,7 +102,7 @@ console.log('POSPage session:', session);
             searchQuery={searchQuery}
             selectedCategory={selectedCategory}
             onAddToCart={handleAddToCart}
-             branchId={session.branchId} 
+            branchId={session.branchId}
           />
         </div>
 
@@ -115,8 +114,8 @@ console.log('POSPage session:', session);
           onUpdateQuantity={handleUpdateQuantity}
           onRemoveItem={handleRemoveItem}
           onClearCart={handleClearCart}
-            registerId={session.registerId}   // ← this
-  branchId={session.branchId}       // ← this
+          registerId={session.registerId} // ← this
+          branchId={session.branchId} // ← this
         />
 
         {/* Floating Cart Button - Only show when cart is closed and has items */}

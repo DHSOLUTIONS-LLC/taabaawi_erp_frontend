@@ -28,13 +28,13 @@ interface ProductGridProps {
   searchQuery: string;
   selectedCategory: string;
   onAddToCart: (product: Product) => void;
-   branchId?: number; 
+  branchId?: number;
 }
 
 export default function ProductGrid({
   searchQuery,
   onAddToCart,
-   branchId, 
+  branchId,
 }: ProductGridProps) {
   const [selectedCategory, setSelectedCategory] = useState("All Items");
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
@@ -51,49 +51,56 @@ export default function ProductGrid({
   ];
 
   // Use useMemo to prevent recreating products on every render
- const products = useMemo(() => {
-  const apiProducts = productsResponse?.data?.data || [];
-  
-  // Check if user is Super Admin (no branch restriction)
-  const isSuperAdmin = !branchId;
-  
-  return apiProducts
-    .map((product: any) => {
-      let stock = 0;
-      
-      if (isSuperAdmin) {
-        // Super Admin: Show total stock across ALL branches
-        stock = product.inventory?.reduce(
-          (sum: number, inv: any) => sum + (inv.available_quantity ?? inv.quantity ?? 0), 0
-        ) || 0;
-      } else {
-        // Other users: Filter by specific branch
-        const branchInventory = product.inventory?.find((inv: any) => inv.branch_id === branchId);
-        if (!branchInventory) return null; // Product not available in this branch
-        stock = branchInventory.available_quantity ?? branchInventory.quantity ?? 0;
-      }
-      
-      const imagePath = product.primary_image?.image_path 
-        ? `/storage/${product.primary_image.image_path}` 
-        : 'https://images.unsplash.com/photo-1541275055241-329bbdf9a191?w=500&auto=format&fit=crop&q=60';
-      
-      return {
-        id: product.id.toString(),
-        product_id: product.id,
-        name: product.product_name || '',
-        sku: product.sku || '',
-        price: typeof product.selling_price === 'string'
-          ? parseFloat(product.selling_price)
-          : product.selling_price || 0,
-        stock: stock,
-        outOfStock: stock <= 0,
-        image: imagePath,
-        image_url: imagePath,
-        category: product.category?.category_name || 'All Items',
-      };
-    })
-    .filter(Boolean);
-}, [productsResponse, branchId]);
+  const products = useMemo(() => {
+    const apiProducts = productsResponse?.data?.data || [];
+
+    // Check if user is Super Admin (no branch restriction)
+    const isSuperAdmin = !branchId;
+
+    return apiProducts
+      .map((product: any) => {
+        let stock = 0;
+
+        if (isSuperAdmin) {
+          // Super Admin: Show total stock across ALL branches
+          stock =
+            product.inventory?.reduce(
+              (sum: number, inv: any) =>
+                sum + (inv.available_quantity ?? inv.quantity ?? 0),
+              0,
+            ) || 0;
+        } else {
+          // Other users: Filter by specific branch
+          const branchInventory = product.inventory?.find(
+            (inv: any) => inv.branch_id === branchId,
+          );
+          if (!branchInventory) return null; // Product not available in this branch
+          stock =
+            branchInventory.available_quantity ?? branchInventory.quantity ?? 0;
+        }
+
+        const imagePath = product.primary_image?.image_path
+          ? `/storage/${product.primary_image.image_path}`
+          : "https://images.unsplash.com/photo-1541275055241-329bbdf9a191?w=500&auto=format&fit=crop&q=60";
+
+        return {
+          id: product.id.toString(),
+          product_id: product.id,
+          name: product.product_name || "",
+          sku: product.sku || "",
+          price:
+            typeof product.selling_price === "string"
+              ? parseFloat(product.selling_price)
+              : product.selling_price || 0,
+          stock: stock,
+          outOfStock: stock <= 0,
+          image: imagePath,
+          image_url: imagePath,
+          category: product.category?.category_name || "All Items",
+        };
+      })
+      .filter(Boolean);
+  }, [productsResponse, branchId]);
 
   // Filter products when search, category, or products change
   useEffect(() => {

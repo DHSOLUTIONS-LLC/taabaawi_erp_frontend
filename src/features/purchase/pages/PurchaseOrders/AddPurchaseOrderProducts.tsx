@@ -1,17 +1,20 @@
 // src/features/purchase/pages/purchase-orders/AddPurchaseOrderProducts.tsx
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import DashboardLayout from '../../../../layouts/DashboardLayout';
-import { useAppSelector, useAppDispatch } from '../../../../app/hooks';
-import type { RootState } from '../../../../app/store';
-import { useGetProductsQuery, useGetCategoriesQuery } from '../../../../services/inventoryApi';
-import { addPOProduct } from '../../purchaseSlice';
-import ProductCard from '../../../../features/pos/components/Productcard';
-import ProductPopup from '../../../../features/pos/components/Productpopup';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import DashboardLayout from "../../../../layouts/DashboardLayout";
+import { useAppSelector, useAppDispatch } from "../../../../app/hooks";
+import type { RootState } from "../../../../app/store";
+import {
+  useGetProductsQuery,
+  useGetCategoriesQuery,
+} from "../../../../services/inventoryApi";
+import { addPOProduct } from "../../purchaseSlice";
+import ProductCard from "../../../../features/pos/components/Productcard";
+import ProductPopup from "../../../../features/pos/components/Productpopup";
 
-import arrow_back_icon from '../../../../assets/icons/arrow_back_icon.svg';
-import search_icon from '../../../../assets/icons/search_icon.svg';
-import barcode_icon from '../../../../assets/icons/barcode_icon.svg';
+import arrow_back_icon from "../../../../assets/icons/arrow_back_icon.svg";
+import search_icon from "../../../../assets/icons/search_icon.svg";
+import barcode_icon from "../../../../assets/icons/barcode_icon.svg";
 
 interface MappedProduct {
   id: string;
@@ -31,44 +34,52 @@ export default function AddPurchaseOrderProducts() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const isSuperAdmin = user?.role?.role_name === 'Super Admin';
-  const basePath = isSuperAdmin ? '/admin' : '';
+  const isSuperAdmin = user?.role?.role_name === "Super Admin";
+  const basePath = isSuperAdmin ? "/admin" : "";
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All Items');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All Items");
   const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [currentProduct, setCurrentProduct] = useState<MappedProduct | null>(null);
+  const [currentProduct, setCurrentProduct] = useState<MappedProduct | null>(
+    null,
+  );
 
   const { data: productsResponse, isLoading, error } = useGetProductsQuery();
   const { data: categoriesResponse } = useGetCategoriesQuery();
 
-  const categories = ['All Items', ...(categoriesResponse?.data?.data?.map((c: any) => c.category_name) || [])];
+  const categories = [
+    "All Items",
+    ...(categoriesResponse?.data?.data?.map((c: any) => c.category_name) || []),
+  ];
 
-  const products: MappedProduct[] = (productsResponse?.data?.data || []).map((product: any) => ({
-    id: product.id.toString(),
-    product_id: product.id,
-    name: product.product_name || '',
-    sku: product.sku || '',
-    price: parseFloat(product.selling_price) || 0,
-    stock: product.total_stock || 0,
-    outOfStock: (product.total_stock || 0) <= 0,
-    image: product.primary_image?.image_path || '',
-    image_url: product.primary_image?.image_path || '',
-    category: product.category?.category_name || 'All Items',
-  }));
+  const products: MappedProduct[] = (productsResponse?.data?.data || []).map(
+    (product: any) => ({
+      id: product.id.toString(),
+      product_id: product.id,
+      name: product.product_name || "",
+      sku: product.sku || "",
+      price: parseFloat(product.selling_price) || 0,
+      stock: product.total_stock || 0,
+      outOfStock: (product.total_stock || 0) <= 0,
+      image: product.primary_image?.image_path || "",
+      image_url: product.primary_image?.image_path || "",
+      category: product.category?.category_name || "All Items",
+    }),
+  );
 
   const [filteredProducts, setFilteredProducts] = useState<MappedProduct[]>([]);
 
   useEffect(() => {
     let filtered = products;
-    if (selectedCategory !== 'All Items') {
-      filtered = filtered.filter(p => p.category === selectedCategory);
+    if (selectedCategory !== "All Items") {
+      filtered = filtered.filter((p) => p.category === selectedCategory);
     }
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(p => 
-        p.name.toLowerCase().includes(query) || 
-        p.sku.toLowerCase().includes(query)
+      filtered = filtered.filter(
+        (p) =>
+          p.name.toLowerCase().includes(query) ||
+          p.sku.toLowerCase().includes(query),
       );
     }
     setFilteredProducts(filtered);
@@ -80,23 +91,25 @@ export default function AddPurchaseOrderProducts() {
   };
 
   const handleAddToSelection = (productWithDetails: any) => {
-    const uniqueId = `${currentProduct?.product_id}-${productWithDetails.variant_id || 'default'}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    
-    dispatch(addPOProduct({
-      id: uniqueId,
-      product_id: currentProduct?.product_id || 0,
-      name: productWithDetails.name || currentProduct?.name || '',
-      sku: productWithDetails.sku || currentProduct?.sku || '',
-      price: productWithDetails.price || currentProduct?.price || 0,
-      //size: productWithDetails.size || 'Default',
-      variant_id: productWithDetails.variant_id ?? null,
-      quantity: productWithDetails.quantity || 1,
-      discount_percentage: 0,
-      tax_percentage: 0,
-      image: currentProduct?.image || '',
-      image_url: currentProduct?.image_url || currentProduct?.image || '',
-    }));
-    
+    const uniqueId = `${currentProduct?.product_id}-${productWithDetails.variant_id || "default"}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+    dispatch(
+      addPOProduct({
+        id: uniqueId,
+        product_id: currentProduct?.product_id || 0,
+        name: productWithDetails.name || currentProduct?.name || "",
+        sku: productWithDetails.sku || currentProduct?.sku || "",
+        price: productWithDetails.price || currentProduct?.price || 0,
+        //size: productWithDetails.size || 'Default',
+        variant_id: productWithDetails.variant_id ?? null,
+        quantity: productWithDetails.quantity || 1,
+        discount_percentage: 0,
+        tax_percentage: 0,
+        image: currentProduct?.image || "",
+        image_url: currentProduct?.image_url || currentProduct?.image || "",
+      }),
+    );
+
     setIsPopupOpen(false);
     setCurrentProduct(null);
   };
@@ -109,7 +122,8 @@ export default function AddPurchaseOrderProducts() {
     navigate(`${basePath}/purchase/orders/create`);
   };
 
-  const orderProducts = useAppSelector((state: any) => state.purchase?.poProducts) || [];
+  const orderProducts =
+    useAppSelector((state: any) => state.purchase?.poProducts) || [];
 
   if (isLoading) {
     return (
@@ -124,7 +138,9 @@ export default function AddPurchaseOrderProducts() {
   if (error) {
     return (
       <DashboardLayout>
-        <div className="text-center py-32 text-red-500">Failed to load products</div>
+        <div className="text-center py-32 text-red-500">
+          Failed to load products
+        </div>
       </DashboardLayout>
     );
   }
@@ -152,7 +168,11 @@ export default function AddPurchaseOrderProducts() {
 
         {/* Search Bar */}
         <div className="relative">
-          <img src={search_icon} alt="" className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <img
+            src={search_icon}
+            alt=""
+            className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
+          />
           <input
             type="text"
             value={searchQuery}
@@ -173,8 +193,8 @@ export default function AddPurchaseOrderProducts() {
               onClick={() => setSelectedCategory(category)}
               className={`px-6 py-3 rounded-md font-medium text-sm transition-all ${
                 selectedCategory === category
-                  ? 'border border-blue-500 text-black shadow-md'
-                  : 'border border-gray-200 text-gray-700 hover:border-blue-300'
+                  ? "border border-blue-500 text-black shadow-md"
+                  : "border border-gray-200 text-gray-700 hover:border-blue-300"
               }`}
             >
               {category}
@@ -204,7 +224,10 @@ export default function AddPurchaseOrderProducts() {
         {isPopupOpen && currentProduct && (
           <ProductPopup
             product={currentProduct}
-            onClose={() => { setIsPopupOpen(false); setCurrentProduct(null); }}
+            onClose={() => {
+              setIsPopupOpen(false);
+              setCurrentProduct(null);
+            }}
             onAdd={handleAddToSelection}
           />
         )}

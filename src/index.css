@@ -1,6 +1,5 @@
 @import "tailwindcss";
 
-
 /* Force horizontal scroll on table containers */
 .table-scroll-container {
   overflow-x: auto !important;

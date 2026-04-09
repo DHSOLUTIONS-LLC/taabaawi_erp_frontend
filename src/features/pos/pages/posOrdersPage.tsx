@@ -19,8 +19,6 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import jsPDF from "jspdf";
 
-
-
 import {
   useReactTable,
   getCoreRowModel,
@@ -30,11 +28,7 @@ import {
   flexRender,
 } from "@tanstack/react-table";
 
-import type {
-  ColumnDef,
-  SortingState,
-} from "@tanstack/react-table";
-
+import type { ColumnDef, SortingState } from "@tanstack/react-table";
 
 import { ChevronUp, ChevronDown } from "lucide-react";
 
@@ -55,13 +49,8 @@ export default function POSOrdersPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-
-  
-const [sorting, setSorting] = useState<SortingState>([]);
-const [globalFilter, setGlobalFilter] = useState("");
-
-
-
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [globalFilter, setGlobalFilter] = useState("");
 
   const { data: branchesData } = useGetBranchesQuery();
   const branches = Array.isArray(branchesData) ? branchesData : [];
@@ -294,241 +283,243 @@ const [globalFilter, setGlobalFilter] = useState("");
     return map[method] || "bg-gray-100 text-gray-600";
   };
 
-
-
   const columns: ColumnDef<any>[] = useMemo(
-  () => [
-    {
-      accessorKey: "sale_number",
-      header: ({ column }) => (
-        <button
-          onClick={() => column.toggleSorting()}
-          className="flex items-center gap-1 group"
-        >
-          Order
-          {column.getIsSorted() === "asc" ? (
-            <ChevronUp className="w-3 h-3" />
-          ) : column.getIsSorted() === "desc" ? (
-            <ChevronDown className="w-3 h-3" />
-          ) : (
-            <ChevronUp className="w-3 h-3 opacity-0 group-hover:opacity-30" />
-          )}
-        </button>
-      ),
-      cell: ({ row }) => (
-        <div className="text-sm font-medium text-gray-900">
-          {row.original.sale_number}
-        </div>
-      ),
-    },
-    {
-      accessorKey: "branch.branch_name",
-      header: ({ column }) => (
-        <button
-          onClick={() => column.toggleSorting()}
-          className="flex items-center gap-1 group"
-        >
-          Branch
-          {column.getIsSorted() === "asc" ? (
-            <ChevronUp className="w-3 h-3" />
-          ) : column.getIsSorted() === "desc" ? (
-            <ChevronDown className="w-3 h-3" />
-          ) : (
-            <ChevronUp className="w-3 h-3 opacity-0 group-hover:opacity-30" />
-          )}
-        </button>
-      ),
-      cell: ({ row }) => (
-        <div className="text-sm text-gray-900">
-          {row.original.branch?.branch_name}
-        </div>
-      ),
-    },
-    {
-      accessorKey: "cashier.name",
-      header: ({ column }) => (
-        <button
-          onClick={() => column.toggleSorting()}
-          className="flex items-center gap-1 group"
-        >
-          Cashier
-          {column.getIsSorted() === "asc" ? (
-            <ChevronUp className="w-3 h-3" />
-          ) : column.getIsSorted() === "desc" ? (
-            <ChevronDown className="w-3 h-3" />
-          ) : (
-            <ChevronUp className="w-3 h-3 opacity-0 group-hover:opacity-30" />
-          )}
-        </button>
-      ),
-      cell: ({ row }) => (
-        <div className="text-sm text-gray-900">
-          {row.original.cashier?.name}
-        </div>
-      ),
-    },
-    {
-      accessorKey: "payment_method",
-      header: ({ column }) => (
-        <button
-          onClick={() => column.toggleSorting()}
-          className="flex items-center gap-1 group"
-        >
-          Pay
-          {column.getIsSorted() === "asc" ? (
-            <ChevronUp className="w-3 h-3" />
-          ) : column.getIsSorted() === "desc" ? (
-            <ChevronDown className="w-3 h-3" />
-          ) : (
-            <ChevronUp className="w-3 h-3 opacity-0 group-hover:opacity-30" />
-          )}
-        </button>
-      ),
-      cell: ({ row }) => {
-        const paymentMethod = row.original.payment_method;
-        const paymentBadge = (method: string) => {
-          const map: Record<string, string> = {
-            Cash: "bg-green-100 text-green-800",
-            Card: "bg-blue-100 text-blue-800",
-            "K-Net": "bg-purple-100 text-purple-800",
-            "Mobile Payment": "bg-orange-100 text-orange-800",
-            Mixed: "bg-gray-100 text-gray-800",
+    () => [
+      {
+        accessorKey: "sale_number",
+        header: ({ column }) => (
+          <button
+            onClick={() => column.toggleSorting()}
+            className="flex items-center gap-1 group"
+          >
+            Order
+            {column.getIsSorted() === "asc" ? (
+              <ChevronUp className="w-3 h-3" />
+            ) : column.getIsSorted() === "desc" ? (
+              <ChevronDown className="w-3 h-3" />
+            ) : (
+              <ChevronUp className="w-3 h-3 opacity-0 group-hover:opacity-30" />
+            )}
+          </button>
+        ),
+        cell: ({ row }) => (
+          <div className="text-sm font-medium text-gray-900">
+            {row.original.sale_number}
+          </div>
+        ),
+      },
+      {
+        accessorKey: "branch.branch_name",
+        header: ({ column }) => (
+          <button
+            onClick={() => column.toggleSorting()}
+            className="flex items-center gap-1 group"
+          >
+            Branch
+            {column.getIsSorted() === "asc" ? (
+              <ChevronUp className="w-3 h-3" />
+            ) : column.getIsSorted() === "desc" ? (
+              <ChevronDown className="w-3 h-3" />
+            ) : (
+              <ChevronUp className="w-3 h-3 opacity-0 group-hover:opacity-30" />
+            )}
+          </button>
+        ),
+        cell: ({ row }) => (
+          <div className="text-sm text-gray-900">
+            {row.original.branch?.branch_name}
+          </div>
+        ),
+      },
+      {
+        accessorKey: "cashier.name",
+        header: ({ column }) => (
+          <button
+            onClick={() => column.toggleSorting()}
+            className="flex items-center gap-1 group"
+          >
+            Cashier
+            {column.getIsSorted() === "asc" ? (
+              <ChevronUp className="w-3 h-3" />
+            ) : column.getIsSorted() === "desc" ? (
+              <ChevronDown className="w-3 h-3" />
+            ) : (
+              <ChevronUp className="w-3 h-3 opacity-0 group-hover:opacity-30" />
+            )}
+          </button>
+        ),
+        cell: ({ row }) => (
+          <div className="text-sm text-gray-900">
+            {row.original.cashier?.name}
+          </div>
+        ),
+      },
+      {
+        accessorKey: "payment_method",
+        header: ({ column }) => (
+          <button
+            onClick={() => column.toggleSorting()}
+            className="flex items-center gap-1 group"
+          >
+            Pay
+            {column.getIsSorted() === "asc" ? (
+              <ChevronUp className="w-3 h-3" />
+            ) : column.getIsSorted() === "desc" ? (
+              <ChevronDown className="w-3 h-3" />
+            ) : (
+              <ChevronUp className="w-3 h-3 opacity-0 group-hover:opacity-30" />
+            )}
+          </button>
+        ),
+        cell: ({ row }) => {
+          const paymentMethod = row.original.payment_method;
+          const paymentBadge = (method: string) => {
+            const map: Record<string, string> = {
+              Cash: "bg-green-100 text-green-800",
+              Card: "bg-blue-100 text-blue-800",
+              "K-Net": "bg-purple-100 text-purple-800",
+              "Mobile Payment": "bg-orange-100 text-orange-800",
+              Mixed: "bg-gray-100 text-gray-800",
+            };
+            return map[method] || "bg-gray-100 text-gray-600";
           };
-          return map[method] || "bg-gray-100 text-gray-600";
-        };
-        return (
-          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${paymentBadge(paymentMethod)}`}>
-            <span className="w-1.5 h-1.5 rounded-full bg-current opacity-70" />
-            {paymentMethod}
-          </span>
-        );
+          return (
+            <span
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${paymentBadge(paymentMethod)}`}
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-current opacity-70" />
+              {paymentMethod}
+            </span>
+          );
+        },
       },
-    },
-    {
-      accessorKey: "status",
-      header: ({ column }) => (
-        <button
-          onClick={() => column.toggleSorting()}
-          className="flex items-center gap-1 group"
-        >
-          Status
-          {column.getIsSorted() === "asc" ? (
-            <ChevronUp className="w-3 h-3" />
-          ) : column.getIsSorted() === "desc" ? (
-            <ChevronDown className="w-3 h-3" />
-          ) : (
-            <ChevronUp className="w-3 h-3 opacity-0 group-hover:opacity-30" />
-          )}
-        </button>
-      ),
-      cell: ({ row }) => {
-        const status = row.original.status;
-        const statusClass = status === "Completed"
-          ? "bg-green-100 text-green-800"
-          : status === "Refunded"
-            ? "bg-red-100 text-red-800"
-            : status === "Partially Refunded"
-              ? "bg-yellow-100 text-yellow-800"
-              : "bg-gray-100 text-gray-600";
-        return (
-          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${statusClass}`}>
-            <span className="w-1.5 h-1.5 rounded-full bg-current opacity-70" />
-            {status}
-          </span>
-        );
+      {
+        accessorKey: "status",
+        header: ({ column }) => (
+          <button
+            onClick={() => column.toggleSorting()}
+            className="flex items-center gap-1 group"
+          >
+            Status
+            {column.getIsSorted() === "asc" ? (
+              <ChevronUp className="w-3 h-3" />
+            ) : column.getIsSorted() === "desc" ? (
+              <ChevronDown className="w-3 h-3" />
+            ) : (
+              <ChevronUp className="w-3 h-3 opacity-0 group-hover:opacity-30" />
+            )}
+          </button>
+        ),
+        cell: ({ row }) => {
+          const status = row.original.status;
+          const statusClass =
+            status === "Completed"
+              ? "bg-green-100 text-green-800"
+              : status === "Refunded"
+                ? "bg-red-100 text-red-800"
+                : status === "Partially Refunded"
+                  ? "bg-yellow-100 text-yellow-800"
+                  : "bg-gray-100 text-gray-600";
+          return (
+            <span
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${statusClass}`}
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-current opacity-70" />
+              {status}
+            </span>
+          );
+        },
       },
-    },
-    {
-      accessorKey: "total_amount",
-      header: ({ column }) => (
-        <button
-          onClick={() => column.toggleSorting()}
-          className="flex items-center gap-1 group"
-        >
-          Total
-          {column.getIsSorted() === "asc" ? (
-            <ChevronUp className="w-3 h-3" />
-          ) : column.getIsSorted() === "desc" ? (
-            <ChevronDown className="w-3 h-3" />
-          ) : (
-            <ChevronUp className="w-3 h-3 opacity-0 group-hover:opacity-30" />
-          )}
-        </button>
-      ),
-      cell: ({ row }) => (
-        <div className="text-sm font-semibold text-gray-900">
-          KD {parseFloat(row.original.total_amount).toFixed(3)}
-        </div>
-      ),
-    },
-    {
-      accessorKey: "sale_date",
-      header: ({ column }) => (
-        <button
-          onClick={() => column.toggleSorting()}
-          className="flex items-center gap-1 group"
-        >
-          Date
-          {column.getIsSorted() === "asc" ? (
-            <ChevronUp className="w-3 h-3" />
-          ) : column.getIsSorted() === "desc" ? (
-            <ChevronDown className="w-3 h-3" />
-          ) : (
-            <ChevronUp className="w-3 h-3 opacity-0 group-hover:opacity-30" />
-          )}
-        </button>
-      ),
-      cell: ({ row }) => (
-        <div className="text-sm text-gray-500">
-          {new Date(row.original.sale_date).toLocaleDateString("en-GB", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-          })}
-        </div>
-      ),
-    },
-    {
-      id: "actions",
-      header: "Action",
-      cell: ({ row }) => (
-        <button
-          onClick={() => {
-            setReturnSaleId(row.original.id);
-            setShowReturnModal(true);
-          }}
-          className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors"
-        >
-          <img src={returns} alt="" className="w-3.5 h-3.5" />
-          <span>Return</span>
-        </button>
-      ),
-    },
-  ],
-  []
-);
+      {
+        accessorKey: "total_amount",
+        header: ({ column }) => (
+          <button
+            onClick={() => column.toggleSorting()}
+            className="flex items-center gap-1 group"
+          >
+            Total
+            {column.getIsSorted() === "asc" ? (
+              <ChevronUp className="w-3 h-3" />
+            ) : column.getIsSorted() === "desc" ? (
+              <ChevronDown className="w-3 h-3" />
+            ) : (
+              <ChevronUp className="w-3 h-3 opacity-0 group-hover:opacity-30" />
+            )}
+          </button>
+        ),
+        cell: ({ row }) => (
+          <div className="text-sm font-semibold text-gray-900">
+            KD {parseFloat(row.original.total_amount).toFixed(3)}
+          </div>
+        ),
+      },
+      {
+        accessorKey: "sale_date",
+        header: ({ column }) => (
+          <button
+            onClick={() => column.toggleSorting()}
+            className="flex items-center gap-1 group"
+          >
+            Date
+            {column.getIsSorted() === "asc" ? (
+              <ChevronUp className="w-3 h-3" />
+            ) : column.getIsSorted() === "desc" ? (
+              <ChevronDown className="w-3 h-3" />
+            ) : (
+              <ChevronUp className="w-3 h-3 opacity-0 group-hover:opacity-30" />
+            )}
+          </button>
+        ),
+        cell: ({ row }) => (
+          <div className="text-sm text-gray-500">
+            {new Date(row.original.sale_date).toLocaleDateString("en-GB", {
+              day: "2-digit",
+              month: "short",
+              year: "numeric",
+            })}
+          </div>
+        ),
+      },
+      {
+        id: "actions",
+        header: "Action",
+        cell: ({ row }) => (
+          <button
+            onClick={() => {
+              setReturnSaleId(row.original.id);
+              setShowReturnModal(true);
+            }}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors"
+          >
+            <img src={returns} alt="" className="w-3.5 h-3.5" />
+            <span>Return</span>
+          </button>
+        ),
+      },
+    ],
+    [],
+  );
 
-// Create table instance
-const table = useReactTable({
-  data: sales,
-  columns,
-  state: {
-    sorting,
-    globalFilter,
-  },
-  onSortingChange: setSorting,
-  onGlobalFilterChange: setGlobalFilter,
-  getCoreRowModel: getCoreRowModel(),
-  getFilteredRowModel: getFilteredRowModel(),
-  // getPaginationRowModel: getPaginationRowModel(),
-  getSortedRowModel: getSortedRowModel(),
-  // initialState: {
-  //   pagination: {
-  //     pageSize: 10,
-  //   },
-  // },
-});
-
+  // Create table instance
+  const table = useReactTable({
+    data: sales,
+    columns,
+    state: {
+      sorting,
+      globalFilter,
+    },
+    onSortingChange: setSorting,
+    onGlobalFilterChange: setGlobalFilter,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    // getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    // initialState: {
+    //   pagination: {
+    //     pageSize: 10,
+    //   },
+    // },
+  });
 
   return (
     <DashboardLayout>
@@ -794,129 +785,146 @@ const table = useReactTable({
             )}
           </div>
 
-         {/* Table Area with Horizontal Scroll Only */}
-           <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
-<div className="xl:col-span-4 overflow-x-auto w-full">
-  <table className="w-full divide-y divide-gray-200" style={{ minWidth: '680px' }}>
-    <thead className="bg-gray-50">
-      {table.getHeaderGroups().map((headerGroup) => (
-        <tr key={headerGroup.id}>
-          {headerGroup.headers.map((header) => (
-            <th
-              key={header.id}
-              className="px-4 md:px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap"
-            >
-              {header.isPlaceholder
-                ? null
-                : flexRender(header.column.columnDef.header, header.getContext())}
-            </th>
-          ))}
-        </tr>
-      ))}
-    </thead>
-    <tbody className="bg-white divide-y divide-gray-100">
-      {isLoading ? (
-        <tr>
-          <td colSpan={columns.length} className="py-12 text-center">
-            <div className="flex justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
-            </div>
-          </td>
-        </tr>
-      ) : table.getRowModel().rows.length === 0 ? (
-        <tr>
-          <td colSpan={columns.length} className="py-12 text-center text-gray-500 text-sm">
-            {searchQuery
-              ? `No orders found matching your search.`
-              : "No orders available."}
-          </td>
-        </tr>
-      ) : (
-        table.getRowModel().rows.map((row) => (
-          <tr key={row.id} className="hover:bg-gray-50 transition-colors">
-            {row.getVisibleCells().map((cell) => (
-              <td
-                key={cell.id}
-                className="px-4 md:px-5 py-3 md:py-4 whitespace-nowrap"
+          {/* Table Area with Horizontal Scroll Only */}
+          <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+            <div className="xl:col-span-4 overflow-x-auto w-full">
+              <table
+                className="w-full divide-y divide-gray-200"
+                style={{ minWidth: "680px" }}
               >
-                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-              </td>
-            ))}
-          </tr>
-        ))
-      )}
-    </tbody>
-  </table>
-</div>
-           </div>
-
+                <thead className="bg-gray-50">
+                  {table.getHeaderGroups().map((headerGroup) => (
+                    <tr key={headerGroup.id}>
+                      {headerGroup.headers.map((header) => (
+                        <th
+                          key={header.id}
+                          className="px-4 md:px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap"
+                        >
+                          {header.isPlaceholder
+                            ? null
+                            : flexRender(
+                                header.column.columnDef.header,
+                                header.getContext(),
+                              )}
+                        </th>
+                      ))}
+                    </tr>
+                  ))}
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-100">
+                  {isLoading ? (
+                    <tr>
+                      <td
+                        colSpan={columns.length}
+                        className="py-12 text-center"
+                      >
+                        <div className="flex justify-center">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+                        </div>
+                      </td>
+                    </tr>
+                  ) : table.getRowModel().rows.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={columns.length}
+                        className="py-12 text-center text-gray-500 text-sm"
+                      >
+                        {searchQuery
+                          ? `No orders found matching your search.`
+                          : "No orders available."}
+                      </td>
+                    </tr>
+                  ) : (
+                    table.getRowModel().rows.map((row) => (
+                      <tr
+                        key={row.id}
+                        className="hover:bg-gray-50 transition-colors"
+                      >
+                        {row.getVisibleCells().map((cell) => (
+                          <td
+                            key={cell.id}
+                            className="px-4 md:px-5 py-3 md:py-4 whitespace-nowrap"
+                          >
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext(),
+                            )}
+                          </td>
+                        ))}
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
 
           {/* Pagination */}
-<div className="px-5 py-4 border-t border-gray-100">
-  <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-    <div className="text-xs sm:text-sm text-gray-500 text-center sm:text-left">
-      {pagination ? (
-        <>
-          Showing{" "}
-          <span className="font-medium">{pagination.from}</span> to{" "}
-          <span className="font-medium">{pagination.to}</span> of{" "}
-          <span className="font-medium">{pagination.total}</span>{" "}
-          orders
-        </>
-      ) : (
-        `${sales.length} orders`
-      )}
-    </div>
-    <div className="flex items-center flex-wrap justify-center gap-1">
-      <button
-        onClick={() => handlePageChange(currentPage - 1)}
-        disabled={currentPage === 1}
-        className={`px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium rounded-lg transition-colors ${
-          currentPage === 1
-            ? "text-gray-400 bg-gray-100 cursor-not-allowed"
-            : "text-gray-700 bg-gray-100 hover:bg-gray-200"
-        }`}
-      >
-        Prev
-      </button>
+          <div className="px-5 py-4 border-t border-gray-100">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="text-xs sm:text-sm text-gray-500 text-center sm:text-left">
+                {pagination ? (
+                  <>
+                    Showing{" "}
+                    <span className="font-medium">{pagination.from}</span> to{" "}
+                    <span className="font-medium">{pagination.to}</span> of{" "}
+                    <span className="font-medium">{pagination.total}</span>{" "}
+                    orders
+                  </>
+                ) : (
+                  `${sales.length} orders`
+                )}
+              </div>
+              <div className="flex items-center flex-wrap justify-center gap-1">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className={`px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium rounded-lg transition-colors ${
+                    currentPage === 1
+                      ? "text-gray-400 bg-gray-100 cursor-not-allowed"
+                      : "text-gray-700 bg-gray-100 hover:bg-gray-200"
+                  }`}
+                >
+                  Prev
+                </button>
 
-      {getPageNumbers().map((page, index) =>
-        page === "..." ? (
-          <span
-            key={`ellipsis-${index}`}
-            className="px-2 sm:px-3 py-1 text-xs sm:text-sm text-gray-500"
-          >
-            ...
-          </span>
-        ) : (
-          <button
-            key={`page-${page}`}
-            onClick={() => handlePageChange(page as number)}
-            className={`px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium rounded-lg transition-colors ${
-              currentPage === page
-                ? "text-blue-600 bg-blue-50 hover:bg-blue-100"
-                : "text-gray-700 hover:bg-gray-100"
-            }`}
-          >
-            {page}
-          </button>
-        ),
-      )}
+                {getPageNumbers().map((page, index) =>
+                  page === "..." ? (
+                    <span
+                      key={`ellipsis-${index}`}
+                      className="px-2 sm:px-3 py-1 text-xs sm:text-sm text-gray-500"
+                    >
+                      ...
+                    </span>
+                  ) : (
+                    <button
+                      key={`page-${page}`}
+                      onClick={() => handlePageChange(page as number)}
+                      className={`px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium rounded-lg transition-colors ${
+                        currentPage === page
+                          ? "text-blue-600 bg-blue-50 hover:bg-blue-100"
+                          : "text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ),
+                )}
 
-      <button
-        onClick={() => handlePageChange(currentPage + 1)}
-        disabled={currentPage === totalPages}
-        className={`px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium rounded-lg transition-colors ${
-          currentPage === totalPages
-            ? "text-gray-400 bg-gray-100 cursor-not-allowed"
-            : "text-gray-700 bg-gray-100 hover:bg-gray-200"
-        }`}
-      >
-        Next
-      </button>
-    </div>
-  </div>
-</div>
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className={`px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium rounded-lg transition-colors ${
+                    currentPage === totalPages
+                      ? "text-gray-400 bg-gray-100 cursor-not-allowed"
+                      : "text-gray-700 bg-gray-100 hover:bg-gray-200"
+                  }`}
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

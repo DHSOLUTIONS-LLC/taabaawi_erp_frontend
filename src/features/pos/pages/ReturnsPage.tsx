@@ -1,41 +1,41 @@
 // src/features/pos/pages/ReturnsPage.tsx
-import { useState, useEffect } from 'react';
-import DashboardLayout from '../../../layouts/DashboardLayout';
+import { useState, useEffect } from "react";
+import DashboardLayout from "../../../layouts/DashboardLayout";
 import {
   useGetReturnsQuery,
   useGetReturnStatisticsQuery,
   useApproveReturnMutation,
   useRejectReturnMutation,
-} from '../../../services/posApi';
-import CreateReturnModal from '../components/CreateReturnModal';
-import { useGetBranchesQuery } from '../../../services/superAdminApi';
-import { useAppSelector } from '../../../app/hooks';
-import type { RootState } from '../../../app/store';
-import { canSwitchBranch } from '../../../utils/roleHelpers';
+} from "../../../services/posApi";
+import CreateReturnModal from "../components/CreateReturnModal";
+import { useGetBranchesQuery } from "../../../services/superAdminApi";
+import { useAppSelector } from "../../../app/hooks";
+import type { RootState } from "../../../app/store";
+import { canSwitchBranch } from "../../../utils/roleHelpers";
 
-import search_icon from '../../../assets/icons/search_icon.svg';
+import search_icon from "../../../assets/icons/search_icon.svg";
 // import export_pdf from '../../../assets/icons/export_pdf.svg';
-import export_excel from '../../../assets/icons/export_excel.svg';
-import date_icon from '../../../assets/icons/date_icon.svg';
-import dropdown_arrow_icon from '../../../assets/icons/dropdown_arrow_icon.svg';
-import market_icon from '../../../assets/icons/market_icon.svg';
-import * as XLSX from 'xlsx';
-import { saveAs } from 'file-saver';
+import export_excel from "../../../assets/icons/export_excel.svg";
+import date_icon from "../../../assets/icons/date_icon.svg";
+import dropdown_arrow_icon from "../../../assets/icons/dropdown_arrow_icon.svg";
+import market_icon from "../../../assets/icons/market_icon.svg";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 export default function ReturnsPage() {
   const { user } = useAppSelector((state: RootState) => state.auth);
   const userCanSwitchBranch = canSwitchBranch(user?.role?.role_name);
 
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [selectedBranch, setSelectedBranch] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [refundMethodFilter, setRefundMethodFilter] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedBranch, setSelectedBranch] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [refundMethodFilter, setRefundMethodFilter] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [rejectingId, setRejectingId] = useState<number | null>(null);
-  const [rejectReason, setRejectReason] = useState('');
+  const [rejectReason, setRejectReason] = useState("");
 
   const { data: branchesData } = useGetBranchesQuery();
   const branches = Array.isArray(branchesData) ? branchesData : [];
@@ -72,58 +72,67 @@ export default function ReturnsPage() {
   const pagination = returnsResponse?.data;
 
   // Debug — remove once confirmed working
-  console.log('statsResponse raw:', statsResponse);
+  console.log("statsResponse raw:", statsResponse);
 
   // Handle both { data: { total_returns, ... } } and { total_returns, ... }
-  const stats = statsResponse?.data?.data ?? statsResponse?.data ?? statsResponse ?? null;
+  const stats =
+    statsResponse?.data?.data ?? statsResponse?.data ?? statsResponse ?? null;
 
   const handleApprove = async (id: number) => {
     try {
       await approveReturn(id).unwrap();
     } catch (err: any) {
-      alert(err?.data?.message || 'Failed to approve return');
+      alert(err?.data?.message || "Failed to approve return");
     }
   };
 
   const handleReject = async (id: number) => {
-    if (!rejectReason.trim()) { alert('Please enter a reason'); return; }
+    if (!rejectReason.trim()) {
+      alert("Please enter a reason");
+      return;
+    }
     try {
       await rejectReturn({ id, reason: rejectReason }).unwrap();
       setRejectingId(null);
-      setRejectReason('');
+      setRejectReason("");
     } catch (err: any) {
-      alert(err?.data?.message || 'Failed to reject return');
+      alert(err?.data?.message || "Failed to reject return");
     }
   };
 
   const handleExportExcel = () => {
     try {
       const data = returns.map((r: any) => ({
-        'Return #': r.return_number,
-        'Sale #': r.sale?.sale_number,
+        "Return #": r.return_number,
+        "Sale #": r.sale?.sale_number,
         Branch: r.branch?.branch_name,
-        'Processed By': r.processed_by?.name,
-        'Refund Amount': r.return_amount,
-        'Refund Method': r.refund_method,
+        "Processed By": r.processed_by?.name,
+        "Refund Amount": r.return_amount,
+        "Refund Method": r.refund_method,
         Status: r.status,
         Reason: r.reason,
         Date: new Date(r.return_date).toLocaleDateString(),
       }));
       const ws = XLSX.utils.json_to_sheet(data);
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'Returns');
-      const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-      saveAs(new Blob([buf], { type: 'application/octet-stream' }), `returns_${new Date().toISOString().split('T')[0]}.xlsx`);
-    } catch (e) { console.error(e); }
+      XLSX.utils.book_append_sheet(wb, ws, "Returns");
+      const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+      saveAs(
+        new Blob([buf], { type: "application/octet-stream" }),
+        `returns_${new Date().toISOString().split("T")[0]}.xlsx`,
+      );
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const statusBadge = (status: string) => {
     const map: Record<string, string> = {
-      Approved: 'bg-green-100 text-green-800',
-      Pending: 'bg-yellow-100 text-yellow-800',
-      Rejected: 'bg-red-100 text-red-800',
+      Approved: "bg-green-100 text-green-800",
+      Pending: "bg-yellow-100 text-yellow-800",
+      Rejected: "bg-red-100 text-red-800",
     };
-    return map[status] || 'bg-gray-100 text-gray-600';
+    return map[status] || "bg-gray-100 text-gray-600";
   };
 
   return (
@@ -132,36 +141,70 @@ export default function ReturnsPage() {
         {/* Filters Header */}
         <div className="bg-white px-4 py-4 rounded-lg grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
           <div className="relative">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2"><img src={date_icon} alt="" /></div>
-            <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)}
-              className="w-full pl-12 pr-10 py-3.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <div className="absolute left-4 top-1/2 -translate-y-1/2">
+              <img src={date_icon} alt="" />
+            </div>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="w-full pl-12 pr-10 py-3.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
           </div>
           <div className="relative">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2"><img src={date_icon} alt="" /></div>
-            <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)}
-              className="w-full pl-12 pr-10 py-3.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <div className="absolute left-4 top-1/2 -translate-y-1/2">
+              <img src={date_icon} alt="" />
+            </div>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="w-full pl-12 pr-10 py-3.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
           </div>
           <div className="relative">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2"><img src={market_icon} alt="" /></div>
+            <div className="absolute left-4 top-1/2 -translate-y-1/2">
+              <img src={market_icon} alt="" />
+            </div>
             {userCanSwitchBranch ? (
-              <select value={selectedBranch} onChange={(e) => setSelectedBranch(e.target.value)}
-                className="w-full pl-12 pr-10 py-3.5 border rounded-xl appearance-none bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <select
+                value={selectedBranch}
+                onChange={(e) => setSelectedBranch(e.target.value)}
+                className="w-full pl-12 pr-10 py-3.5 border rounded-xl appearance-none bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
                 <option value="">All Branches</option>
-                {branches.map((b: any) => <option key={b.id} value={b.id}>{b.branch_name}</option>)}
+                {branches.map((b: any) => (
+                  <option key={b.id} value={b.id}>
+                    {b.branch_name}
+                  </option>
+                ))}
               </select>
             ) : (
               <div className="w-full pl-12 pr-10 py-3.5 border rounded-xl bg-gray-50 text-gray-700">
-                {branches.find((b: any) => b.id === user?.branch_id)?.branch_name || 'My Branch'}
+                {branches.find((b: any) => b.id === user?.branch_id)
+                  ?.branch_name || "My Branch"}
               </div>
             )}
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none"><img src={dropdown_arrow_icon} alt="" className="w-4 h-4" /></div>
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+              <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
+            </div>
           </div>
           <button
             onClick={() => setShowCreateModal(true)}
             className="flex items-center justify-center gap-2 px-6 py-3.5 bg-[#1773CF] text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M12 4v16m8-8H4"
+              />
             </svg>
             New Return
           </button>
@@ -170,132 +213,206 @@ export default function ReturnsPage() {
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           {[
-            { label: 'Total Returns', value: stats?.total_returns || 0, color: 'text-gray-900' },
-            { label: 'Total Refunded', value: `KD ${parseFloat(stats?.total_refund_amount || 0).toFixed(3)}`, color: 'text-red-600' },
-            { label: 'Approved', value: stats?.by_status?.find((s: any) => s.status === 'Approved')?.count || 0, color: 'text-green-600' },
-            { label: 'Pending', value: stats?.by_status?.find((s: any) => s.status === 'Pending')?.count || 0, color: 'text-yellow-600' },
+            {
+              label: "Total Returns",
+              value: stats?.total_returns || 0,
+              color: "text-gray-900",
+            },
+            {
+              label: "Total Refunded",
+              value: `KD ${parseFloat(stats?.total_refund_amount || 0).toFixed(3)}`,
+              color: "text-red-600",
+            },
+            {
+              label: "Approved",
+              value:
+                stats?.by_status?.find((s: any) => s.status === "Approved")
+                  ?.count || 0,
+              color: "text-green-600",
+            },
+            {
+              label: "Pending",
+              value:
+                stats?.by_status?.find((s: any) => s.status === "Pending")
+                  ?.count || 0,
+              color: "text-yellow-600",
+            },
           ].map((card) => (
             <div key={card.label} className="bg-white rounded-xl p-5 shadow-sm">
               <p className="text-sm text-gray-500 mb-1">{card.label}</p>
-              <p className={`text-[18px] lg:text-2xl font-bold ${card.color}`}>{card.value}</p>
+              <p className={`text-[18px] lg:text-2xl font-bold ${card.color}`}>
+                {card.value}
+              </p>
             </div>
           ))}
         </div>
 
         {/* Table Section */}
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-       {/* Search + Filters */}
-<div className="px-4 sm:px-6 py-3 sm:py-4 border-b flex flex-col lg:flex-row flex-wrap items-start lg:items-center justify-between gap-3 sm:gap-4">
-  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
-    {/* Search Input */}
-    <div className="relative w-full sm:w-auto">
-      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-        <img src={search_icon} alt="" className="w-4 h-4" />
-      </div>
-      <input 
-        type="text" 
-        value={searchQuery} 
-        onChange={(e) => setSearchQuery(e.target.value)}
-        placeholder="Search returns..."
-        className="w-full sm:w-56 pl-9 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" 
-      />
-    </div>
-    
-    {/* Status Filter */}
-    <select 
-      value={statusFilter} 
-      onChange={(e) => setStatusFilter(e.target.value)}
-      className="w-full sm:w-auto px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-    >
-      <option value="">All Statuses</option>
-      <option value="Pending">Pending</option>
-      <option value="Approved">Approved</option>
-      <option value="Rejected">Rejected</option>
-    </select>
-    
-    {/* Refund Method Filter */}
-    <select 
-      value={refundMethodFilter} 
-      onChange={(e) => setRefundMethodFilter(e.target.value)}
-      className="w-full sm:w-auto px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-    >
-      <option value="">All Methods</option>
-      <option value="Cash">Cash</option>
-      <option value="Card">Card</option>
-      <option value="Store Credit">Store Credit</option>
-    </select>
-  </div>
-  
-  {/* Export Button */}
-  <div className="w-full sm:w-auto">
-    <button 
-      onClick={handleExportExcel} 
-      className="w-full sm:w-auto flex items-center justify-center gap-2 px-3 py-2 border rounded-lg hover:bg-gray-50 text-sm transition-colors"
-    >
-      <img src={export_excel} alt="" className="w-5 h-5" />
-      Export
-    </button>
-  </div>
-</div>
+          {/* Search + Filters */}
+          <div className="px-4 sm:px-6 py-3 sm:py-4 border-b flex flex-col lg:flex-row flex-wrap items-start lg:items-center justify-between gap-3 sm:gap-4">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
+              {/* Search Input */}
+              <div className="relative w-full sm:w-auto">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <img src={search_icon} alt="" className="w-4 h-4" />
+                </div>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search returns..."
+                  className="w-full sm:w-56 pl-9 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                />
+              </div>
+
+              {/* Status Filter */}
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="w-full sm:w-auto px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">All Statuses</option>
+                <option value="Pending">Pending</option>
+                <option value="Approved">Approved</option>
+                <option value="Rejected">Rejected</option>
+              </select>
+
+              {/* Refund Method Filter */}
+              <select
+                value={refundMethodFilter}
+                onChange={(e) => setRefundMethodFilter(e.target.value)}
+                className="w-full sm:w-auto px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">All Methods</option>
+                <option value="Cash">Cash</option>
+                <option value="Card">Card</option>
+                <option value="Store Credit">Store Credit</option>
+              </select>
+            </div>
+
+            {/* Export Button */}
+            <div className="w-full sm:w-auto">
+              <button
+                onClick={handleExportExcel}
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-3 py-2 border rounded-lg hover:bg-gray-50 text-sm transition-colors"
+              >
+                <img src={export_excel} alt="" className="w-5 h-5" />
+                Export
+              </button>
+            </div>
+          </div>
 
           {/* Table */}
-           <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
- <div className="xl:col-span-4 overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  {['Return #', 'Sale #', 'Branch', 'Items', 'Refund Amount', 'Method', 'Status', 'Date', 'Actions'].map(h => (
-                    <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-[#37638F] uppercase tracking-wider">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-100">
-                {isLoading ? (
-                  <tr><td colSpan={9} className="px-6 py-12 text-center">
-                    <div className="flex items-center justify-center gap-2 text-gray-500">
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-                      Loading returns...
-                    </div>
-                  </td></tr>
-                ) : returns.length === 0 ? (
-                  <tr><td colSpan={9} className="px-6 py-12 text-center text-gray-500">No returns found.</td></tr>
-                ) : returns.map((r: any) => (
-                  <tr key={r.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-5 py-4 text-sm font-medium text-gray-900">{r.return_number}</td>
-                    <td className="px-5 py-4 text-sm text-blue-600">{r.sale?.sale_number}</td>
-                    <td className="px-5 py-4 text-sm text-gray-700">{r.branch?.branch_name}</td>
-                    <td className="px-5 py-4 text-sm text-gray-700">{r.items?.length || 0} item(s)</td>
-                    <td className="px-5 py-4 text-sm font-semibold text-gray-900">KD {parseFloat(r.return_amount).toFixed(3)}</td>
-                    <td className="px-5 py-4">
-                      <span className="px-2 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-lg">{r.refund_method}</span>
-                    </td>
-                    <td className="px-5 py-4">
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${statusBadge(r.status)}`}>{r.status}</span>
-                    </td>
-                    <td className="px-5 py-4 text-sm text-gray-500">
-                      {new Date(r.return_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
-                    </td>
-                    <td className="px-5 py-4">
-                      {r.status === 'Pending' && (
-                        <div className="flex gap-2">
-                          <button onClick={() => handleApprove(r.id)}
-                            className="px-3 py-1.5 bg-green-600 text-white text-xs rounded-lg hover:bg-green-700 font-medium">
-                            Approve
-                          </button>
-                          <button onClick={() => setRejectingId(r.id)}
-                            className="px-3 py-1.5 bg-red-100 text-red-700 text-xs rounded-lg hover:bg-red-200 font-medium">
-                            Reject
-                          </button>
-                        </div>
-                      )}
-                    </td>
+          <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+            <div className="xl:col-span-4 overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    {[
+                      "Return #",
+                      "Sale #",
+                      "Branch",
+                      "Items",
+                      "Refund Amount",
+                      "Method",
+                      "Status",
+                      "Date",
+                      "Actions",
+                    ].map((h) => (
+                      <th
+                        key={h}
+                        className="px-5 py-3 text-left text-xs font-semibold text-[#37638F] uppercase tracking-wider"
+                      >
+                        {h}
+                      </th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-100">
+                  {isLoading ? (
+                    <tr>
+                      <td colSpan={9} className="px-6 py-12 text-center">
+                        <div className="flex items-center justify-center gap-2 text-gray-500">
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                          Loading returns...
+                        </div>
+                      </td>
+                    </tr>
+                  ) : returns.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={9}
+                        className="px-6 py-12 text-center text-gray-500"
+                      >
+                        No returns found.
+                      </td>
+                    </tr>
+                  ) : (
+                    returns.map((r: any) => (
+                      <tr
+                        key={r.id}
+                        className="hover:bg-gray-50 transition-colors"
+                      >
+                        <td className="px-5 py-4 text-sm font-medium text-gray-900">
+                          {r.return_number}
+                        </td>
+                        <td className="px-5 py-4 text-sm text-blue-600">
+                          {r.sale?.sale_number}
+                        </td>
+                        <td className="px-5 py-4 text-sm text-gray-700">
+                          {r.branch?.branch_name}
+                        </td>
+                        <td className="px-5 py-4 text-sm text-gray-700">
+                          {r.items?.length || 0} item(s)
+                        </td>
+                        <td className="px-5 py-4 text-sm font-semibold text-gray-900">
+                          KD {parseFloat(r.return_amount).toFixed(3)}
+                        </td>
+                        <td className="px-5 py-4">
+                          <span className="px-2 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-lg">
+                            {r.refund_method}
+                          </span>
+                        </td>
+                        <td className="px-5 py-4">
+                          <span
+                            className={`px-2 py-1 text-xs font-medium rounded-full ${statusBadge(r.status)}`}
+                          >
+                            {r.status}
+                          </span>
+                        </td>
+                        <td className="px-5 py-4 text-sm text-gray-500">
+                          {new Date(r.return_date).toLocaleDateString("en-GB", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                          })}
+                        </td>
+                        <td className="px-5 py-4">
+                          {r.status === "Pending" && (
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleApprove(r.id)}
+                                className="px-3 py-1.5 bg-green-600 text-white text-xs rounded-lg hover:bg-green-700 font-medium"
+                              >
+                                Approve
+                              </button>
+                              <button
+                                onClick={() => setRejectingId(r.id)}
+                                className="px-3 py-1.5 bg-red-100 text-red-700 text-xs rounded-lg hover:bg-red-200 font-medium"
+                              >
+                                Reject
+                              </button>
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
-           </div>
-         
 
           {/* Pagination */}
           {pagination?.last_page > 1 && (
@@ -304,11 +421,25 @@ export default function ReturnsPage() {
                 Showing {pagination.from}–{pagination.to} of {pagination.total}
               </p>
               <div className="flex gap-2">
-                <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}
-                  className="px-3 py-1.5 border rounded-lg text-sm disabled:opacity-50 hover:bg-gray-50">Previous</button>
-                <span className="px-3 py-1.5 bg-[#1773CF] text-white rounded-lg text-sm">{currentPage}</span>
-                <button onClick={() => setCurrentPage(p => Math.min(pagination.last_page, p + 1))} disabled={currentPage === pagination.last_page}
-                  className="px-3 py-1.5 border rounded-lg text-sm disabled:opacity-50 hover:bg-gray-50">Next</button>
+                <button
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1.5 border rounded-lg text-sm disabled:opacity-50 hover:bg-gray-50"
+                >
+                  Previous
+                </button>
+                <span className="px-3 py-1.5 bg-[#1773CF] text-white rounded-lg text-sm">
+                  {currentPage}
+                </span>
+                <button
+                  onClick={() =>
+                    setCurrentPage((p) => Math.min(pagination.last_page, p + 1))
+                  }
+                  disabled={currentPage === pagination.last_page}
+                  className="px-3 py-1.5 border rounded-lg text-sm disabled:opacity-50 hover:bg-gray-50"
+                >
+                  Next
+                </button>
               </div>
             </div>
           )}
@@ -320,15 +451,29 @@ export default function ReturnsPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
             <h3 className="text-lg font-bold mb-4">Reject Return</h3>
-            <textarea value={rejectReason} onChange={(e) => setRejectReason(e.target.value)}
-              rows={3} placeholder="Enter rejection reason *"
-              className="w-full px-4 py-2.5 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4" />
+            <textarea
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              rows={3}
+              placeholder="Enter rejection reason *"
+              className="w-full px-4 py-2.5 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
+            />
             <div className="flex gap-3">
-              <button onClick={() => { setRejectingId(null); setRejectReason(''); }}
-                className="flex-1 py-2.5 border rounded-xl font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
-              <button onClick={() => handleReject(rejectingId)} disabled={isRejecting}
-                className="flex-1 py-2.5 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700 disabled:opacity-50">
-                {isRejecting ? 'Rejecting...' : 'Reject Return'}
+              <button
+                onClick={() => {
+                  setRejectingId(null);
+                  setRejectReason("");
+                }}
+                className="flex-1 py-2.5 border rounded-xl font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleReject(rejectingId)}
+                disabled={isRejecting}
+                className="flex-1 py-2.5 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700 disabled:opacity-50"
+              >
+                {isRejecting ? "Rejecting..." : "Reject Return"}
               </button>
             </div>
           </div>

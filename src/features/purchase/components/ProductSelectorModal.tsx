@@ -1,10 +1,13 @@
 // src/features/purchase/components/ProductSelectorModal.tsx
-import { useState, useMemo } from 'react';
-import { useGetProductsQuery, useGetCategoriesQuery } from '../../../services/inventoryApi';
+import { useState, useMemo } from "react";
+import {
+  useGetProductsQuery,
+  useGetCategoriesQuery,
+} from "../../../services/inventoryApi";
 
-
-const API_BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://erp-backend.ttexpresskw.com';
-
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL?.replace("/api", "") ||
+  "https://erp-backend.ttexpresskw.com";
 
 interface POProduct {
   id: string;
@@ -31,13 +34,15 @@ export default function ProductSelectorModal({
   onAddProduct,
   selectedProducts,
 }: ProductSelectorModalProps) {
-  const [search, setSearch] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [search, setSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
   const [quantities, setQuantities] = useState<Record<number, number>>({});
   const [justAdded, setJustAdded] = useState<Set<number>>(new Set());
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: productsResponse, isLoading } = useGetProductsQuery(undefined as any);
+  const { data: productsResponse, isLoading } = useGetProductsQuery(
+    undefined as any,
+  );
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: categoriesResponse } = useGetCategoriesQuery(undefined as any);
 
@@ -48,8 +53,10 @@ export default function ProductSelectorModal({
 
   const categories = useMemo(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const cats = categoriesData.filter((c: any) => c.is_active).map((c: any) => c.category_name as string);
-    return ['All', ...cats];
+    const cats = categoriesData
+      .filter((c: any) => c.is_active)
+      .map((c: any) => c.category_name as string);
+    return ["All", ...cats];
   }, [categoriesData]);
 
   interface MappedProduct {
@@ -70,21 +77,23 @@ export default function ProductSelectorModal({
         const totalStock: number =
           p.total_stock != null
             ? Number(p.total_stock)
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            : (p.inventory ?? []).reduce((sum: number, inv: any) =>
-                sum + (inv.available_quantity ?? inv.quantity ?? 0), 0
+            : // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (p.inventory ?? []).reduce(
+                (sum: number, inv: any) =>
+                  sum + (inv.available_quantity ?? inv.quantity ?? 0),
+                0,
               );
         return {
           id: p.id as number,
           product_id: p.id as number,
-          name: (p.product_name as string) || '',
-          sku: (p.sku as string) || '',
+          name: (p.product_name as string) || "",
+          sku: (p.sku as string) || "",
           price: parseFloat(p.selling_price as string) || 0,
           stock: totalStock,
-          image: p.primary_image?.image_path 
-  ? `${API_BASE_URL}/storage/${p.primary_image.image_path}` 
-  : 'https://images.unsplash.com/photo-1541275055241-329bbdf9a191?w=500&auto=format&fit=crop&q=60',
-          category: (p.category?.category_name as string) || 'Uncategorized',
+          image: p.primary_image?.image_path
+            ? `${API_BASE_URL}/storage/${p.primary_image.image_path}`
+            : "https://images.unsplash.com/photo-1541275055241-329bbdf9a191?w=500&auto=format&fit=crop&q=60",
+          category: (p.category?.category_name as string) || "Uncategorized",
         };
       })
       .filter((p: MappedProduct) => p.stock > 0); // only in-stock
@@ -95,7 +104,8 @@ export default function ProductSelectorModal({
       const matchSearch =
         p.name.toLowerCase().includes(search.toLowerCase()) ||
         p.sku.toLowerCase().includes(search.toLowerCase());
-      const matchCat = selectedCategory === 'All' || p.category === selectedCategory;
+      const matchCat =
+        selectedCategory === "All" || p.category === selectedCategory;
       return matchSearch && matchCat;
     });
   }, [products, search, selectedCategory]);
@@ -127,7 +137,11 @@ export default function ProductSelectorModal({
     });
     setJustAdded((prev) => new Set(prev).add(product.id));
     setTimeout(() => {
-      setJustAdded((prev) => { const s = new Set(prev); s.delete(product.id); return s; });
+      setJustAdded((prev) => {
+        const s = new Set(prev);
+        s.delete(product.id);
+        return s;
+      });
     }, 1000);
     setQuantities((prev) => ({ ...prev, [product.id]: 1 }));
   };
@@ -137,7 +151,6 @@ export default function ProductSelectorModal({
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl">
-
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <div className="flex items-center gap-3">
@@ -155,9 +168,22 @@ export default function ProductSelectorModal({
             >
               Done
             </button>
-            <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-              <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <svg
+                className="w-5 h-5 text-gray-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
@@ -166,8 +192,18 @@ export default function ProductSelectorModal({
         {/* Search + Categories */}
         <div className="px-6 py-4 border-b border-gray-100 space-y-3">
           <div className="relative">
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            <svg
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
             </svg>
             <input
               type="text"
@@ -185,8 +221,8 @@ export default function ProductSelectorModal({
                 onClick={() => setSelectedCategory(cat)}
                 className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
                   selectedCategory === cat
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}
               >
                 {cat}
@@ -206,7 +242,9 @@ export default function ProductSelectorModal({
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <p className="text-gray-500 font-medium">No products found</p>
               <p className="text-xs text-gray-400 mt-1">
-                {products.length === 0 ? 'All products are out of stock' : 'Try a different search or category'}
+                {products.length === 0
+                  ? "All products are out of stock"
+                  : "Try a different search or category"}
               </p>
             </div>
           ) : (
@@ -219,7 +257,9 @@ export default function ProductSelectorModal({
                   <div
                     key={product.id}
                     className={`border rounded-xl overflow-hidden bg-white transition-all ${
-                      inPOQty > 0 ? 'border-blue-400 shadow-sm' : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'
+                      inPOQty > 0
+                        ? "border-blue-400 shadow-sm"
+                        : "border-gray-200 hover:border-gray-300 hover:shadow-sm"
                     }`}
                   >
                     <div className="relative h-36 bg-gray-100">
@@ -229,12 +269,16 @@ export default function ProductSelectorModal({
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src =
-                            'https://images.unsplash.com/photo-1541275055241-329bbdf9a191?w=200&auto=format&fit=crop';
+                            "https://images.unsplash.com/photo-1541275055241-329bbdf9a191?w=200&auto=format&fit=crop";
                         }}
                       />
-                      <div className={`absolute top-2 left-2 px-2 py-0.5 rounded-full text-xs font-semibold ${
-                        product.stock <= 5 ? 'bg-orange-500 text-white' : 'bg-white/90 text-gray-700'
-                      }`}>
+                      <div
+                        className={`absolute top-2 left-2 px-2 py-0.5 rounded-full text-xs font-semibold ${
+                          product.stock <= 5
+                            ? "bg-orange-500 text-white"
+                            : "bg-white/90 text-gray-700"
+                        }`}
+                      >
                         {product.stock} left
                       </div>
                       {inPOQty > 0 && (
@@ -244,12 +288,19 @@ export default function ProductSelectorModal({
                       )}
                     </div>
                     <div className="p-3">
-                      <h3 className="text-sm font-semibold text-gray-900 truncate" title={product.name}>
+                      <h3
+                        className="text-sm font-semibold text-gray-900 truncate"
+                        title={product.name}
+                      >
                         {product.name}
                       </h3>
-                      <p className="text-xs text-gray-400 mb-2 truncate">SKU: {product.sku}</p>
+                      <p className="text-xs text-gray-400 mb-2 truncate">
+                        SKU: {product.sku}
+                      </p>
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-sm font-bold text-blue-600">KWD {product.price.toFixed(3)}</span>
+                        <span className="text-sm font-bold text-blue-600">
+                          KWD {product.price.toFixed(3)}
+                        </span>
                         <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full truncate max-w-[80px]">
                           {product.category}
                         </span>
@@ -257,30 +308,53 @@ export default function ProductSelectorModal({
                       <div className="flex items-center gap-2">
                         <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden flex-shrink-0">
                           <button
-                            onClick={() => handleQtyChange(product.id, qtyInput - 1)}
+                            onClick={() =>
+                              handleQtyChange(product.id, qtyInput - 1)
+                            }
                             className="w-7 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-100 font-bold"
-                          >−</button>
+                          >
+                            −
+                          </button>
                           <input
-                            type="number" min="1" max={product.stock} value={qtyInput}
-                            onChange={(e) => handleQtyChange(product.id, parseInt(e.target.value) || 1)}
+                            type="number"
+                            min="1"
+                            max={product.stock}
+                            value={qtyInput}
+                            onChange={(e) =>
+                              handleQtyChange(
+                                product.id,
+                                parseInt(e.target.value) || 1,
+                              )
+                            }
                             className="w-9 h-8 text-center text-sm font-semibold border-0 focus:ring-0 focus:outline-none"
                           />
                           <button
-                            onClick={() => handleQtyChange(product.id, Math.min(product.stock, qtyInput + 1))}
+                            onClick={() =>
+                              handleQtyChange(
+                                product.id,
+                                Math.min(product.stock, qtyInput + 1),
+                              )
+                            }
                             className="w-7 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-100 font-bold"
-                          >+</button>
+                          >
+                            +
+                          </button>
                         </div>
                         <button
                           onClick={() => handleAdd(product)}
                           className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all active:scale-95 ${
                             isJustAdded
-                              ? 'bg-green-500 text-white'
+                              ? "bg-green-500 text-white"
                               : inPOQty > 0
-                              ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                              : 'bg-blue-600 text-white hover:bg-blue-700'
+                                ? "bg-blue-100 text-blue-700 hover:bg-blue-200"
+                                : "bg-blue-600 text-white hover:bg-blue-700"
                           }`}
                         >
-                          {isJustAdded ? '✓ Added!' : inPOQty > 0 ? 'Add More' : 'Add'}
+                          {isJustAdded
+                            ? "✓ Added!"
+                            : inPOQty > 0
+                              ? "Add More"
+                              : "Add"}
                         </button>
                       </div>
                     </div>
@@ -295,8 +369,8 @@ export default function ProductSelectorModal({
         {totalInPO > 0 && (
           <div className="px-6 py-3 border-t border-gray-200 bg-gray-50 rounded-b-2xl flex items-center justify-between">
             <p className="text-sm text-gray-600">
-              <span className="font-bold text-gray-900">{totalInPO}</span>{' '}
-              product{totalInPO !== 1 ? 's' : ''} added to order
+              <span className="font-bold text-gray-900">{totalInPO}</span>{" "}
+              product{totalInPO !== 1 ? "s" : ""} added to order
             </p>
             <button
               onClick={onClose}

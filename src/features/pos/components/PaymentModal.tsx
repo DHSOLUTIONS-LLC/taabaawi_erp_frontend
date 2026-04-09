@@ -1,6 +1,6 @@
 // src/features/pos/components/PaymentModal.tsx
-import { useState } from 'react';
-import { useCreateSaleMutation } from '../../../services/posApi';
+import { useState } from "react";
+import { useCreateSaleMutation } from "../../../services/posApi";
 
 interface CartItem {
   id: string;
@@ -31,7 +31,7 @@ interface PaymentModalProps {
   onSuccess: (sale: any) => void;
 }
 
-type PaymentMethod = 'Cash' | 'Card' | 'K-Net';
+type PaymentMethod = "Cash" | "Card" | "K-Net";
 
 export default function PaymentModal({
   isOpen,
@@ -49,31 +49,34 @@ export default function PaymentModal({
   customerId,
   onSuccess,
 }: PaymentModalProps) {
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('Cash');
-  const [cashReceived, setCashReceived] = useState('');
-  const [cardReference, setCardReference] = useState('');
-  const [notes, setNotes] = useState('');
-  const [error, setError] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("Cash");
+  const [cashReceived, setCashReceived] = useState("");
+  const [cardReference, setCardReference] = useState("");
+  const [notes, setNotes] = useState("");
+  const [error, setError] = useState("");
 
   const total = subtotal - discount - couponDiscount;
-  const change = paymentMethod === 'Cash' && cashReceived ? parseFloat(cashReceived) - total : 0;
+  const change =
+    paymentMethod === "Cash" && cashReceived
+      ? parseFloat(cashReceived) - total
+      : 0;
 
   const [createSale, { isLoading }] = useCreateSaleMutation();
 
   if (!isOpen) return null;
 
   const handleProcessPayment = async () => {
-    setError('');
+    setError("");
 
-    if (paymentMethod === 'Cash') {
+    if (paymentMethod === "Cash") {
       if (!cashReceived || parseFloat(cashReceived) < total) {
-        setError('Cash received must be at least the total amount');
+        setError("Cash received must be at least the total amount");
         return;
       }
     }
 
     try {
-      const items = cartItems.map(item => ({
+      const items = cartItems.map((item) => ({
         product_id: item.product_id || parseInt(item.id),
         variant_id: item.variant_id,
         quantity: item.quantity,
@@ -94,17 +97,19 @@ export default function PaymentModal({
       };
 
       if (couponCode) payload.coupon_code = couponCode;
-      if (paymentMethod === 'Cash') {
+      if (paymentMethod === "Cash") {
         payload.cash_received = parseFloat(cashReceived) || 0;
       }
-      if (paymentMethod === 'Card' || paymentMethod === 'K-Net') {
+      if (paymentMethod === "Card" || paymentMethod === "K-Net") {
         payload.card_reference = cardReference;
       }
 
       const result = await createSale(payload).unwrap();
       onSuccess(result.data);
     } catch (err: any) {
-      setError(err?.data?.message || 'Failed to process payment. Please try again.');
+      setError(
+        err?.data?.message || "Failed to process payment. Please try again.",
+      );
     }
   };
 
@@ -114,9 +119,22 @@ export default function PaymentModal({
         {/* Header */}
         <div className="bg-[#1773CF] px-5 py-4 flex items-center justify-between">
           <h2 className="text-lg font-bold text-white">Payment</h2>
-          <button onClick={onClose} className="text-white/70 hover:text-white transition-colors">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+          <button
+            onClick={onClose}
+            className="text-white/70 hover:text-white transition-colors"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -125,22 +143,28 @@ export default function PaymentModal({
           {/* Total Amount */}
           <div className="bg-gray-50 rounded-lg p-4 text-center">
             <p className="text-sm text-gray-500 mb-1">Total Amount</p>
-            <p className="text-2xl font-bold text-[#1773CF]">KD {total.toFixed(3)}</p>
-            <p className="text-xs text-gray-400 mt-1">{cartItems.length} item(s)</p>
+            <p className="text-2xl font-bold text-[#1773CF]">
+              KD {total.toFixed(3)}
+            </p>
+            <p className="text-xs text-gray-400 mt-1">
+              {cartItems.length} item(s)
+            </p>
           </div>
 
           {/* Payment Method */}
           <div>
-            <p className="text-sm font-medium text-gray-700 mb-2">Payment Method</p>
+            <p className="text-sm font-medium text-gray-700 mb-2">
+              Payment Method
+            </p>
             <div className="grid grid-cols-3 gap-2">
-              {(['Cash', 'Card', 'K-Net'] as PaymentMethod[]).map((method) => (
+              {(["Cash", "Card", "K-Net"] as PaymentMethod[]).map((method) => (
                 <button
                   key={method}
                   onClick={() => setPaymentMethod(method)}
                   className={`py-2.5 rounded-lg border-2 transition-all text-sm font-medium ${
                     paymentMethod === method
-                      ? 'border-[#1773CF] bg-blue-50 text-[#1773CF]'
-                      : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                      ? "border-[#1773CF] bg-blue-50 text-[#1773CF]"
+                      : "border-gray-200 text-gray-600 hover:border-gray-300"
                   }`}
                 >
                   {method}
@@ -150,9 +174,11 @@ export default function PaymentModal({
           </div>
 
           {/* Cash Amount */}
-          {paymentMethod === 'Cash' && (
+          {paymentMethod === "Cash" && (
             <div>
-              <label className="text-sm font-medium text-gray-700 mb-1 block">Cash Received (KD)</label>
+              <label className="text-sm font-medium text-gray-700 mb-1 block">
+                Cash Received (KD)
+              </label>
               <input
                 type="number"
                 step="0.001"
@@ -171,9 +197,11 @@ export default function PaymentModal({
           )}
 
           {/* Card Reference */}
-          {(paymentMethod === 'Card' || paymentMethod === 'K-Net') && (
+          {(paymentMethod === "Card" || paymentMethod === "K-Net") && (
             <div>
-              <label className="text-sm font-medium text-gray-700 mb-1 block">Card Reference</label>
+              <label className="text-sm font-medium text-gray-700 mb-1 block">
+                Card Reference
+              </label>
               <input
                 type="text"
                 value={cardReference}
@@ -186,7 +214,9 @@ export default function PaymentModal({
 
           {/* Notes */}
           <div>
-            <label className="text-sm font-medium text-gray-700 mb-1 block">Notes (Optional)</label>
+            <label className="text-sm font-medium text-gray-700 mb-1 block">
+              Notes (Optional)
+            </label>
             <input
               type="text"
               value={notes}
@@ -212,18 +242,39 @@ export default function PaymentModal({
             </button>
             <button
               onClick={handleProcessPayment}
-              disabled={isLoading || (paymentMethod === 'Cash' && (!cashReceived || parseFloat(cashReceived) < total))}
+              disabled={
+                isLoading ||
+                (paymentMethod === "Cash" &&
+                  (!cashReceived || parseFloat(cashReceived) < total))
+              }
               className="flex-1 py-2.5 bg-[#1773CF] hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <span className="flex items-center justify-center gap-2">
-                  <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  <svg
+                    className="animate-spin w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                    />
                   </svg>
                   Processing...
                 </span>
-              ) : `Pay KD ${total.toFixed(3)}`}
+              ) : (
+                `Pay KD ${total.toFixed(3)}`
+              )}
             </button>
           </div>
         </div>

@@ -1,10 +1,7 @@
 // src/features/pos/pages/CashRegistersPage.tsx
 import { useState, useMemo, useEffect } from "react";
 import DashboardLayout from "../../../layouts/DashboardLayout";
-import { 
-  useGetPOSsQuery, 
-  useGetPOSByIdQuery 
-} from "../../../services/posApi";
+import { useGetPOSsQuery, useGetPOSByIdQuery } from "../../../services/posApi";
 import { useGetBranchesQuery } from "../../../services/superAdminApi";
 import { useAppSelector } from "../../../app/hooks";
 import type { RootState } from "../../../app/store";
@@ -25,7 +22,9 @@ export default function CashRegistersPage() {
   const [selectedBranch, setSelectedBranch] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
-  const [selectedRegisterId, setSelectedRegisterId] = useState<number | null>(null);
+  const [selectedRegisterId, setSelectedRegisterId] = useState<number | null>(
+    null,
+  );
   const [showRegisterDetails, setShowRegisterDetails] = useState(false);
 
   // Search and pagination states
@@ -43,7 +42,7 @@ export default function CashRegistersPage() {
   // Set initial branch based on user role
   useEffect(() => {
     if (!userCanSwitchBranch && userBranchId && branches.length > 0) {
-      const userBranch = branches.find(b => b.id === userBranchId);
+      const userBranch = branches.find((b) => b.id === userBranchId);
       if (userBranch) {
         setSelectedBranch(userBranch.id.toString());
       }
@@ -59,28 +58,43 @@ export default function CashRegistersPage() {
   });
 
   // Fetch selected register details
-  const { data: registerDetailsResponse } = useGetPOSByIdQuery(selectedRegisterId!, {
-    skip: !selectedRegisterId
-  });
+  const { data: registerDetailsResponse } = useGetPOSByIdQuery(
+    selectedRegisterId!,
+    {
+      skip: !selectedRegisterId,
+    },
+  );
 
   const registers = registersResponse?.data?.data || [];
   const pagination = registersResponse?.data;
   const selectedRegister = registerDetailsResponse?.data;
 
   // Calculate summary stats
-  const totalOpening = registers.reduce((sum: number, register: any) => sum + parseFloat(register.opening_balance), 0);
-  const totalClosing = registers.reduce((sum: any, r: any) => sum + (parseFloat(r.closing_balance) || 0), 0);
-  const totalDifference = registers.reduce((sum: number, r: any) => sum + (parseFloat(r.difference) || 0), 0);
-  const activeRegisters = registers.filter((r: any) => r.status === 'Open').length;
+  const totalOpening = registers.reduce(
+    (sum: number, register: any) => sum + parseFloat(register.opening_balance),
+    0,
+  );
+  const totalClosing = registers.reduce(
+    (sum: any, r: any) => sum + (parseFloat(r.closing_balance) || 0),
+    0,
+  );
+  const totalDifference = registers.reduce(
+    (sum: number, r: any) => sum + (parseFloat(r.difference) || 0),
+    0,
+  );
+  const activeRegisters = registers.filter(
+    (r: any) => r.status === "Open",
+  ).length;
 
   // Filter registers based on search query
   const filteredRegisters = useMemo(() => {
     if (!searchQuery.trim()) return registers;
     const query = searchQuery.toLowerCase().trim();
-    return registers.filter((register: any) =>
+    return registers.filter(
+      (register: any) =>
         register.user?.name?.toLowerCase().includes(query) ||
         register.branch?.branch_name?.toLowerCase().includes(query) ||
-        register.status?.toLowerCase().includes(query)
+        register.status?.toLowerCase().includes(query),
     );
   }, [searchQuery, registers]);
 
@@ -95,12 +109,12 @@ export default function CashRegistersPage() {
     const query = searchQuery.toLowerCase().trim();
     const suggestions = new Set<string>();
     registers.forEach((register: any) => {
-        if (register.user?.name?.toLowerCase().includes(query)) {
-            suggestions.add(register.user.name);
-        }
-        if (register.branch?.branch_name?.toLowerCase().includes(query)) {
-            suggestions.add(register.branch.branch_name);
-        }
+      if (register.user?.name?.toLowerCase().includes(query)) {
+        suggestions.add(register.user.name);
+      }
+      if (register.branch?.branch_name?.toLowerCase().includes(query)) {
+        suggestions.add(register.branch.branch_name);
+      }
     });
     return Array.from(suggestions).slice(0, 5);
   }, [searchQuery, registers]);
@@ -126,7 +140,7 @@ export default function CashRegistersPage() {
   };
 
   const handleExportToPDF = () => {
-    alert('PDF export functionality coming soon');
+    alert("PDF export functionality coming soon");
   };
 
   // Export functions remain the same but use actual data
@@ -136,22 +150,32 @@ export default function CashRegistersPage() {
         Branch: register.branch?.branch_name,
         Cashier: register.user?.name,
         "Opened At": new Date(register.opened_at).toLocaleString(),
-        "Closed At": register.closed_at ? new Date(register.closed_at).toLocaleString() : '-',
+        "Closed At": register.closed_at
+          ? new Date(register.closed_at).toLocaleString()
+          : "-",
         "Opening Balance": register.opening_balance,
-        "Closing Balance": register.closing_balance || '-',
-        "Expected Balance": register.expected_balance || '-',
-        Difference: register.difference || '0',
+        "Closing Balance": register.closing_balance || "-",
+        "Expected Balance": register.expected_balance || "-",
+        Difference: register.difference || "0",
         Status: register.status,
-        "Total Sales": register.sales?.length || 0
+        "Total Sales": register.sales?.length || 0,
       }));
 
       const worksheet = XLSX.utils.json_to_sheet(exportData);
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Cash Registers");
-      
-      const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-      const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
-      saveAs(blob, `cash_registers_${new Date().toISOString().split("T")[0]}.xlsx`);
+
+      const excelBuffer = XLSX.write(workbook, {
+        bookType: "xlsx",
+        type: "array",
+      });
+      const blob = new Blob([excelBuffer], {
+        type: "application/octet-stream",
+      });
+      saveAs(
+        blob,
+        `cash_registers_${new Date().toISOString().split("T")[0]}.xlsx`,
+      );
     } catch (error) {
       console.error("Excel export failed:", error);
     }
@@ -196,13 +220,16 @@ export default function CashRegistersPage() {
                   >
                     <option value="">All Branches</option>
                     {branches.map((branch) => (
-                      <option key={branch.id} value={branch.id}>{branch.branch_name}</option>
+                      <option key={branch.id} value={branch.id}>
+                        {branch.branch_name}
+                      </option>
                     ))}
                   </select>
                 ) : (
                   // Users with fixed branch
                   <div className="w-full pl-12 pr-10 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-700">
-                    {branches.find(b => b.id === parseInt(selectedBranch))?.branch_name || 'No Branch Assigned'}
+                    {branches.find((b) => b.id === parseInt(selectedBranch))
+                      ?.branch_name || "No Branch Assigned"}
                   </div>
                 )}
                 <div className="absolute right-4 top-1/2 -translate-y-1/2">
@@ -233,11 +260,15 @@ export default function CashRegistersPage() {
             <div className="bg-blue-50 rounded-xl p-3 flex items-center justify-between">
               <div>
                 <p className="text-xs text-blue-600">Active Registers</p>
-                <p className="text-2xl font-bold text-blue-800">{activeRegisters}</p>
+                <p className="text-2xl font-bold text-blue-800">
+                  {activeRegisters}
+                </p>
               </div>
               <div className="text-right">
                 <p className="text-xs text-blue-600">Total Difference</p>
-                <p className="text-lg font-semibold text-blue-800">KD {totalDifference.toFixed(3)}</p>
+                <p className="text-lg font-semibold text-blue-800">
+                  KD {totalDifference.toFixed(3)}
+                </p>
               </div>
             </div>
           </div>
@@ -250,15 +281,21 @@ export default function CashRegistersPage() {
             </div>
             <div className="bg-white rounded-lg p-6 shadow">
               <p className="text-sm text-gray-500 mb-3">Total Opening Cash</p>
-              <p className="text-3xl font-semibold">KD {totalOpening.toFixed(3)}</p>
+              <p className="text-3xl font-semibold">
+                KD {totalOpening.toFixed(3)}
+              </p>
             </div>
             <div className="bg-white rounded-lg p-6 shadow">
               <p className="text-sm text-gray-500 mb-3">Total Closing Cash</p>
-              <p className="text-3xl font-semibold">KD {totalClosing.toFixed(3)}</p>
+              <p className="text-3xl font-semibold">
+                KD {totalClosing.toFixed(3)}
+              </p>
             </div>
             <div className="bg-white rounded-lg p-6 shadow">
               <p className="text-sm text-gray-500 mb-3">Net Difference</p>
-              <p className={`text-3xl font-semibold ${totalDifference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              <p
+                className={`text-3xl font-semibold ${totalDifference >= 0 ? "text-green-600" : "text-red-600"}`}
+              >
                 KD {totalDifference.toFixed(3)}
               </p>
             </div>
@@ -275,7 +312,9 @@ export default function CashRegistersPage() {
                   type="text"
                   value={searchQuery}
                   onChange={handleSearchChange}
-                  onFocus={() => searchQuery.length >= 2 && setShowSuggestions(true)}
+                  onFocus={() =>
+                    searchQuery.length >= 2 && setShowSuggestions(true)
+                  }
                   onBlur={handleSearchBlur}
                   placeholder="Search by cashier or branch..."
                   className="pl-10 pr-4 py-2.5 border rounded-lg w-full"
@@ -296,11 +335,17 @@ export default function CashRegistersPage() {
               </div>
 
               <div className="flex space-x-3">
-                <button onClick={handleExportToPDF} className="flex items-center space-x-2 px-4 py-2 border rounded-lg hover:bg-gray-50">
+                <button
+                  onClick={handleExportToPDF}
+                  className="flex items-center space-x-2 px-4 py-2 border rounded-lg hover:bg-gray-50"
+                >
                   <img src={export_pdf} alt="" className="w-5 h-5" />
                   <span>Export PDF</span>
                 </button>
-                <button onClick={handleExportToExcel} className="flex items-center space-x-2 px-4 py-2 border rounded-lg hover:bg-gray-50">
+                <button
+                  onClick={handleExportToExcel}
+                  className="flex items-center space-x-2 px-4 py-2 border rounded-lg hover:bg-gray-50"
+                >
                   <img src={export_excel} alt="" className="w-5 h-5" />
                   <span>Export Excel</span>
                 </button>
@@ -313,85 +358,155 @@ export default function CashRegistersPage() {
             <div className="px-6 py-4 border-b">
               <h2 className="text-xl font-bold">Cash Registers</h2>
             </div>
-               <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
- <div className="xl:col-span-4 overflow-x-auto">
-              <table className="min-w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Branch</th>
-                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Cashier</th>
-                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Opened</th>
-                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Closed</th>
-                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Opening</th>
-                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Closing</th>
-                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Expected</th>
-                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Difference</th>
-                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Status</th>
-                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {isLoading ? (
-                    <tr><td colSpan={10} className="text-center py-8">Loading...</td></tr>
-                  ) : filteredRegisters.length === 0 ? (
-                    <tr><td colSpan={10} className="text-center py-8">No registers found</td></tr>
-                  ) : (
-                    filteredRegisters.map((register: any) => (
-                      <tr key={register.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4">{register.branch?.branch_name}</td>
-                        <td className="px-6 py-4">{register.user?.name}</td>
-                        <td className="px-6 py-4">{new Date(register.opened_at).toLocaleString()}</td>
-                        <td className="px-6 py-4">{register.closed_at ? new Date(register.closed_at).toLocaleString() : '-'}</td>
-                        <td className="px-6 py-4">KD {register.opening_balance}</td>
-                        <td className="px-6 py-4">{register.closing_balance ? `KD ${register.closing_balance}` : '-'}</td>
-                        <td className="px-6 py-4">{register.expected_balance ? `KD ${register.expected_balance}` : '-'}</td>
-                        <td className="px-6 py-4">
-                          <span className={register.difference > 0 ? 'text-green-600' : register.difference < 0 ? 'text-red-600' : ''}>
-                            {register.difference ? `KD ${register.difference}` : '-'}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className={`px-2 py-1 rounded-full text-xs ${
-                            register.status === 'Open' ? 'bg-green-100 text-green-800' : 'bg-gray-100'
-                          }`}>
-                            {register.status}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <button
-                            onClick={() => handleViewDetails(register.id)}
-                            className="text-blue-600 hover:text-blue-800"
-                          >
-                            <img src={view_icon} alt="View" className="w-5 h-5" />
-                          </button>
+            <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+              <div className="xl:col-span-4 overflow-x-auto">
+                <table className="min-w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">
+                        Branch
+                      </th>
+                      <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">
+                        Cashier
+                      </th>
+                      <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">
+                        Opened
+                      </th>
+                      <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">
+                        Closed
+                      </th>
+                      <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">
+                        Opening
+                      </th>
+                      <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">
+                        Closing
+                      </th>
+                      <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">
+                        Expected
+                      </th>
+                      <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">
+                        Difference
+                      </th>
+                      <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">
+                        Status
+                      </th>
+                      <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {isLoading ? (
+                      <tr>
+                        <td colSpan={10} className="text-center py-8">
+                          Loading...
                         </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>  
+                    ) : filteredRegisters.length === 0 ? (
+                      <tr>
+                        <td colSpan={10} className="text-center py-8">
+                          No registers found
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredRegisters.map((register: any) => (
+                        <tr key={register.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4">
+                            {register.branch?.branch_name}
+                          </td>
+                          <td className="px-6 py-4">{register.user?.name}</td>
+                          <td className="px-6 py-4">
+                            {new Date(register.opened_at).toLocaleString()}
+                          </td>
+                          <td className="px-6 py-4">
+                            {register.closed_at
+                              ? new Date(register.closed_at).toLocaleString()
+                              : "-"}
+                          </td>
+                          <td className="px-6 py-4">
+                            KD {register.opening_balance}
+                          </td>
+                          <td className="px-6 py-4">
+                            {register.closing_balance
+                              ? `KD ${register.closing_balance}`
+                              : "-"}
+                          </td>
+                          <td className="px-6 py-4">
+                            {register.expected_balance
+                              ? `KD ${register.expected_balance}`
+                              : "-"}
+                          </td>
+                          <td className="px-6 py-4">
+                            <span
+                              className={
+                                register.difference > 0
+                                  ? "text-green-600"
+                                  : register.difference < 0
+                                    ? "text-red-600"
+                                    : ""
+                              }
+                            >
+                              {register.difference
+                                ? `KD ${register.difference}`
+                                : "-"}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span
+                              className={`px-2 py-1 rounded-full text-xs ${
+                                register.status === "Open"
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-gray-100"
+                              }`}
+                            >
+                              {register.status}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <button
+                              onClick={() => handleViewDetails(register.id)}
+                              className="text-blue-600 hover:text-blue-800"
+                            >
+                              <img
+                                src={view_icon}
+                                alt="View"
+                                className="w-5 h-5"
+                              />
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
-               </div>
-           
 
             {/* Pagination */}
             {pagination && pagination.last_page > 1 && (
               <div className="px-6 py-4 border-t">
                 <div className="flex justify-between items-center">
                   <div className="text-sm text-gray-500">
-                    Showing {pagination.from} to {pagination.to} of {pagination.total}
+                    Showing {pagination.from} to {pagination.to} of{" "}
+                    {pagination.total}
                   </div>
                   <div className="flex space-x-2">
                     <button
-                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                       disabled={currentPage === 1}
                       className="px-3 py-1 border rounded disabled:opacity-50"
                     >
                       Previous
                     </button>
-                    <span className="px-3 py-1 bg-blue-500 text-white rounded">{currentPage}</span>
+                    <span className="px-3 py-1 bg-blue-500 text-white rounded">
+                      {currentPage}
+                    </span>
                     <button
-                      onClick={() => setCurrentPage(p => Math.min(pagination.last_page, p + 1))}
+                      onClick={() =>
+                        setCurrentPage((p) =>
+                          Math.min(pagination.last_page, p + 1),
+                        )
+                      }
                       disabled={currentPage === pagination.last_page}
                       className="px-3 py-1 border rounded disabled:opacity-50"
                     >
@@ -410,24 +525,37 @@ export default function CashRegistersPage() {
         <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-lg">
             <div className="p-6 border-b flex justify-between items-center">
-              <h2 className="text-xl font-bold">Register Details - {selectedRegister.branch?.branch_name}</h2>
-              <button onClick={() => setShowRegisterDetails(false)} className="text-gray-500 hover:text-gray-700 text-2xl">×</button>
+              <h2 className="text-xl font-bold">
+                Register Details - {selectedRegister.branch?.branch_name}
+              </h2>
+              <button
+                onClick={() => setShowRegisterDetails(false)}
+                className="text-gray-500 hover:text-gray-700 text-2xl"
+              >
+                ×
+              </button>
             </div>
-            
+
             <div>
               {/* Summary Cards */}
               <div className="grid grid-cols-3 gap-4 mb-6">
                 <div className="bg-blue-50 p-4 rounded-lg">
                   <p className="text-sm text-blue-600">Opening Balance</p>
-                  <p className="text-2xl font-bold">KD {selectedRegister.opening_balance}</p>
+                  <p className="text-2xl font-bold">
+                    KD {selectedRegister.opening_balance}
+                  </p>
                 </div>
                 <div className="bg-green-50 p-4 rounded-lg">
                   <p className="text-sm text-green-600">Expected Balance</p>
-                  <p className="text-2xl font-bold">KD {selectedRegister.expected_balance || '0.000'}</p>
+                  <p className="text-2xl font-bold">
+                    KD {selectedRegister.expected_balance || "0.000"}
+                  </p>
                 </div>
                 <div className="bg-purple-50 p-4 rounded-lg">
                   <p className="text-sm text-purple-600">Closing Balance</p>
-                  <p className="text-2xl font-bold">KD {selectedRegister.closing_balance || '0.000'}</p>
+                  <p className="text-2xl font-bold">
+                    KD {selectedRegister.closing_balance || "0.000"}
+                  </p>
                 </div>
               </div>
 
@@ -449,20 +577,34 @@ export default function CashRegistersPage() {
                       selectedRegister.cash_movements.map((movement: any) => (
                         <tr key={movement.id}>
                           <td className="px-4 py-2">
-                            <span className={`px-2 py-1 rounded-full text-xs ${
-                              movement.type === 'Cash In' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                            }`}>
+                            <span
+                              className={`px-2 py-1 rounded-full text-xs ${
+                                movement.type === "Cash In"
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-red-100 text-red-800"
+                              }`}
+                            >
                               {movement.type}
                             </span>
                           </td>
-                          <td className="px-4 py-2 font-medium">KD {movement.amount}</td>
+                          <td className="px-4 py-2 font-medium">
+                            KD {movement.amount}
+                          </td>
                           <td className="px-4 py-2">{movement.reason}</td>
-                          <td className="px-4 py-2">{new Date(movement.movement_date).toLocaleString()}</td>
-                          <td className="px-4 py-2">{movement.recorded_by?.name}</td>
+                          <td className="px-4 py-2">
+                            {new Date(movement.movement_date).toLocaleString()}
+                          </td>
+                          <td className="px-4 py-2">
+                            {movement.recorded_by?.name}
+                          </td>
                         </tr>
                       ))
                     ) : (
-                      <tr><td colSpan={5} className="text-center py-4">No cash movements</td></tr>
+                      <tr>
+                        <td colSpan={5} className="text-center py-4">
+                          No cash movements
+                        </td>
+                      </tr>
                     )}
                   </tbody>
                 </table>
@@ -486,14 +628,24 @@ export default function CashRegistersPage() {
                       selectedRegister.sales.map((sale: any) => (
                         <tr key={sale.id}>
                           <td className="px-4 py-2">{sale.invoice_number}</td>
-                          <td className="px-4 py-2">{new Date(sale.created_at).toLocaleString()}</td>
-                          <td className="px-4 py-2">{sale.items?.length || 0}</td>
-                          <td className="px-4 py-2 font-medium">KD {sale.total_amount}</td>
+                          <td className="px-4 py-2">
+                            {new Date(sale.created_at).toLocaleString()}
+                          </td>
+                          <td className="px-4 py-2">
+                            {sale.items?.length || 0}
+                          </td>
+                          <td className="px-4 py-2 font-medium">
+                            KD {sale.total_amount}
+                          </td>
                           <td className="px-4 py-2">{sale.payment_method}</td>
                         </tr>
                       ))
                     ) : (
-                      <tr><td colSpan={5} className="text-center py-4">No sales</td></tr>
+                      <tr>
+                        <td colSpan={5} className="text-center py-4">
+                          No sales
+                        </td>
+                      </tr>
                     )}
                   </tbody>
                 </table>

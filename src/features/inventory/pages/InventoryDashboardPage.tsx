@@ -618,7 +618,8 @@ export default function DashboardPage() {
     <DashboardLayout>
       <div className="space-y-4 md:space-y-6 overflow-x-hidden min-w-0">
         {/* Stat Cards - Same UI as first dashboard */}
-        <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 xl:gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-2 gap-3 md:gap-4 xl:gap-6">
           {statCards.map((card) => (
             <div
               key={card.label}
@@ -649,7 +650,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Quick Actions Row */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-1 gap-4 md:gap-6">
           {/* Quick Actions Card */}
           <div className="bg-white rounded-2xl p-5 md:p-6 shadow-sm">
             <div className="space-y-6">
@@ -737,6 +738,7 @@ export default function DashboardPage() {
 
           {/* Empty space for layout balance - can be removed if not needed */}
           <div className="hidden xl:block"></div>
+        </div>
         </div>
 
         {/* Main Table Section */}

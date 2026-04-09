@@ -99,7 +99,8 @@ export default function PendingApprovalsPage() {
               <p className="text-gray-500 font-medium">No pending approvals found</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+               <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+ <div className="xl:col-span-4 overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
@@ -155,6 +156,8 @@ export default function PendingApprovalsPage() {
                 </tbody>
               </table>
             </div>
+               </div>
+           
           )}
         </div>
 

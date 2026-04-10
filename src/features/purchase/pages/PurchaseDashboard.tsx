@@ -355,7 +355,7 @@ export default function PurchaseDashboard() {
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
       {[
         { label: 'All Orders',        path: `${basePath}/purchase/orders`,     color: 'border-blue-200 hover:bg-blue-50'   },
-        { label: 'Pending Approvals', path: `${basePath}/purchase/approvals`,  color: 'border-yellow-200 hover:bg-yellow-50' },
+        // { label: 'Pending   Approvals', path: `${basePath}/purchase/approvals`,  color: 'border-yellow-200 hover:bg-yellow-50' },
         { label: 'Suppliers',         path: `${basePath}/purchase/suppliers`,  color: 'border-green-200 hover:bg-green-50'  },
         { label: 'Currencies',        path: `${basePath}/purchase/currencies`, color: 'border-purple-200 hover:bg-purple-50' },
       ].map((item) => (

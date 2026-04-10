@@ -120,23 +120,23 @@ export default function EditBankAccountPage() {
     );
   }
 
-  return (
+return (
     <DashboardLayout>
-      <div className="max-w-3xl mx-auto space-y-6">
+      <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6 px-4 sm:px-0">
         {/* Header */}
-        <div className="flex items-center gap-4">
-          <button onClick={() => navigate(`${basePath}/accounting/bank-accounts/${accountId}`)}>
-            <img src={arrow_back_icon} alt="" className="w-8 h-8" />
+        <div className="flex items-start gap-3 sm:gap-4">
+          <button onClick={() => navigate(`${basePath}/accounting/bank-accounts/${accountId}`)} className="flex-shrink-0 mt-1">
+            <img src={arrow_back_icon} alt="" className="w-6 h-6 sm:w-8 sm:h-8" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Edit Bank Account</h1>
-            <p className="text-sm text-gray-500 mt-0.5">{account.account_name}</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Edit Bank Account</h1>
+            <p className="text-xs sm:text-sm text-gray-500 mt-0.5 break-words">{account.account_name}</p>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-xl p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="bg-white rounded-xl p-4 sm:p-6 space-y-4 sm:space-y-6">
           {/* Account Information */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-2">
                 Account Name <span className="text-red-500">*</span>
@@ -146,7 +146,7 @@ export default function EditBankAccountPage() {
                 name="account_name"
                 value={formData.account_name}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                 required
               />
               {errors.account_name && (
@@ -163,9 +163,10 @@ export default function EditBankAccountPage() {
                 name="bank_name"
                 value={formData.bank_name}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                 required
               />
+              {errors.bank_name && <p className="text-xs text-red-500 mt-1">{errors.bank_name[0]}</p>}
             </div>
 
             <div>
@@ -177,9 +178,10 @@ export default function EditBankAccountPage() {
                 name="account_number"
                 value={formData.account_number}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                 required
               />
+              {errors.account_number && <p className="text-xs text-red-500 mt-1">{errors.account_number[0]}</p>}
             </div>
 
             <div>
@@ -191,7 +193,7 @@ export default function EditBankAccountPage() {
                 name="branch_name"
                 value={formData.branch_name}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
               />
             </div>
 
@@ -204,7 +206,7 @@ export default function EditBankAccountPage() {
                 name="iban"
                 value={formData.iban}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
               />
             </div>
 
@@ -217,7 +219,7 @@ export default function EditBankAccountPage() {
                 name="swift_code"
                 value={formData.swift_code}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
               />
             </div>
 
@@ -230,7 +232,7 @@ export default function EditBankAccountPage() {
                   name="currency"
                   value={formData.currency}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                   required
                 >
                   {CURRENCIES.map(currency => (
@@ -252,7 +254,7 @@ export default function EditBankAccountPage() {
                   name="gl_account_id"
                   value={formData.gl_account_id}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                 >
                   <option value="">None</option>
                   {glAccounts.map((acc: any) => (
@@ -278,7 +280,7 @@ export default function EditBankAccountPage() {
               value={formData.notes}
               onChange={handleChange}
               rows={3}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 resize-none"
+              className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base"
             />
           </div>
 
@@ -296,18 +298,18 @@ export default function EditBankAccountPage() {
           </div>
 
           {/* Actions */}
-          <div className="flex justify-end gap-3 pt-4 border-t">
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-4 border-t">
             <button
               type="button"
               onClick={() => navigate(`${basePath}/accounting/bank-accounts/${accountId}`)}
-              className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+              className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 text-sm sm:text-base"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isUpdating}
-              className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm sm:text-base"
             >
               {isUpdating ? 'Updating...' : 'Update Account'}
             </button>

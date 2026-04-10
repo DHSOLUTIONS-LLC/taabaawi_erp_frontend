@@ -62,76 +62,79 @@ export default function BankAccountsPage() {
     <DashboardLayout>
       <div className="space-y-6">
 
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Bank Accounts</h1>
-            <p className="text-sm text-gray-500 mt-1">Manage your bank accounts and transactions</p>
-          </div>
-          <button
-            onClick={() => navigate(`${basePath}/accounting/bank-accounts/create`)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <img src={add_icon} alt="" className="w-4 h-4" />
-            New Bank Account
-          </button>
-        </div>
+     {/* Header */}
+<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+  <div>
+    <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Bank Accounts</h1>
+    <p className="text-xs sm:text-sm text-gray-500 mt-1">Manage your bank accounts and transactions</p>
+  </div>
+  <button
+    onClick={() => navigate(`${basePath}/accounting/bank-accounts/create`)}
+    className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
+  >
+    <img src={add_icon} alt="" className="w-4 h-4" />
+    New Bank Account
+  </button>
+</div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-3 gap-4">
-          <div className="bg-white rounded-xl p-5 shadow-sm">
-            <p className="text-sm text-gray-500">Total Balance</p>
-            <p className="text-2xl font-bold text-blue-600 mt-1">
-              KWD {totalBalance.toFixed(3)}
-            </p>
-            <p className="text-xs text-gray-400 mt-1">Across all active accounts</p>
-          </div>
-          <div className="bg-white rounded-xl p-5 shadow-sm">
-            <p className="text-sm text-gray-500">Active Accounts</p>
-            <p className="text-2xl font-bold text-green-600 mt-1">{activeCount}</p>
-            <p className="text-xs text-gray-400 mt-1">Currently active</p>
-          </div>
-          <div className="bg-white rounded-xl p-5 shadow-sm">
-            <p className="text-sm text-gray-500">Total Accounts</p>
-            <p className="text-2xl font-bold text-gray-900 mt-1">{pagination?.total ?? accounts.length}</p>
-            <p className="text-xs text-gray-400 mt-1">All bank accounts</p>
-          </div>
-        </div>
+{/* Stats Cards */}
+<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+  <div className="bg-white rounded-xl p-4 sm:p-5 shadow-sm">
+    <p className="text-xs sm:text-sm text-gray-500">Total Balance</p>
+    <p className="text-lg sm:text-2xl font-bold text-blue-600 mt-1 break-words">
+      KWD {totalBalance.toFixed(3)}
+    </p>
+    <p className="text-xs text-gray-400 mt-1">Across all active accounts</p>
+  </div>
+  <div className="bg-white rounded-xl p-4 sm:p-5 shadow-sm">
+    <p className="text-xs sm:text-sm text-gray-500">Active Accounts</p>
+    <p className="text-lg sm:text-2xl font-bold text-green-600 mt-1">{activeCount}</p>
+    <p className="text-xs text-gray-400 mt-1">Currently active</p>
+  </div>
+  <div className="bg-white rounded-xl p-4 sm:p-5 shadow-sm sm:col-span-2 lg:col-span-1">
+    <p className="text-xs sm:text-sm text-gray-500">Total Accounts</p>
+    <p className="text-lg sm:text-2xl font-bold text-gray-900 mt-1">{pagination?.total ?? accounts.length}</p>
+    <p className="text-xs text-gray-400 mt-1">All bank accounts</p>
+  </div>
+</div>
 
-        {/* Filters */}
-        <div className="bg-white rounded-xl p-4 flex flex-wrap gap-3 items-center">
-          <div className="relative flex-1 min-w-[220px]">
-            <img src={search_icon} alt="" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
-              placeholder="Search by name, account number, or bank..."
-              className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+{/* Filters */}
+<div className="bg-white rounded-xl p-3 sm:p-4">
+  <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+    <div className="relative flex-1 min-w-[200px] sm:min-w-[220px]">
+      <img src={search_icon} alt="" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
+      <input
+        type="text"
+        value={search}
+        onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
+        placeholder="Search by name, account number, or bank..."
+        className="w-full pl-9 pr-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+      />
+    </div>
 
-          <div className="flex items-center gap-2 ml-auto">
-            <input
-              type="checkbox"
-              id="showInactive"
-              checked={showInactive}
-              onChange={(e) => { setShowInactive(e.target.checked); setCurrentPage(1); }}
-              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-            />
-            <label htmlFor="showInactive" className="text-sm text-gray-700">Show inactive</label>
-          </div>
+    <div className="flex items-center justify-between sm:justify-normal gap-3">
+      <div className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          id="showInactive"
+          checked={showInactive}
+          onChange={(e) => { setShowInactive(e.target.checked); setCurrentPage(1); }}
+          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+        />
+        <label htmlFor="showInactive" className="text-sm text-gray-700 whitespace-nowrap">Show inactive</label>
+      </div>
 
-          {(search || showInactive) && (
-            <button
-              onClick={() => { setSearch(''); setShowInactive(false); setCurrentPage(1); }}
-              className="px-4 py-2.5 text-sm text-gray-500 hover:text-red-500 border border-gray-300 rounded-lg"
-            >
-              Clear
-            </button>
-          )}
-        </div>
-
+      {(search || showInactive) && (
+        <button
+          onClick={() => { setSearch(''); setShowInactive(false); setCurrentPage(1); }}
+          className="px-4 py-2 text-sm text-gray-500 hover:text-red-500 border border-gray-300 rounded-lg"
+        >
+          Clear
+        </button>
+      )}
+    </div>
+  </div>
+</div>    
         {/* Table */}
         <div className="bg-white rounded-xl overflow-hidden shadow-sm">
           {isLoading ? (
@@ -156,7 +159,8 @@ export default function BankAccountsPage() {
               </button>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+             <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-6">
+   <div className="xl:col-span-4 overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
@@ -250,6 +254,8 @@ export default function BankAccountsPage() {
                 </tbody>
               </table>
             </div>
+             </div>
+         
           )}
         </div>
 

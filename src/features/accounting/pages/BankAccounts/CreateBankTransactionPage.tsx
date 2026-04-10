@@ -106,27 +106,27 @@ export default function CreateBankTransactionPage() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-3xl mx-auto space-y-6">
+      <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-4">
-          <button onClick={() => navigate(`${basePath}/accounting/bank-accounts/${id}`)}>
-            <img src={arrow_back_icon} alt="" className="w-8 h-8" />
+        <div className="flex items-start gap-3 sm:gap-4">
+          <button onClick={() => navigate(`${basePath}/accounting/bank-accounts/${id}`)} className="flex-shrink-0 mt-1">
+            <img src={arrow_back_icon} alt="" className="w-6 h-6 sm:w-8 sm:h-8" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Create Bank Transaction</h1>
-            <p className="text-sm text-gray-500 mt-0.5">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Create Bank Transaction</h1>
+            <p className="text-xs sm:text-sm text-gray-500 mt-0.5 break-words">
               {bankAccount?.data?.account_name} - {bankAccount?.data?.bank_name}
             </p>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-xl p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="bg-white rounded-xl p-4 sm:p-6 space-y-4 sm:space-y-6">
           
           {/* Transaction Details */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900">Transaction Details</h3>
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900">Transaction Details</h3>
             
-            <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-600 mb-2">
                   Transaction Date <span className="text-red-500">*</span>
@@ -136,11 +136,12 @@ export default function CreateBankTransactionPage() {
                   name="transaction_date"
                   value={formData.transaction_date}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                  className={`w-full px-4 py-2.5 sm:py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base ${
                     errors.transaction_date ? 'border-red-400' : 'border-gray-300'
                   }`}
                   required
                 />
+                {errors.transaction_date && <p className="text-xs text-red-500 mt-1">{errors.transaction_date[0]}</p>}
               </div>
 
               <div>
@@ -152,7 +153,7 @@ export default function CreateBankTransactionPage() {
                     name="transaction_type"
                     value={formData.transaction_type}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                     required
                   >
                     {TRANSACTION_TYPES.map(type => (
@@ -177,11 +178,12 @@ export default function CreateBankTransactionPage() {
                   value={formData.amount}
                   onChange={handleChange}
                   placeholder="0.000"
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                  className={`w-full px-4 py-2.5 sm:py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base ${
                     errors.amount ? 'border-red-400' : 'border-gray-300'
                   }`}
                   required
                 />
+                {errors.amount && <p className="text-xs text-red-500 mt-1">{errors.amount[0]}</p>}
               </div>
 
               <div>
@@ -194,52 +196,55 @@ export default function CreateBankTransactionPage() {
                   value={formData.description}
                   onChange={handleChange}
                   placeholder="Transaction description"
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                  className={`w-full px-4 py-2.5 sm:py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base ${
                     errors.description ? 'border-red-400' : 'border-gray-300'
                   }`}
                   required
                 />
+                {errors.description && <p className="text-xs text-red-500 mt-1">{errors.description[0]}</p>}
               </div>
             </div>
           </div>
 
           {/* Reference Information */}
           <div className="space-y-4 pt-4 border-t">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">Reference (Optional)</h3>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900">Reference (Optional)</h3>
               <button
                 type="button"
                 onClick={() => setShowJournalSelector(!showJournalSelector)}
-                className="text-sm text-blue-600 hover:text-blue-800"
+                className="text-sm text-blue-600 hover:text-blue-800 text-left sm:text-right"
               >
                 {showJournalSelector ? 'Hide' : 'Link to Journal Entry'}
               </button>
             </div>
 
             {showJournalSelector && (
-              <div className="mb-4 p-4 bg-gray-50 rounded-lg max-h-60 overflow-y-auto">
+              <div className="mb-4 p-3 sm:p-4 bg-gray-50 rounded-lg max-h-60 overflow-y-auto">
                 <h4 className="text-sm font-medium text-gray-700 mb-2">Select Journal Entry:</h4>
-                {journals.map((journal: any) => (
-                  <div
-                    key={journal.id}
-                    onClick={() => handleReferenceSelect(journal)}
-                    className="p-3 bg-white border border-gray-200 rounded-lg mb-2 cursor-pointer hover:bg-blue-50 hover:border-blue-300 transition-colors"
-                  >
-                    <div className="flex justify-between items-center">
-                      <span className="font-medium text-sm">{journal.journal_number}</span>
-                      <span className="text-xs text-gray-500">{journal.entry_date}</span>
+                <div className="space-y-2">
+                  {journals.map((journal: any) => (
+                    <div
+                      key={journal.id}
+                      onClick={() => handleReferenceSelect(journal)}
+                      className="p-3 bg-white border border-gray-200 rounded-lg cursor-pointer hover:bg-blue-50 hover:border-blue-300 transition-colors"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
+                        <span className="font-medium text-sm">{journal.journal_number}</span>
+                        <span className="text-xs text-gray-500">{journal.entry_date}</span>
+                      </div>
+                      <p className="text-sm text-gray-600 mt-1 break-words">{journal.description}</p>
+                      <div className="flex flex-col sm:flex-row sm:justify-between gap-1 mt-2 text-xs">
+                        <span>Debit: {journal.total_debit}</span>
+                        <span>Credit: {journal.total_credit}</span>
+                      </div>
                     </div>
-                    <p className="text-sm text-gray-600 mt-1">{journal.description}</p>
-                    <div className="flex justify-between mt-2 text-xs">
-                      <span>Debit: {journal.total_debit}</span>
-                      <span>Credit: {journal.total_credit}</span>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-600 mb-2">
                   Reference Type
@@ -249,7 +254,7 @@ export default function CreateBankTransactionPage() {
                     name="reference_type"
                     value={formData.reference_type}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                   >
                     <option value="">None</option>
                     {REFERENCE_TYPES.map(type => (
@@ -272,12 +277,12 @@ export default function CreateBankTransactionPage() {
                   value={formData.reference_number}
                   onChange={handleChange}
                   placeholder="e.g. JE-2024-0001"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                 />
               </div>
 
               {formData.reference_id && (
-                <div className="col-span-2">
+                <div className="sm:col-span-2">
                   <label className="block text-sm font-medium text-gray-600 mb-2">
                     Reference ID
                   </label>
@@ -287,7 +292,7 @@ export default function CreateBankTransactionPage() {
                     value={formData.reference_id}
                     onChange={handleChange}
                     placeholder="Reference ID"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50"
+                    className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg bg-gray-50 text-sm sm:text-base"
                     readOnly
                   />
                 </div>
@@ -296,18 +301,18 @@ export default function CreateBankTransactionPage() {
           </div>
 
           {/* Actions */}
-          <div className="flex justify-end gap-3 pt-4 border-t">
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-4 border-t">
             <button
               type="button"
               onClick={() => navigate(`${basePath}/accounting/bank-accounts/${id}`)}
-              className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+              className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 text-sm sm:text-base"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm sm:text-base"
             >
               {isLoading ? 'Creating...' : 'Create Transaction'}
             </button>

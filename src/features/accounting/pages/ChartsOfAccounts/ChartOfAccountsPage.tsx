@@ -50,82 +50,84 @@ export default function ChartOfAccountsPage() {
     <DashboardLayout>
       <div className="space-y-6">
 
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Chart of Accounts</h1>
-            <p className="text-sm text-gray-500 mt-1">Manage your financial accounts</p>
-          </div>
-          <div className='flex flex-row space-x-2 '>
-            <button
-            onClick={() => navigate(`${basePath}/accounting/chart-of-accounts/create`)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 hover:text-white transition-colors cursor-pointer"
-          >
-            <img src={add_icon} alt="" className="w-4 h-4" />
-            New Account
-          </button>
-          <button
-            onClick={() => navigate(`${basePath}/accounting/account-tree`)}
-            className="flex items-center gap-2 px-5 py-2.5 border border-blue-600 text-black rounded-lg hover:bg-blue-700 hover:text-white transition-colors cursor-pointer"
-          >
-            <img src={add_icon} alt="" className="w-4 h-4" />
-            Accounts Tree
-          </button>
-          </div>
-        </div>
+      {/* Header */}
+<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+  <div>
+    <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Chart of Accounts</h1>
+    <p className="text-xs sm:text-sm text-gray-500 mt-1">Manage your financial accounts</p>
+  </div>
+  <div className='flex flex-col sm:flex-row gap-2 sm:space-x-2 sm:space-x-reverse'>
+    <button
+      onClick={() => navigate(`${basePath}/accounting/chart-of-accounts/create`)}
+      className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 hover:text-white transition-colors cursor-pointer text-sm sm:text-base"
+    >
+      <img src={add_icon} alt="" className="w-4 h-4" />
+      New Account
+    </button>
+    <button
+      onClick={() => navigate(`${basePath}/accounting/account-tree`)}
+      className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 border border-blue-600 text-black rounded-lg hover:bg-blue-700 hover:text-white transition-colors cursor-pointer text-sm sm:text-base"
+    >
+      <img src={add_icon} alt="" className="w-4 h-4" />
+      Accounts Tree
+    </button>
+  </div>
+</div>
 
-        {/* Filters */}
-        <div className="bg-white rounded-xl p-4 flex flex-wrap gap-3 items-center">
-          <div className="relative flex-1 min-w-[220px]">
-            <img src={search_icon} alt="" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
-              placeholder="Search by code or name..."
-              className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+{/* Filters */}
+<div className="bg-white rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row flex-wrap gap-3 items-stretch sm:items-center">
+  <div className="relative flex-1 min-w-[200px] sm:min-w-[220px]">
+    <img src={search_icon} alt="" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
+    <input
+      type="text"
+      value={search}
+      onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
+      placeholder="Search by code or name..."
+      className="w-full pl-9 pr-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+    />
+  </div>
 
-          <div className="relative min-w-[180px]">
-            <select
-              value={accountType}
-              onChange={(e) => { setAccountType(e.target.value); setCurrentPage(1); }}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm bg-white appearance-none pr-10"
-            >
-              <option value="">All Account Types</option>
-              <option value="Asset">Asset</option>
-              <option value="Liability">Liability</option>
-              <option value="Equity">Equity</option>
-              <option value="Revenue">Revenue</option>
-              <option value="Expense">Expense</option>
-              <option value="Cost of Goods Sold">Cost of Goods Sold</option>
-            </select>
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-              <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
-            </div>
-          </div>
+  <div className="relative flex-1 sm:flex-initial min-w-[180px]">
+    <select
+      value={accountType}
+      onChange={(e) => { setAccountType(e.target.value); setCurrentPage(1); }}
+      className="w-full px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-sm bg-white appearance-none pr-10"
+    >
+      <option value="">All Account Types</option>
+      <option value="Asset">Asset</option>
+      <option value="Liability">Liability</option>
+      <option value="Equity">Equity</option>
+      <option value="Revenue">Revenue</option>
+      <option value="Expense">Expense</option>
+      <option value="Cost of Goods Sold">Cost of Goods Sold</option>
+    </select>
+    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+      <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
+    </div>
+  </div>
 
-          <div className="flex items-center gap-2 ml-auto">
-            <input
-              type="checkbox"
-              id="showInactive"
-              checked={showInactive}
-              onChange={(e) => { setShowInactive(e.target.checked); setCurrentPage(1); }}
-              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-            />
-            <label htmlFor="showInactive" className="text-sm text-gray-700">Show inactive</label>
-          </div>
+  <div className="flex items-center justify-between sm:justify-normal gap-3">
+    <div className="flex items-center gap-2">
+      <input
+        type="checkbox"
+        id="showInactive"
+        checked={showInactive}
+        onChange={(e) => { setShowInactive(e.target.checked); setCurrentPage(1); }}
+        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+      />
+      <label htmlFor="showInactive" className="text-sm text-gray-700 whitespace-nowrap">Show inactive</label>
+    </div>
 
-          {(search || accountType || showInactive) && (
-            <button
-              onClick={() => { setSearch(''); setAccountType(''); setShowInactive(false); setCurrentPage(1); }}
-              className="px-4 py-2.5 text-sm text-gray-500 hover:text-red-500 border border-gray-300 rounded-lg"
-            >
-              Clear
-            </button>
-          )}
-        </div>
+    {(search || accountType || showInactive) && (
+      <button
+        onClick={() => { setSearch(''); setAccountType(''); setShowInactive(false); setCurrentPage(1); }}
+        className="px-4 py-2 sm:py-2.5 text-sm text-gray-500 hover:text-red-500 border border-gray-300 rounded-lg"
+      >
+        Clear
+      </button>
+    )}
+  </div>
+</div>
 
         {/* Table */}
         <div className="bg-white rounded-xl overflow-hidden shadow-sm">
@@ -151,7 +153,8 @@ export default function ChartOfAccountsPage() {
               </button>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-6">
+   <div className="xl:col-span-4 overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
@@ -218,6 +221,8 @@ export default function ChartOfAccountsPage() {
                 </tbody>
               </table>
             </div>
+            </div>
+         
           )}
         </div>
 

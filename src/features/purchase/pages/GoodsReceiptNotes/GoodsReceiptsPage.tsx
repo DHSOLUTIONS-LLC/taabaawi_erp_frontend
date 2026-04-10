@@ -50,82 +50,91 @@ export default function GoodsReceiptsPage() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Goods Receipt Notes</h1>
-            <p className="text-sm text-gray-500 mt-1">Receive and verify purchase orders</p>
-          </div>
-          <button
-            onClick={() => navigate(`${basePath}/purchase/goods-receipts/create`)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <img src={add_icon} alt="" className="w-4 h-4 " />
-            New Receipt
-          </button>
-        </div>
+     {/* Header - Responsive */}
+<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+  <div>
+    <h1 className="text-xl md:text-2xl font-bold text-gray-900">Goods Receipt Notes</h1>
+    <p className="text-xs md:text-sm text-gray-500 mt-1">Receive and verify purchase orders</p>
+  </div>
+  <button
+    onClick={() => navigate(`${basePath}/purchase/goods-receipts/create`)}
+    className="flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm md:text-base"
+  >
+    <img src={add_icon} alt="" className="w-4 h-4" />
+    New Receipt
+  </button>
+</div>
 
-        {/* Filters */}
-        <div className="bg-white rounded-xl p-4 flex flex-wrap gap-3 items-center">
-          <div className="relative flex-1 min-w-[200px]">
-            <img src={search_icon} alt="" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
-              placeholder="Search GRN # or PO #..."
-              className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+{/* Filters - Fully Responsive */}
+<div className="bg-white rounded-xl p-4">
+  {/* Search - Full width on mobile */}
+  <div className="relative mb-3">
+    <img src={search_icon} alt="" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
+    <input
+      type="text"
+      value={search}
+      onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
+      placeholder="Search GRN # or PO #..."
+      className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+    />
+  </div>
 
-          <div className="relative min-w-[150px]">
-            <select
-              value={statusFilter}
-              onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm bg-white appearance-none pr-10"
-            >
-              <option value="">All Statuses</option>
-              <option value="Pending">Pending</option>
-              <option value="Verified">Verified</option>
-              <option value="Completed">Completed</option>
-              <option value="Cancelled">Cancelled</option>
-            </select>
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-              <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
-            </div>
-          </div>
+  {/* Filter Controls - Responsive Grid */}
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-row gap-3">
+    {/* Status Filter */}
+    <div className="relative sm:col-span-1">
+      <select
+        value={statusFilter}
+        onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
+        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm bg-white appearance-none pr-10 focus:ring-2 focus:ring-blue-500"
+      >
+        <option value="">All Statuses</option>
+        <option value="Pending">Pending</option>
+        <option value="Verified">Verified</option>
+        <option value="Completed">Completed</option>
+        <option value="Cancelled">Cancelled</option>
+      </select>
+      <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+        <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
+      </div>
+    </div>
 
-          <div className="relative">
-            <img src={date_icon} alt="" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => { setStartDate(e.target.value); setCurrentPage(1); }}
-              className="pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm"
-              placeholder="Start Date"
-            />
-          </div>
-          <div className="relative">
-            <img src={date_icon} alt="" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
-            <input
-              type="date"
-              value={endDate}
-              min={startDate}
-              onChange={(e) => { setEndDate(e.target.value); setCurrentPage(1); }}
-              className="pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm"
-              placeholder="End Date"
-            />
-          </div>
+    {/* Start Date */}
+    <div className="relative">
+      <img src={date_icon} alt="" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" />
+      <input
+        type="date"
+        value={startDate}
+        onChange={(e) => { setStartDate(e.target.value); setCurrentPage(1); }}
+        className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+        placeholder="Start Date"
+      />
+    </div>
 
-          {(search || statusFilter || startDate || endDate) && (
-            <button
-              onClick={() => { setSearch(''); setStatusFilter(''); setStartDate(''); setEndDate(''); setCurrentPage(1); }}
-              className="px-4 py-2.5 text-sm text-gray-500 hover:text-red-500 border border-gray-300 rounded-lg"
-            >
-              Clear
-            </button>
-          )}
-        </div>
+    {/* End Date */}
+    <div className="relative">
+      <img src={date_icon} alt="" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" />
+      <input
+        type="date"
+        value={endDate}
+        min={startDate}
+        onChange={(e) => { setEndDate(e.target.value); setCurrentPage(1); }}
+        className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+        placeholder="End Date"
+      />
+    </div>
+
+    {/* Clear Button */}
+    {(search || statusFilter || startDate || endDate) && (
+      <button
+        onClick={() => { setSearch(''); setStatusFilter(''); setStartDate(''); setEndDate(''); setCurrentPage(1); }}
+        className="px-4 py-2.5 text-sm text-gray-500 hover:text-red-500 border border-gray-300 rounded-lg transition-colors"
+      >
+        Clear Filters
+      </button>
+    )}
+  </div>
+</div>
 
         {/* Table */}
         <div className="bg-white rounded-xl overflow-hidden shadow-sm">
@@ -151,7 +160,8 @@ export default function GoodsReceiptsPage() {
               </button>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+             <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+  <div className="xl:col-span-4 overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
@@ -210,6 +220,8 @@ export default function GoodsReceiptsPage() {
                 </tbody>
               </table>
             </div>
+             </div>
+          
           )}
         </div>
 

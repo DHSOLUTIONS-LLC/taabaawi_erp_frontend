@@ -99,31 +99,34 @@ export default function JournalEntryDetailPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button onClick={() => navigate(`${basePath}/accounting/journal-entries`)}>
-              <img src={arrow_back_icon} alt="" className="w-8 h-8" />
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <button 
+              onClick={() => navigate(`${basePath}/accounting/journal-entries`)}
+              className="flex-shrink-0 mt-1"
+            >
+              <img src={arrow_back_icon} alt="" className="w-6 h-6 sm:w-8 sm:h-8" />
             </button>
             <div>
-              <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-bold text-gray-900">{journal.journal_number}</h1>
-                <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${STATUS_COLORS[journal.status]}`}>
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{journal.journal_number}</h1>
+                <span className={`px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap ${STATUS_COLORS[journal.status]}`}>
                   {journal.status}
                 </span>
               </div>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-xs sm:text-sm text-gray-500 mt-1 break-words">
                 {new Date(journal.entry_date).toLocaleDateString()} · {journal.description}
               </p>
             </div>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             {canEdit && (
               <button
                 onClick={() => navigate(`${basePath}/accounting/journal-entries/edit/${journal.id}`)}
-                className="flex items-center gap-2 px-4 py-2 border border-blue-300 rounded-lg text-blue-600 hover:bg-blue-50"
+                className="flex items-center justify-center gap-2 px-4 py-2 border border-blue-300 rounded-lg text-blue-600 hover:bg-blue-50 text-sm sm:text-base"
               >
                 <img src={edit_icon} alt="" className="w-4 h-4" />
                 Edit
@@ -133,9 +136,9 @@ export default function JournalEntryDetailPage() {
               <button
                 onClick={() => setShowPostModal(true)}
                 disabled={isPosting}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+                className="flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 text-sm sm:text-base"
               >
-                <img src={check_icon} alt="" className="w-4 h-4 " />
+                <img src={check_icon} alt="" className="w-4 h-4" />
                 {isPosting ? 'Posting...' : 'Post Entry'}
               </button>
             )}
@@ -143,9 +146,9 @@ export default function JournalEntryDetailPage() {
               <button
                 onClick={() => setShowReverseModal(true)}
                 disabled={isReversing}
-                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+                className="flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 text-sm sm:text-base"
               >
-                <img src={close_icon} alt="" className="w-4 h-4 " />
+                <img src={close_icon} alt="" className="w-4 h-4" />
                 {isReversing ? 'Reversing...' : 'Reverse Entry'}
               </button>
             )}
@@ -153,40 +156,42 @@ export default function JournalEntryDetailPage() {
         </div>
 
         {/* Journal Details */}
-        <div className="grid grid-cols-3 gap-6">
-          {/* Left Column - 2/3 width */}
-          <div className="col-span-2 space-y-6">
+        <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4 sm:gap-6">
+          {/* Left Column - 2/3 width on desktop, full width on mobile */}
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Journal Lines */}
-            <div className="bg-white rounded-xl p-6">
+            <div className="bg-white rounded-xl p-4 sm:p-6">
               <h2 className="text-base font-semibold text-gray-900 mb-4">Journal Lines</h2>
-              <JournalEntryLines
-                lines={journal.lines?.map((l: any) => ({
-                  id: `line-${l.id}`,
-                  account_id: l.account_id.toString(),
-                  description: l.description,
-                  debit: num(l.debit),
-                  credit: num(l.credit),
-                })) || []}
-                onChange={() => {}}
-                currency="KWD"
-                readOnly
-              />
+              <div className="overflow-x-auto">
+                <JournalEntryLines
+                  lines={journal.lines?.map((l: any) => ({
+                    id: `line-${l.id}`,
+                    account_id: l.account_id.toString(),
+                    description: l.description,
+                    debit: num(l.debit),
+                    credit: num(l.credit),
+                  })) || []}
+                  onChange={() => {}}
+                  currency="KWD"
+                  readOnly
+                />
+              </div>
             </div>
 
             {/* Notes */}
             {journal.notes && (
-              <div className="bg-white rounded-xl p-6">
+              <div className="bg-white rounded-xl p-4 sm:p-6">
                 <h2 className="text-base font-semibold text-gray-900 mb-4">Notes</h2>
-                <p className="text-sm text-gray-700 whitespace-pre-wrap">{journal.notes}</p>
+                <p className="text-sm text-gray-700 whitespace-pre-wrap break-words">{journal.notes}</p>
               </div>
             )}
           </div>
 
-          {/* Right Column - 1/3 width */}
-          <div className="space-y-6">
+          {/* Right Column - 1/3 width on desktop, full width on mobile */}
+          <div className="space-y-4 sm:space-y-6">
             {/* Reference Info */}
             {journal.reference_type && (
-              <div className="bg-white rounded-xl p-6">
+              <div className="bg-white rounded-xl p-4 sm:p-6">
                 <h2 className="text-base font-semibold text-gray-900 mb-4">Reference</h2>
                 <div className="space-y-3">
                   <div>
@@ -196,7 +201,7 @@ export default function JournalEntryDetailPage() {
                   {journal.reference_number && (
                     <div>
                       <p className="text-xs text-gray-500">Number</p>
-                      <p className="text-sm font-medium text-blue-600 mt-1">{journal.reference_number}</p>
+                      <p className="text-sm font-medium text-blue-600 mt-1 break-words">{journal.reference_number}</p>
                     </div>
                   )}
                 </div>
@@ -204,7 +209,7 @@ export default function JournalEntryDetailPage() {
             )}
 
             {/* Audit Info */}
-            <div className="bg-white rounded-xl p-6">
+            <div className="bg-white rounded-xl p-4 sm:p-6">
               <h2 className="text-base font-semibold text-gray-900 mb-4">Audit Information</h2>
               <div className="space-y-3">
                 <div>
@@ -227,18 +232,18 @@ export default function JournalEntryDetailPage() {
             </div>
 
             {/* Summary */}
-            <div className="bg-white rounded-xl p-6">
+            <div className="bg-white rounded-xl p-4 sm:p-6">
               <h2 className="text-base font-semibold text-gray-900 mb-4">Summary</h2>
               <div className="space-y-3">
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-500">Total Debit</span>
-                  <span className="text-sm font-mono font-bold text-blue-600">
+                  <span className="text-sm font-mono font-bold text-blue-600 whitespace-nowrap">
                     KWD {num(journal.total_debit).toFixed(3)}
                   </span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-500">Total Credit</span>
-                  <span className="text-sm font-mono font-bold text-blue-600">
+                  <span className="text-sm font-mono font-bold text-blue-600 whitespace-nowrap">
                     KWD {num(journal.total_credit).toFixed(3)}
                   </span>
                 </div>

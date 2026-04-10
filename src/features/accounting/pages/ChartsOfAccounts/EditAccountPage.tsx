@@ -129,25 +129,32 @@ export default function EditAccountPage() {
     );
   }
 
-  return (
+ return (
     <DashboardLayout>
-      <div className="max-w-3xl mx-auto space-y-6">
+      <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-4">
-          <button onClick={() => navigate(`${basePath}/accounting/chart-of-accounts/${accountId}`)}>
-            <img src={arrow_back_icon} alt="" className="w-8 h-8" />
+        <div className="flex items-center gap-3 sm:gap-4">
+          <button 
+            onClick={() => navigate(`${basePath}/accounting/chart-of-accounts/${accountId}`)} 
+            className="flex-shrink-0 -ml-1 sm:ml-0 mt-1"
+          >
+            <img src={arrow_back_icon} alt="Go back" className="w-6 h-6 sm:w-8 sm:h-8" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Edit Account</h1>
-            <p className="text-sm text-gray-500 mt-0.5">{account.account_code} - {account.account_name}</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Edit Account</h1>
+            <div className="flex flex-wrap items-center gap-1 mt-0.5">
+              <span className="text-xs sm:text-sm text-gray-500 break-all">{account.account_code}</span>
+              <span className="text-gray-400 text-xs sm:text-sm hidden sm:inline">-</span>
+              <span className="text-xs sm:text-sm text-gray-500 break-words">{account.account_name}</span>
+            </div>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-xl p-6 space-y-6">
-          {/* Account Code */}
-          <div className="grid grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit} className="bg-white rounded-xl p-4 sm:p-6 space-y-4 sm:space-y-6">
+          {/* Account Code and Name */}
+          <div className="space-y-4 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                 Account Code <span className="text-red-500">*</span>
               </label>
               <input
@@ -155,7 +162,7 @@ export default function EditAccountPage() {
                 name="account_code"
                 value={formData.account_code}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 required
               />
               {errors.account_code && (
@@ -164,7 +171,7 @@ export default function EditAccountPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                 Account Name <span className="text-red-500">*</span>
               </label>
               <input
@@ -172,7 +179,7 @@ export default function EditAccountPage() {
                 name="account_name"
                 value={formData.account_name}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 required
               />
               {errors.account_name && (
@@ -181,10 +188,10 @@ export default function EditAccountPage() {
             </div>
           </div>
 
-          {/* Account Type */}
-          <div className="grid grid-cols-2 gap-4">
+          {/* Account Type and Sub Type */}
+          <div className="space-y-4 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                 Account Type <span className="text-red-500">*</span>
               </label>
               <div className="relative">
@@ -192,7 +199,7 @@ export default function EditAccountPage() {
                   name="account_type"
                   value={formData.account_type}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                   required
                 >
                   {ACCOUNT_TYPES.map(type => (
@@ -206,7 +213,7 @@ export default function EditAccountPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                 Account Sub Type
               </label>
               <input
@@ -214,14 +221,15 @@ export default function EditAccountPage() {
                 name="account_sub_type"
                 value={formData.account_sub_type}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                placeholder="e.g. Current Asset"
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
               />
             </div>
           </div>
 
           {/* Parent Account */}
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
               Parent Account
             </label>
             <div className="relative">
@@ -229,7 +237,7 @@ export default function EditAccountPage() {
                 name="parent_account_id"
                 value={formData.parent_account_id}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
               >
                 <option value="">None (Top Level Account)</option>
                 {accounts
@@ -244,11 +252,14 @@ export default function EditAccountPage() {
                 <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
               </div>
             </div>
+            <p className="text-xs text-gray-500 mt-1">
+              Parent accounts cannot be set to a child account
+            </p>
           </div>
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
               Description
             </label>
             <textarea
@@ -256,12 +267,13 @@ export default function EditAccountPage() {
               value={formData.description}
               onChange={handleChange}
               rows={3}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 resize-none"
+              placeholder="Enter account description..."
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm"
             />
           </div>
 
           {/* Active Status */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 py-2">
             <input
               type="checkbox"
               name="is_active"
@@ -270,24 +282,36 @@ export default function EditAccountPage() {
               onChange={handleChange}
               className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
             />
-            <label htmlFor="is_active" className="text-sm text-gray-700">Active</label>
+            <label htmlFor="is_active" className="text-sm text-gray-700">
+              Active <span className="text-xs text-gray-500">(Inactive accounts won't appear in transactions)</span>
+            </label>
           </div>
 
           {/* Actions */}
-          <div className="flex justify-end gap-3 pt-4 border-t">
+          <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 pt-4 border-t">
             <button
               type="button"
               onClick={() => navigate(`${basePath}/accounting/chart-of-accounts/${accountId}`)}
-              className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+              className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors text-sm"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isUpdating}
-              className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
             >
-              {isUpdating ? 'Updating...' : 'Update Account'}
+              {isUpdating ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Updating...
+                </span>
+              ) : (
+                'Update Account'
+              )}
             </button>
           </div>
         </form>

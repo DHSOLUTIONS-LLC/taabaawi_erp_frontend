@@ -72,25 +72,25 @@ export default function CreateAccountPage() {
     }
   };
 
-  return (
+ return (
     <DashboardLayout>
-      <div className="max-w-3xl mx-auto space-y-6">
+      <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-4">
-          <button onClick={() => navigate(`${basePath}/accounting/chart-of-accounts`)}>
-            <img src={arrow_back_icon} alt="" className="w-8 h-8" />
+        <div className="flex  items-center gap-3 sm:gap-4">
+          <button onClick={() => navigate(`${basePath}/accounting/chart-of-accounts`)} className="flex-shrink-0">
+            <img src={arrow_back_icon} alt="" className="w-6 h-6 sm:w-8 sm:h-8" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Create New Account</h1>
-            <p className="text-sm text-gray-500 mt-0.5">Add a new account to your chart of accounts</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Create New Account</h1>
+            <p className="text-xs sm:text-sm text-gray-500 mt-0.5">Add a new account to your chart of accounts</p>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-xl p-6 space-y-6">
-          {/* Account Code */}
-          <div className="grid grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit} className="bg-white rounded-xl p-4 sm:p-6 space-y-4 sm:space-y-6">
+          {/* Account Code and Name - Stacks on mobile */}
+          <div className="space-y-4 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                 Account Code <span className="text-red-500">*</span>
               </label>
               <input
@@ -99,7 +99,7 @@ export default function CreateAccountPage() {
                 value={formData.account_code}
                 onChange={handleChange}
                 placeholder="e.g. 1000"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 required
               />
               {errors.account_code && (
@@ -108,7 +108,7 @@ export default function CreateAccountPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                 Account Name <span className="text-red-500">*</span>
               </label>
               <input
@@ -117,7 +117,7 @@ export default function CreateAccountPage() {
                 value={formData.account_name}
                 onChange={handleChange}
                 placeholder="e.g. Cash"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 required
               />
               {errors.account_name && (
@@ -126,10 +126,10 @@ export default function CreateAccountPage() {
             </div>
           </div>
 
-          {/* Account Type */}
-          <div className="grid grid-cols-2 gap-4">
+          {/* Account Type and Sub Type */}
+          <div className="space-y-4 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                 Account Type <span className="text-red-500">*</span>
               </label>
               <div className="relative">
@@ -137,9 +137,10 @@ export default function CreateAccountPage() {
                   name="account_type"
                   value={formData.account_type}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                   required
                 >
+                  <option value="">Select Account Type</option>
                   {ACCOUNT_TYPES.map(type => (
                     <option key={type} value={type}>{type}</option>
                   ))}
@@ -151,7 +152,7 @@ export default function CreateAccountPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                 Account Sub Type
               </label>
               <input
@@ -160,14 +161,14 @@ export default function CreateAccountPage() {
                 value={formData.account_sub_type}
                 onChange={handleChange}
                 placeholder="e.g. Current Asset"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
               />
             </div>
           </div>
 
           {/* Parent Account */}
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
               Parent Account
             </label>
             <div className="relative">
@@ -175,7 +176,7 @@ export default function CreateAccountPage() {
                 name="parent_account_id"
                 value={formData.parent_account_id}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
               >
                 <option value="">None (Top Level Account)</option>
                 {accounts
@@ -194,7 +195,7 @@ export default function CreateAccountPage() {
 
           {/* Opening Balance */}
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
               Opening Balance (KWD)
             </label>
             <input
@@ -204,7 +205,7 @@ export default function CreateAccountPage() {
               value={formData.opening_balance}
               onChange={handleChange}
               placeholder="0.000"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
             />
             <p className="text-xs text-gray-500 mt-1">
               Initial balance for this account. Current balance will be updated automatically.
@@ -213,7 +214,7 @@ export default function CreateAccountPage() {
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
               Description
             </label>
             <textarea
@@ -222,12 +223,12 @@ export default function CreateAccountPage() {
               onChange={handleChange}
               rows={3}
               placeholder="Enter account description..."
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 resize-none"
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm"
             />
           </div>
 
           {/* Active Status */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 py-2">
             <input
               type="checkbox"
               name="is_active"
@@ -239,19 +240,19 @@ export default function CreateAccountPage() {
             <label htmlFor="is_active" className="text-sm text-gray-700">Active</label>
           </div>
 
-          {/* Actions */}
-          <div className="flex justify-end gap-3 pt-4 border-t">
+          {/* Actions - Stack buttons on mobile */}
+          <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 pt-4 border-t">
             <button
               type="button"
               onClick={() => navigate(`${basePath}/accounting/chart-of-accounts`)}
-              className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+              className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 text-sm"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm"
             >
               {isLoading ? 'Creating...' : 'Create Account'}
             </button>

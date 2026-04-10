@@ -174,18 +174,20 @@ export default function AccountingDashboard() {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Accounting Dashboard</h1>
-            <p className="text-sm text-gray-500 mt-1">Overview of your financial position</p>
-          </div>
-          <DateRangePicker
-            startDate={dateRange.start_date}
-            endDate={dateRange.end_date}
-            asOfDate={dateRange.as_of_date}
-            onChange={(range) => setDateRange(range)}
-          />
-        </div>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+  <div>
+    <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">Accounting Dashboard</h1>
+    <p className="text-xs text-gray-500 mt-0.5 sm:text-sm sm:mt-1">Overview of your financial position</p>
+  </div>
+  <div className="w-full sm:w-auto">
+    <DateRangePicker
+      startDate={dateRange.start_date}
+      endDate={dateRange.end_date}
+      asOfDate={dateRange.as_of_date}
+      onChange={(range) => setDateRange(range)}
+    />
+  </div>
+</div>
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -242,164 +244,171 @@ export default function AccountingDashboard() {
         </div>
 
         {/* Charts Section */}
-        <div className="grid grid-cols-3 gap-6">
-          {/* Revenue vs Expense Chart */}
-          <div className="col-span-2 bg-white rounded-xl p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-semibold text-gray-900">Revenue vs Expenses</h2>
-              <span className="text-xs text-gray-500">Last 6 months</span>
-            </div>
-            <div className="h-64">
-              <FinancialChart
-                type="bar"
-                data={chartData}
-                options={{
-                  plugins: {
-                    legend: { position: 'bottom' },
-                  },
-                }}
-              />
-            </div>
-          </div>
+      <div className="grid grid-cols-1 gap-4 lg:gap-6 md:grid-cols-3">
+  {/* Revenue vs Expense Chart */}
+  <div className="md:col-span-2 bg-white rounded-xl p-4 sm:p-6">
+    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4">
+      <h2 className="text-base font-semibold text-gray-900">Revenue vs Expenses</h2>
+      <span className="text-xs text-gray-500">Last 6 months</span>
+    </div>
+    <div className="h-64 sm:h-72 md:h-64">
+      <FinancialChart
+        type="bar"
+        data={chartData}
+        options={{
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: { 
+              position: 'bottom',
+              labels: {
+                boxWidth: 12,
+                font: { size: window.innerWidth < 640 ? 10 : 12 }
+              }
+            },
+          },
+        }}
+      />
+    </div>
+  </div>
 
-          {/* Financial Health */}
-          <div className="bg-white rounded-xl p-6">
-            <h2 className="text-base font-semibold text-gray-900 mb-4">Financial Health</h2>
-            <div className="space-y-4">
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-600">Current Ratio</span>
-                  <span className="font-medium text-gray-900">{currentRatio.toFixed(2)}</span>
-                </div>
-                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-green-500" 
-                    style={{ width: `${Math.min(currentRatio / 3 * 100, 100)}%` }} 
-                  />
-                </div>
-              </div>
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-600">Profit Margin</span>
-                  <span className="font-medium text-gray-900">{profitMargin.toFixed(1)}%</span>
-                </div>
-                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-blue-500" 
-                    style={{ width: `${Math.min(profitMargin, 100)}%` }} 
-                  />
-                </div>
-              </div>
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-600">Debt to Equity</span>
-                  <span className="font-medium text-gray-900">{debtToEquity.toFixed(2)}</span>
-                </div>
-                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-orange-500" 
-                    style={{ width: `${Math.min(debtToEquity / 2 * 100, 100)}%` }} 
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <div className="flex justify-between mb-2">
-                <span className="text-sm text-gray-600">Gross Profit</span>
-                <span className="text-sm font-semibold text-green-600">
-                  KWD {num(profitLoss?.gross_profit).toFixed(3)}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-gray-600">Net Profit</span>
-                <span className="text-sm font-semibold text-blue-600">
-                  KWD {num(profitLoss?.net_profit).toFixed(3)}
-                </span>
-              </div>
-            </div>
-          </div>
+  {/* Financial Health */}
+  <div className="bg-white rounded-xl p-4 sm:p-6">
+    <h2 className="text-base font-semibold text-gray-900 mb-4">Financial Health</h2>
+    <div className="space-y-4">
+      <div>
+        <div className="flex justify-between text-sm mb-1">
+          <span className="text-gray-600">Current Ratio</span>
+          <span className="font-medium text-gray-900">{currentRatio.toFixed(2)}</span>
         </div>
-
-        {/* Recent Transactions */}
-        <div className="grid grid-cols-2 gap-6">
-          {/* Recent Accounts Payable */}
-          <div className="bg-white rounded-xl p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-semibold text-gray-900">Recent Payables</h2>
-              <button
-                onClick={() => navigate(`${basePath}/accounting/accounts-payable`)}
-                className="text-sm text-blue-600 hover:underline"
-              >
-                View All
-              </button>
-            </div>
-
-            {recentAP.length === 0 ? (
-              <p className="text-gray-500 text-center py-4 text-sm">No recent payables</p>
-            ) : (
-              <div className="space-y-3">
-                {recentAP.map((ap: any) => (
-                  <div
-                    key={ap.id}
-                    onClick={() => navigate(`${basePath}/accounting/accounts-payable/${ap.id}`)}
-                    className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-                  >
-                    <div>
-                      <p className="text-sm font-semibold text-blue-600">{ap.ap_number}</p>
-                      <p className="text-xs text-gray-500">{ap.supplier?.supplier_name}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-semibold text-gray-900">
-                        {ap.currency} {num(ap.outstanding_amount).toFixed(3)}
-                      </p>
-                      <StatusBadge status={ap.status} size="sm" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Recent Accounts Receivable */}
-          <div className="bg-white rounded-xl p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-semibold text-gray-900">Recent Receivables</h2>
-              <button
-                onClick={() => navigate(`${basePath}/accounting/accounts-receivable`)}
-                className="text-sm text-blue-600 hover:underline"
-              >
-                View All
-              </button>
-            </div>
-
-            {recentAR.length === 0 ? (
-              <p className="text-gray-500 text-center py-4 text-sm">No recent receivables</p>
-            ) : (
-              <div className="space-y-3">
-                {recentAR.map((ar: any) => (
-                  <div
-                    key={ar.id}
-                    onClick={() => navigate(`${basePath}/accounting/accounts-receivable/${ar.id}`)}
-                    className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-                  >
-                    <div>
-                      <p className="text-sm font-semibold text-blue-600">{ar.ar_number}</p>
-                      <p className="text-xs text-gray-500">{ar.customer?.name}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-semibold text-gray-900">
-                        {ar.currency} {num(ar.outstanding_amount).toFixed(3)}
-                      </p>
-                      <StatusBadge status={ar.status} size="sm" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+          <div 
+            className="h-full bg-green-500" 
+            style={{ width: `${Math.min(currentRatio / 3 * 100, 100)}%` }} 
+          />
         </div>
+      </div>
+      <div>
+        <div className="flex justify-between text-sm mb-1">
+          <span className="text-gray-600">Profit Margin</span>
+          <span className="font-medium text-gray-900">{profitMargin.toFixed(1)}%</span>
+        </div>
+        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+          <div 
+            className="h-full bg-blue-500" 
+            style={{ width: `${Math.min(profitMargin, 100)}%` }} 
+          />
+        </div>
+      </div>
+      <div>
+        <div className="flex justify-between text-sm mb-1">
+          <span className="text-gray-600">Debt to Equity</span>
+          <span className="font-medium text-gray-900">{debtToEquity.toFixed(2)}</span>
+        </div>
+        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+          <div 
+            className="h-full bg-orange-500" 
+            style={{ width: `${Math.min(debtToEquity / 2 * 100, 100)}%` }} 
+          />
+        </div>
+      </div>
+    </div>
 
+    <div className="mt-6 pt-6 border-t border-gray-200">
+      <div className="flex justify-between mb-2">
+        <span className="text-sm text-gray-600">Gross Profit</span>
+        <span className="text-sm font-semibold text-green-600">
+          KWD {num(profitLoss?.gross_profit).toFixed(3)}
+        </span>
+      </div>
+      <div className="flex justify-between">
+        <span className="text-sm text-gray-600">Net Profit</span>
+        <span className="text-sm font-semibold text-blue-600">
+          KWD {num(profitLoss?.net_profit).toFixed(3)}
+        </span>
+      </div>
+    </div>
+  </div>
+</div>  
+
+      {/* Recent Transactions */}
+<div className="grid grid-cols-1 gap-4 lg:gap-6 lg:grid-cols-2">
+  {/* Recent Accounts Payable */}
+  <div className="bg-white rounded-xl p-4 sm:p-6">
+    <div className="flex items-center justify-between mb-4">
+      <h2 className="text-sm sm:text-base font-semibold text-gray-900">Recent Payables</h2>
+      <button
+        onClick={() => navigate(`${basePath}/accounting/accounts-payable`)}
+        className="text-xs sm:text-sm text-blue-600 hover:underline"
+      >
+        View All
+      </button>
+    </div>
+
+    {recentAP.length === 0 ? (
+      <p className="text-gray-500 text-center py-4 text-sm">No recent payables</p>
+    ) : (
+      <div className="space-y-3">
+        {recentAP.map((ap: any) => (
+          <div
+            key={ap.id}
+            onClick={() => navigate(`${basePath}/accounting/accounts-payable/${ap.id}`)}
+            className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+          >
+            <div>
+              <p className="text-sm font-semibold text-blue-600">{ap.ap_number}</p>
+              <p className="text-xs text-gray-500 truncate max-w-[200px] sm:max-w-none">{ap.supplier?.supplier_name}</p>
+            </div>
+            <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4">
+              <p className="text-sm font-semibold text-gray-900 whitespace-nowrap">
+                {ap.currency} {num(ap.outstanding_amount).toFixed(3)}
+              </p>
+              <StatusBadge status={ap.status} size="sm" />
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+
+  {/* Recent Accounts Receivable */}
+  <div className="bg-white rounded-xl p-4 sm:p-6">
+    <div className="flex items-center justify-between mb-4">
+      <h2 className="text-sm sm:text-base font-semibold text-gray-900">Recent Receivables</h2>
+      <button
+        onClick={() => navigate(`${basePath}/accounting/accounts-receivable`)}
+        className="text-xs sm:text-sm text-blue-600 hover:underline"
+      >
+        View All
+      </button>
+    </div>
+
+    {recentAR.length === 0 ? (
+      <p className="text-gray-500 text-center py-4 text-sm">No recent receivables</p>
+    ) : (
+      <div className="space-y-3">
+        {recentAR.map((ar: any) => (
+          <div
+            key={ar.id}
+            onClick={() => navigate(`${basePath}/accounting/accounts-receivable/${ar.id}`)}
+            className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+          >
+            <div>
+              <p className="text-sm font-semibold text-blue-600">{ar.ar_number}</p>
+              <p className="text-xs text-gray-500 truncate max-w-[200px] sm:max-w-none">{ar.customer?.name}</p>
+            </div>
+            <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4">
+              <p className="text-sm font-semibold text-gray-900 whitespace-nowrap">
+                {ar.currency} {num(ar.outstanding_amount).toFixed(3)}
+              </p>
+              <StatusBadge status={ar.status} size="sm" />
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+</div>
       
       </div>
     </DashboardLayout>

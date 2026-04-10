@@ -64,66 +64,70 @@ export default function SuppliersPage() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Suppliers</h1>
-            <p className="text-sm text-gray-500 mt-1">Manage your suppliers and vendors</p>
-          </div>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <img src={add_icon} alt="" className="w-4 h-4 " />
-            Add Supplier
-          </button>
-        </div>
+      {/* Header - Responsive */}
+<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+  <div>
+    <h1 className="text-xl md:text-2xl font-bold text-gray-900">Suppliers</h1>
+    <p className="text-xs md:text-sm text-gray-500 mt-1">Manage your suppliers and vendors</p>
+  </div>
+  <button
+    onClick={() => setShowCreateModal(true)}
+    className="flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm md:text-base"
+  >
+    <img src={add_icon} alt="" className="w-4 h-4" />
+    Add Supplier
+  </button>
+</div>
 
-        {/* Filters */}
-        <div className="bg-white rounded-xl p-4 flex flex-wrap gap-3 items-center">
-          <div className="relative flex-1 min-w-[220px]">
-            <img src={search_icon} alt="" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
-              placeholder="Search by name, email, or code..."
-              className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+{/* Filters - Grid based responsive */}
+<div className="bg-white rounded-xl p-4">
+  {/* Search - Full width */}
+  <div className="relative mb-3">
+    <img src={search_icon} alt="" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
+    <input
+      type="text"
+      value={search}
+      onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
+      placeholder="Search by name, email, or code..."
+      className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+    />
+  </div>
 
-          <select
-            value={filterRating}
-            onChange={(e) => { setFilterRating(e.target.value); setCurrentPage(1); }}
-            className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm bg-white"
-          >
-            <option value="">All Ratings</option>
-            <option value="Excellent">Excellent</option>
-            <option value="Good">Good</option>
-            <option value="Average">Average</option>
-            <option value="Poor">Poor</option>
-          </select>
+  {/* Filters - 2 column grid on mobile, row on desktop */}
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-row gap-3">
+    <select
+      value={filterRating}
+      onChange={(e) => { setFilterRating(e.target.value); setCurrentPage(1); }}
+      className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500"
+    >
+      <option value="">All Ratings</option>
+      <option value="Excellent">Excellent</option>
+      <option value="Good">Good</option>
+      <option value="Average">Average</option>
+      <option value="Poor">Poor</option>
+    </select>
 
-          <select
-            value={filterCountry}
-            onChange={(e) => { setFilterCountry(e.target.value); setCurrentPage(1); }}
-            className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm bg-white"
-          >
-            <option value="">All Countries</option>
-            {countries.map((country: any) => (
-              <option key={country} value={country}>{country}</option>
-            ))}
-          </select>
+    <select
+      value={filterCountry}
+      onChange={(e) => { setFilterCountry(e.target.value); setCurrentPage(1); }}
+      className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500"
+    >
+      <option value="">All Countries</option>
+      {countries.map((country: any) => (
+        <option key={country} value={country}>{country}</option>
+      ))}
+    </select>
 
-          {(search || filterRating || filterCountry) && (
-            <button
-              onClick={() => { setSearch(''); setFilterRating(''); setFilterCountry(''); setCurrentPage(1); }}
-              className="px-4 py-2.5 text-sm text-gray-500 hover:text-red-500 border border-gray-300 rounded-lg"
-            >
-              Clear
-            </button>
-          )}
-        </div>
+    {(search || filterRating || filterCountry) && (
+      <button
+        onClick={() => { setSearch(''); setFilterRating(''); setFilterCountry(''); setCurrentPage(1); }}
+        className="px-4 py-2.5 text-sm text-gray-500 hover:text-red-500 border border-gray-300 rounded-lg transition-colors sm:col-span-2 lg:col-span-1"
+      >
+        Clear Filters
+      </button>
+    )}
+  </div>
+</div>
 
         {/* Table */}
         <div className="bg-white rounded-xl overflow-hidden shadow-sm">
@@ -136,7 +140,8 @@ export default function SuppliersPage() {
               <p className="text-gray-500 font-medium">No suppliers found</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+             <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+<div className="xl:col-span-4 overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
@@ -201,6 +206,8 @@ export default function SuppliersPage() {
                 </tbody>
               </table>
             </div>
+             </div>
+            
           )}
         </div>
 

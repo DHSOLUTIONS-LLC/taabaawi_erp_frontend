@@ -74,7 +74,7 @@ export default function CreatePaymentModal({ po, onClose, onSuccess }: CreatePay
 
   const num = (v: any) => (typeof v === 'number' ? v : parseFloat(v) || 0);
 
- return (
+return (
   <div className="fixed inset-0 flex items-center justify-center z-50 p-3 sm:p-4 bg-black/50 overflow-y-auto">
     <div className="bg-white rounded-2xl w-full max-w-lg shadow-xl my-auto mx-3 sm:mx-4">
       {/* Header */}
@@ -229,14 +229,14 @@ export default function CreatePaymentModal({ po, onClose, onSuccess }: CreatePay
           <button
             type="button"
             onClick={onClose}
-            className="sm:flex-1 py-2.5 sm:py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+            className="w-full sm:w-auto sm:flex-1 py-2.5 sm:py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-colors text-sm sm:text-base"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={isLoading}
-            className="sm:flex-1 py-2.5 sm:py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+            className="w-full sm:w-auto sm:flex-1 py-2.5 sm:py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 text-sm sm:text-base"
           >
             {isLoading && (
               <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">

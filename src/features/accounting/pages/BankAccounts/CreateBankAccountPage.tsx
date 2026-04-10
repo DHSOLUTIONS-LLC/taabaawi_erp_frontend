@@ -76,23 +76,23 @@ export default function CreateBankAccountPage() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-3xl mx-auto space-y-6">
+      <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-4">
-          <button onClick={() => navigate(`${basePath}/accounting/bank-accounts`)}>
-            <img src={arrow_back_icon} alt="" className="w-8 h-8" />
+        <div className="flex items-center gap-3 sm:gap-4">
+          <button onClick={() => navigate(`${basePath}/accounting/bank-accounts`)} className="flex-shrink-0 mt-1">
+            <img src={arrow_back_icon} alt="" className="w-6 h-6 sm:w-8 sm:h-8" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Create Bank Account</h1>
-            <p className="text-sm text-gray-500 mt-0.5">Add a new bank account to your system</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Create Bank Account</h1>
+            <p className="text-xs sm:text-sm text-gray-500 mt-0.5">Add a new bank account to your system</p>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-xl p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="bg-white rounded-xl p-4 sm:p-6 space-y-4 sm:space-y-6">
           {/* Basic Information */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900">Basic Information</h3>
-            <div className="grid grid-cols-2 gap-4">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900">Basic Information</h3>
+            <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-600 mb-2">
                   Account Name <span className="text-red-500">*</span>
@@ -103,7 +103,7 @@ export default function CreateBankAccountPage() {
                   value={formData.account_name}
                   onChange={handleChange}
                   placeholder="e.g. Main Operating Account"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                   required
                 />
                 {errors.account_name && (
@@ -121,7 +121,7 @@ export default function CreateBankAccountPage() {
                   value={formData.bank_name}
                   onChange={handleChange}
                   placeholder="e.g. National Bank of Kuwait"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                   required
                 />
                 {errors.bank_name && (
@@ -139,7 +139,7 @@ export default function CreateBankAccountPage() {
                   value={formData.account_number}
                   onChange={handleChange}
                   placeholder="e.g. 1234567890"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                   required
                 />
                 {errors.account_number && (
@@ -157,7 +157,7 @@ export default function CreateBankAccountPage() {
                   value={formData.branch_name}
                   onChange={handleChange}
                   placeholder="e.g. Head Office Branch"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                 />
               </div>
             </div>
@@ -165,8 +165,8 @@ export default function CreateBankAccountPage() {
 
           {/* Bank Details */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900">Bank Details</h3>
-            <div className="grid grid-cols-2 gap-4">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900">Bank Details</h3>
+            <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-600 mb-2">
                   IBAN
@@ -177,7 +177,7 @@ export default function CreateBankAccountPage() {
                   value={formData.iban}
                   onChange={handleChange}
                   placeholder="e.g. KW81CBKU00000000000012345601"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                 />
               </div>
 
@@ -191,7 +191,7 @@ export default function CreateBankAccountPage() {
                   value={formData.swift_code}
                   onChange={handleChange}
                   placeholder="e.g. NBKKKWKW"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                 />
               </div>
 
@@ -204,7 +204,7 @@ export default function CreateBankAccountPage() {
                     name="currency"
                     value={formData.currency}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                     required
                   >
                     {CURRENCIES.map(currency => (
@@ -228,7 +228,7 @@ export default function CreateBankAccountPage() {
                   value={formData.opening_balance}
                   onChange={handleChange}
                   placeholder="0.000"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                 />
               </div>
             </div>
@@ -244,7 +244,7 @@ export default function CreateBankAccountPage() {
                 name="gl_account_id"
                 value={formData.gl_account_id}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
               >
                 <option value="">Select GL Account (Optional)</option>
                 {glAccounts.map((acc: any) => (
@@ -273,7 +273,7 @@ export default function CreateBankAccountPage() {
               onChange={handleChange}
               rows={3}
               placeholder="Any additional notes about this account..."
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 resize-none"
+              className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base"
             />
           </div>
 
@@ -291,18 +291,18 @@ export default function CreateBankAccountPage() {
           </div>
 
           {/* Actions */}
-          <div className="flex justify-end gap-3 pt-4 border-t">
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-4 border-t">
             <button
               type="button"
               onClick={() => navigate(`${basePath}/accounting/bank-accounts`)}
-              className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+              className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 text-sm sm:text-base"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm sm:text-base"
             >
               {isLoading ? 'Creating...' : 'Create Account'}
             </button>

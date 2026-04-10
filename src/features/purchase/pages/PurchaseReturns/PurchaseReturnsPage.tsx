@@ -59,121 +59,131 @@ export default function PurchaseReturnsPage() {
     <DashboardLayout>
       <div className="space-y-6">
 
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Purchase Returns</h1>
-            <p className="text-sm text-gray-500 mt-1">Manage and track supplier return requests</p>
-          </div>
-          <button
-            onClick={() => navigate(`${basePath}/purchase/returns/create`)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <img src={add_icon} alt="" className="w-4 h-4 " />
-            New Return
-          </button>
-        </div>
+      {/* Header - Responsive */}
+<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+  <div>
+    <h1 className="text-xl md:text-2xl font-bold text-gray-900">Purchase Returns</h1>
+    <p className="text-xs md:text-sm text-gray-500 mt-1">Manage and track supplier return requests</p>
+  </div>
+  <button
+    onClick={() => navigate(`${basePath}/purchase/returns/create`)}
+    className="flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm md:text-base"
+  >
+    <img src={add_icon} alt="" className="w-4 h-4" />
+    New Return
+  </button>
+</div>
 
-        {/* Stats */}
-<div className="grid grid-cols-4 gap-4">
-  <div className="bg-white rounded-xl p-5 shadow-sm">
-    <p className="text-sm text-gray-500">Total Returns</p>
-    <p className="text-2xl font-bold text-gray-900 mt-1">
+{/* Stats - Responsive Grid */}
+<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+  <div className="bg-white rounded-xl p-4 md:p-5 shadow-sm">
+    <p className="text-xs md:text-sm text-gray-500">Total Returns</p>
+    <p className="text-xl md:text-2xl font-bold text-gray-900 mt-1">
       {stats?.total_returns ?? returns.length}
     </p>
   </div>
   
-  <div className="bg-white rounded-xl p-5 shadow-sm">
-    <p className="text-sm text-gray-500">Pending Review</p>
-    <p className="text-2xl font-bold text-yellow-600 mt-1">
+  <div className="bg-white rounded-xl p-4 md:p-5 shadow-sm">
+    <p className="text-xs md:text-sm text-gray-500">Pending Review</p>
+    <p className="text-xl md:text-2xl font-bold text-yellow-600 mt-1">
       {stats?.pending ?? returns.filter((r: any) => r.status === 'Pending').length}
     </p>
   </div>
   
-  <div className="bg-white rounded-xl p-5 shadow-sm">
-    <p className="text-sm text-gray-500">Total Return Value</p>
-    <p className="text-2xl font-bold text-blue-600 mt-1">
+  <div className="bg-white rounded-xl p-4 md:p-5 shadow-sm">
+    <p className="text-xs md:text-sm text-gray-500">Total Return Value</p>
+    <p className="text-lg md:text-2xl font-bold text-blue-600 mt-1 break-words">
       KWD {num(stats?.total_return_amount ?? 
                returns.reduce((sum: number, r: any) => sum + num(r.return_amount), 0)
               ).toFixed(3)}
     </p>
   </div>
   
-  <div className="bg-white rounded-xl p-5 shadow-sm">
-    <p className="text-sm text-gray-500">Completed</p>
-    <p className="text-2xl font-bold text-green-600 mt-1">
+  <div className="bg-white rounded-xl p-4 md:p-5 shadow-sm">
+    <p className="text-xs md:text-sm text-gray-500">Completed</p>
+    <p className="text-xl md:text-2xl font-bold text-green-600 mt-1">
       {stats?.completed ?? returns.filter((r: any) => r.status === 'Completed').length}
     </p>
   </div>
 </div>
 
-        {/* Filters */}
-        <div className="bg-white rounded-xl p-4 flex flex-wrap gap-3 items-center">
-          <div className="relative flex-1 min-w-[200px]">
-            <img src={search_icon} alt="" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
-              placeholder="Search return number or PO..."
-              className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+{/* Filters - Fully Responsive */}
+<div className="bg-white rounded-xl p-4">
+  {/* Search - Full width on mobile */}
+  <div className="relative mb-3">
+    <img src={search_icon} alt="" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
+    <input
+      type="text"
+      value={search}
+      onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
+      placeholder="Search return number or PO..."
+      className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+    />
+  </div>
 
-          <select
-            value={statusFilter}
-            onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-            className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm bg-white min-w-[130px]"
-          >
-            <option value="">All Statuses</option>
-            <option value="Pending">Pending</option>
-            <option value="Approved">Approved</option>
-            <option value="Rejected">Rejected</option>
-            <option value="Completed">Completed</option>
-          </select>
+  {/* Filter Controls - Responsive Grid */}
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-row gap-3">
+    {/* Status Filter */}
+    <select
+      value={statusFilter}
+      onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
+      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500"
+    >
+      <option value="">All Statuses</option>
+      <option value="Pending">Pending</option>
+      <option value="Approved">Approved</option>
+      <option value="Rejected">Rejected</option>
+      <option value="Completed">Completed</option>
+    </select>
 
-          <select
-            value={reasonFilter}
-            onChange={(e) => { setReasonFilter(e.target.value); setCurrentPage(1); }}
-            className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm bg-white min-w-[150px]"
-          >
-            <option value="">All Reasons</option>
-            <option value="Damaged">Damaged</option>
-            <option value="Defective">Defective</option>
-            <option value="Wrong Item">Wrong Item</option>
-            <option value="Excess Quantity">Excess Quantity</option>
-            <option value="Other">Other</option>
-          </select>
+    {/* Reason Filter */}
+    <select
+      value={reasonFilter}
+      onChange={(e) => { setReasonFilter(e.target.value); setCurrentPage(1); }}
+      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500"
+    >
+      <option value="">All Reasons</option>
+      <option value="Damaged">Damaged</option>
+      <option value="Defective">Defective</option>
+      <option value="Wrong Item">Wrong Item</option>
+      <option value="Excess Quantity">Excess Quantity</option>
+      <option value="Other">Other</option>
+    </select>
 
-          <div className="relative">
-            <img src={date_icon} alt="" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => { setStartDate(e.target.value); setCurrentPage(1); }}
-              className="pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm"
-            />
-          </div>
-          <div className="relative">
-            <img src={date_icon} alt="" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
-            <input
-              type="date"
-              value={endDate}
-              min={startDate}
-              onChange={(e) => { setEndDate(e.target.value); setCurrentPage(1); }}
-              className="pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm"
-            />
-          </div>
+    {/* Start Date */}
+    <div className="relative">
+      <img src={date_icon} alt="" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" />
+      <input
+        type="date"
+        value={startDate}
+        onChange={(e) => { setStartDate(e.target.value); setCurrentPage(1); }}
+        className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+      />
+    </div>
 
-          {(search || statusFilter || reasonFilter || startDate || endDate) && (
-            <button
-              onClick={() => { setSearch(''); setStatusFilter(''); setReasonFilter(''); setStartDate(''); setEndDate(''); setCurrentPage(1); }}
-              className="px-4 py-2.5 text-sm text-gray-500 hover:text-red-500 border border-gray-300 rounded-lg transition-colors"
-            >
-              Clear
-            </button>
-          )}
-        </div>
+    {/* End Date */}
+    <div className="relative">
+      <img src={date_icon} alt="" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" />
+      <input
+        type="date"
+        value={endDate}
+        min={startDate}
+        onChange={(e) => { setEndDate(e.target.value); setCurrentPage(1); }}
+        className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+      />
+    </div>
+
+    {/* Clear Button */}
+    {(search || statusFilter || reasonFilter || startDate || endDate) && (
+      <button
+        onClick={() => { setSearch(''); setStatusFilter(''); setReasonFilter(''); setStartDate(''); setEndDate(''); setCurrentPage(1); }}
+        className="w-full sm:w-auto px-4 py-2.5 text-sm text-gray-500 hover:text-red-500 border border-gray-300 rounded-lg transition-colors"
+      >
+        Clear Filters
+      </button>
+    )}
+  </div>
+</div>
 
         {/* Table */}
         <div className="bg-white rounded-xl overflow-hidden shadow-sm">
@@ -199,7 +209,8 @@ export default function PurchaseReturnsPage() {
               </button>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+ <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
@@ -262,6 +273,8 @@ export default function PurchaseReturnsPage() {
                 </tbody>
               </table>
             </div>
+            </div>
+           
           )}
         </div>
 

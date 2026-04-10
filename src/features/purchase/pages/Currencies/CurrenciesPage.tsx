@@ -93,359 +93,226 @@ export default function CurrenciesPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-4 md:space-y-6">
-        {/* Header - Responsive */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-xl md:text-2xl font-bold text-gray-900">
-              Currencies
-            </h1>
-            <p className="text-xs md:text-sm text-gray-500 mt-1">
-              Manage exchange rates and currencies
-            </p>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <button
-              onClick={() => setShowConverter(true)}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors text-sm"
-            >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
-                />
-              </svg>
-              <span>Currency Converter</span>
-            </button>
-            {isSuperAdmin && (
-              <button
-                onClick={() => {
-                  setSelectedCurrency(null);
-                  setShowModal(true);
-                }}
-                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
-              >
-                <img src={add_icon} alt="" className="w-4 h-4" />
-                Add Currency
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Filters - Responsive */}
-        <div className="bg-white rounded-xl p-4 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
-          <div className="relative flex-1 min-w-[200px]">
-            <img
-              src={search_icon}
-              alt=""
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
-            />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setCurrentPage(1);
-              }}
-              placeholder="Search by code or name..."
-              className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div className="flex items-center gap-2 sm:ml-auto">
-            <input
-              type="checkbox"
-              id="showInactive"
-              checked={showInactive}
-              onChange={(e) => setShowInactive(e.target.checked)}
-              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-            />
-            <label htmlFor="showInactive" className="text-sm text-gray-700">
-              Show inactive
-            </label>
-          </div>
-        </div>
-
-        {/* Table / Card View - Responsive */}
-        <div className="bg-white rounded-xl overflow-hidden shadow-sm">
-          {isLoading ? (
-            <div className="flex items-center justify-center py-24">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
-            </div>
-          ) : paginatedCurrencies.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-24">
-              <p className="text-gray-500 font-medium">No currencies found</p>
-            </div>
-          ) : (
-            <>
-              {/* Desktop Table View - hidden on mobile */}
-              <div className="hidden md:block overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50 border-b border-gray-200">
-                    <tr>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">
-                        Code
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">
-                        Name
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">
-                        Symbol
-                      </th>
-                      <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase">
-                        Exchange Rate
-                      </th>
-                      <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase">
-                        Base
-                      </th>
-                      <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase">
-                        Status
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">
-                        Last Updated
-                      </th>
-                      <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {paginatedCurrencies.map((currency: any) => (
-                      <tr key={currency.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 font-mono font-bold text-gray-900">
-                          {currency.currency_code}
-                        </td>
-                        <td className="px-6 py-4 text-gray-900">
-                          {currency.currency_name}
-                        </td>
-                        <td className="px-6 py-4 text-gray-700">
-                          {currency.currency_symbol}
-                        </td>
-                        <td className="px-6 py-4 text-right font-mono text-gray-900">
-                          1 KWD = {currency.exchange_rate.toFixed(6)}{" "}
-                          {currency.currency_code}
-                        </td>
-                        <td className="px-6 py-4 text-center">
-                          {currency.is_base_currency ? (
-                            <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
-                              Base
-                            </span>
-                          ) : (
-                            <span className="text-gray-400">—</span>
-                          )}
-                        </td>
-                        <td className="px-6 py-4 text-center">
-                          <button
-                            onClick={() => handleToggleActive(currency)}
-                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                              currency.is_active
-                                ? "bg-green-500"
-                                : "bg-gray-300"
-                            }`}
-                            disabled={
-                              currency.is_base_currency || !isSuperAdmin
-                            }
-                          >
-                            <span
-                              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                                currency.is_active
-                                  ? "translate-x-6"
-                                  : "translate-x-1"
-                              }`}
-                            />
-                          </button>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-500">
-                          {new Date(currency.last_updated).toLocaleDateString()}
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex justify-center gap-2">
-                            <button
-                              onClick={() => handleEdit(currency)}
-                              className="p-1.5 text-gray-500 hover:text-blue-600"
-                              disabled={!isSuperAdmin}
-                            >
-                              <img
-                                src={edit_icon}
-                                alt="Edit"
-                                className="w-4 h-4"
-                              />
-                            </button>
-                            {!currency.is_base_currency && (
-                              <button
-                                onClick={() => handleDelete(currency.id)}
-                                className="p-1.5 text-gray-500 hover:text-red-600"
-                                disabled={!isSuperAdmin}
-                              >
-                                <img
-                                  src={delete_icon}
-                                  alt="Delete"
-                                  className="w-4 h-4"
-                                />
-                              </button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Mobile Card View - visible only below md */}
-              <div className="md:hidden divide-y divide-gray-100">
-                {paginatedCurrencies.map((currency: any) => (
-                  <div
-                    key={currency.id}
-                    className="p-4 hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 flex-wrap mb-1">
-                          <span className="font-mono font-bold text-base text-gray-900">
-                            {currency.currency_code}
-                          </span>
-                          {currency.is_base_currency && (
-                            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
-                              Base
-                            </span>
-                          )}
-                          {!currency.is_active && (
-                            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                              Inactive
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-sm text-gray-900">
-                          {currency.currency_name}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-0.5">
-                          Symbol: {currency.currency_symbol}
-                        </p>
-                      </div>
-
-                      {/* Actions */}
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleEdit(currency)}
-                          className="p-2 text-gray-500 hover:text-blue-600"
-                          disabled={!isSuperAdmin}
-                        >
-                          <img src={edit_icon} alt="Edit" className="w-4 h-4" />
-                        </button>
-                        {!currency.is_base_currency && (
-                          <button
-                            onClick={() => handleDelete(currency.id)}
-                            className="p-2 text-gray-500 hover:text-red-600"
-                            disabled={!isSuperAdmin}
-                          >
-                            <img
-                              src={delete_icon}
-                              alt="Delete"
-                              className="w-4 h-4"
-                            />
-                          </button>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Exchange Rate */}
-                    <div className="bg-gray-50 rounded-lg p-3 mb-3">
-                      <p className="text-xs text-gray-500 mb-1">
-                        Exchange Rate
-                      </p>
-                      <p className="text-sm font-mono font-medium text-gray-900">
-                        1 KWD = {currency.exchange_rate.toFixed(6)}{" "}
-                        {currency.currency_code}
-                      </p>
-                    </div>
-
-                    {/* Status Toggle & Last Updated */}
-                    <div className="flex items-center justify-between pt-2">
-                      <div className="flex items-center gap-3">
-                        <span className="text-xs text-gray-500">Status:</span>
-                        <button
-                          onClick={() => handleToggleActive(currency)}
-                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                            currency.is_active ? "bg-green-500" : "bg-gray-300"
-                          }`}
-                          disabled={currency.is_base_currency || !isSuperAdmin}
-                        >
-                          <span
-                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                              currency.is_active
-                                ? "translate-x-6"
-                                : "translate-x-1"
-                            }`}
-                          />
-                        </button>
-                      </div>
-                      <p className="text-xs text-gray-400">
-                        Updated:{" "}
-                        {new Date(currency.last_updated).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-
-        {/* Pagination - Responsive */}
-        {totalPages > 1 && (
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p className="text-sm text-gray-500 order-2 sm:order-1">
-              Page {currentPage} of {totalPages}
-            </p>
-            <div className="flex gap-2 order-1 sm:order-2 w-full sm:w-auto">
-              <button
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-                className="flex-1 sm:flex-none px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 transition-colors"
-              >
-                Previous
-              </button>
-              <button
-                onClick={() =>
-                  setCurrentPage((p) => Math.min(totalPages, p + 1))
-                }
-                disabled={currentPage === totalPages}
-                className="flex-1 sm:flex-none px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 transition-colors"
-              >
-                Next
-              </button>
-            </div>
-          </div>
+  <div className="space-y-4">
+    {/* Header - Optimized for mobile */}
+    <div className="flex flex-col gap-4">
+      <div>
+        <h1 className="text-xl font-bold text-gray-900">Currencies</h1>
+        <p className="text-xs text-gray-500 mt-1">Manage exchange rates and currencies</p>
+      </div>
+      <div className="flex flex-col gap-3">
+        <button
+          onClick={() => setShowConverter(true)}
+          className="flex items-center justify-center gap-2 px-4 py-2.5 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors text-sm w-full"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+          </svg>
+          <span>Currency Converter</span>
+        </button>
+        {isSuperAdmin && (
+          <button
+            onClick={() => {
+              setSelectedCurrency(null);
+              setShowModal(true);
+            }}
+            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm w-full"
+          >
+            <img src={add_icon} alt="" className="w-4 h-4" />
+            Add Currency
+          </button>
         )}
       </div>
+    </div>
 
-      {/* Currency Modal */}
-      {showModal && (
-        <CurrencyModal
-          currency={selectedCurrency}
-          onClose={() => setShowModal(false)}
-          onSuccess={() => {
-            setShowModal(false);
-            refetch();
+    {/* Filters - Stacked on mobile */}
+    <div className="bg-white rounded-xl p-4 space-y-3">
+      <div className="relative">
+        <img src={search_icon} alt="" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setCurrentPage(1);
           }}
+          placeholder="Search by code or name..."
+          className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
         />
-      )}
+      </div>
 
-      {/* Currency Converter */}
-      {showConverter && (
-        <CurrencyConverter
-          currencies={currencies}
-          onClose={() => setShowConverter(false)}
+      <div className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          id="showInactive"
+          checked={showInactive}
+          onChange={(e) => setShowInactive(e.target.checked)}
+          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
         />
+        <label htmlFor="showInactive" className="text-sm text-gray-700">
+          Show inactive currencies
+        </label>
+      </div>
+    </div>
+
+    {/* Mobile Card View - Optimized for below md */}
+    <div className="bg-white rounded-xl overflow-hidden shadow-sm">
+      {isLoading ? (
+        <div className="flex items-center justify-center py-24">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+        </div>
+      ) : paginatedCurrencies.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 px-4">
+          <p className="text-gray-500 font-medium text-center">No currencies found</p>
+          {(search || !showInactive) && (
+            <button
+              onClick={() => {
+                setSearch('');
+                setShowInactive(true);
+              }}
+              className="mt-3 text-sm text-blue-600 hover:underline"
+            >
+              Clear filters
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="divide-y divide-gray-100">
+          {paginatedCurrencies.map((currency: any) => (
+            <div key={currency.id} className="p-4 hover:bg-gray-50 transition-colors">
+              {/* Header Row */}
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap mb-1">
+                    <span className="font-mono font-bold text-base text-gray-900">
+                      {currency.currency_code}
+                    </span>
+                    {currency.is_base_currency && (
+                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700 whitespace-nowrap">
+                        Base
+                      </span>
+                    )}
+                    {!currency.is_active && !currency.is_base_currency && (
+                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 whitespace-nowrap">
+                        Inactive
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-900 truncate">{currency.currency_name}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Symbol: {currency.currency_symbol}
+                  </p>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-1 ml-2">
+                  <button
+                    onClick={() => handleEdit(currency)}
+                    className="p-2 text-gray-500 hover:text-blue-600 transition-colors"
+                    disabled={!isSuperAdmin}
+                  >
+                    <img src={edit_icon} alt="Edit" className="w-4 h-4" />
+                  </button>
+                  {!currency.is_base_currency && (
+                    <button
+                      onClick={() => handleDelete(currency.id)}
+                      className="p-2 text-gray-500 hover:text-red-600 transition-colors"
+                      disabled={!isSuperAdmin}
+                    >
+                      <img src={delete_icon} alt="Delete" className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Exchange Rate Card */}
+              <div className="bg-gray-50 rounded-lg p-3 mb-3">
+                <p className="text-xs text-gray-500 mb-1">Exchange Rate</p>
+                <p className="text-sm font-mono font-medium text-gray-900 break-words">
+                  1 KWD = {currency.exchange_rate.toFixed(6)} {currency.currency_code}
+                </p>
+              </div>
+
+              {/* Status and Last Updated */}
+              <div className="flex items-center justify-between pt-2">
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-gray-500">Status:</span>
+                  <button
+                    onClick={() => handleToggleActive(currency)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      currency.is_active ? "bg-green-500" : "bg-gray-300"
+                    }`}
+                    disabled={currency.is_base_currency || !isSuperAdmin}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        currency.is_active ? "translate-x-6" : "translate-x-1"
+                      }`}
+                    />
+                  </button>
+                </div>
+                <p className="text-xs text-gray-400">
+                  Updated: {new Date(currency.last_updated).toLocaleDateString()}
+                </p>
+              </div>
+
+              {/* Disabled message for base currency */}
+              {currency.is_base_currency && (
+                <p className="text-xs text-gray-400 mt-3 pt-2 border-t border-gray-100">
+                  Base currency cannot be deactivated or deleted
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
       )}
-    </DashboardLayout>
+    </div>
+
+    {/* Pagination - Mobile optimized */}
+    {totalPages > 1 && (
+      <div className="flex flex-col gap-3">
+        <div className="flex gap-2">
+          <button
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            className="flex-1 px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            Previous
+          </button>
+          <button
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+            className="flex-1 px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            Next
+          </button>
+        </div>
+        <p className="text-sm text-gray-500 text-center">
+          Page {currentPage} of {totalPages}
+        </p>
+      </div>
+    )}
+  </div>
+
+  {/* Currency Modal */}
+  {showModal && (
+    <CurrencyModal
+      currency={selectedCurrency}
+      onClose={() => setShowModal(false)}
+      onSuccess={() => {
+        setShowModal(false);
+        refetch();
+      }}
+    />
+  )}
+
+  {/* Currency Converter */}
+  {showConverter && (
+    <CurrencyConverter
+      currencies={currencies}
+      onClose={() => setShowConverter(false)}
+    />
+  )}
+</DashboardLayout>
   );
 }

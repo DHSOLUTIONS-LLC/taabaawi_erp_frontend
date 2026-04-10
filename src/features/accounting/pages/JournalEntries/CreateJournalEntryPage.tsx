@@ -110,25 +110,28 @@ export default function CreateJournalEntryPage() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-5xl mx-auto space-y-6">
+      <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6">
 
         {/* Header */}
-        <div className="flex items-center gap-4">
-          <button onClick={() => navigate(`${basePath}/accounting/journal-entries`)}>
-            <img src={arrow_back_icon} alt="" className="w-8 h-8" />
+        <div className="flex items-center gap-3 sm:gap-4">
+          <button 
+            onClick={() => navigate(`${basePath}/accounting/journal-entries`)}
+            className="flex-shrink-0 mt-1"
+          >
+            <img src={arrow_back_icon} alt="" className="w-6 h-6 sm:w-8 sm:h-8" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Create Journal Entry</h1>
-            <p className="text-sm text-gray-500 mt-0.5">Record a new financial transaction</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Create Journal Entry</h1>
+            <p className="text-xs sm:text-sm text-gray-500 mt-0.5">Record a new financial transaction</p>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
 
           {/* Entry Details */}
-          <div className="bg-white rounded-xl p-6">
+          <div className="bg-white rounded-xl p-4 sm:p-6">
             <h2 className="text-base font-semibold text-gray-900 mb-4">Entry Details</h2>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4">
 
               <div>
                 <label className="block text-sm font-medium text-gray-600 mb-2">
@@ -140,7 +143,7 @@ export default function CreateJournalEntryPage() {
                   value={formData.entry_date}
                   onChange={handleChange}
                   max={new Date().toISOString().split('T')[0]}
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                  className={`w-full px-4 py-2.5 sm:py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base ${
                     errors.entry_date ? 'border-red-400' : 'border-gray-300'
                   }`}
                 />
@@ -157,7 +160,7 @@ export default function CreateJournalEntryPage() {
                   value={formData.description}
                   onChange={handleChange}
                   placeholder="Brief description of the transaction"
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                  className={`w-full px-4 py-2.5 sm:py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base ${
                     errors.description ? 'border-red-400' : 'border-gray-300'
                   }`}
                 />
@@ -171,7 +174,7 @@ export default function CreateJournalEntryPage() {
                     name="reference_type"
                     value={formData.reference_type}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                   >
                     <option value="">None</option>
                     <option value="Invoice">Invoice</option>
@@ -194,23 +197,25 @@ export default function CreateJournalEntryPage() {
                   value={formData.reference_number}
                   onChange={handleChange}
                   placeholder="e.g. INV-2025-001"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                 />
               </div>
             </div>
           </div>
 
           {/* Journal Lines */}
-          <div className="bg-white rounded-xl p-6">
+          <div className="bg-white rounded-xl p-4 sm:p-6">
             <h2 className="text-base font-semibold text-gray-900 mb-4">Journal Lines</h2>
-            <JournalEntryLines lines={lines} onChange={setLines} currency="KWD" />
+            <div className="overflow-x-auto">
+              <JournalEntryLines lines={lines} onChange={setLines} currency="KWD" />
+            </div>
             {errors.lines && (
               <p className="text-xs text-red-500 mt-2">{errors.lines[0]}</p>
             )}
             {/* Balance error shown only after clicking submit */}
             {errors.balance && (
-              <div className="mt-3 flex items-center gap-2 text-red-600 bg-red-50 border border-red-200 px-4 py-2.5 rounded-lg">
-                <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="mt-3 flex items-start sm:items-center gap-2 text-red-600 bg-red-50 border border-red-200 px-3 sm:px-4 py-2.5 rounded-lg">
+                <svg className="w-4 h-4 shrink-0 mt-0.5 sm:mt-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <span className="text-sm font-medium">{errors.balance[0]}</span>
@@ -219,7 +224,7 @@ export default function CreateJournalEntryPage() {
           </div>
 
           {/* Notes */}
-          <div className="bg-white rounded-xl p-6">
+          <div className="bg-white rounded-xl p-4 sm:p-6">
             <h2 className="text-base font-semibold text-gray-900 mb-4">Additional Notes</h2>
             <textarea
               name="notes"
@@ -227,23 +232,23 @@ export default function CreateJournalEntryPage() {
               onChange={handleChange}
               rows={3}
               placeholder="Any additional notes about this entry..."
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 resize-none"
+              className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base"
             />
           </div>
 
           {/* Actions */}
-          <div className="flex justify-end gap-3">
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3">
             <button
               type="button"
               onClick={() => navigate(`${basePath}/accounting/journal-entries`)}
-              className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+              className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 text-sm sm:text-base"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+              className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2 text-sm sm:text-base"
             >
               {isLoading && (
                 <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">

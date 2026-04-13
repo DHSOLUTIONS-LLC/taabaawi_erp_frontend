@@ -25,8 +25,13 @@ export const systemApi = api.injectEndpoints({
         url: '/system-settings/upload-logo',
         method: 'POST',
         body: formData,
+        formData: true,
       }),
       invalidatesTags: ['SystemSettings'],
+      transformResponse: (response: any) => {
+        console.log('Upload response:', response);
+        return response;
+      },
     }),
 
     // Update email settings

@@ -158,7 +158,7 @@ export default function Sidebar({ onMenuSelect, mobileMenuOpen, closeMobileMenu 
       submenu: [
         { id: 'system-settings', label: 'Settings', path: `${basePath}/system/settings` },
         { id: 'payment-methods', label: 'Payment Methods', path: `${basePath}/system/payment-methods` },
-        { id: 'seo', label: 'SEO Manager', path: `${basePath}/system/seo` },
+        // { id: 'seo', label: 'SEO Manager', path: `${basePath}/system/seo` },
       ]
     },
     hasPermission('') && {
@@ -336,11 +336,10 @@ export default function Sidebar({ onMenuSelect, mobileMenuOpen, closeMobileMenu 
             <div key={menu.id}>
               <button
                 onClick={() => handleMenuClick(menu)}
-                className={`w-full flex items-center rounded-lg transition-all duration-200 cursor-pointer px-4 py-3 space-x-3 ${
-                  isActive || isParentActive
-                    ? 'bg-gray-200 text-blue-600'
-                    : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'
-                }`}
+                className={`w-full flex items-center rounded-lg transition-all duration-200 cursor-pointer px-4 py-3 space-x-3 ${isActive || isParentActive
+                  ? 'bg-gray-200 text-blue-600'
+                  : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'
+                  }`}
               >
                 <div className={`shrink-0 ${isActive || isParentActive ? 'text-blue-500' : 'text-gray-500'}`}>
                   <img src={menu.icon} alt={menu.label} className="w-5 h-5 object-contain" />
@@ -366,11 +365,10 @@ export default function Sidebar({ onMenuSelect, mobileMenuOpen, closeMobileMenu 
                       <button
                         key={submenu.id}
                         onClick={() => handleSubmenuClick(submenu, menu.label)}
-                        className={`w-full flex items-center rounded-lg transition-all duration-200 px-4 py-2.5 cursor-pointer ${
-                          isSubmenuActive
-                            ? 'bg-blue-50 text-blue-600 font-medium'
-                            : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600'
-                        }`}
+                        className={`w-full flex items-center rounded-lg transition-all duration-200 px-4 py-2.5 cursor-pointer ${isSubmenuActive
+                          ? 'bg-blue-50 text-blue-600 font-medium'
+                          : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600'
+                          }`}
                       >
                         <span className="text-base truncate">{submenu.label}</span>
                       </button>
@@ -441,11 +439,10 @@ export default function Sidebar({ onMenuSelect, mobileMenuOpen, closeMobileMenu 
                   <button
                     key={menu.id}
                     onClick={() => handleMenuClick(menu)}
-                    className={`w-full flex items-center rounded-lg transition-all duration-200 px-4 py-3 space-x-3 ${
-                      isActive
-                        ? 'bg-gray-200 text-blue-600 font-bold'
-                        : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'
-                    }`}
+                    className={`w-full flex items-center rounded-lg transition-all duration-200 px-4 py-3 space-x-3 ${isActive
+                      ? 'bg-gray-200 text-blue-600 font-bold'
+                      : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'
+                      }`}
                   >
                     <div className={`shrink-0 ${isActive ? 'text-blue-500' : 'text-gray-500'}`}>
                       <img src={menu.icon} alt={menu.label} className="w-6 h-6 object-contain" />

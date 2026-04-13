@@ -58,95 +58,97 @@ export default function BudgetsPage() {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Budgets</h1>
-            <p className="text-sm text-gray-500 mt-1">Plan and track financial budgets</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Budgets</h1>
+            <p className="text-xs sm:text-sm text-gray-500 mt-1">Plan and track financial budgets</p>
           </div>
           <button
             onClick={() => navigate(`${basePath}/accounting/budgets/create`)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
           >
-            <img src={add_icon} alt="" className="w-4 h-4 " />
+            <img src={add_icon} alt="" className="w-4 h-4" />
             New Budget
           </button>
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-xl p-4 flex flex-wrap gap-3 items-center">
-          <div className="relative flex-1 min-w-[220px]">
-            <img src={search_icon} alt="" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
-              placeholder="Search by budget name..."
-              className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div className="relative min-w-[150px]">
-            <select
-              value={statusFilter}
-              onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm bg-white appearance-none pr-10"
-            >
-              <option value="">All Statuses</option>
-              <option value="Draft">Draft</option>
-              <option value="Active">Active</option>
-              <option value="Closed">Closed</option>
-            </select>
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-              <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
+        <div className="bg-white rounded-xl p-3 sm:p-4">
+          <div className="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center">
+            <div className="relative flex-1 min-w-[200px]">
+              <img src={search_icon} alt="" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
+                placeholder="Search by budget name..."
+                className="w-full pl-9 pr-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+              />
             </div>
-          </div>
 
-          <div className="relative min-w-[150px]">
-            <select
-              value={periodFilter}
-              onChange={(e) => { setPeriodFilter(e.target.value); setCurrentPage(1); }}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm bg-white appearance-none pr-10"
-            >
-              <option value="">All Periods</option>
-              <option value="Monthly">Monthly</option>
-              <option value="Quarterly">Quarterly</option>
-              <option value="Yearly">Yearly</option>
-            </select>
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-              <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
+            <div className="relative flex-1 sm:flex-initial min-w-[150px]">
+              <select
+                value={statusFilter}
+                onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
+                className="w-full px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-sm bg-white appearance-none pr-10"
+              >
+                <option value="">All Statuses</option>
+                <option value="Draft">Draft</option>
+                <option value="Active">Active</option>
+                <option value="Closed">Closed</option>
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
+              </div>
             </div>
-          </div>
 
-          <div className="relative min-w-[150px]">
-            <select
-              value={yearFilter}
-              onChange={(e) => { setYearFilter(e.target.value); setCurrentPage(1); }}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm bg-white appearance-none pr-10"
-            >
-              <option value="">All Years</option>
-              {years.map((year: any) => (
-                <option key={String(year)} value={String(year)}>{year}</option>
-              ))}
-            </select>
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-              <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
+            <div className="relative flex-1 sm:flex-initial min-w-[150px]">
+              <select
+                value={periodFilter}
+                onChange={(e) => { setPeriodFilter(e.target.value); setCurrentPage(1); }}
+                className="w-full px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-sm bg-white appearance-none pr-10"
+              >
+                <option value="">All Periods</option>
+                <option value="Monthly">Monthly</option>
+                <option value="Quarterly">Quarterly</option>
+                <option value="Yearly">Yearly</option>
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
+              </div>
             </div>
-          </div>
 
-          {(search || statusFilter || periodFilter || yearFilter) && (
-            <button
-              onClick={() => { 
-                setSearch(''); 
-                setStatusFilter(''); 
-                setPeriodFilter(''); 
-                setYearFilter('');
-                setCurrentPage(1); 
-              }}
-              className="px-4 py-2.5 text-sm text-gray-500 hover:text-red-500 border border-gray-300 rounded-lg"
-            >
-              Clear
-            </button>
-          )}
+            <div className="relative flex-1 sm:flex-initial min-w-[150px]">
+              <select
+                value={yearFilter}
+                onChange={(e) => { setYearFilter(e.target.value); setCurrentPage(1); }}
+                className="w-full px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-sm bg-white appearance-none pr-10"
+              >
+                <option value="">All Years</option>
+                {years.map((year: any) => (
+                  <option key={String(year)} value={String(year)}>{year}</option>
+                ))}
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
+              </div>
+            </div>
+
+            {(search || statusFilter || periodFilter || yearFilter) && (
+              <button
+                onClick={() => {
+                  setSearch('');
+                  setStatusFilter('');
+                  setPeriodFilter('');
+                  setYearFilter('');
+                  setCurrentPage(1);
+                }}
+                className="px-4 py-2 text-sm text-gray-500 hover:text-red-500 border border-gray-300 rounded-lg"
+              >
+                Clear
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Table */}
@@ -173,93 +175,94 @@ export default function BudgetsPage() {
               </button>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Budget Name</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Fiscal Year</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Period</th>
-                    <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase">Budgeted</th>
-                    <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase">Actual</th>
-                    <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase">Variance</th>
-                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase">Utilization</th>
-                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase">Status</th>
-                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {budgets.map((budget: any) => (
-                    <tr key={budget.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4">
-                        <button
-                          onClick={() => navigate(`${basePath}/accounting/budgets/${budget.id}`)}
-                          className="text-sm font-semibold text-blue-600 hover:underline text-left"
-                        >
-                          {budget.budget_name}
-                        </button>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-700">{budget.fiscal_year}</td>
-                      <td className="px-6 py-4">
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${PERIOD_COLORS[budget.period_type]}`}>
-                          {budget.period_type}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right text-sm font-mono text-gray-900">
-                        KWD {num(budget.total_budget_amount).toFixed(3)}
-                      </td>
-                      <td className="px-6 py-4 text-right text-sm font-mono text-blue-600">
-                        KWD {num(budget.total_actual).toFixed(3)}
-                      </td>
-                      <td className={`px-6 py-4 text-right text-sm font-mono font-medium ${
-                        num(budget.total_variance) >= 0 ? 'text-green-600' : 'text-red-600'
-                      }`}>
-                        {num(budget.total_variance) >= 0 ? '+' : ''}{num(budget.total_variance).toFixed(3)}
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <div className="flex items-center gap-2">
-                          <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                            <div 
-                              className={`h-full ${
-                                (budget.utilization_percentage || 0) > 100 ? 'bg-red-500' :
-                                (budget.utilization_percentage || 0) > 80 ? 'bg-yellow-500' : 'bg-green-500'
-                              }`}
-                              style={{ width: `${Math.min((budget.utilization_percentage || 0), 100)}%` }}
-                            />
-                          </div>
-                          <span className="text-xs text-gray-600">
-                            {(budget.utilization_percentage || 0).toFixed(1)}%
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${STATUS_COLORS[budget.status]}`}>
-                          {budget.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex justify-center gap-2">
+            <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+              <div className="xl:col-span-4 overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Budget Name</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Fiscal Year</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Period</th>
+                      <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase">Budgeted</th>
+                      <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase">Actual</th>
+                      <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase">Variance</th>
+                      <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase">Utilization</th>
+                      <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase">Status</th>
+                      <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {budgets.map((budget: any) => (
+                      <tr key={budget.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4">
                           <button
                             onClick={() => navigate(`${basePath}/accounting/budgets/${budget.id}`)}
-                            className="px-3 py-1.5 text-xs bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                            className="text-sm font-semibold text-blue-600 hover:underline text-left"
                           >
-                            View
+                            {budget.budget_name}
                           </button>
-                          {budget.status === 'Draft' && (
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-700">{budget.fiscal_year}</td>
+                        <td className="px-6 py-4">
+                          <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${PERIOD_COLORS[budget.period_type]}`}>
+                            {budget.period_type}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-right text-sm font-mono text-gray-900">
+                          KWD {num(budget.total_budget_amount).toFixed(3)}
+                        </td>
+                        <td className="px-6 py-4 text-right text-sm font-mono text-blue-600">
+                          KWD {num(budget.total_actual).toFixed(3)}
+                        </td>
+                        <td className={`px-6 py-4 text-right text-sm font-mono font-medium ${num(budget.total_variance) >= 0 ? 'text-green-600' : 'text-red-600'
+                          }`}>
+                          {num(budget.total_variance) >= 0 ? '+' : ''}{num(budget.total_variance).toFixed(3)}
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                              <div
+                                className={`h-full ${(budget.utilization_percentage || 0) > 100 ? 'bg-red-500' :
+                                  (budget.utilization_percentage || 0) > 80 ? 'bg-yellow-500' : 'bg-green-500'
+                                  }`}
+                                style={{ width: `${Math.min((budget.utilization_percentage || 0), 100)}%` }}
+                              />
+                            </div>
+                            <span className="text-xs text-gray-600">
+                              {(budget.utilization_percentage || 0).toFixed(1)}%
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${STATUS_COLORS[budget.status]}`}>
+                            {budget.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex justify-center gap-2">
                             <button
-                              onClick={() => navigate(`${basePath}/accounting/budgets/edit/${budget.id}`)}
-                              className="p-1.5 text-gray-500 hover:text-blue-600"
+                              onClick={() => navigate(`${basePath}/accounting/budgets/${budget.id}`)}
+                              className="px-3 py-1.5 text-xs bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                             >
-                              <img src={edit_icon} alt="Edit" className="w-4 h-4" />
+                              View
                             </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                            {budget.status === 'Draft' && (
+                              <button
+                                onClick={() => navigate(`${basePath}/accounting/budgets/edit/${budget.id}`)}
+                                className="p-1.5 text-gray-500 hover:text-blue-600"
+                              >
+                                <img src={edit_icon} alt="Edit" className="w-4 h-4" />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
+
           )}
         </div>
 

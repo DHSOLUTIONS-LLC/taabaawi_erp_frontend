@@ -4,9 +4,9 @@ import { useNavigate, useParams } from 'react-router-dom';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
 import { useAppSelector } from '../../../../app/hooks';
 import type { RootState } from '../../../../app/store';
-import { 
+import {
   useCreateAPMutation,
-  
+
 } from '../../../../services/accountingApi';
 
 
@@ -40,8 +40,8 @@ export default function CreateAPPage() {
   const [createAP, { isLoading }] = useCreateAPMutation();
 
   // Fetch suppliers
-  const { data: suppliersData } = useGetSuppliersQuery({ 
-     is_active:  1 as any, 
+  const { data: suppliersData } = useGetSuppliersQuery({
+    is_active: 1 as any,
     per_page: 1000,
   });
   const suppliers = (suppliersData as any)?.data?.data || (suppliersData as any)?.data || [];
@@ -66,13 +66,13 @@ export default function CreateAPPage() {
   const handlePOChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const poId = e.target.value;
     setFormData(prev => ({ ...prev, purchase_order_id: poId }));
-    
+
     // Auto-fill supplier if PO selected
     if (poId) {
       const selectedPO = purchaseOrders.find((po: any) => po.id.toString() === poId);
       if (selectedPO) {
-        setFormData(prev => ({ 
-          ...prev, 
+        setFormData(prev => ({
+          ...prev,
           supplier_id: selectedPO.supplier_id?.toString() || '',
           currency: selectedPO.currency || 'KWD',
         }));
@@ -93,7 +93,7 @@ export default function CreateAPPage() {
         currency: formData.currency,
         notes: formData.notes || undefined,
       };
-      
+
       const result = await createAP(payload).unwrap();
       navigate(`${basePath}/accounting/accounts-payable/${(result as any).data?.id}`);
     } catch (err: any) {
@@ -107,7 +107,7 @@ export default function CreateAPPage() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-3xl mx-auto space-y-6">
+      <div className="max-w-full mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4">
           <button onClick={() => navigate(`${basePath}/accounting/accounts-payable`)}>
@@ -284,7 +284,7 @@ export default function CreateAPPage() {
           </div>
 
           {/* Actions */}
-          <div className="flex justify-end gap-3 pt-4 border-t">
+          <div className="flex justify-end gap-3 pt-4 border-t border-gray-300">
             <button
               type="button"
               onClick={() => navigate(`${basePath}/accounting/accounts-payable`)}

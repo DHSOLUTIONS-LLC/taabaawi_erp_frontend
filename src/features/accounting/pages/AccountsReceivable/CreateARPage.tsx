@@ -4,9 +4,9 @@ import { useNavigate, useParams } from 'react-router-dom';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
 import { useAppSelector } from '../../../../app/hooks';
 import type { RootState } from '../../../../app/store';
-import { 
+import {
   useCreateARMutation,
-  useGetCustomersQuery 
+  useGetCustomersQuery
 } from '../../../../services/accountingApi';
 import { useGetOrdersQuery } from '../../../../services/salesApi';
 
@@ -38,7 +38,7 @@ export default function CreateARPage() {
   const [createAR, { isLoading }] = useCreateARMutation();
 
   // Fetch customers (users with role 'Customer')
-  const { data: customersData } = useGetCustomersQuery({ 
+  const { data: customersData } = useGetCustomersQuery({
     is_active: true,
     per_page: 1000,
   });
@@ -63,13 +63,13 @@ export default function CreateARPage() {
   const handleOrderChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const orderId = e.target.value;
     setFormData(prev => ({ ...prev, order_id: orderId }));
-    
+
     // Auto-fill customer if order selected
     if (orderId) {
       const selectedOrder = orders.find((order: any) => order.id.toString() === orderId);
       if (selectedOrder) {
-        setFormData(prev => ({ 
-          ...prev, 
+        setFormData(prev => ({
+          ...prev,
           customer_id: selectedOrder.customer_id?.toString() || '',
           currency: selectedOrder.currency || 'KWD',
           invoice_amount: selectedOrder.total_amount || 0,
@@ -91,7 +91,7 @@ export default function CreateARPage() {
         currency: formData.currency,
         notes: formData.notes || undefined,
       };
-      
+
       const result = await createAR(payload).unwrap();
       navigate(`${basePath}/accounting/accounts-receivable/${(result as any).data?.id}`);
     } catch (err: any) {
@@ -105,7 +105,7 @@ export default function CreateARPage() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-3xl mx-auto space-y-6">
+      <div className="max-w-full mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4">
           <button onClick={() => navigate(`${basePath}/accounting/accounts-receivable`)}>
@@ -282,7 +282,7 @@ export default function CreateARPage() {
           </div>
 
           {/* Actions */}
-          <div className="flex justify-end gap-3 pt-4 border-t">
+          <div className="flex justify-end gap-3 pt-4 border-t border-gray-300">
             <button
               type="button"
               onClick={() => navigate(`${basePath}/accounting/accounts-receivable`)}

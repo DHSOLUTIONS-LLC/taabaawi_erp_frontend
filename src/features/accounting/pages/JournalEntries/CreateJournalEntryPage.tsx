@@ -51,14 +51,14 @@ export default function CreateJournalEntryPage() {
   };
 
   // Computed balance values
-  const totalDebit  = lines.reduce((sum, l) => sum + num(l.debit), 0);
+  const totalDebit = lines.reduce((sum, l) => sum + num(l.debit), 0);
   const totalCredit = lines.reduce((sum, l) => sum + num(l.credit), 0);
-  const isBalanced  = Math.abs(totalDebit - totalCredit) <= 0.001;
+  const isBalanced = Math.abs(totalDebit - totalCredit) <= 0.001;
 
   const validate = () => {
     const newErrors: Record<string, string[]> = {};
 
-    if (!formData.entry_date)  newErrors.entry_date  = ['Entry date is required'];
+    if (!formData.entry_date) newErrors.entry_date = ['Entry date is required'];
     if (!formData.description) newErrors.description = ['Description is required'];
 
     // Need at least 2 valid lines (backend requires min:2)
@@ -110,11 +110,11 @@ export default function CreateJournalEntryPage() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6">
+      <div className="max-w-full mx-auto space-y-4 sm:space-y-6">
 
         {/* Header */}
         <div className="flex items-center gap-3 sm:gap-4">
-          <button 
+          <button
             onClick={() => navigate(`${basePath}/accounting/journal-entries`)}
             className="flex-shrink-0 mt-1"
           >
@@ -143,9 +143,8 @@ export default function CreateJournalEntryPage() {
                   value={formData.entry_date}
                   onChange={handleChange}
                   max={new Date().toISOString().split('T')[0]}
-                  className={`w-full px-4 py-2.5 sm:py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base ${
-                    errors.entry_date ? 'border-red-400' : 'border-gray-300'
-                  }`}
+                  className={`w-full px-4 py-2.5 sm:py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base ${errors.entry_date ? 'border-red-400' : 'border-gray-300'
+                    }`}
                 />
                 {errors.entry_date && <p className="text-xs text-red-500 mt-1">{errors.entry_date[0]}</p>}
               </div>
@@ -160,9 +159,8 @@ export default function CreateJournalEntryPage() {
                   value={formData.description}
                   onChange={handleChange}
                   placeholder="Brief description of the transaction"
-                  className={`w-full px-4 py-2.5 sm:py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base ${
-                    errors.description ? 'border-red-400' : 'border-gray-300'
-                  }`}
+                  className={`w-full px-4 py-2.5 sm:py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base ${errors.description ? 'border-red-400' : 'border-gray-300'
+                    }`}
                 />
                 {errors.description && <p className="text-xs text-red-500 mt-1">{errors.description[0]}</p>}
               </div>

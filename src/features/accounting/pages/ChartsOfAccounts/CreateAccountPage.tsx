@@ -35,13 +35,13 @@ export default function CreateAccountPage() {
   const basePath = isSuperAdmin ? '/admin' : '';
 
   const [createAccount, { isLoading }] = useCreateAccountMutation();
-  
+
   // Get existing accounts for parent dropdown
-  const { data: accountsData } = useGetChartOfAccountsQuery({ 
+  const { data: accountsData } = useGetChartOfAccountsQuery({
     is_active: 1 as any,
     per_page: 1000,
   });
-  
+
   const accounts = (accountsData as any)?.data?.data || (accountsData as any)?.data || [];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -60,7 +60,7 @@ export default function CreateAccountPage() {
         parent_account_id: formData.parent_account_id ? parseInt(formData.parent_account_id) : undefined,
       };
       console.log('payload creating JE:', payload)
-      
+
       await createAccount(payload).unwrap();
       navigate(`${basePath}/accounting/chart-of-accounts`);
     } catch (err: any) {
@@ -72,9 +72,9 @@ export default function CreateAccountPage() {
     }
   };
 
- return (
+  return (
     <DashboardLayout>
-      <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6">
+      <div className="max-w-full mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
         <div className="flex  items-center gap-3 sm:gap-4">
           <button onClick={() => navigate(`${basePath}/accounting/chart-of-accounts`)} className="flex-shrink-0">

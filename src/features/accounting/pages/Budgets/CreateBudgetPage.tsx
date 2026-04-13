@@ -4,9 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
 import { useAppSelector } from '../../../../app/hooks';
 import type { RootState } from '../../../../app/store';
-import { 
+import {
   useCreateBudgetMutation,
-  useGetChartOfAccountsQuery 
+  useGetChartOfAccountsQuery
 } from '../../../../services/accountingApi';
 import BudgetLines from '../../components/BudgetLines';
 
@@ -47,10 +47,10 @@ export default function CreateBudgetPage() {
     per_page: 1000,
   });
 
-const allAccounts = accountsData?.data?.data || accountsData?.data || [];
-const accounts = allAccounts.filter((acc: any) => 
-  ['Revenue', 'Expense', 'Cost of Goods Sold'].includes(acc.account_type)
-);
+  const allAccounts = accountsData?.data?.data || accountsData?.data || [];
+  const accounts = allAccounts.filter((acc: any) =>
+    ['Revenue', 'Expense', 'Cost of Goods Sold'].includes(acc.account_type)
+  );
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -60,7 +60,7 @@ const accounts = allAccounts.filter((acc: any) =>
     if (name === 'period_type' || name === 'start_date') {
       const startDate = name === 'start_date' ? new Date(value) : new Date(formData.start_date);
       const periodType = name === 'period_type' ? value : formData.period_type;
-      
+
       let endDate = new Date(startDate);
       if (periodType === 'Monthly') {
         endDate.setMonth(endDate.getMonth() + 1);
@@ -69,10 +69,10 @@ const accounts = allAccounts.filter((acc: any) =>
       } else {
         endDate.setFullYear(endDate.getFullYear() + 1);
       }
-      
-      setFormData(prev => ({ 
-        ...prev, 
-        end_date: endDate.toISOString().split('T')[0] 
+
+      setFormData(prev => ({
+        ...prev,
+        end_date: endDate.toISOString().split('T')[0]
       }));
     }
   };
@@ -88,7 +88,7 @@ const accounts = allAccounts.filter((acc: any) =>
   };
 
   const updateLine = (id: string, updates: Partial<BudgetLineItem>) => {
-    setLines(lines.map(line => 
+    setLines(lines.map(line =>
       line.id === id ? { ...line, ...updates } : line
     ));
   };
@@ -121,7 +121,7 @@ const accounts = allAccounts.filter((acc: any) =>
             notes: l.notes || undefined,
           })),
       };
-      
+
       const result = await createBudget(payload).unwrap();
       navigate(`${basePath}/accounting/budgets/${(result as any).data?.id}`);
     } catch (err: any) {
@@ -137,7 +137,7 @@ const accounts = allAccounts.filter((acc: any) =>
 
   return (
     <DashboardLayout>
-      <div className="max-w-5xl mx-auto space-y-6">
+      <div className="max-w-full mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4">
           <button onClick={() => navigate(`${basePath}/accounting/budgets`)}>

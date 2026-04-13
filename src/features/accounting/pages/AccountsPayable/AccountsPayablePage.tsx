@@ -58,50 +58,50 @@ export default function AccountsPayablePage() {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Accounts Payable</h1>
-            <p className="text-sm text-gray-500 mt-1">Manage money owed to suppliers</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Accounts Payable</h1>
+            <p className="text-xs sm:text-sm text-gray-500 mt-1">Manage money owed to suppliers</p>
           </div>
-          <div className='flex flex-row space-x-2'>
+          <div className='flex flex-col sm:flex-row gap-2 sm:space-x-2'>
             <button
-            onClick={() => navigate(`${basePath}/accounting/accounts-payable/create`)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg  hover:bg-blue-700 hover:text-white transition-colors cursor-pointer"
-          >
-            <img src={add_icon} alt="" className="w-4 h-4 " />
-            New AP
-          </button>
-          <button
-            onClick={() => navigate(`${basePath}/accounting/accounts-payable/aging-report`)}
-            className="flex items-center gap-2 px-5 py-2.5 border border-blue-600 text-balck rounded-lg hover:bg-blue-700 hover:text-white transition-colors cursor-pointer"
-          >
-            <img src={add_icon} alt="" className="w-4 h-4 " />
-            AP Aging Reports
-          </button>
+              onClick={() => navigate(`${basePath}/accounting/accounts-payable/create`)}
+              className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 hover:text-white transition-colors cursor-pointer text-sm sm:text-base"
+            >
+              <img src={add_icon} alt="" className="w-4 h-4" />
+              New AP
+            </button>
+            <button
+              onClick={() => navigate(`${basePath}/accounting/accounts-payable/aging-report`)}
+              className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 border border-blue-600 text-black rounded-lg hover:bg-blue-700 hover:text-white transition-colors cursor-pointer text-sm sm:text-base"
+            >
+              <img src={add_icon} alt="" className="w-4 h-4" />
+              AP Aging Reports
+            </button>
           </div>
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-3 gap-4">
-          <div className="bg-white rounded-xl p-5 shadow-sm">
-            <p className="text-sm text-gray-500">Total Outstanding</p>
-            <p className="text-2xl font-bold text-blue-600 mt-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+          <div className="bg-white rounded-xl p-4 sm:p-5 shadow-sm">
+            <p className="text-xs sm:text-sm text-gray-500">Total Outstanding</p>
+            <p className="text-lg sm:text-2xl font-bold text-blue-600 mt-1 break-words">
               KWD {totalOutstanding.toFixed(3)}
             </p>
             <p className="text-xs text-gray-400 mt-1">{payables.length} invoices</p>
           </div>
-          <div className="bg-white rounded-xl p-5 shadow-sm">
-            <p className="text-sm text-gray-500">Overdue Amount</p>
-            <p className="text-2xl font-bold text-orange-600 mt-1">
+          <div className="bg-white rounded-xl p-4 sm:p-5 shadow-sm">
+            <p className="text-xs sm:text-sm text-gray-500">Overdue Amount</p>
+            <p className="text-lg sm:text-2xl font-bold text-orange-600 mt-1 break-words">
               KWD {totalOverdue.toFixed(3)}
             </p>
             <p className="text-xs text-gray-400 mt-1">
               {payables.filter((ap: any) => ap.status === 'Overdue').length} overdue
             </p>
           </div>
-          <div className="bg-white rounded-xl p-5 shadow-sm">
-            <p className="text-sm text-gray-500">This Month</p>
-            <p className="text-2xl font-bold text-green-600 mt-1">
+          <div className="bg-white rounded-xl p-4 sm:p-5 shadow-sm sm:col-span-2 lg:col-span-1">
+            <p className="text-xs sm:text-sm text-gray-500">This Month</p>
+            <p className="text-lg sm:text-2xl font-bold text-green-600 mt-1 break-words">
               KWD {payables
                 .filter((ap: any) => {
                   const date = new Date(ap.invoice_date);
@@ -115,85 +115,90 @@ export default function AccountsPayablePage() {
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-xl p-4 flex flex-wrap gap-3 items-center">
-          <div className="relative flex-1 min-w-[220px]">
-            <img src={search_icon} alt="" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
-              placeholder="Search by invoice or AP number..."
-              className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+        <div className="bg-white rounded-xl p-3 sm:p-4">
+          <div className="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center">
+            <div className="relative flex-1 min-w-[200px]">
+              <img src={search_icon} alt="" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
+                placeholder="Search by invoice or AP number..."
+                className="w-full pl-9 pr-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
 
-          <div className="relative min-w-[150px]">
-            <select
-              value={statusFilter}
-              onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm bg-white appearance-none pr-10"
-            >
-              <option value="">All Statuses</option>
-              <option value="Unpaid">Unpaid</option>
-              <option value="Partial">Partial</option>
-              <option value="Paid">Paid</option>
-              <option value="Overdue">Overdue</option>
-            </select>
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-              <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
+            <div className="relative flex-1 sm:flex-initial min-w-[150px]">
+              <select
+                value={statusFilter}
+                onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
+                className="w-full px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-sm bg-white appearance-none pr-10"
+              >
+                <option value="">All Statuses</option>
+                <option value="Unpaid">Unpaid</option>
+                <option value="Partial">Partial</option>
+                <option value="Paid">Paid</option>
+                <option value="Overdue">Overdue</option>
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="relative flex-1 sm:flex-initial">
+                <img src={date_icon} alt="" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => { setStartDate(e.target.value); setCurrentPage(1); }}
+                  className="w-full sm:w-auto pl-9 pr-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-sm"
+                  placeholder="Start Date"
+                />
+              </div>
+              <div className="relative flex-1 sm:flex-initial">
+                <img src={date_icon} alt="" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
+                <input
+                  type="date"
+                  value={endDate}
+                  min={startDate}
+                  onChange={(e) => { setEndDate(e.target.value); setCurrentPage(1); }}
+                  className="w-full sm:w-auto pl-9 pr-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-sm"
+                  placeholder="End Date"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between sm:justify-normal gap-3">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="showOverdue"
+                  checked={showOverdue}
+                  onChange={(e) => setShowOverdue(e.target.checked)}
+                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <label htmlFor="showOverdue" className="text-sm text-gray-700 whitespace-nowrap">Show overdue only</label>
+              </div>
+
+              {(search || statusFilter || startDate || endDate || showOverdue) && (
+                <button
+                  onClick={() => {
+                    setSearch('');
+                    setStatusFilter('');
+                    setStartDate('');
+                    setEndDate('');
+                    setShowOverdue(false);
+                    setCurrentPage(1);
+                  }}
+                  className="px-4 py-2 text-sm text-gray-500 hover:text-red-500 border border-gray-300 rounded-lg"
+                >
+                  Clear
+                </button>
+              )}
             </div>
           </div>
-
-          <div className="relative">
-            <img src={date_icon} alt="" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => { setStartDate(e.target.value); setCurrentPage(1); }}
-              className="pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm"
-              placeholder="Start Date"
-            />
-          </div>
-          <div className="relative">
-            <img src={date_icon} alt="" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
-            <input
-              type="date"
-              value={endDate}
-              min={startDate}
-              onChange={(e) => { setEndDate(e.target.value); setCurrentPage(1); }}
-              className="pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm"
-              placeholder="End Date"
-            />
-          </div>
-
-          <div className="flex items-center gap-2 ml-auto">
-            <input
-              type="checkbox"
-              id="showOverdue"
-              checked={showOverdue}
-              onChange={(e) => setShowOverdue(e.target.checked)}
-              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-            />
-            <label htmlFor="showOverdue" className="text-sm text-gray-700">Show overdue only</label>
-          </div>
-
-          {(search || statusFilter || startDate || endDate || showOverdue) && (
-            <button
-              onClick={() => { 
-                setSearch(''); 
-                setStatusFilter(''); 
-                setStartDate(''); 
-                setEndDate(''); 
-                setShowOverdue(false);
-                setCurrentPage(1); 
-              }}
-              className="px-4 py-2.5 text-sm text-gray-500 hover:text-red-500 border border-gray-300 rounded-lg"
-            >
-              Clear
-            </button>
-          )}
         </div>
-
         {/* Table */}
         <div className="bg-white rounded-xl overflow-hidden shadow-sm">
           {isLoading ? (
@@ -218,80 +223,83 @@ export default function AccountsPayablePage() {
               </button>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">AP #</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Supplier</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Invoice #</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Invoice Date</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Due Date</th>
-                    <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase">Amount</th>
-                    <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase">Paid</th>
-                    <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase">Outstanding</th>
-                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase">Status</th>
-                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {payables.map((ap: any) => {
-                    const isOverdue = new Date(ap.due_date) < new Date() && ap.outstanding_amount > 0;
-                    const displayStatus = isOverdue && ap.status === 'Unpaid' ? 'Overdue' : ap.status;
-                    
-                    return (
-                      <tr key={ap.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4">
-                          <button
-                            onClick={() => navigate(`${basePath}/accounting/accounts-payable/${ap.id}`)}
-                            className="text-sm font-semibold text-blue-600 hover:underline"
-                          >
-                            {ap.ap_number}
-                          </button>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="text-sm font-medium text-gray-900">{ap.supplier?.supplier_name || '—'}</div>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-700">{ap.invoice_number}</td>
-                        <td className="px-6 py-4 text-sm text-gray-700">
-                          {new Date(ap.invoice_date).toLocaleDateString()}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-700">
-                          {new Date(ap.due_date).toLocaleDateString()}
-                          {isOverdue && (
-                            <span className="ml-2 text-xs text-red-600 font-medium">Overdue</span>
-                          )}
-                        </td>
-                        <td className="px-6 py-4 text-right text-sm font-mono text-gray-900">
-                          {ap.currency} {num(ap.invoice_amount).toFixed(3)}
-                        </td>
-                        <td className="px-6 py-4 text-right text-sm font-mono text-green-600">
-                          {ap.currency} {num(ap.paid_amount).toFixed(3)}
-                        </td>
-                        <td className="px-6 py-4 text-right text-sm font-mono font-bold text-orange-600">
-                          {ap.currency} {num(ap.outstanding_amount).toFixed(3)}
-                        </td>
-                        <td className="px-6 py-4 text-center">
-                          <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${STATUS_COLORS[displayStatus]}`}>
-                            {displayStatus}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex justify-center gap-2">
+            <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+              <div className="xl:col-span-4 overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">AP #</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Supplier</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Invoice #</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Invoice Date</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Due Date</th>
+                      <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase">Amount</th>
+                      <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase">Paid</th>
+                      <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase">Outstanding</th>
+                      <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase">Status</th>
+                      <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {payables.map((ap: any) => {
+                      const isOverdue = new Date(ap.due_date) < new Date() && ap.outstanding_amount > 0;
+                      const displayStatus = isOverdue && ap.status === 'Unpaid' ? 'Overdue' : ap.status;
+
+                      return (
+                        <tr key={ap.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4">
                             <button
                               onClick={() => navigate(`${basePath}/accounting/accounts-payable/${ap.id}`)}
-                              className="px-3 py-1.5 text-xs bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                              className="text-sm font-semibold text-blue-600 hover:underline"
                             >
-                              View
+                              {ap.ap_number}
                             </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="text-sm font-medium text-gray-900">{ap.supplier?.supplier_name || '—'}</div>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-700">{ap.invoice_number}</td>
+                          <td className="px-6 py-4 text-sm text-gray-700">
+                            {new Date(ap.invoice_date).toLocaleDateString()}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-700">
+                            {new Date(ap.due_date).toLocaleDateString()}
+                            {isOverdue && (
+                              <span className="ml-2 text-xs text-red-600 font-medium">Overdue</span>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 text-right text-sm font-mono text-gray-900">
+                            {ap.currency} {num(ap.invoice_amount).toFixed(3)}
+                          </td>
+                          <td className="px-6 py-4 text-right text-sm font-mono text-green-600">
+                            {ap.currency} {num(ap.paid_amount).toFixed(3)}
+                          </td>
+                          <td className="px-6 py-4 text-right text-sm font-mono font-bold text-orange-600">
+                            {ap.currency} {num(ap.outstanding_amount).toFixed(3)}
+                          </td>
+                          <td className="px-6 py-4 text-center">
+                            <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${STATUS_COLORS[displayStatus]}`}>
+                              {displayStatus}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex justify-center gap-2">
+                              <button
+                                onClick={() => navigate(`${basePath}/accounting/accounts-payable/${ap.id}`)}
+                                className="px-3 py-1.5 text-xs bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                              >
+                                View
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
+
           )}
         </div>
 

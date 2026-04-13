@@ -9,21 +9,21 @@ interface Props {
   setValue: UseFormSetValue<SystemSettings>;
 }
 
-const LocalizationSettings: React.FC<Props> = ({ register }) => {
+const LocalizationSettings: React.FC<Props> = ({ register, watch }) => {
   return (
-    <div className="space-y-6">
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">Localization Settings</h2>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="space-y-4 sm:space-y-6">
+      <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4">Localization Settings</h2>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
         {/* Timezone */}
         <div>
-          <label htmlFor="timezone" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="timezone" className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
             Timezone
           </label>
           <select
             id="timezone"
             {...register('timezone')}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base bg-white"
           >
             <option value="UTC">UTC</option>
             <option value="America/New_York">Eastern Time</option>
@@ -41,13 +41,13 @@ const LocalizationSettings: React.FC<Props> = ({ register }) => {
 
         {/* Default Currency */}
         <div>
-          <label htmlFor="default_currency" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="default_currency" className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
             Default Currency
           </label>
           <select
             id="default_currency"
             {...register('default_currency')}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base bg-white"
           >
             <option value="USD">USD - US Dollar</option>
             <option value="EUR">EUR - Euro</option>
@@ -61,35 +61,36 @@ const LocalizationSettings: React.FC<Props> = ({ register }) => {
 
         {/* Currency Symbol */}
         <div>
-          <label htmlFor="currency_symbol" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="currency_symbol" className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
             Currency Symbol
           </label>
           <input
             id="currency_symbol"
             type="text"
             {...register('currency_symbol')}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
             placeholder="$"
           />
         </div>
 
         {/* Currency Position */}
         <div>
-          <label htmlFor="currency_position" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="currency_position" className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
             Currency Position
           </label>
           <select
             id="currency_position"
             {...register('currency_position')}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base bg-white"
           >
-            <option value="after">After (100 KD)</option>
+            <option value="before">Before Amount ($100)</option>
+            <option value="after">After Amount (100$)</option>
           </select>
         </div>
 
         {/* Decimal Places */}
         <div>
-          <label htmlFor="decimal_places" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="decimal_places" className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
             Decimal Places
           </label>
           <input
@@ -98,49 +99,20 @@ const LocalizationSettings: React.FC<Props> = ({ register }) => {
             min="0"
             max="4"
             {...register('decimal_places')}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
             placeholder="2"
           />
         </div>
 
-       {/* Enabled Languages */}
-<div className="col-span-2">
-  <label className="block text-sm font-medium text-gray-700 mb-2">
-    Enabled Languages
-  </label>
-  <div className="grid grid-cols-2 gap-2">
-    {[
-      { value: 'en', label: 'English' },
-      { value: 'ar', label: 'Arabic' },
-      { value: 'fr', label: 'French' },
-      { value: 'es', label: 'Spanish' },
-      { value: 'de', label: 'German' },
-      { value: 'zh', label: 'Chinese' },
-      { value: 'hi', label: 'Hindi' }
-    ].map((lang) => (
-      <label key={lang.value} className="flex items-center space-x-2">
-        <input
-          type="checkbox"
-          value={lang.value}
-          {...register('enabled_languages')}
-          className="h-4 w-4 text-blue-600 rounded border-gray-300"
-        />
-        <span className="text-sm text-gray-700">{lang.label}</span>
-      </label>
-    ))}
-  </div>
-  <p className="mt-1 text-xs text-gray-500">Select languages available in the system</p>
-</div>
-
         {/* Date Format */}
         <div>
-          <label htmlFor="date_format" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="date_format" className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
             Date Format
           </label>
           <select
             id="date_format"
             {...register('date_format')}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base bg-white"
           >
             <option value="Y-m-d">2024-03-15</option>
             <option value="d/m/Y">15/03/2024</option>
@@ -152,18 +124,48 @@ const LocalizationSettings: React.FC<Props> = ({ register }) => {
 
         {/* Time Format */}
         <div>
-          <label htmlFor="time_format" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="time_format" className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
             Time Format
           </label>
           <select
             id="time_format"
             {...register('time_format')}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base bg-white"
           >
             <option value="H:i">14:30 (24 hour)</option>
             <option value="h:i A">02:30 PM (12 hour)</option>
           </select>
         </div>
+      </div>
+
+      {/* Enabled Languages */}
+      <div className="mt-4 sm:mt-6">
+        <label className="block text-sm font-medium text-gray-700 mb-2 sm:mb-3">
+          Enabled Languages
+        </label>
+        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3">
+          {[
+            { value: 'en', label: 'English' },
+            { value: 'ar', label: 'Arabic' },
+            { value: 'fr', label: 'French' },
+            { value: 'es', label: 'Spanish' },
+            { value: 'de', label: 'German' },
+            { value: 'zh', label: 'Chinese' },
+            { value: 'hi', label: 'Hindi' },
+            { value: 'ru', label: 'Russian' },
+          ].map((lang) => (
+            <label key={lang.value} className="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded-lg cursor-pointer">
+              <input
+                type="checkbox"
+                value={lang.value}
+                {...register('enabled_languages')}
+                className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">{lang.label}</span>
+            </label>
+          ))}
+        </div>
+        <p className="mt-2 text-xs text-gray-500">Select languages available in the system</p>
       </div>
     </div>
   );

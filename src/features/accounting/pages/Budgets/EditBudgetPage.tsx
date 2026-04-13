@@ -4,10 +4,10 @@ import { useState, useEffect } from 'react';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
 import { useAppSelector } from '../../../../app/hooks';
 import type { RootState } from '../../../../app/store';
-import { 
+import {
   useGetBudgetByIdQuery,
   useUpdateBudgetMutation,
-  useGetChartOfAccountsQuery 
+  useGetChartOfAccountsQuery
 } from '../../../../services/accountingApi';
 
 import arrow_back_icon from '../../../../assets/icons/arrow_back_icon.svg';
@@ -42,7 +42,7 @@ export default function EditBudgetPage() {
   const [updateBudget, { isLoading: isUpdating }] = useUpdateBudgetMutation();
 
   const { data: accountsData } = useGetChartOfAccountsQuery({
-    is_active: 1,
+    is_active: 1 as any,
     per_page: 1000,
   });
 
@@ -75,11 +75,11 @@ export default function EditBudgetPage() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-//   const updateLine = (id: string, updates: Partial<BudgetLineItem>) => {
-//     setLines(lines.map(line => 
-//       line.id === id ? { ...line, ...updates } : line
-//     ));
-//   };
+  //   const updateLine = (id: string, updates: Partial<BudgetLineItem>) => {
+  //     setLines(lines.map(line => 
+  //       line.id === id ? { ...line, ...updates } : line
+  //     ));
+  //   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,7 +91,7 @@ export default function EditBudgetPage() {
         end_date: formData.end_date,
         notes: formData.notes || undefined,
       };
-      
+
       await updateBudget({ id: budgetId, data: payload }).unwrap();
       navigate(`${basePath}/accounting/budgets/${budgetId}`);
     } catch (err: any) {
@@ -149,7 +149,7 @@ export default function EditBudgetPage() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-5xl mx-auto space-y-6">
+      <div className="max-w-full mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4">
           <button onClick={() => navigate(`${basePath}/accounting/budgets/${budgetId}`)}>

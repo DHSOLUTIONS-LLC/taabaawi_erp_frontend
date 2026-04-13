@@ -82,10 +82,23 @@ const systemSlice = createSlice({
 
       // Upload Logo
       .addMatcher(
-        systemApi.endpoints.uploadLogo.matchPending,
-        (state) => {
-          state.loading = true;
-          state.error = null;
+        systemApi.endpoints.uploadLogo.matchFulfilled,
+        (state, { payload }: PayloadAction<any>) => {
+          state.loading = false;
+          if (state.settings) {
+            // Merge the new logo data with existing settings
+            state.settings = {
+              ...state.settings,
+              logo: payload.data.logo,
+              logo_url: payload.data.logo_url,
+            };
+          } else {
+            // If settings doesn't exist, create it
+            state.settings = {
+              logo: payload.data.logo,
+              logo_url: payload.data.logo_url,
+            };
+          }
         }
       )
       .addMatcher(

@@ -4,9 +4,9 @@ import { useState } from 'react';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
 import { useAppSelector } from '../../../../app/hooks';
 import type { RootState } from '../../../../app/store';
-import { 
+import {
   useGetAPByIdQuery,
-  useRecordAPPaymentMutation 
+  useRecordAPPaymentMutation
 } from '../../../../services/accountingApi';
 
 import arrow_back_icon from '../../../../assets/icons/arrow_back_icon.svg';
@@ -37,7 +37,7 @@ export default function APDetailPage() {
   const [recordPayment] = useRecordAPPaymentMutation();
 
   const ap = (data as any)?.data;
-  
+
 
   const handleRecordPayment = async () => {
     const amount = parseFloat(paymentAmount);
@@ -95,21 +95,24 @@ export default function APDetailPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6 px-4 sm:px-0">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button onClick={() => navigate(`${basePath}/accounting/accounts-payable`)}>
-              <img src={arrow_back_icon} alt="" className="w-8 h-8" />
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div className="flex items-start gap-3 sm:gap-4">
+            <button
+              onClick={() => navigate(`${basePath}/accounting/accounts-payable`)}
+              className="flex-shrink-0 mt-1"
+            >
+              <img src={arrow_back_icon} alt="" className="w-6 h-6 sm:w-8 sm:h-8" />
             </button>
             <div>
-              <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-bold text-gray-900">{ap.ap_number}</h1>
-                <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${STATUS_COLORS[displayStatus]}`}>
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 break-words">{ap.ap_number}</h1>
+                <span className={`px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap ${STATUS_COLORS[displayStatus]}`}>
                   {displayStatus}
                 </span>
               </div>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-xs sm:text-sm text-gray-500 mt-1 break-words">
                 {ap.supplier?.supplier_name} · Invoice: {ap.invoice_number}
               </p>
             </div>
@@ -118,24 +121,24 @@ export default function APDetailPage() {
           {ap.status !== 'Paid' && (
             <button
               onClick={() => setShowPaymentModal(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm sm:text-base"
             >
-              <img src={payment_icon} alt="" className="w-4 h-4 " />
+              <img src={payment_icon} alt="" className="w-4 h-4" />
               Record Payment
             </button>
           )}
         </div>
 
-        <div className="grid grid-cols-3 gap-6">
-          {/* Left Column - 2/3 width */}
-          <div className="col-span-2 space-y-6">
+        <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4 sm:gap-6">
+          {/* Left Column - 2/3 width on desktop, full width on mobile */}
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Invoice Details */}
-            <div className="bg-white rounded-xl p-6">
+            <div className="bg-white rounded-xl p-4 sm:p-6">
               <h2 className="text-base font-semibold text-gray-900 mb-4">Invoice Details</h2>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <p className="text-xs text-gray-500">Invoice Number</p>
-                  <p className="text-sm font-medium text-gray-900 mt-1">{ap.invoice_number}</p>
+                  <p className="text-sm font-medium text-gray-900 mt-1 break-words">{ap.invoice_number}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">Invoice Date</p>
@@ -146,7 +149,7 @@ export default function APDetailPage() {
                   <p className="text-sm text-gray-900 mt-1">
                     {new Date(ap.due_date).toLocaleDateString()}
                     {ap.days_overdue > 0 && (
-                      <span className="ml-2 text-xs text-red-600 font-medium">
+                      <span className="ml-2 text-xs text-red-600 font-medium whitespace-nowrap">
                         {ap.days_overdue} days overdue
                       </span>
                     )}
@@ -161,17 +164,17 @@ export default function APDetailPage() {
 
             {/* Purchase Order Info */}
             {ap.purchaseOrder && (
-              <div className="bg-white rounded-xl p-6">
+              <div className="bg-white rounded-xl p-4 sm:p-6">
                 <h2 className="text-base font-semibold text-gray-900 mb-4">Purchase Order</h2>
                 <button
                   onClick={() => navigate(`${basePath}/purchase/orders/${ap.purchase_order_id}`)}
                   className="text-left w-full p-3 rounded-lg hover:bg-gray-50 transition-colors"
                 >
-                  <p className="text-sm font-medium text-blue-600">{ap.purchaseOrder.po_number}</p>
+                  <p className="text-sm font-medium text-blue-600 break-words">{ap.purchaseOrder.po_number}</p>
                   <p className="text-xs text-gray-500 mt-1">
                     Date: {new Date(ap.purchaseOrder.order_date).toLocaleDateString()}
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-gray-500 break-words">
                     Total: {ap.purchaseOrder.currency} {num(ap.purchaseOrder.total_amount).toFixed(3)}
                   </p>
                 </button>
@@ -180,34 +183,34 @@ export default function APDetailPage() {
 
             {/* Notes */}
             {ap.notes && (
-              <div className="bg-white rounded-xl p-6">
+              <div className="bg-white rounded-xl p-4 sm:p-6">
                 <h2 className="text-base font-semibold text-gray-900 mb-4">Notes</h2>
-                <p className="text-sm text-gray-700 whitespace-pre-wrap">{ap.notes}</p>
+                <p className="text-sm text-gray-700 whitespace-pre-wrap break-words">{ap.notes}</p>
               </div>
             )}
           </div>
 
-          {/* Right Column - 1/3 width */}
-          <div className="space-y-6">
+          {/* Right Column - 1/3 width on desktop, full width on mobile */}
+          <div className="space-y-4 sm:space-y-6">
             {/* Amount Summary */}
-            <div className="bg-white rounded-xl p-6">
+            <div className="bg-white rounded-xl p-4 sm:p-6">
               <h2 className="text-base font-semibold text-gray-900 mb-4">Amount Summary</h2>
               <div className="space-y-3">
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between items-center text-sm">
                   <span className="text-gray-500">Invoice Amount</span>
-                  <span className="font-mono font-medium text-gray-900">
+                  <span className="font-mono font-medium text-gray-900 break-words text-right">
                     {ap.currency} {num(ap.invoice_amount).toFixed(3)}
                   </span>
                 </div>
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between items-center text-sm">
                   <span className="text-gray-500">Paid Amount</span>
-                  <span className="font-mono font-medium text-green-600">
+                  <span className="font-mono font-medium text-green-600 break-words text-right">
                     {ap.currency} {num(ap.paid_amount).toFixed(3)}
                   </span>
                 </div>
-                <div className="flex justify-between pt-2 border-t border-gray-200">
+                <div className="flex justify-between items-center pt-2 border-t border-gray-200">
                   <span className="text-sm font-semibold">Outstanding</span>
-                  <span className="text-lg font-bold text-orange-600">
+                  <span className="text-base sm:text-lg font-bold text-orange-600 break-words text-right">
                     {ap.currency} {num(ap.outstanding_amount).toFixed(3)}
                   </span>
                 </div>
@@ -216,14 +219,14 @@ export default function APDetailPage() {
 
             {/* Supplier Info */}
             {ap.supplier && (
-              <div className="bg-white rounded-xl p-6">
+              <div className="bg-white rounded-xl p-4 sm:p-6">
                 <h2 className="text-base font-semibold text-gray-900 mb-4">Supplier Information</h2>
                 <div className="space-y-3">
                   <div>
                     <p className="text-xs text-gray-500">Name</p>
                     <button
                       onClick={() => navigate(`${basePath}/purchase/suppliers/${ap.supplier.id}`)}
-                      className="text-sm font-medium text-blue-600 hover:underline mt-1"
+                      className="text-sm font-medium text-blue-600 hover:underline mt-1 break-words text-left"
                     >
                       {ap.supplier.supplier_name}
                     </button>
@@ -231,7 +234,7 @@ export default function APDetailPage() {
                   {ap.supplier.email && (
                     <div>
                       <p className="text-xs text-gray-500">Email</p>
-                      <p className="text-sm text-gray-900 mt-1">{ap.supplier.email}</p>
+                      <p className="text-sm text-gray-900 mt-1 break-words">{ap.supplier.email}</p>
                     </div>
                   )}
                   {ap.supplier.phone && (
@@ -244,16 +247,16 @@ export default function APDetailPage() {
               </div>
             )}
 
-            {/* Dates */}
-            <div className="bg-white rounded-xl p-6">
+            {/* Timeline */}
+            <div className="bg-white rounded-xl p-4 sm:p-6">
               <h2 className="text-base font-semibold text-gray-900 mb-4">Timeline</h2>
               <div className="space-y-2">
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center">
                   <span className="text-xs text-gray-500">Created</span>
                   <span className="text-xs text-gray-900">{new Date(ap.created_at).toLocaleDateString()}</span>
                 </div>
                 {ap.paid_at && (
-                  <div className="flex justify-between">
+                  <div className="flex justify-between items-center">
                     <span className="text-xs text-gray-500">Last Payment</span>
                     <span className="text-xs text-gray-900">{new Date(ap.paid_at).toLocaleDateString()}</span>
                   </div>
@@ -264,16 +267,26 @@ export default function APDetailPage() {
         </div>
       </div>
 
-      {/* Payment Modal */}
+      {/* Payment Modal - Responsive */}
       {showPaymentModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl w-full max-w-md p-6">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">Record Payment</h3>
-            
+          <div className="bg-white rounded-2xl w-full max-w-md mx-4 sm:mx-auto p-4 sm:p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-gray-900">Record Payment</h3>
+              <button
+                onClick={() => setShowPaymentModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
             <div className="space-y-4">
-              <div className="bg-gray-50 rounded-lg p-3">
+              <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
                 <p className="text-xs text-gray-500">Outstanding Amount</p>
-                <p className="text-xl font-bold text-orange-600">
+                <p className="text-lg sm:text-xl font-bold text-orange-600 break-words">
                   {ap.currency} {num(ap.outstanding_amount).toFixed(3)}
                 </p>
               </div>
@@ -288,22 +301,22 @@ export default function APDetailPage() {
                   value={paymentAmount}
                   onChange={(e) => setPaymentAmount(e.target.value)}
                   placeholder={`Enter amount in ${ap.currency}`}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                   autoFocus
                 />
               </div>
 
-              <div className="flex justify-end gap-3 pt-4">
+              <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-4">
                 <button
                   onClick={() => setShowPaymentModal(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                  className="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 text-sm sm:text-base"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleRecordPayment}
                   disabled={isRecording}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+                  className="w-full sm:w-auto px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 text-sm sm:text-base"
                 >
                   {isRecording ? 'Recording...' : 'Record Payment'}
                 </button>

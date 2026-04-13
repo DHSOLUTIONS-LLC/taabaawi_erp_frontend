@@ -88,7 +88,8 @@ const BlogCategoriesList: React.FC<Props> = ({ onSelect, onEdit }) => {
   );
 
   return (
-    <div className="bg-white rounded-lg shadow overflow-hidden">
+    <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+<div className="xl:col-span-4 overflow-x-auto">
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
@@ -124,6 +125,8 @@ const BlogCategoriesList: React.FC<Props> = ({ onSelect, onEdit }) => {
         </tbody>
       </table>
     </div>
+    </div>
+    
   );
 };
 

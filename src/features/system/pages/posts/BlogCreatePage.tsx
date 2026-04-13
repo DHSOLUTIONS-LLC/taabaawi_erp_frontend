@@ -15,22 +15,22 @@ const BlogCreatePage: React.FC = () => {
     const basePath = isSuperAdmin ? '/admin' : '';
 
     
-  return (
+ return (
     <DashboardLayout>
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="container mx-auto max-w-full">
         {/* Header */}
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-6">
           <button
             onClick={() => navigate(`${basePath}/blog`)}
-            className="text-blue-600 hover:text-blue-800 mb-2 inline-block"
+            className="text-blue-600 hover:text-blue-800 text-sm sm:text-base inline-block mb-2"
           >
             ← Back to Blog
           </button>
-          <h1 className="text-2xl font-bold text-gray-900">Create New Blog Post</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Create New Blog Post</h1>
         </div>
 
         {/* Form */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
           <BlogPostForm />
         </div>
       </div>

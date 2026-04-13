@@ -26,7 +26,9 @@ const ExecutionHistory = ({ reportId }: { reportId: number }) => {
   if (!history.length) return <p className="text-xs text-gray-400 px-4 py-2">No executions yet</p>;
 
   return (
-    <table className="w-full text-xs">
+    <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+ <div className='xl:col-span-4 overflow-x-auto'>
+  <table className="w-full text-xs">
       <thead className="bg-gray-50">
         <tr>
           {['Executed At', 'Records', 'Time (ms)', 'Status', 'Export'].map(h => (
@@ -50,11 +52,14 @@ const ExecutionHistory = ({ reportId }: { reportId: number }) => {
         ))}
       </tbody>
     </table>
+ </div>
+    </div>
+   
   );
 };
 
 const ExecutionResult = ({ result }: { result: any }) => {
-  if (!result?.data?.length) return <p className="text-xs text-gray-400 px-4 py-3">No data returned</p>;
+  if (!result?.data?.length) return <p className="text-xs text-gray-400 px-2 py-2">No data returned</p>;
   const cols = Object.keys(result.data[0]);
   return (
     <div className="px-4 pb-4">
@@ -62,7 +67,8 @@ const ExecutionResult = ({ result }: { result: any }) => {
         <span>{result.records_count} records</span>
         <span>{result.execution_time_ms}ms</span>
       </div>
-      <div className="overflow-x-auto border border-gray-200 rounded-lg">
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+  <div className="xl:col-span-4 overflow-x-auto border border-gray-200 rounded-lg">
         <table className="w-full text-xs">
           <thead className="bg-gray-50">
             <tr>{cols.map(c => <th key={c} className="px-3 py-2 text-left font-medium text-gray-500 whitespace-nowrap">{c.replace(/_/g, ' ')}</th>)}</tr>
@@ -76,6 +82,8 @@ const ExecutionResult = ({ result }: { result: any }) => {
           </tbody>
         </table>
       </div>
+      </div>
+    
     </div>
   );
 };
@@ -167,12 +175,13 @@ export const SavedReportsTab = () => {
       </div>
 
       {/* Table */}
-      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+ <div className="xl:col-span-4 overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
               {['Name', 'Type', 'Data Source', 'Chart', 'Visibility', 'Scheduled', 'Created', 'Actions'].map(h => (
-                <th key={h} className="px-4 py-3 text-left font-medium text-gray-500">{h}</th>
+                <th key={h} className="px-2 py-2 text-left font-medium text-gray-500">{h}</th>
               ))}
             </tr>
           </thead>
@@ -181,7 +190,7 @@ export const SavedReportsTab = () => {
               ? Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i} className="animate-pulse">
                     {Array.from({ length: 8 }).map((_, j) => (
-                      <td key={j} className="px-4 py-3"><div className="h-4 bg-gray-100 rounded w-3/4" /></td>
+                      <td key={j} className="px-2 py-2"><div className="h-4 bg-gray-100 rounded w-3/4" /></td>
                     ))}
                   </tr>
                 ))
@@ -190,19 +199,19 @@ export const SavedReportsTab = () => {
               : reports.map((r: any) => (
                 <>
                   <tr key={r.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3">
+                    <td className="px-2 py-2">
                       <p className="font-medium text-gray-800">{r.report_name}</p>
                       <p className="text-xs text-gray-400">{r.report_code}</p>
                     </td>
-                    <td className="px-4 py-3 text-gray-600 text-xs">{r.report_type}</td>
-                    <td className="px-4 py-3 text-gray-600 text-xs">{r.data_source}</td>
-                    <td className="px-4 py-3 text-gray-600 text-xs">{r.chart_type}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-2 py-2 text-gray-600 text-xs">{r.report_type}</td>
+                    <td className="px-2 py-2 text-gray-600 text-xs">{r.data_source}</td>
+                    <td className="px-2 py-2 text-gray-600 text-xs">{r.chart_type}</td>
+                    <td className="px-2 py-2">
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${visibilityColor[r.visibility] ?? ''}`}>{r.visibility}</span>
                     </td>
-                    <td className="px-4 py-3 text-xs text-gray-500">{r.is_scheduled ? 'Yes' : 'No'}</td>
-                    <td className="px-4 py-3 text-xs text-gray-400">{new Date(r.created_at).toLocaleDateString()}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-2 py-2 text-xs text-gray-500">{r.is_scheduled ? 'Yes' : 'No'}</td>
+                    <td className="px-2 py-2 text-xs text-gray-400">{new Date(r.created_at).toLocaleDateString()}</td>
+                    <td className="px-2 py-2">
                       <div className="flex items-center gap-1">
                         <button onClick={() => handleExecute(r.id)} disabled={executing} title="Run" className="p-1.5 hover:bg-green-50 text-gray-400 hover:text-green-600 rounded"><Play className="h-3.5 w-3.5" /></button>
                         <button onClick={() => setShowHistory(showHistory === r.id ? null : r.id)} title="History" className="p-1.5 hover:bg-blue-50 text-gray-400 hover:text-blue-600 rounded"><Clock className="h-3.5 w-3.5" /></button>
@@ -244,7 +253,7 @@ export const SavedReportsTab = () => {
 
         {/* Pagination */}
         {meta && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 text-sm text-gray-500">
+          <div className="flex items-center justify-between px-2 py-2 border-t border-gray-100 text-sm text-gray-500">
             <span>Showing {(filters.page - 1) * filters.per_page + 1}–{Math.min(filters.page * filters.per_page, meta.total)} of {meta.total}</span>
             <div className="flex items-center gap-1">
               <button disabled={filters.page === 1} onClick={() => set({ page: filters.page - 1 })} className="px-3 py-1.5 border border-gray-200 rounded-lg disabled:opacity-40 hover:bg-gray-50">Prev</button>
@@ -254,6 +263,8 @@ export const SavedReportsTab = () => {
           </div>
         )}
       </div>
+      </div>
+     
 
       {isReportModalOpen && <ReportModal />}
     </div>

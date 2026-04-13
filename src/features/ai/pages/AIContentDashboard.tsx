@@ -111,87 +111,92 @@ const AIContentDashboard: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">AI Content Dashboard</h1>
-            <p className="text-gray-600 mt-2">Monitor AI usage, costs, and generation logs</p>
+      <div className="mx-auto">
+      {/* Header */}
+<div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 sm:mb-8">
+  <div>
+    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">AI Content Dashboard</h1>
+    <p className="text-sm sm:text-base text-gray-600 mt-1">Monitor AI usage, costs, and generation logs</p>
+  </div>
+  <button
+    onClick={handleRefresh}
+    className="w-full sm:w-auto flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+  >
+    <ArrowPathIcon className="w-5 h-5 mr-2" />
+    Refresh
+  </button>
+</div>
+
+{/* Statistics Cards */}
+{statsLoading ? (
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+    {[...Array(4)].map((_, i) => (
+      <div key={i} className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-5 animate-pulse">
+        <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
+        <div className="h-7 sm:h-8 bg-gray-200 rounded w-3/4"></div>
+      </div>
+    ))}
+  </div>
+) : (
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+    <StatCard
+      title="Total Generations"
+      value={stats?.successful_requests || 0}
+      icon={<DocumentTextIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />}
+      color="bg-blue-500"
+    />
+    <StatCard
+      title="Total Tokens Used"
+      value={stats?.total_tokens?.toLocaleString() || 0}
+      icon={<ChartBarIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />}
+      color="bg-green-500"
+    />
+    <StatCard
+      title="Avg Response Time"
+      value={`${Math.round(stats?.average_response_time_ms || 0)}ms`}
+      icon={<ClockIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />}
+      color="bg-purple-500"
+    />
+    <StatCard
+      title="Success Rate"
+      value={`${Math.round((stats?.success_rate || 0) * 100)}%`}
+      icon={<CheckCircleIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />}
+      color="bg-orange-500"
+    />
+  </div>
+)}
+
+{/* Usage by Type Chart */}
+{stats?.usage_by_type && (
+  <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 mb-6 sm:mb-8">
+    <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Usage by Content Type</h2>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      {Object.entries(stats.usage_by_type).map(([type, count]) => (
+        <div key={type} className="bg-gray-50 rounded-lg p-3 sm:p-4 hover:shadow-sm transition-shadow">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs sm:text-sm font-medium text-gray-700 capitalize">
+              {type.replace(/_/g, ' ')}
+            </span>
+            <span className="text-base sm:text-lg font-bold text-blue-600">{count as number}</span>
           </div>
-          <button
-            onClick={handleRefresh}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-          >
-            <ArrowPathIcon className="w-5 h-5 mr-2" />
-            Refresh
-          </button>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div
+              className="bg-blue-600 rounded-full h-2 transition-all duration-500"
+              style={{
+                width: `${((count as number) / (stats.total_generations || 1)) * 100}%`,
+              }}
+            />
+          </div>
+          <div className="mt-2 text-right">
+            <span className="text-xs text-gray-400">
+              {((count as number) / (stats.total_generations || 1) * 100).toFixed(1)}% of total
+            </span>
+          </div>
         </div>
-
-        {/* Statistics Cards */}
-        {statsLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="bg-white rounded-lg shadow p-6 animate-pulse">
-                <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
-                <div className="h-8 bg-gray-200 rounded w-3/4"></div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <StatCard
-              title="Total Generations"
-              value={stats?.successful_requests || 0}
-              icon={<DocumentTextIcon className="w-6 h-6 text-white" />}
-              color="bg-blue-500"
-            />
-            <StatCard
-              title="Total Tokens Used"
-              value={stats?.total_tokens?.toLocaleString() || 0}
-              icon={<ChartBarIcon className="w-6 h-6 text-white" />}
-              color="bg-green-500"
-            />
-            <StatCard
-              title="Avg Response Time"
-              value={`${Math.round(stats?.average_response_time_ms || 0)}ms`}
-              icon={<ClockIcon className="w-6 h-6 text-white" />}
-              color="bg-purple-500"
-            />
-            <StatCard
-              title="Success Rate"
-              value={`${Math.round((stats?.success_rate || 0) * 100)}%`}
-              icon={<CheckCircleIcon className="w-6 h-6 text-white" />}
-              color="bg-orange-500"
-            />
-          </div>
-        )}
-
-        {/* Usage by Type Chart */}
-        {stats?.usage_by_type && (
-          <div className="bg-white rounded-lg shadow p-6 mb-8">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Usage by Content Type</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {Object.entries(stats.usage_by_type).map(([type, count]) => (
-                <div key={type} className="bg-gray-50 rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-700 capitalize">
-                      {type.replace('_', ' ')}
-                    </span>
-                    <span className="text-lg font-bold text-blue-600">{count}</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className="bg-blue-600 rounded-full h-2"
-                      style={{
-                        width: `${(count / stats.total_generations) * 100}%`,
-                      }}
-                    ></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+      ))}
+    </div>
+  </div>
+)}
 
         {/* Usage by User */}
         {stats?.usage_by_user && stats.usage_by_user.length > 0 && (
@@ -260,7 +265,8 @@ const AIContentDashboard: React.FC = () => {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+              <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+ <div className="xl:col-span-4 overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
@@ -341,6 +347,8 @@ const AIContentDashboard: React.FC = () => {
                 </tbody>
               </table>
             </div>
+                </div>
+           
           )}
 
           {/* Pagination */}

@@ -28,7 +28,7 @@ const ResultTable = ({ data }: { data: any[] }) => {
   const cols = Object.keys(data[0]);
   return (
     <div className="overflow-x-auto mt-3 max-w-full">
-      <table className="text-xs border border-gray-200 rounded-lg overflow-hidden min-w-max">
+      <table className="text-xs border border-gray-200 rounded-lg overflow-hidden min-w-max w-full">
         <thead className="bg-gray-50">
           <tr>
             {cols.map(c => (
@@ -112,6 +112,7 @@ const ReportPanel = ({
   };
 
   const handleExport = () => {
+    if (!rows.length) return;
     const csv = [Object.keys(rows[0]).join(','), ...rows.map(r => Object.values(r).join(','))].join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url  = URL.createObjectURL(blob);
@@ -119,30 +120,38 @@ const ReportPanel = ({
     a.href     = url;
     a.download = `${reportKey}_report.csv`;
     a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-3 bg-white">
-        <div>
+    <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 py-3">
+        <div className="flex-1">
           <p className="font-medium text-sm text-gray-800">{config.label}</p>
           <p className="text-xs text-gray-400">{config.description}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-end gap-2">
           {rows.length > 0 && (
-            <button onClick={handleExport} className="p-1.5 hover:bg-gray-100 rounded text-gray-500" title="Export CSV">
+            <button 
+              onClick={handleExport} 
+              className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500 transition-colors"
+              title="Export CSV"
+            >
               <Download className="h-4 w-4" />
             </button>
           )}
           <button
             onClick={handleRun}
             disabled={isLoading}
-            className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 disabled:opacity-50"
+            className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-xs rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
           >
             <Play className="h-3 w-3" /> {isLoading ? 'Running...' : 'Run'}
           </button>
           {rawData && (
-            <button onClick={() => setOpen(p => !p)} className="p-1.5 hover:bg-gray-100 rounded text-gray-500">
+            <button 
+              onClick={() => setOpen(p => !p)} 
+              className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500 transition-colors"
+            >
               {open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
             </button>
           )}
@@ -153,12 +162,12 @@ const ReportPanel = ({
         <div className="px-4 pb-4 bg-gray-50 border-t border-gray-100">
           {/* Summary cards */}
           {summary && (
-            <div className="flex flex-wrap gap-3 pt-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 pt-3">
               {Object.entries(summary).map(([k, v]) => (
                 typeof v !== 'object' && (
-                  <div key={k} className="bg-white border border-gray-200 rounded px-3 py-2 text-xs">
-                    <p className="text-gray-400">{k.replace(/_/g, ' ')}</p>
-                    <p className="font-semibold text-gray-800">{String(v)}</p>
+                  <div key={k} className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs">
+                    <p className="text-gray-400 truncate">{k.replace(/_/g, ' ')}</p>
+                    <p className="font-semibold text-gray-800 break-words">{String(v)}</p>
                   </div>
                 )
               ))}
@@ -179,34 +188,75 @@ export const PreBuiltReportViewer = () => {
   });
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4 sm:space-y-6">
       {/* Shared date range */}
-      <div className="flex items-center gap-2">
-        <label className="text-sm text-gray-500">Period:</label>
-        <input
-          type="date"
-          value={dates.start_date}
-          onChange={e => dispatch(setPreBuiltDates({ start_date: e.target.value }))}
-          className="border border-gray-200 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-        />
-        <span className="text-gray-400 text-sm">to</span>
-        <input
-          type="date"
-          value={dates.end_date}
-          onChange={e => dispatch(setPreBuiltDates({ end_date: e.target.value }))}
-          className="border border-gray-200 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-        />
+      <div className="bg-white p-4 sm:p-5 rounded-xl border border-gray-200 shadow-sm">
+        <div className="flex flex-col gap-4">
+          {/* Quick Date Selectors */}
+          <div className="flex flex-wrap gap-2">
+            {[
+              { label: 'Today', days: 0 },
+              { label: 'This Week', days: 7 },
+              { label: 'This Month', days: 30 },
+              { label: 'Last 3 Months', days: 90 },
+              { label: 'This Year', days: 365 },
+            ].map((period) => (
+              <button
+                key={period.label}
+                onClick={() => {
+                  const endDate = new Date();
+                  const startDate = new Date();
+                  startDate.setDate(endDate.getDate() - period.days);
+                  dispatch(setPreBuiltDates({
+                    start_date: startDate.toISOString().split('T')[0],
+                    end_date: endDate.toISOString().split('T')[0],
+                  }));
+                }}
+                className="px-3 py-1.5 text-xs sm:text-sm bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                {period.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Custom Date Range */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 pt-3 border-t border-gray-100">
+            <label className="text-sm font-medium text-gray-700">Custom Range:</label>
+            <div className="flex flex-col xs:flex-row items-stretch xs:items-center gap-2">
+              <div className="relative flex-1">
+                <input
+                  type="date"
+                  value={dates.start_date}
+                  onChange={e => dispatch(setPreBuiltDates({ start_date: e.target.value }))}
+                  className="w-full xs:w-auto border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <span className="text-gray-400 text-sm text-center xs:text-left">to</span>
+              <div className="relative flex-1">
+                <input
+                  type="date"
+                  value={dates.end_date}
+                  onChange={e => dispatch(setPreBuiltDates({ end_date: e.target.value }))}
+                  className="w-full xs:w-auto border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {(Object.keys(REPORT_CONFIG) as ReportKey[]).map(key => (
-        <ReportPanel
-          key={key}
-          reportKey={key}
-          dates={dates}
-          skipQuery={skipMap[key]}
-          setSkipQuery={(v) => setSkipMap(p => ({ ...p, [key]: v }))}
-        />
-      ))}
+      {/* Report Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        {(Object.keys(REPORT_CONFIG) as ReportKey[]).map(key => (
+          <ReportPanel
+            key={key}
+            reportKey={key}
+            dates={dates}
+            skipQuery={skipMap[key]}
+            setSkipQuery={(v) => setSkipMap(p => ({ ...p, [key]: v }))}
+          />
+        ))}
+      </div>
     </div>
   );
 };

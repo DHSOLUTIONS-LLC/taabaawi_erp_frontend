@@ -459,7 +459,7 @@ const BlogPostForm: React.FC<Props> = ({ post, onSuccess }) => {
       </div>
 
       {/* SEO Section — all 3 AI buttons live here */}
-      <details className="border rounded-md p-4">
+      <details className="border border-gray-300 rounded-md p-4">
         <summary className="text-sm font-medium text-gray-700 cursor-pointer flex items-center gap-2">
           SEO Settings
           <span className="text-xs text-purple-600 font-normal">✨ AI-powered</span>
@@ -547,7 +547,7 @@ const BlogPostForm: React.FC<Props> = ({ post, onSuccess }) => {
       </details>
 
       {/* Submit */}
-      <div className="flex justify-end space-x-3 pt-4 border-t">
+      <div className="flex justify-end space-x-3 pt-4 border-t border-gray-300">
         <button
           type="button"
           onClick={() => navigate(-1)}

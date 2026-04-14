@@ -139,7 +139,7 @@ const BranchesDashboard: React.FC = () => {
 
     return (
         <DashboardLayout>
-            <div className="container mx-auto px-4 py-8">
+            <div className="container mx-auto py-2 md:py-8">
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
                     <div>
@@ -266,7 +266,8 @@ const BranchesDashboard: React.FC = () => {
 
                 {/* Branches Table */}
                 <div className="bg-white rounded-lg shadow overflow-hidden">
-                    <div className="overflow-x-auto">
+                    <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+   <div className="xl:col-span-4 overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-200">
                             <thead className="bg-gray-50">
                                 <tr>
@@ -405,6 +406,8 @@ const BranchesDashboard: React.FC = () => {
                             </tbody>
                         </table>
                     </div>
+                    </div>
+                 
 
                     {/* Pagination */}
                     {totalPages > 1 && (

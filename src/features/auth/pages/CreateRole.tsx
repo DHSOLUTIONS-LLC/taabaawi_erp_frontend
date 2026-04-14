@@ -162,7 +162,7 @@ export default function CreateRole() { // Changed from CreateInvoice to CreateRo
 
     return (
         <DashboardLayout>
-            <div className="space-y-6 p-4 md:p-6">
+            <div className="space-y-6 p-2 md:p-6">
                 {/* Header */}
                 <div className="flex flex-row justify-between items-center">
                     <Link to={`${basePath}/hr`} className="flex flex-row items-center">
@@ -237,7 +237,7 @@ export default function CreateRole() { // Changed from CreateInvoice to CreateRo
                         ) : (
                             <div className="space-y-6">
                                 {Object.entries(permissionsByModule).map(([moduleName, perms]) => (
-                                    <div key={moduleName} className="border border-gray-200 rounded-lg p-4">
+                                    <div key={moduleName} className="border border-gray-200 rounded-lg p-2 md:p-4">
                                         {/* Module Header with Select All for Module */}
                                         <div className="flex justify-between items-center mb-3">
                                             <h3 className="font-semibold text-gray-800 text-lg">
@@ -255,7 +255,7 @@ export default function CreateRole() { // Changed from CreateInvoice to CreateRo
                                         </div>
 
                                         {/* Module Permissions */}
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 pl-2">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0 md:gap-3 pl-2">
                                             {perms.map((p) => (
                                                 <label
                                                     key={p.id}

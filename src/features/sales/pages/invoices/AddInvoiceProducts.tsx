@@ -232,7 +232,7 @@ export default function AddInvoiceProducts() {
             <button
               key={category}
               onClick={() => setSelectedCategory(category)}
-              className={`lg:px-6 lg:py-3 px-3 py-2 mx-1 rounded-md font-medium text-sm whitespace-nowrap transition-all duration-200 cursor-pointer ${
+              className={`lg:px-6 lg:py-3 px-3 py-1 m-1 rounded-md font-medium text-sm whitespace-nowrap transition-all duration-200 cursor-pointer ${
                 selectedCategory === category
                   ? "border border-[#1773CF] text-black shadow-md shadow-blue-200"
                   : "bg-white text-gray-700 border border-gray-200 hover:border-blue-300 hover:text-blue-600"

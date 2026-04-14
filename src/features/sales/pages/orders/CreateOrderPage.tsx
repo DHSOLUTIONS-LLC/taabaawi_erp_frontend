@@ -326,7 +326,7 @@ export default function CreateOrderPage() {
                         customers.map((customer: any) => (
                           <button
                             key={customer.id}
-                            className="w-full px-3 sm:px-4 py-2 sm:py-3 text-left hover:bg-gray-50 focus:bg-gray-50 focus:outline-none border-b last:border-b-0"
+                            className="w-full px-3 sm:px-4 py-2 sm:py-3 text-left hover:bg-gray-50 focus:bg-gray-50 focus:outline-none border-b border-gray-300  last:border-b-0"
                             onClick={(e) => {
                               e.stopPropagation();
                               handleCustomerSelect(customer);

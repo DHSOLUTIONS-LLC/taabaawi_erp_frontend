@@ -450,7 +450,8 @@ export default function ProfilePage() {
                                             Absent: <strong>{absentCount}</strong>
                                         </span>
                                     </div>
-                                    <div className="overflow-x-auto">
+                                     <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+ <div className="xl:col-span-4 overflow-x-auto">
                                         <table className="min-w-full divide-y divide-gray-100">
                                             <thead className="bg-gray-50">
                                                 <tr>
@@ -499,7 +500,9 @@ export default function ProfilePage() {
                                                 )}
                                             </tbody>
                                         </table>
-                                    </div>
+                                    </div>  
+                                     </div>
+                                   
                                 </>
                             )}
                         </div>

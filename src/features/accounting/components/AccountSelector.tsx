@@ -131,7 +131,7 @@ export default function AccountSelector({
                   <button
                     key={account.id}
                     onClick={() => handleSelect(account)}
-                    className="w-full px-4 py-3 text-left hover:bg-gray-50 focus:bg-gray-50 border-b last:border-b-0"
+                    className="w-full px-4 py-3 text-left hover:bg-gray-50 focus:bg-gray-50 border-b border-gray-300 last:border-b-0"
                   >
                     <div className="flex items-center justify-between">
                       <div>

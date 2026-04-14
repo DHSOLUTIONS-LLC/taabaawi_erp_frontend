@@ -111,12 +111,12 @@ const CreateNewBranch: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="container mx-auto px-4 py-8 max-w-3xl">
+      <div className="mx-auto max-w-full">
         {/* Header */}
         <div className="mb-6">
           <button
             onClick={() => navigate(`${basePath}/branches`)}
-            className="text-blue-600 hover:text-blue-800 mb-2 inline-block"
+            className="text-black hover:text-blue-800 mb-2 inline-block"
           >
             ← Back to Branches
           </button>

@@ -250,7 +250,7 @@ export default function ReturnsPage() {
         {/* Table Section */}
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
           {/* Search + Filters */}
-          <div className="px-4 sm:px-6 py-3 sm:py-4 border-b flex flex-col lg:flex-row flex-wrap items-start lg:items-center justify-between gap-3 sm:gap-4">
+          <div className="px-4 sm:px-6 py-3 sm:py-4 border-b  border-gray-300  flex flex-col lg:flex-row flex-wrap items-start lg:items-center justify-between gap-3 sm:gap-4">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
               {/* Search Input */}
               <div className="relative w-full sm:w-auto">

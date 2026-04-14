@@ -270,7 +270,7 @@ export default function OrdersPage() {
         {/* Table */}
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
           {/* Table header filters */}
-          <div className="px-4 sm:px-6 py-3 sm:py-4 border-b flex flex-col lg:flex-row gap-3 sm:gap-4 items-start lg:items-center justify-between">
+          <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-300  flex flex-col lg:flex-row gap-3 sm:gap-4 items-start lg:items-center justify-between">
             <div className="flex flex-col sm:flex-row lg:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
               {/* Search Input */}
               <div className="relative w-full sm:w-auto">

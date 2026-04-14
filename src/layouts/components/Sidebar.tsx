@@ -5,12 +5,19 @@ import { useAppSelector } from '../../app/hooks';
 import erp_logo from '../../assets/icons/erp_logo.png'
 import dashboard from '../../assets/icons/dashboard.png'
 import inventory from '../../assets/icons/inventory.png'
-import pos from '../../assets/icons/pos.png'
+import pos from '../../assets/icons/pos_.svg'
+import reports from '../../assets/icons/reports_.svg'
 import purchases from '../../assets/icons/purchases.png'
 import sales from '../../assets/icons/sales.png'
-import crm from '../../assets/icons/crm.png'
+import crm from '../../assets/icons/crm_.svg'
+import systems from '../../assets/icons/systems_.png'
+import blog from '../../assets/icons/blog_.png'
+import help from '../../assets/icons/help__.png'
+import ai_content from '../../assets/icons/ai-content.png'
+import security_center from '../../assets/icons/security_center_.png'
 import accounting from '../../assets/icons/accounting.png'
-import hr_icon from '../../assets/icons/hr_icon.svg'
+import hr_users from '../../assets/icons/hr_users_.png'
+import branches from '../../assets/icons/branches.png'
 import type { RootState } from '../../app/store';
 
 interface SidebarProps {
@@ -154,7 +161,7 @@ export default function Sidebar({ onMenuSelect, mobileMenuOpen, closeMobileMenu 
     hasPermission('') && {
       id: 'system',
       label: 'System',
-      icon: crm,
+      icon: systems,
       submenu: [
         { id: 'system-settings', label: 'Settings', path: `${basePath}/system/settings` },
         { id: 'payment-methods', label: 'Payment Methods', path: `${basePath}/system/payment-methods` },
@@ -164,7 +171,7 @@ export default function Sidebar({ onMenuSelect, mobileMenuOpen, closeMobileMenu 
     hasPermission('') && {
       id: 'blog',
       label: 'Blog',
-      icon: crm,
+      icon: blog,
       submenu: [
         { id: 'blog-all', label: 'All Posts', path: `${basePath}/blog` },
         { id: 'blog-create', label: 'Create Post', path: `${basePath}/blog/create` },
@@ -174,7 +181,7 @@ export default function Sidebar({ onMenuSelect, mobileMenuOpen, closeMobileMenu 
     hasPermission('view_reports') && {
       id: 'reports',
       label: 'Reports',
-      icon: crm,
+      icon: reports,
       path: `${basePath}/reports`
     },
     hasPermission('view_crm') && {
@@ -186,25 +193,25 @@ export default function Sidebar({ onMenuSelect, mobileMenuOpen, closeMobileMenu 
     hasAnyPermission(['view_users', 'create_user', 'edit_user', 'delete_user']) && {
       id: 'hr',
       label: 'HR & Users',
-      icon: hr_icon,
+      icon: hr_users,
       path: `${basePath}/hr`
     },
     hasAnyPermission(['view_users', 'create_user', 'edit_user', 'delete_user']) && {
       id: 'help',
       label: 'Help',
-      icon: hr_icon,
+      icon: help,
       path: `${basePath}/help`
     },
     {
       id: 'ai-content',
       label: 'AI Content',
-      icon: hr_icon,
+      icon: ai_content,
       path: `${basePath}/ai-content`,
     },
     {
       id: 'branches',
       label: 'Branches',
-      icon: hr_icon,
+      icon: branches,
       path: `${basePath}/branches`,
     },
     hasAnyPermission(['view_users', 'create_user', 'edit_user', 'delete_user']) && {
@@ -216,7 +223,7 @@ export default function Sidebar({ onMenuSelect, mobileMenuOpen, closeMobileMenu 
     hasAnyPermission(['view_users', 'create_user', 'edit_user', 'delete_user']) && {
       id: 'security',
       label: 'Security Center',
-      icon: crm,
+      icon: security_center,
       path: `${basePath}/security`
     },
   ].filter(Boolean) as MenuItem[];
@@ -239,6 +246,7 @@ export default function Sidebar({ onMenuSelect, mobileMenuOpen, closeMobileMenu 
     if (menu.id === 'blog') return hasPermission('view_users') || isSuperAdmin;
     if (menu.id === 'ai-content') return hasPermission('view_users') || isSuperAdmin;
     if (menu.id === 'security') return hasPermission('view_users') || isSuperAdmin;
+    if (menu.id === 'branches') return hasPermission('view_users') || isSuperAdmin;
     return false;
   });
 

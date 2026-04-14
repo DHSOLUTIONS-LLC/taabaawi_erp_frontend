@@ -71,7 +71,7 @@ export default function HelpSearchBar() {
                     navigate(`${basePath}/help/article/${article.slug}`);
                     setShowSuggestions(false);
                   }}
-                  className="w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 hover:bg-gray-50 border-b last:border-b-0"
+                  className="w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 hover:bg-gray-50 border-b  border-gray-300 last:border-b-0"
                 >
                   <div className="font-medium text-sm sm:text-base text-gray-900">{article.title}</div>
                   <div className="text-xs sm:text-sm text-gray-500 truncate">{article.summary}</div>

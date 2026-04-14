@@ -524,7 +524,7 @@ export default function CashRegistersPage() {
       {showRegisterDetails && selectedRegister && (
         <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-lg">
-            <div className="p-6 border-b flex justify-between items-center">
+            <div className="p-6 border-b  border-gray-300 flex justify-between items-center">
               <h2 className="text-xl font-bold">
                 Register Details - {selectedRegister.branch?.branch_name}
               </h2>

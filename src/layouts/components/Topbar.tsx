@@ -601,78 +601,84 @@ export default function Topbar({
           </button>
 
           {/* Profile Menu */}
-          <div className="relative">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowProfileMenu(!showProfileMenu);
-              }}
-              className="flex items-center gap-1 xs:gap-2 focus:outline-none"
-            >
-              <div className="w-6 h-6 xs:w-7 xs:h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center">
-                <span className="text-white text-xs xs:text-sm font-semibold">
-                  {user?.name?.charAt(0) || "U"}
-                </span>
-              </div>
-              <div className="hidden md:block text-left">
-                <p className="text-xs sm:text-sm font-medium text-gray-900 max-w-[80px] sm:max-w-[100px] truncate">
-                  {user?.name || "User"}
-                </p>
-                <p className="text-xs text-gray-500 max-w-[80px] sm:max-w-[100px] truncate">
-                  {user?.role?.role_name || "Role"}
-                </p>
-              </div>
-              <ChevronDown className="hidden md:block w-3 h-3 sm:w-4 sm:h-4 text-gray-500" />
-            </button>
+<div className="relative">
+  <button
+    onClick={(e) => {
+      e.stopPropagation();
+      setShowProfileMenu(!showProfileMenu);
+    }}
+    className="flex items-center gap-1 xs:gap-2 focus:outline-none"
+  >
+    <div className="w-6 h-6 xs:w-7 xs:h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center">
+      <span className="text-white text-xs xs:text-sm font-semibold">
+        {user?.name?.charAt(0) || "U"}
+      </span>
+    </div>
+    <div className="hidden md:block text-left">
+      <p className="text-xs sm:text-sm font-medium text-gray-900 max-w-[80px] sm:max-w-[100px] truncate">
+        {user?.name || "User"}
+      </p>
+      <p className="text-xs text-gray-500 max-w-[80px] sm:max-w-[100px] truncate">
+        {user?.role?.role_name || "Role"}
+      </p>
+    </div>
+    <ChevronDown className="hidden md:block w-3 h-3 sm:w-4 sm:h-4 text-gray-500" />
+  </button>
 
-            {showProfileMenu && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-                <div className="p-2">
-                  <div className="px-3 py-2 border-b border-gray-100">
-                    <p className="text-sm font-medium text-gray-900 truncate">
-                      {user?.name}
-                    </p>
-                    <p className="text-xs text-gray-500 truncate">
-                      {user?.email}
-                    </p>
-                    <p className="text-xs text-blue-600 font-medium mt-1">
-                      {user?.role?.role_name}
-                    </p>
-                  </div>
-                  <Link to="/profile">
-                    <button
-                      onClick={() => setShowProfileMenu(false)}
-                      className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
-                    >
-                      My Profile
-                    </button>
-                  </Link>
-                  <Link to="/my-leaves">
-                    <button
-                      onClick={() => setShowProfileMenu(false)}
-                      className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
-                    >
-                      My Leaves
-                    </button>
-                  </Link>
-                  <Link to="/my-leaves/request">
-                    <button
-                      onClick={() => setShowProfileMenu(false)}
-                      className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
-                    >
-                      My Leaves Requests
-                    </button>
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded transition-colors"
-                  >
-                    Logout
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+  {showProfileMenu && (
+    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+      <div className="p-2">
+        <div className="px-3 py-2 border-b border-gray-100">
+          <p className="text-sm font-medium text-gray-900 truncate">
+            {user?.name}
+          </p>
+          <p className="text-xs text-gray-500 truncate">
+            {user?.email}
+          </p>
+          <p className="text-xs text-blue-600 font-medium mt-1">
+            {user?.role?.role_name}
+          </p>
+        </div>
+       
+        {/* Show My Leaves and My Leaves Requests to all users except Super Admin */}
+        {!isSuperAdmin && (
+          <>
+           <Link to="/profile">
+          <button
+            onClick={() => setShowProfileMenu(false)}
+            className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
+          >
+            My Profile
+          </button>
+        </Link>
+            <Link to="/my-leaves">
+              <button
+                onClick={() => setShowProfileMenu(false)}
+                className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
+              >
+                My Leaves
+              </button>
+            </Link>
+            <Link to="/my-leaves/request">
+              <button
+                onClick={() => setShowProfileMenu(false)}
+                className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
+              >
+                My Leaves Requests
+              </button>
+            </Link>
+          </>
+        )}
+        <button
+          onClick={handleLogout}
+          className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded transition-colors"
+        >
+          Logout
+        </button>
+      </div>
+    </div>
+  )}
+</div>
         </div>
       </div>
 

@@ -328,22 +328,24 @@ export default function LeaveRequestDetails() {
     return (
         <DashboardLayout>
             <div className="min-h-screen bg-gray-50">
-                <div className="px-4 md:px-6 py-6">
+                <div className="">
                     {/* First Row: Employee Name and Active Button */}
-                    <div className="px-3 py-6 mb-3">
-                        <div className="flex items-center justify-between">
-                            <h1 className="text-2xl font-bold text-gray-900">{employeeData.name}</h1>
-                            <button className="inline-flex items-center px-4 py-2 border border-[#0088FF] rounded-full text-green-800 cursor-pointer">
-                                <span className="text-md font-medium px-4 text-[#0088FF]">
+                    <div className="px-2 sm:px-3 py-3 sm:py-6 mb-2 sm:mb-3">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+                            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 break-words">
+                                {employeeData.name}
+                            </h1>
+                            <button className="inline-flex items-center justify-center px-3 sm:px-4 py-1.5 sm:py-2 border border-[#0088FF] rounded-full cursor-pointer w-full sm:w-auto">
+                                <span className="text-sm sm:text-md font-medium px-2 sm:px-4 text-[#0088FF]">
                                     {employeeData.status}
                                 </span>
-                                <img src={active_icon} alt="Active" className="w-7 h-7 mr-2" />
+                                <img src={active_icon} alt="Active" className="w-5 h-5 sm:w-7 sm:h-7" />
                             </button>
                         </div>
                     </div>
 
                     {/* Personal Details Dropdown */}
-                    <div className="bg-white rounded-[20px] shadow-sm mb-6 overflow-hidden">
+                    <div className="bg-white rounded-[20px] shadow-sm mb-2 md: mb-2 md:mb-6  overflow-hidden">
                         <button
                             onClick={() => setPersonalDetailsOpen(!personalDetailsOpen)}
                             className="w-full p-6 flex items-center justify-between"
@@ -394,7 +396,7 @@ export default function LeaveRequestDetails() {
                     </div>
 
                     {/* Employment Details Dropdown */}
-                    <div className="bg-white rounded-[20px] shadow-sm mb-6 overflow-hidden">
+                    <div className="bg-white rounded-[20px] shadow-sm  mb-2 md: mb-2 md:mb-6   overflow-hidden">
                         <button
                             onClick={() => setEmploymentDetailsOpen(!employmentDetailsOpen)}
                             className="w-full p-6 flex items-center justify-between"
@@ -445,30 +447,30 @@ export default function LeaveRequestDetails() {
                     </div>
 
                     {/* Stats Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-6">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-8  mb-2 md:mb-6 ">
                         <div className="bg-white rounded-xl shadow-sm p-6">
-                            <div className="text-lg font-semibold text-gray-600 mb-6">Total Working Days</div>
+                            <div className="text-lg font-semibold text-gray-600  mb-2 md:mb-6 ">Total Working Days</div>
                             <div className="text-3xl font-semibold text-gray-900 mb-2">
                                 {employeeData.stats.totalWorkingDays}
                             </div>
                         </div>
 
                         <div className="bg-white rounded-xl shadow-sm p-6">
-                            <div className="text-lg font-semibold text-gray-600 mb-6">Present</div>
+                            <div className="text-lg font-semibold text-gray-600  mb-2 md:mb-6 ">Present</div>
                             <div className="text-3xl font-semibold text-green-600 mb-2">
                                 {employeeData.stats.present}
                             </div>
                         </div>
 
                         <div className="bg-white rounded-xl shadow-sm p-6">
-                            <div className="text-lg font-semibold text-gray-600 mb-6">Late Arrivals</div>
+                            <div className="text-lg font-semibold text-gray-600  mb-2 md:mb-6 ">Late Arrivals</div>
                             <div className="text-3xl font-semibold text-yellow-600 mb-2">
                                 {employeeData.stats.lateArrivals}
                             </div>
                         </div>
 
                         <div className="bg-white rounded-xl shadow-sm p-6">
-                            <div className="text-lg font-semibold text-gray-600 mb-6">Absent</div>
+                            <div className="text-lg font-semibold text-gray-600  mb-2 md:mb-6 ">Absent</div>
                             <div className="text-3xl font-semibold text-red-600 mb-2">
                                 {employeeData.stats.absent}
                             </div>
@@ -476,7 +478,7 @@ export default function LeaveRequestDetails() {
                     </div>
 
                     {/* Last Sync Row */}
-                    <div className="bg-white rounded-full shadow-sm p-4 mb-6">
+                    <div className="bg-white rounded-full shadow-sm p-4  mb-2 md:mb-6 ">
                         <div className="flex items-center justify-between">
                             <span className="text-md text-[#0088FF] font-semibold px-4">Last sync</span>
                             <span className="text-md font-medium text-[#0088FF] border rounded-full border-[#0088FF] py-2 px-4">
@@ -490,58 +492,61 @@ export default function LeaveRequestDetails() {
                         <div className="p-6">
                             <h3 className="text-lg font-medium text-gray-900">Attendance History</h3>
                         </div>
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
-                                    <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Check-in</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Check-out</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Hours</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Source</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Notes</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
-                                    {employeeData.attendance.length === 0 ? (
+                        <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+                            <div className="xl:col-span-4 overflow-x-auto">
+                                <table className="min-w-full divide-y divide-gray-200">
+                                    <thead className="bg-gray-50">
                                         <tr>
-                                            <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
-                                                No attendance records found
-                                            </td>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Check-in</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Check-out</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Hours</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Source</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Notes</th>
                                         </tr>
-                                    ) : (
-                                        employeeData.attendance.map((record: Attendance, index: number) => (
-                                            <tr key={record.id || index} className="hover:bg-gray-50">
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                    {formatDate(record.attendance_date)}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-mono">
-                                                    {formatTime(record.check_in)}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-mono">
-                                                    {formatTime(record.check_out)}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                    {record.total_hours ? `${record.total_hours} min` : '--'}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                    {getAttendanceSource(record)}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColorClass(record.status)}`}>
-                                                        {record.status}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                    {record.notes || '-'}
+                                    </thead>
+                                    <tbody className="bg-white divide-y divide-gray-200">
+                                        {employeeData.attendance.length === 0 ? (
+                                            <tr>
+                                                <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
+                                                    No attendance records found
                                                 </td>
                                             </tr>
-                                        ))
-                                    )}
-                                </tbody>
-                            </table>
+                                        ) : (
+                                            employeeData.attendance.map((record: Attendance, index: number) => (
+                                                <tr key={record.id || index} className="hover:bg-gray-50">
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                        {formatDate(record.attendance_date)}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-mono">
+                                                        {formatTime(record.check_in)}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-mono">
+                                                        {formatTime(record.check_out)}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                        {record.total_hours ? `${record.total_hours} min` : '--'}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                        {getAttendanceSource(record)}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColorClass(record.status)}`}>
+                                                            {record.status}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        {record.notes || '-'}
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
+
                     </div>
 
                     {/* Leave Balance Table */}
@@ -549,50 +554,53 @@ export default function LeaveRequestDetails() {
                         <div className="p-6">
                             <h3 className="text-lg font-medium text-gray-900">Leave Balance</h3>
                         </div>
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
-                                    <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Leave Type</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Days</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Used Days</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pending Days</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Available Days</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
-                                    {leaveBalance.length === 0 ? (
+                        <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+                            <div className="xl:col-span-4 overflow-x-auto">
+                                <table className="min-w-full divide-y divide-gray-200">
+                                    <thead className="bg-gray-50">
                                         <tr>
-                                            <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
-                                                No leave balance records found
-                                            </td>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Leave Type</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Days</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Used Days</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pending Days</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Available Days</th>
                                         </tr>
-                                    ) : (
-                                        leaveBalance.map((balance: any, index: number) => (
-                                            <tr key={index} className="hover:bg-gray-50">
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                    {balance.leave_type}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                    {balance.max_days}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                    {balance.used_days}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                    {balance.pending_days}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                    <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full">
-                                                        {balance.available_days}
-                                                    </span>
+                                    </thead>
+                                    <tbody className="bg-white divide-y divide-gray-200">
+                                        {leaveBalance.length === 0 ? (
+                                            <tr>
+                                                <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                                                    No leave balance records found
                                                 </td>
                                             </tr>
-                                        ))
-                                    )}
-                                </tbody>
-                            </table>
+                                        ) : (
+                                            leaveBalance.map((balance: any, index: number) => (
+                                                <tr key={index} className="hover:bg-gray-50">
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                                        {balance.leave_type}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                        {balance.max_days}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                        {balance.used_days}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                        {balance.pending_days}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                        <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full">
+                                                            {balance.available_days}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
+
                     </div>
 
                     {/* Leave History Table */}
@@ -600,54 +608,57 @@ export default function LeaveRequestDetails() {
                         <div className="p-6">
                             <h3 className="text-lg font-medium text-gray-900">Leave History</h3>
                         </div>
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
-                                    <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Leave Type</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">From</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">To</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Days</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reason</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
-                                    {userLeaveRequests.length === 0 ? (
+                        <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+                            <div className="xl:col-span-4 overflow-x-auto">
+                                <table className="min-w-full divide-y divide-gray-200">
+                                    <thead className="bg-gray-50">
                                         <tr>
-                                            <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
-                                                No leave requests found
-                                            </td>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Leave Type</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">From</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">To</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Days</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reason</th>
                                         </tr>
-                                    ) : (
-                                        userLeaveRequests.map((request: any, index: number) => (
-                                            <tr key={request.id || index} className="hover:bg-gray-50">
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                    {request.leave_type?.leave_type_name || request.leave_type?.name || 'N/A'}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                    {formatDate(request.start_date)}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                    {formatDate(request.end_date)}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                    {request.total_days || calculateDays(request.start_date, request.end_date)}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(request.status)}`}>
-                                                        {request.status}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                    {request.reason || '-'}
+                                    </thead>
+                                    <tbody className="bg-white divide-y divide-gray-200">
+                                        {userLeaveRequests.length === 0 ? (
+                                            <tr>
+                                                <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                                                    No leave requests found
                                                 </td>
                                             </tr>
-                                        ))
-                                    )}
-                                </tbody>
-                            </table>
+                                        ) : (
+                                            userLeaveRequests.map((request: any, index: number) => (
+                                                <tr key={request.id || index} className="hover:bg-gray-50">
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                        {request.leave_type?.leave_type_name || request.leave_type?.name || 'N/A'}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                        {formatDate(request.start_date)}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                        {formatDate(request.end_date)}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                        {request.total_days || calculateDays(request.start_date, request.end_date)}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(request.status)}`}>
+                                                            {request.status}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        {request.reason || '-'}
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
+
                     </div>
 
                     {/* Bonuses Table with Actions */}
@@ -656,129 +667,132 @@ export default function LeaveRequestDetails() {
                             <h3 className="text-lg font-medium text-gray-900">Bonuses</h3>
                             <button
                                 onClick={() => setShowSummaryModal(true)}
-                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                                className="px-4 py-2 text-blue-600 underline rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
                             >
                                 View Summary
                             </button>
                         </div>
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
-                                    <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bonus Type</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
-                                    {userBonuses.length === 0 ? (
+                        <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+                            <div className="xl:col-span-4 overflow-x-auto">
+                                <table className="min-w-full divide-y divide-gray-200">
+                                    <thead className="bg-gray-50">
                                         <tr>
-                                            <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
-                                                No bonus records found for this employee
-                                            </td>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bonus Type</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                         </tr>
-                                    ) : (
-                                        userBonuses.map((bonus: Bonus, index: number) => (
-                                            <tr key={bonus.id || index} className="hover:bg-gray-50">
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                    {bonus.bonus_type}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
-                                                    KD {bonus.amount}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                    {formatDate(bonus.bonus_date)}
-                                                </td>
-
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                    {bonus.description || '-'}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                    <div className="flex items-center space-x-3">
-                                                        <button
-                                                            onClick={() => handleViewBonus(bonus)}
-                                                            className="text-blue-600 hover:text-blue-800 transition-colors"
-                                                            title="View Details"
-                                                        >
-                                                            <img src={view_icon} alt="View" className="w-5 h-5" />
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleEditBonus(bonus)}
-                                                            className="text-green-600 hover:text-green-800 transition-colors"
-                                                            title="Edit"
-                                                        >
-                                                            <img src={edit_icon} alt="Edit" className="w-5 h-5" />
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleDeleteClick(bonus)}
-                                                            className="text-red-600 hover:text-red-800 transition-colors"
-                                                            title="Delete"
-                                                        >
-                                                            <img src={delete_icon} alt="Delete" className="w-5 h-5" />
-                                                        </button>
-                                                    </div>
+                                    </thead>
+                                    <tbody className="bg-white divide-y divide-gray-200">
+                                        {userBonuses.length === 0 ? (
+                                            <tr>
+                                                <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                                                    No bonus records found for this employee
                                                 </td>
                                             </tr>
-                                        ))
-                                    )}
-                                </tbody>
-                            </table>
+                                        ) : (
+                                            userBonuses.map((bonus: Bonus, index: number) => (
+                                                <tr key={bonus.id || index} className="hover:bg-gray-50">
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                        {bonus.bonus_type}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
+                                                        KD {bonus.amount}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                        {formatDate(bonus.bonus_date)}
+                                                    </td>
+
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        {bonus.description || '-'}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        <div className="flex items-center space-x-3">
+                                                            <button
+                                                                onClick={() => handleViewBonus(bonus)}
+                                                                className="text-blue-600 hover:text-blue-800 transition-colors"
+                                                                title="View Details"
+                                                            >
+                                                                <img src={view_icon} alt="View" className="w-5 h-5" />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleEditBonus(bonus)}
+                                                                className="text-green-600 hover:text-green-800 transition-colors"
+                                                                title="Edit"
+                                                            >
+                                                                <img src={edit_icon} alt="Edit" className="w-5 h-5" />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleDeleteClick(bonus)}
+                                                                className="text-red-600 hover:text-red-800 transition-colors"
+                                                                title="Delete"
+                                                            >
+                                                                <img src={delete_icon} alt="Delete" className="w-5 h-5" />
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
+
                     </div>
                 </div>
             </div>
 
             {/* View Bonus Summary Modal */}
             {showSummaryModal && bonusSummary && (
-                <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50">
+                <div className="fixed inset-0 bg-black/30 bg-opacity-50 flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-                        <div className="p-6 border-b border-gray-200 flex justify-between items-center">
-                            <h2 className="text-xl font-bold text-gray-900">Bonus Summary</h2>
+                        <div className="sticky top-0 bg-white z-10 p-4 sm:p-6 border-b border-gray-200 flex justify-between items-center">
+                            <h2 className="text-lg sm:text-xl font-bold text-gray-900">Bonus Summary</h2>
                             <button
                                 onClick={() => setShowSummaryModal(false)}
-                                className="text-gray-500 hover:text-gray-700"
+                                className="text-gray-500 hover:text-gray-700 p-1"
                             >
                                 <img src={close_icon} alt="Close" className="w-5 h-5" />
                             </button>
                         </div>
-                        <div className="p-6 space-y-6">
+                        <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
                             {/* Summary Cards */}
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div className="bg-blue-50 p-4 rounded-lg">
-                                    <p className="text-sm text-blue-600 font-medium mb-1">Total Bonuses</p>
-                                    <p className="text-2xl font-bold text-blue-800">{bonusSummary.total_bonuses || 0}</p>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                                <div className="bg-blue-50 p-3 sm:p-4 rounded-lg">
+                                    <p className="text-xs sm:text-sm text-blue-600 font-medium mb-1">Total Bonuses</p>
+                                    <p className="text-xl sm:text-2xl font-bold text-blue-800">{bonusSummary.total_bonuses || 0}</p>
                                 </div>
-                                <div className="bg-green-50 p-4 rounded-lg">
-                                    <p className="text-sm text-green-600 font-medium mb-1">Total Amount</p>
-                                    <p className="text-2xl font-bold text-green-800">KD {bonusSummary.total_amount || 0}</p>
+                                <div className="bg-green-50 p-3 sm:p-4 rounded-lg">
+                                    <p className="text-xs sm:text-sm text-green-600 font-medium mb-1">Total Amount</p>
+                                    <p className="text-xl sm:text-2xl font-bold text-green-800">KD {bonusSummary.total_amount || 0}</p>
                                 </div>
-                                <div className="bg-purple-50 p-4 rounded-lg">
-                                    <p className="text-sm text-purple-600 font-medium mb-1">Average Amount</p>
-                                    <p className="text-2xl font-bold text-purple-800">KD {bonusSummary.average_amount || 0}</p>
+                                <div className="bg-purple-50 p-3 sm:p-4 rounded-lg">
+                                    <p className="text-xs sm:text-sm text-purple-600 font-medium mb-1">Average Amount</p>
+                                    <p className="text-xl sm:text-2xl font-bold text-purple-800">KD {bonusSummary.average_amount || 0}</p>
                                 </div>
                             </div>
 
                             {/* Last Bonus Date */}
                             {bonusSummary.last_bonus_date && (
-                                <div className="bg-gray-50 p-4 rounded-lg">
-                                    <p className="text-sm text-gray-600 font-medium mb-1">Last Bonus Date</p>
-                                    <p className="text-lg font-semibold text-gray-900">{formatDate(bonusSummary.last_bonus_date)}</p>
+                                <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
+                                    <p className="text-xs sm:text-sm text-gray-600 font-medium mb-1">Last Bonus Date</p>
+                                    <p className="text-base sm:text-lg font-semibold text-gray-900">{formatDate(bonusSummary.last_bonus_date)}</p>
                                 </div>
                             )}
 
                             {/* Bonuses by Type */}
                             {bonusSummary.bonuses_by_type && Object.keys(bonusSummary.bonuses_by_type).length > 0 && (
                                 <div>
-                                    <h3 className="text-md font-semibold text-gray-900 mb-3">Breakdown by Type</h3>
+                                    <h3 className="text-sm sm:text-md font-semibold text-gray-900 mb-2 sm:mb-3">Breakdown by Type</h3>
                                     <div className="space-y-2">
                                         {Object.entries(bonusSummary.bonuses_by_type).map(([type, data]: [string, any]) => (
-                                            <div key={type} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                                <span className="font-medium text-gray-700">{type}</span>
-                                                <div className="flex space-x-4">
-                                                    <span className="text-sm text-gray-600">Count: <span className="font-semibold">{data.count}</span></span>
-                                                    <span className="text-sm text-gray-600">Total: <span className="font-semibold">KD {data.total}</span></span>
+                                            <div key={type} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 bg-gray-50 rounded-lg">
+                                                <span className="font-medium text-gray-700 text-sm sm:text-base">{type}</span>
+                                                <div className="flex flex-wrap gap-3 sm:gap-4">
+                                                    <span className="text-xs sm:text-sm text-gray-600">Count: <span className="font-semibold">{data.count}</span></span>
+                                                    <span className="text-xs sm:text-sm text-gray-600">Total: <span className="font-semibold">KD {data.total}</span></span>
                                                 </div>
                                             </div>
                                         ))}
@@ -788,16 +802,16 @@ export default function LeaveRequestDetails() {
 
                             {/* Recent Bonuses */}
                             <div>
-                                <h3 className="text-md font-semibold text-gray-900 mb-3">Recent Bonuses</h3>
+                                <h3 className="text-sm sm:text-md font-semibold text-gray-900 mb-2 sm:mb-3">Recent Bonuses</h3>
                                 <div className="space-y-2">
                                     {userBonuses.slice(0, 5).map((bonus: Bonus) => (
-                                        <div key={bonus.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                                        <div key={bonus.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 border border-gray-200 rounded-lg">
                                             <div>
-                                                <p className="font-medium text-gray-900">{bonus.bonus_type}</p>
+                                                <p className="font-medium text-gray-900 text-sm sm:text-base">{bonus.bonus_type}</p>
                                                 <p className="text-xs text-gray-500">{formatDate(bonus.bonus_date)}</p>
                                             </div>
-                                            <div className="text-right">
-                                                <p className="font-semibold text-green-600">KD {bonus.amount}</p>
+                                            <div className="flex items-center justify-between sm:justify-end gap-3">
+                                                <p className="font-semibold text-green-600 text-sm sm:text-base">KD {bonus.amount}</p>
                                                 <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${getBonusStatusColor(bonus.status || 'Pending')}`}>
                                                     {bonus.status || '-'}
                                                 </span>
@@ -807,10 +821,10 @@ export default function LeaveRequestDetails() {
                                 </div>
                             </div>
                         </div>
-                        <div className="p-6 border-t border-gray-200 flex justify-end">
+                        <div className="sticky bottom-0 bg-white p-4 sm:p-6 border-t border-gray-200 flex justify-end">
                             <button
                                 onClick={() => setShowSummaryModal(false)}
-                                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
+                                className="px-3 sm:px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors text-sm sm:text-base w-full sm:w-auto"
                             >
                                 Close
                             </button>

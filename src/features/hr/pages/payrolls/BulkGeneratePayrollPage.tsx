@@ -6,12 +6,25 @@ import { useGetBranchesQuery } from '../../../../services/superAdminApi';
 import dropdown_arrow_icon from '../../../../assets/icons/dropdown_arrow_icon.svg';
 import arrow_back_icon from '../../../../assets/icons/arrow_back_icon.svg';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
+import { useAppSelector } from '../../../../app/hooks';
+import type { RootState } from '../../../../app/store';
 
 export default function BulkGeneratePayrollPage() {
+    const { user } = useAppSelector((state: RootState) => state.auth);
+
+    // Check user role
+    const isSuperAdmin = user?.role?.role_name === 'Super Admin';
+    const isHR = user?.role?.role_name === 'HR';
+    const basePath = isSuperAdmin
+        ? '/admin'
+        : isHR
+            ? ''
+            : '';
+
     const navigate = useNavigate();
     const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
     const [selectedBranch, setSelectedBranch] = useState('');
-    
+
     const { data: branchesData = [] } = useGetBranchesQuery();
     const [generateBulk, { isLoading }] = useGenerateBulkPayrollMutation();
 
@@ -30,7 +43,7 @@ export default function BulkGeneratePayrollPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         if (!selectedMonth) {
             alert('Please select a month');
             return;
@@ -41,9 +54,9 @@ export default function BulkGeneratePayrollPage() {
                 payroll_month: selectedMonth,
                 branch_id: selectedBranch ? parseInt(selectedBranch) : undefined
             }).unwrap();
-            
+
             alert(`Bulk generation completed!\nGenerated: ${result.data.generated}\nSkipped: ${result.data.skipped}`);
-            navigate('/hr/payrolls');
+            navigate(`${basePath}/hr/payrolls`);
         } catch (error: any) {
             console.error('Failed to generate bulk payroll:', error);
             alert(error?.data?.message || 'Failed to generate bulk payroll');
@@ -52,17 +65,17 @@ export default function BulkGeneratePayrollPage() {
 
     return (
         <DashboardLayout>
-            <div className="space-y-6 p-4 md:p-6">
+            <div className="space-y-6">
                 {/* Header */}
                 <div className="flex flex-row justify-between items-center">
-                    <Link to="/hr/payrolls" className="flex flex-row items-center">
+                    <Link to={`${basePath}/hr/payrolls`} className="flex flex-row items-center">
                         <img src={arrow_back_icon} alt="Back" className="w-6 h-6 md:w-8 md:h-8" />
                         <span className="px-2 font-semibold text-sm md:text-base">Bulk Generate Payroll</span>
                     </Link>
                 </div>
 
                 {/* Form */}
-                <div className="bg-white rounded-xl p-6 max-w-2xl mx-auto">
+                <div className="bg-white rounded-xl p-2 md:p-6 max-w-full mx-auto">
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {/* Month Selection */}
                         <div>
@@ -127,7 +140,7 @@ export default function BulkGeneratePayrollPage() {
                         {/* Action Buttons */}
                         <div className="flex justify-end space-x-3 pt-4">
                             <Link
-                                to="/hr/payrolls"
+                                to={`${basePath}/hr/payrolls`}
                                 className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
                             >
                                 Cancel

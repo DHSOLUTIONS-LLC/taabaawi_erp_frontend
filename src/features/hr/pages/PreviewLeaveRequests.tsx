@@ -3,18 +3,18 @@ import DashboardLayout from '../../../layouts/DashboardLayout';
 import { useState } from 'react';
 
 import dropdown_arrow_icon from '../../../assets/icons/dropdown_arrow_icon.svg';
-import arrow_down_dropdown  from '../../../assets/icons/dropdown_arrow_icon.svg';
+import arrow_down_dropdown from '../../../assets/icons/dropdown_arrow_icon.svg';
 import search_icon from '../../../assets/icons/search_icon.svg';
 import filterIcon from '../../../assets/icons/filter_icon.svg';
 import export_pdf from '../../../assets/icons/export_pdf.svg';
 import export_excel from '../../../assets/icons/export_excel.svg';
 import tick_icon from '../../../assets/icons/tick_icon_1.svg';
 import cross_icon from '../../../assets/icons/cross_icon.svg';
-import { 
-    useGetLeaveRequestsQuery, 
-    useApproveLeaveRequestMutation, 
+import {
+    useGetLeaveRequestsQuery,
+    useApproveLeaveRequestMutation,
     useRejectLeaveRequestMutation,
-    useGetLeaveTypesQuery 
+    useGetLeaveTypesQuery
 } from '../../../services/hrApi';
 import { useGetBranchesQuery } from '../../../services/superAdminApi';
 import { toast } from 'react-toastify';
@@ -25,9 +25,9 @@ export default function DashboardPage() {
     const [statusFilter, setStatusFilter] = useState('');
     const [leaveTypeFilter, setLeaveTypeFilter] = useState('');
     const [branchFilter, _setBranchFilter] = useState('');
-    
 
-     const [selectedBranch, setSelectedBranch] = useState<string>('');
+
+    const [selectedBranch, setSelectedBranch] = useState<string>('');
 
     // Custom date picker states
     const [showCustomDatePicker, setShowCustomDatePicker] = useState(false);
@@ -36,7 +36,7 @@ export default function DashboardPage() {
 
     // API Hooks
     const { data: leaveRequestsData, isLoading, refetch } = useGetLeaveRequestsQuery();
-      const {
+    const {
         data: branchesData = [],
         isLoading: branchesLoading,
         error: branchesError,
@@ -49,23 +49,23 @@ export default function DashboardPage() {
 
     // Extract data from API responses
     const leaveRequests = leaveRequestsData?.data?.data || [];
-   const branches = Array.isArray(branchesData) ? branchesData : []; 
+    const branches = Array.isArray(branchesData) ? branchesData : [];
     const leaveTypes = leaveTypesData?.data || [];
 
     // Filter leave requests based on filters
     const filteredRequests = leaveRequests.filter((request: any) => {
-        const matchesSearch = searchTerm === '' || 
+        const matchesSearch = searchTerm === '' ||
             request.user?.employee_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             request.user?.name?.toLowerCase().includes(searchTerm.toLowerCase());
-        
-        const matchesStatus = statusFilter === '' || 
+
+        const matchesStatus = statusFilter === '' ||
             statusFilter === 'Status' ||
             request.status === statusFilter;
-        
-        const matchesLeaveType = leaveTypeFilter === '' || 
+
+        const matchesLeaveType = leaveTypeFilter === '' ||
             leaveTypeFilter === 'Leave Type' ||
             request.leave_type?.id?.toString() === leaveTypeFilter;
-        
+
         const matchesBranch = branchFilter === '' ||
             branchFilter === 'All Branches' ||
             request.user?.branch?.id?.toString() === branchFilter;
@@ -78,7 +78,7 @@ export default function DashboardPage() {
             const filterEndDate = new Date(customEndDate);
             matchesDate = requestStartDate >= filterStartDate && requestStartDate <= filterEndDate;
         }
-        
+
         return matchesSearch && matchesStatus && matchesLeaveType && matchesBranch && matchesDate;
     });
 
@@ -103,7 +103,7 @@ export default function DashboardPage() {
     const handleApprove = async (requestId: number) => {
         try {
             const result = await approveLeaveRequest(requestId).unwrap();
-            
+
             if (result.success) {
                 toast.success(result.message || 'Leave request approved successfully!');
                 refetch();
@@ -117,7 +117,7 @@ export default function DashboardPage() {
 
     const handleReject = async (requestId: number) => {
         const rejection_reason = prompt('Please enter rejection reason:');
-        
+
         if (!rejection_reason) {
             toast.warning('Rejection reason is required');
             return;
@@ -125,11 +125,11 @@ export default function DashboardPage() {
 
         try {
             //  Fixed: changed to rejection_reason
-            const result = await rejectLeaveRequest({ 
-                id: requestId, 
+            const result = await rejectLeaveRequest({
+                id: requestId,
                 rejection_reason: rejection_reason  // Backend expects 'reason' field
             }).unwrap();
-            
+
             if (result.success) {
                 toast.success(result.message || 'Leave request rejected successfully!');
                 refetch();
@@ -143,20 +143,20 @@ export default function DashboardPage() {
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
-        return date.toLocaleDateString('en-GB', { 
-            day: '2-digit', 
-            month: 'short', 
-            year: 'numeric' 
+        return date.toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric'
         });
     };
 
     const formatDisplayDate = (dateString: string) => {
         if (!dateString) return '';
         const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', { 
-            day: '2-digit', 
-            month: 'short', 
-            year: 'numeric' 
+        return date.toLocaleDateString('en-US', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric'
         });
     };
 
@@ -187,7 +187,7 @@ export default function DashboardPage() {
         <DashboardLayout>
             <div className="space-y-6">
                 {/* Filters Row */}
-                <div className="p-6">
+                <div className="p-2 md:p-6">
                     <div className="flex flex-wrap md:flex-nowrap items-center gap-4">
                         {/* Custom Date Picker */}
                         <div className="flex-1 min-w-50 relative">
@@ -279,37 +279,37 @@ export default function DashboardPage() {
 
                         {/* Branch Filter */}
                         <div className="flex-1 min-w-50 relative">
-                                    <select
-                                        value={selectedBranch}
-                                        onChange={(e) => setSelectedBranch(e.target.value)}
-                                        className="w-full px-4 py-2.5 shadow rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-semibold appearance-none bg-white pr-10"
-                                        disabled={branchesLoading || !!branchesError}
-                                    >
-                                        <option value="">All Branches</option>
-                                        {branchesLoading ? (
-                                            <option disabled>Loading branches...</option>
-                                        ) : branchesError ? (
-                                            <option disabled>Failed to load branches</option>
-                                        ) : branches.length > 0 ? (
-                                            branches.map((branch: any) => (
-                                                <option key={branch.id} value={branch.branch_name}>
-                                                    {branch.branch_name}
-                                                </option>
-                                            ))
-                                        ) : (
-                                            <option disabled>No branches found</option>
-                                        )}
-                                    </select>
+                            <select
+                                value={selectedBranch}
+                                onChange={(e) => setSelectedBranch(e.target.value)}
+                                className="w-full px-4 py-2.5 shadow rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-semibold appearance-none bg-white pr-10"
+                                disabled={branchesLoading || !!branchesError}
+                            >
+                                <option value="">All Branches</option>
+                                {branchesLoading ? (
+                                    <option disabled>Loading branches...</option>
+                                ) : branchesError ? (
+                                    <option disabled>Failed to load branches</option>
+                                ) : branches.length > 0 ? (
+                                    branches.map((branch: any) => (
+                                        <option key={branch.id} value={branch.branch_name}>
+                                            {branch.branch_name}
+                                        </option>
+                                    ))
+                                ) : (
+                                    <option disabled>No branches found</option>
+                                )}
+                            </select>
 
-                                    {/* Custom dropdown arrow */}
-                                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                        <img src={arrow_down_dropdown} alt="" />
-                                    </div>
-                                </div>
+                            {/* Custom dropdown arrow */}
+                            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                <img src={arrow_down_dropdown} alt="" />
+                            </div>
+                        </div>
 
                         {/* Leave Type Filter */}
                         <div className="flex-1 min-w-50 relative">
-                            <select 
+                            <select
                                 className="w-full px-4 py-2.5 shadow rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-semibold appearance-none bg-white pr-10"
                                 value={leaveTypeFilter}
                                 onChange={(e) => setLeaveTypeFilter(e.target.value)}
@@ -328,7 +328,7 @@ export default function DashboardPage() {
 
                         {/* Status Filter */}
                         <div className="flex-1 min-w-50 relative">
-                            <select 
+                            <select
                                 className="w-full px-4 py-2.5 shadow rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-semibold appearance-none bg-white pr-10"
                                 value={statusFilter}
                                 onChange={(e) => setStatusFilter(e.target.value)}
@@ -370,8 +370,8 @@ export default function DashboardPage() {
                             </div>
 
                             {/* Action Buttons */}
-                            <div className="flex items-center space-x-3 w-full sm:w-auto">
-                                <button className="flex items-center justify-center space-x-2 px-4 py-2.5 border border-gray-300 rounded-lg cursor-pointer transition-colors w-full sm:w-auto">
+                            <div className="flex md:flex-row flex-col items-center md:space-x-3 w-full sm:w-auto">
+                                <button className="flex items-center justify-center space-x-2 md:px-4 py-2.5 my-2 border border-gray-300 rounded-lg cursor-pointer transition-colors w-full sm:w-auto">
                                     <img src={export_pdf} alt="Add" className="w-7 h-7" />
                                     <span className="text-lg font-medium text-black">Export PDF</span>
                                 </button>
@@ -386,16 +386,17 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Table Container */}
-                <div className="relative mx-6 shadow rounded-xl overflow-hidden">
+                <div className="relative mx-2 md:mx-6 shadow rounded-xl overflow-hidden">
                     <div className="px-6 py-3">
                         <h2 className="text-xl font-bold text-gray-900">Leave Requests</h2>
                     </div>
                     {/* Table */}
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead>
-                                <tr className="bg-gray-50">
-                                    {/* <th className="px-6 py-3 text-left">
+                    <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+                        <div className="xl:col-span-4 overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200">
+                                <thead>
+                                    <tr className="bg-gray-50">
+                                        {/* <th className="px-6 py-3 text-left">
                                         <input
                                             type="checkbox"
                                             checked={selectedRequestIds.length === filteredRequests.length && filteredRequests.length > 0}
@@ -403,58 +404,58 @@ export default function DashboardPage() {
                                             className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
                                         />
                                     </th> */}
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
-                                        Request ID
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
-                                        Emp Name
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
-                                        Emp ID
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
-                                        Role
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
-                                        Leave Type
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
-                                        From
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
-                                        To
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
-                                        Days
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
-                                        Status
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
-                                        Action
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white">
-                                {/*  Show spinner inside table */}
-                                {isLoading ? (
-                                    <tr>
-                                        <td colSpan={11} className="px-6 py-16 text-center">
-                                            <div className="flex justify-center items-center">
-                                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-                                            </div>
-                                        </td>
+                                        <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
+                                            Request ID
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
+                                            Emp Name
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
+                                            Emp ID
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
+                                            Role
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
+                                            Leave Type
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
+                                            From
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
+                                            To
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
+                                            Days
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
+                                            Status
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
+                                            Action
+                                        </th>
                                     </tr>
-                                ) : filteredRequests.length === 0 ? (
-                                    <tr>
-                                        <td colSpan={11} className="px-6 py-8 text-center text-gray-500">
-                                            No leave requests found
-                                        </td>
-                                    </tr>
-                                ) : (
-                                    filteredRequests.map((request: any) => (
-                                        <tr key={request.id} className="hover:bg-gray-50">
-                                            {/* <td className="px-6 py-4 whitespace-nowrap">
+                                </thead>
+                                <tbody className="bg-white">
+                                    {/*  Show spinner inside table */}
+                                    {isLoading ? (
+                                        <tr>
+                                            <td colSpan={11} className="px-6 py-16 text-center">
+                                                <div className="flex justify-center items-center">
+                                                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ) : filteredRequests.length === 0 ? (
+                                        <tr>
+                                            <td colSpan={11} className="px-6 py-8 text-center text-gray-500">
+                                                No leave requests found
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        filteredRequests.map((request: any) => (
+                                            <tr key={request.id} className="hover:bg-gray-50">
+                                                {/* <td className="px-6 py-4 whitespace-nowrap">
                                                 <input
                                                     type="checkbox"
                                                     checked={selectedRequestIds.includes(request.id)}
@@ -463,100 +464,102 @@ export default function DashboardPage() {
                                                 />
                                             </td> */}
 
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-[14px] font-semibold text-gray-900">
-                                                    REQ-{String(request.id).padStart(3, '0')}
-                                                </div>
-                                            </td>
-
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
-                                                        <span className="text-sm font-semibold text-gray-600">
-                                                            {request.user?.name?.charAt(0).toUpperCase() || 'U'}
-                                                        </span>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="text-[14px] font-semibold text-gray-900">
+                                                        REQ-{String(request.id).padStart(3, '0')}
                                                     </div>
+                                                </td>
+
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+                                                            <span className="text-sm font-semibold text-gray-600">
+                                                                {request.user?.name?.charAt(0).toUpperCase() || 'U'}
+                                                            </span>
+                                                        </div>
+                                                        <div className="text-[14px] font-medium text-gray-900">
+                                                            {request.user?.name || 'N/A'}
+                                                        </div>
+                                                    </div>
+                                                </td>
+
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="text-[14px] text-gray-900 font-mono">
+                                                        {request.user?.employee_id || 'N/A'}
+                                                    </div>
+                                                </td>
+
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="text-[14px] text-gray-900">
+                                                        {request.user?.role?.role_name || 'N/A'}
+                                                    </div>
+                                                </td>
+
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <span className="inline-flex px-3 py-1 text-xs font-medium bg-blue-50 text-blue-700 rounded-lg">
+                                                        {request.leave_type?.leave_type_name || 'N/A'}
+                                                    </span>
+                                                </td>
+
+                                                <td className="px-6 py-4 whitespace-nowrap">
                                                     <div className="text-[14px] font-medium text-gray-900">
-                                                        {request.user?.name || 'N/A'}
+                                                        {formatDate(request.start_date)}
                                                     </div>
-                                                </div>
-                                            </td>
+                                                </td>
 
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-[14px] text-gray-900 font-mono">
-                                                    {request.user?.employee_id || 'N/A'}
-                                                </div>
-                                            </td>
-
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-[14px] text-gray-900">
-                                                    {request.user?.role?.role_name || 'N/A'}
-                                                </div>
-                                            </td>
-
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className="inline-flex px-3 py-1 text-xs font-medium bg-blue-50 text-blue-700 rounded-lg">
-                                                    {request.leave_type?.leave_type_name || 'N/A'}
-                                                </span>
-                                            </td>
-
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-[14px] font-medium text-gray-900">
-                                                    {formatDate(request.start_date)}
-                                                </div>
-                                            </td>
-
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-[14px] font-medium text-gray-900">
-                                                    {formatDate(request.end_date)}
-                                                </div>
-                                            </td>
-
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-[14px] font-bold text-gray-900">
-                                                    {request.total_days} days
-                                                </div>
-                                            </td>
-
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className={`inline-flex px-3 py-1 text-xs font-medium rounded-lg ${getStatusColor(request.status)}`}>
-                                                    {request.status}
-                                                </span>
-                                            </td>
-
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                {request.status === 'Pending' ? (
-                                                    <div className="flex items-center gap-2">
-                                                        <button
-                                                            onClick={() => handleApprove(request.id)}
-                                                            disabled={isApproving}
-                                                            className="w-8 h-8 flex items-center justify-center text-green-600 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
-                                                            title="Approve"
-                                                        >
-                                                            <img src={tick_icon} alt="Approve" />
-                                                        </button>
-
-                                                        <button
-                                                            onClick={() => handleReject(request.id)}
-                                                            disabled={isRejecting}
-                                                            className="w-8 h-8 flex items-center justify-center text-red-600 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
-                                                            title="Reject"
-                                                        >
-                                                            <img src={cross_icon} alt="Reject" />
-                                                        </button>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="text-[14px] font-medium text-gray-900">
+                                                        {formatDate(request.end_date)}
                                                     </div>
-                                                ) : (
-                                                    <div className="text-xs text-gray-400">
+                                                </td>
+
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="text-[14px] font-bold text-gray-900">
+                                                        {request.total_days} days
+                                                    </div>
+                                                </td>
+
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <span className={`inline-flex px-3 py-1 text-xs font-medium rounded-lg ${getStatusColor(request.status)}`}>
                                                         {request.status}
-                                                    </div>
-                                                )}
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
+                                                    </span>
+                                                </td>
+
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    {request.status === 'Pending' ? (
+                                                        <div className="flex items-center gap-2">
+                                                            <button
+                                                                onClick={() => handleApprove(request.id)}
+                                                                disabled={isApproving}
+                                                                className="w-8 h-8 flex items-center justify-center text-green-600 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+                                                                title="Approve"
+                                                            >
+                                                                <img src={tick_icon} alt="Approve" />
+                                                            </button>
+
+                                                            <button
+                                                                onClick={() => handleReject(request.id)}
+                                                                disabled={isRejecting}
+                                                                className="w-8 h-8 flex items-center justify-center text-red-600 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+                                                                title="Reject"
+                                                            >
+                                                                <img src={cross_icon} alt="Reject" />
+                                                            </button>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="text-xs text-gray-400">
+                                                            {request.status}
+                                                        </div>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
+
                 </div>
             </div>
         </DashboardLayout>

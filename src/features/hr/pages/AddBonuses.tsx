@@ -279,7 +279,7 @@ export default function AddBonusesPage() {
                 {/* Products Table Section */}
                 <div className="bg-white rounded-xl overflow-hidden">
                     {/* Filters Row */}
-                    <div className="p-6">
+                    <div className="p-2 md:p-6">
                         <div className="flex flex-wrap md:flex-nowrap items-center gap-4">
                             {/* Branch Filter */}
                             <div className="flex-1 min-w-50 relative">
@@ -371,85 +371,88 @@ export default function AddBonusesPage() {
                     </div>
 
                     {/* Table Container */}
-                    <div className="relative mx-6 shadow rounded-xl mb-8">
+                    <div className="relative mx-2 md:mx-6 shadow rounded-xl mb-8">
                         <div className="px-6 py-3 flex justify-between items-center">
                             <h2 className="text-xl font-bold text-gray-900">Employees</h2>
                         </div>
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-gray-200">
-                                <thead>
-                                    <tr className="bg-gray-50">
-                                        <th className="px-6 py-3 text-left">
-                                            <input
-                                                type="checkbox"
-                                                checked={filteredEmployees.length > 0 && selectedEmployeeIds.length === filteredEmployees.length}
-                                                onChange={handleSelectAll}
-                                                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
-                                            />
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
-                                            EMP Name
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
-                                            EMP ID
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
-                                            ROLE
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
-                                            Branch
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody className="bg-white">
-                                    {employeeLoading ? (
-                                        <tr>
-                                            <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
-                                                Loading employees...
-                                            </td>
+                        <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+                            <div className="xl:col-span-4 overflow-x-auto">
+                                <table className="min-w-full divide-y divide-gray-200">
+                                    <thead>
+                                        <tr className="bg-gray-50">
+                                            <th className="px-6 py-3 text-left">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={filteredEmployees.length > 0 && selectedEmployeeIds.length === filteredEmployees.length}
+                                                    onChange={handleSelectAll}
+                                                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                                                />
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
+                                                EMP Name
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
+                                                EMP ID
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
+                                                ROLE
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
+                                                Branch
+                                            </th>
                                         </tr>
-                                    ) : filteredEmployees.length === 0 ? (
-                                        <tr>
-                                            <td colSpan={5} className="px-6 py-8 text-center">
-                                                <div className="text-gray-500 text-lg">
-                                                    {searchQuery || selectedBranch || selectedRole ?
-                                                        'No employees found matching your filters.' :
-                                                        'No employees available.'
-                                                    }
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ) : (
-                                        filteredEmployees.map((employee: Employee) => (
-                                            <tr key={employee.id} className="hover:bg-gray-50">
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={selectedEmployeeIds.includes(employee.id)}
-                                                        onChange={() => handleEmployeeSelect(employee.id)}
-                                                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
-                                                    />
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-[14px] font-medium text-gray-900">{employee.name}</div>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-[14px] text-gray-900 font-mono">{employee.employee_id}</div>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <span className="inline-flex px-3 py-1 text-xs font-medium">
-                                                        {employee.role?.role_name || 'N/A'}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-[14px] text-gray-900">{employee.branch?.branch_name || 'N/A'}</div>
+                                    </thead>
+                                    <tbody className="bg-white">
+                                        {employeeLoading ? (
+                                            <tr>
+                                                <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                                                    Loading employees...
                                                 </td>
                                             </tr>
-                                        ))
-                                    )}
-                                </tbody>
-                            </table>
+                                        ) : filteredEmployees.length === 0 ? (
+                                            <tr>
+                                                <td colSpan={5} className="px-6 py-8 text-center">
+                                                    <div className="text-gray-500 text-lg">
+                                                        {searchQuery || selectedBranch || selectedRole ?
+                                                            'No employees found matching your filters.' :
+                                                            'No employees available.'
+                                                        }
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ) : (
+                                            filteredEmployees.map((employee: Employee) => (
+                                                <tr key={employee.id} className="hover:bg-gray-50">
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={selectedEmployeeIds.includes(employee.id)}
+                                                            onChange={() => handleEmployeeSelect(employee.id)}
+                                                            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                                                        />
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <div className="text-[14px] font-medium text-gray-900">{employee.name}</div>
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <div className="text-[14px] text-gray-900 font-mono">{employee.employee_id}</div>
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <span className="inline-flex px-3 py-1 text-xs font-medium">
+                                                            {employee.role?.role_name || 'N/A'}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <div className="text-[14px] text-gray-900">{employee.branch?.branch_name || 'N/A'}</div>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
+
                     </div>
 
                     {/* Bonus Creation Form */}

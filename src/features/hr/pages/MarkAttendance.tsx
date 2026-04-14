@@ -357,7 +357,7 @@ export default function DashboardPage() {
                 {/* Products Table Section */}
                 <div className="bg-white rounded-xl overflow-hidden">
                     {/* Filters Row */}
-                    <div className="p-6">
+                    <div className="md:p-6 p-2">
                         <div className="flex flex-wrap md:flex-nowrap items-center gap-4">
                             {/* Date Filter */}
                             <div className="flex-1 min-w-50 relative">
@@ -524,130 +524,133 @@ export default function DashboardPage() {
                     </div>
 
                     {/* Table Container */}
-                    <div className="relative mx-6 shadow rounded-xl mb-8">
+                    <div className="relative mx-2 md:mx-6 shadow rounded-xl mb-8">
                         <div className="px-6 py-3 flex justify-between items-center">
                             <h2 className="text-xl font-bold text-gray-900">Attendance Records</h2>
                             {attendanceLoading && (
                                 <span className="text-sm text-gray-500">Loading attendance...</span>
                             )}
                         </div>
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-gray-200">
-                                <thead>
-                                    <tr className="bg-gray-50">
-                                        <th className="px-6 py-3 text-left">
-                                            <input
-                                                type="checkbox"
-                                                checked={filteredEmployees.length > 0 && selectedProductIds.length === filteredEmployees.length}
-                                                onChange={handleSelectAll}
-                                                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
-                                            />
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
-                                            EMP Name
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
-                                            EMP ID
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
-                                            ROLE
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
-                                            Branch
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
-                                            STATUS
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
-                                            CHECK-IN
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
-                                            CHECK-OUT
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
-                                            TOTAL HOURS
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody className="bg-white">
-                                    {employeeLoading ? (
-                                        <tr>
-                                            <td colSpan={9} className="px-6 py-8 text-center text-gray-500">
-                                                Loading employees...
-                                            </td>
+                        <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+                            <div className="xl:col-span-4 overflow-x-auto">
+                                <table className="min-w-full divide-y divide-gray-200">
+                                    <thead>
+                                        <tr className="bg-gray-50">
+                                            <th className="px-6 py-3 text-left">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={filteredEmployees.length > 0 && selectedProductIds.length === filteredEmployees.length}
+                                                    onChange={handleSelectAll}
+                                                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                                                />
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
+                                                EMP Name
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
+                                                EMP ID
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
+                                                ROLE
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
+                                                Branch
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
+                                                STATUS
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
+                                                CHECK-IN
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
+                                                CHECK-OUT
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-md font-medium text-[#37638F] uppercase tracking-wider">
+                                                TOTAL HOURS
+                                            </th>
                                         </tr>
-                                    ) : filteredEmployees.length === 0 ? (
-                                        <tr>
-                                            <td colSpan={9} className="px-6 py-8 text-center">
-                                                <div className="text-gray-500 text-lg">
-                                                    {searchQuery || selectedBranch || selectedRole ?
-                                                        'No employees found matching your filters.' :
-                                                        'No employees available.'
-                                                    }
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ) : (
-                                        filteredEmployees.map((employee: Employee) => {
-                                            const attendance = getEmployeeAttendance(employee.id);
-                                            const status = attendance?.status || 'Not Marked';
+                                    </thead>
+                                    <tbody className="bg-white">
+                                        {employeeLoading ? (
+                                            <tr>
+                                                <td colSpan={9} className="px-6 py-8 text-center text-gray-500">
+                                                    Loading employees...
+                                                </td>
+                                            </tr>
+                                        ) : filteredEmployees.length === 0 ? (
+                                            <tr>
+                                                <td colSpan={9} className="px-6 py-8 text-center">
+                                                    <div className="text-gray-500 text-lg">
+                                                        {searchQuery || selectedBranch || selectedRole ?
+                                                            'No employees found matching your filters.' :
+                                                            'No employees available.'
+                                                        }
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ) : (
+                                            filteredEmployees.map((employee: Employee) => {
+                                                const attendance = getEmployeeAttendance(employee.id);
+                                                const status = attendance?.status || 'Not Marked';
 
-                                            return (
-                                                <tr key={employee.id} className="hover:bg-gray-50">
-                                                    <td className="px-6 py-4 whitespace-nowrap">
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={selectedProductIds.includes(employee.id)}
-                                                            onChange={() => handleProductSelect(employee.id)}
-                                                            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
-                                                        />
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap">
-                                                        <div className="text-[14px] font-medium text-gray-900">{employee.name}</div>
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap">
-                                                        <div className="text-[14px] text-gray-900 font-mono">{employee.employee_id}</div>
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap">
-                                                        <span className="inline-flex px-3 py-1 text-xs font-medium">
-                                                            {employee.role?.role_name || 'N/A'}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap">
-                                                        <div className="text-[14px] text-gray-900">{employee.branch?.branch_name || 'N/A'}</div>
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap">
-                                                        <div className={`text-[14px] font-medium ${status === 'Present' ? 'text-green-600' :
+                                                return (
+                                                    <tr key={employee.id} className="hover:bg-gray-50">
+                                                        <td className="px-2 md:px-6 py-4 md:py-2 whitespace-nowrap">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={selectedProductIds.includes(employee.id)}
+                                                                onChange={() => handleProductSelect(employee.id)}
+                                                                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                                                            />
+                                                        </td>
+                                                        <td className="px-2 md:px-6 py-4 md:py-2 whitespace-nowrap">
+                                                            <div className="text-[14px] font-medium text-gray-900">{employee.name}</div>
+                                                        </td>
+                                                        <td className="px-2 md:px-6 py-4 md:py-2 whitespace-nowrap">
+                                                            <div className="text-[14px] text-gray-900 font-mono">{employee.employee_id}</div>
+                                                        </td>
+                                                        <td className="px-2 md:px-6 py-4 md:py-2 whitespace-nowrap">
+                                                            <span className="inline-flex px-3 py-1 text-xs font-medium">
+                                                                {employee.role?.role_name || 'N/A'}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-2 md:px-6 py-4 md:py-2 whitespace-nowrap">
+                                                            <div className="text-[14px] text-gray-900">{employee.branch?.branch_name || 'N/A'}</div>
+                                                        </td>
+                                                        <td className="px-2 md:px-6 py-4 md:py-2 whitespace-nowrap">
+                                                            <div className={`text-[14px] font-medium ${status === 'Present' ? 'text-green-600' :
                                                                 status === 'Absent' ? 'text-red-600' :
                                                                     status === 'Late' ? 'text-yellow-600' :
                                                                         status === 'Half Day' ? 'text-orange-600' :
                                                                             'text-gray-400'
-                                                            }`}>
-                                                            {status}
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap">
-                                                        <div className="text-[14px] text-gray-600">
-                                                            {attendance?.check_in || '--:--'}
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap">
-                                                        <div className="text-[14px] text-gray-600">
-                                                            {attendance?.check_out || '--:--'}
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap">
-                                                        <div className="text-[14px] text-gray-600">
-                                                            {attendance?.total_hours ? `${attendance.total_hours} min` : '--'}
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })
-                                    )}
-                                </tbody>
-                            </table>
+                                                                }`}>
+                                                                {status}
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-2 md:px-6 py-4 md:py-2 whitespace-nowrap">
+                                                            <div className="text-[14px] text-gray-600">
+                                                                {attendance?.check_in || '--:--'}
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-2 md:px-6 py-4 md:py-2 whitespace-nowrap">
+                                                            <div className="text-[14px] text-gray-600">
+                                                                {attendance?.check_out || '--:--'}
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-2 md:px-6 py-4 md:py-2 whitespace-nowrap">
+                                                            <div className="text-[14px] text-gray-600">
+                                                                {attendance?.total_hours ? `${attendance.total_hours} min` : '--'}
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
+
 
                         {/* Pagination */}
                         {paginationInfo && paginationInfo.last_page > 1 && (
@@ -663,8 +666,8 @@ export default function DashboardPage() {
                                             onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                                             disabled={currentPage === 1}
                                             className={`px-3 py-1 rounded ${currentPage === 1
-                                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                                 }`}
                                         >
                                             Previous
@@ -676,8 +679,8 @@ export default function DashboardPage() {
                                             onClick={() => setCurrentPage(prev => Math.min(prev + 1, paginationInfo.last_page))}
                                             disabled={currentPage === paginationInfo.last_page}
                                             className={`px-3 py-1 rounded ${currentPage === paginationInfo.last_page
-                                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                                 }`}
                                         >
                                             Next
@@ -783,8 +786,8 @@ export default function DashboardPage() {
                                     onClick={handleMarkAttendance}
                                     disabled={selectedProductIds.length === 0 || !attendanceStatus || isLoading}
                                     className={`w-full px-6 py-3 font-medium rounded-lg transition-colors cursor-pointer ${selectedProductIds.length > 0 && attendanceStatus && !isLoading
-                                            ? 'text-black hover:text-white border border-[#6155F5] hover:bg-[#6155F5]'
-                                            : 'text-gray-400 border border-gray-300 cursor-not-allowed'
+                                        ? 'text-black hover:text-white border border-[#6155F5] hover:bg-[#6155F5]'
+                                        : 'text-gray-400 border border-gray-300 cursor-not-allowed'
                                         }`}
                                 >
                                     {isLoading ? 'Saving...' : 'Save Attendance'}

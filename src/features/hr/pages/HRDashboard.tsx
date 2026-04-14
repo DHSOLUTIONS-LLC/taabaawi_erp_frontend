@@ -38,38 +38,38 @@ interface Employee {
     is_active: boolean;
 }
 
-interface Category {
-    id: number;
-    category_name: string;
-    parent_id: number | null;
-    description: string | null;
-    image: string | null;
-    is_active: boolean;
-    created_at: string;
-    updated_at: string;
-    deleted_at: string | null;
-    parent: any | null;
-    children: any[];
-}
+// interface Category {
+//     id: number;
+//     category_name: string;
+//     parent_id: number | null;
+//     description: string | null;
+//     image: string | null;
+//     is_active: boolean;
+//     created_at: string;
+//     updated_at: string;
+//     deleted_at: string | null;
+//     parent: any | null;
+//     children: any[];
+// }
 
-interface CategoryResponse {
-    success: boolean;
-    data: {
-        current_page: number;
-        data: Category[];
-        first_page_url: string;
-        from: number;
-        last_page: number;
-        last_page_url: string;
-        links: Array<{ url: string | null; label: string; active: boolean }>;
-        next_page_url: string | null;
-        path: string;
-        per_page: number;
-        prev_page_url: string | null;
-        to: number;
-        total: number;
-    };
-}
+// interface CategoryResponse {
+//     success: boolean;
+//     data: {
+//         current_page: number;
+//         data: Category[];
+//         first_page_url: string;
+//         from: number;
+//         last_page: number;
+//         last_page_url: string;
+//         links: Array<{ url: string | null; label: string; active: boolean }>;
+//         next_page_url: string | null;
+//         path: string;
+//         per_page: number;
+//         prev_page_url: string | null;
+//         to: number;
+//         total: number;
+//     };
+// }
 
 export default function EmployeeDashboardPage() {
     const { user } = useAppSelector((state: RootState) => state.auth);
@@ -137,15 +137,15 @@ export default function EmployeeDashboardPage() {
 
     useEffect(() => {
         if (employees.length > 0) {
-            const active = employees.filter((e:Employee) => e.is_active === true).length;
-            const inactive = employees.filter((e:Employee) => e.is_active === false).length;
+            const active = employees.filter((e: Employee) => e.is_active === true).length;
+            const inactive = employees.filter((e: Employee) => e.is_active === false).length;
             setAttendanceData({
                 active: active,
                 onLeave: 0,
                 absent: inactive
             })
         }
-    },[employees])
+    }, [employees])
 
 
 
@@ -158,7 +158,7 @@ export default function EmployeeDashboardPage() {
     // Filter states
     const [_selectedDate, setSelectedDate] = useState<string>('');
     const [selectedBranch, setSelectedBranch] = useState<string>('');
-    const [selectedCategory, setSelectedCategory] = useState<string>('');
+    const [_selectedCategory, setSelectedCategory] = useState<string>('');
     const [selectedStatus, setSelectedStatus] = useState<string>('');
 
     // Filter employees based on all criteria
@@ -495,180 +495,127 @@ export default function EmployeeDashboardPage() {
 
     return (
         <DashboardLayout>
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
                 {/* First Row - Stats */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
                     {/* Left Column - Circular Graph Card */}
-                    <div className="lg:col-span-5 bg-white rounded-lg p-2">
-                        <div className="flex items-start justify-between">
-
+                    <div className="lg:col-span-5 bg-white rounded-lg p-2 sm:p-3">
+                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 sm:gap-0">
                             {/* LEFT CONTENT */}
-                            <div className="flex flex-col gap-3 p-12">
-
-                                <div className="flex items-center justify-between gap-6">
-                                    <span className="text-[16px] text-[#87AFF9] font-medium">Active</span>
-                                    <span className="text-gray-900 font-semibold text-[16px]"> {employees.filter((e: Employee) => e.is_active).length} </span>
+                            <div className="flex flex-col gap-3 p-4 sm:p-6 md:p-8 lg:p-12 order-2 sm:order-1">
+                                <div className="flex items-center justify-between gap-4 sm:gap-6">
+                                    <span className="text-sm sm:text-[16px] text-[#87AFF9] font-medium">Active</span>
+                                    <span className="text-gray-900 font-semibold text-sm sm:text-[16px]"> {employees.filter((e: Employee) => e.is_active).length} </span>
                                 </div>
 
-                                <div className="flex items-center justify-between gap-6">
-                                    <span className="text-[16px] text-[#AEE9BD] font-medium">On Leave</span>
-                                    <span className="text-gray-900 font-semibold text-[16px]">{dashboardStatistics.on_leave_today || 0}</span>
+                                <div className="flex items-center justify-between gap-4 sm:gap-6">
+                                    <span className="text-sm sm:text-[16px] text-[#AEE9BD] font-medium">On Leave</span>
+                                    <span className="text-gray-900 font-semibold text-sm sm:text-[16px]">{dashboardStatistics.on_leave_today || 0}</span>
                                 </div>
 
-                                <div className="flex items-center justify-between gap-6">
-                                    <span className="text-[16px] text-[#F6C8BA] font-medium">Absent</span>
-                                    <span className="text-gray-900 font-semibold text-[16px]">{employees.filter((e: Employee) => !e.is_active).length}</span>
+                                <div className="flex items-center justify-between gap-4 sm:gap-6">
+                                    <span className="text-sm sm:text-[16px] text-[#F6C8BA] font-medium">Absent</span>
+                                    <span className="text-gray-900 font-semibold text-sm sm:text-[16px]">{employees.filter((e: Employee) => !e.is_active).length}</span>
                                 </div>
-
                             </div>
 
                             {/* RIGHT CHART */}
-                            <div className="flex justify-end">
+                            <div className="flex justify-center sm:justify-end order-1 sm:order-2">
                                 <AttendanceChart
                                     data={attendanceData}
-                                    showControls={true}
                                     onValueChange={handlePercentageChange}
                                 />
                             </div>
-
                         </div>
                     </div>
 
                     {/* Right Column - Info Cards */}
-                    <div className="lg:col-span-7 space-y-8">
+                    <div className="lg:col-span-7 space-y-4 sm:space-y-6 md:space-y-8">
                         {/* First Row - 2 Cards */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
                             {/* Total Employees Card */}
-                            <div className="bg-white rounded-lg p-6">
-                                <p className="text-gray-500 text-lg font-medium mb-20">Total Employees</p>
-                                <p className="text-4xl font-bold text-gray-900">{dashboardStatistics.total_employees || 0}</p>
+                            <div className="bg-white rounded-lg p-4 sm:p-5 md:p-6">
+                                <p className="text-gray-500 text-base sm:text-lg font-medium mb-12 sm:mb-16 md:mb-20">Total Employees</p>
+                                <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">{dashboardStatistics.total_employees || 0}</p>
                             </div>
 
                             {/* Present Today Card */}
-                            <div className="bg-white rounded-lg p-6">
-                                <p className="text-gray-500 text-lg font-medium mb-20">Present Today</p>
-                                <p className="text-4xl font-bold text-gray-900">{dashboardStatistics.present_today || 0}</p>
+                            <div className="bg-white rounded-lg p-4 sm:p-5 md:p-6">
+                                <p className="text-gray-500 text-base sm:text-lg font-medium mb-12 sm:mb-16 md:mb-20">Present Today</p>
+                                <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">{dashboardStatistics.present_today || 0}</p>
                             </div>
                         </div>
 
                         {/* Second Row - 3 Cards */}
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
                             {/* Pending Leave Requests Card */}
-                            <div className="bg-white rounded-lg p-6">
-                                <p className="text-gray-500 text-lg font-medium mb-20">Pending Leave Requests</p>
-                                <p className="text-3xl font-bold text-gray-900">{dashboardStatistics.pending_leave_requests || 0}</p>
+                            <div className="bg-white rounded-lg p-4 sm:p-5 md:p-6">
+                                <p className="text-gray-500 text-base sm:text-lg font-medium mb-12 sm:mb-16 md:mb-20">Pending Leave Requests</p>
+                                <p className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">{dashboardStatistics.pending_leave_requests || 0}</p>
                             </div>
 
                             {/* On Leave Today Card */}
-                            <div className="bg-white rounded-lg p-6">
-                                <p className="text-gray-500 text-lg font-medium mb-20">On Leave Today</p>
-                                <p className="text-3xl font-bold text-green-600">{dashboardStatistics.on_leave_today || 0}</p>
+                            <div className="bg-white rounded-lg p-4 sm:p-5 md:p-6">
+                                <p className="text-gray-500 text-base sm:text-lg font-medium mb-12 sm:mb-16 md:mb-20">On Leave Today</p>
+                                <p className="text-xl sm:text-2xl md:text-3xl font-bold text-green-600">{dashboardStatistics.on_leave_today || 0}</p>
                             </div>
 
                             {/* Absent Card */}
-                            <div className="bg-white rounded-lg p-6">
-                                <p className="text-gray-500 text-lg font-medium mb-20">Absent</p>
-                                <p className="text-3xl font-bold text-red-600">{dashboardStatistics.absent_today || 0}</p>
+                            <div className="bg-white rounded-lg p-4 sm:p-5 md:p-6">
+                                <p className="text-gray-500 text-base sm:text-lg font-medium mb-12 sm:mb-16 md:mb-20">Absent</p>
+                                <p className="text-xl sm:text-2xl md:text-3xl font-bold text-red-600">{dashboardStatistics.absent_today || 0}</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Second Row - Table and Action Buttons */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
                     {/* Left Column - Employee Table (10/12) */}
-                    <div className="lg:col-span-10 bg-white rounded-lg p-6">
+                    <div className="lg:col-span-10 bg-white rounded-lg p-4 sm:p-5 md:p-6 overflow-x-auto">
                         {/* Filters Section */}
-                        <div className="py-6">
-                            <div className="flex flex-wrap md:flex-nowrap items-center gap-4">
+                        <div className="py-3 sm:py-4 md:py-6">
+                            <div className="flex flex-wrap lg:flex-nowrap items-center gap-3 sm:gap-4">
                                 {/* Date Filter */}
-                                <div className="flex-1 min-w-50 relative">
-                                    {/* Trigger Field */}
+                                <div className="flex-1 min-w-[150px] sm:min-w-[180px] relative">
                                     <div
                                         onClick={() => setShowCustomDatePicker(!showCustomDatePicker)}
-                                        className="w-full px-4 py-2.5 shadow rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-semibold bg-white pr-10 cursor-pointer flex items-center justify-between"
+                                        className="w-full px-3 sm:px-4 py-2 sm:py-2.5 shadow rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-semibold bg-white pr-8 sm:pr-10 cursor-pointer flex items-center justify-between text-sm sm:text-base"
                                     >
-                                        <span>
+                                        <span className="truncate">
                                             {customStartDate && customEndDate
                                                 ? `${customStartDate} - ${customEndDate}`
                                                 : "Date"}
                                         </span>
-
-                                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                            <img src={dropdown_arrow_icon} alt="" />
+                                        <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:pr-3 pointer-events-none">
+                                            <img src={dropdown_arrow_icon} alt="" className="w-3 h-3 sm:w-4 sm:h-4" />
                                         </div>
                                     </div>
 
-                                    {/*  Your Custom Date Picker */}
                                     {showCustomDatePicker && (
-                                        <div className="absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-xl z-50 p-4 w-[320px]">
-                                            <div className="space-y-3">
+                                        <div className="absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-xl z-50 p-3 sm:p-4 w-[280px] sm:w-[320px]">
+                                            <div className="space-y-2 sm:space-y-3">
                                                 <div className="flex justify-between items-center">
-                                                    <h4 className="font-medium text-gray-900">
-                                                        Select Date Range
-                                                    </h4>
-                                                    <button
-                                                        onClick={() => {
-                                                            setShowCustomDatePicker(false);
-                                                            setCustomStartDate("");
-                                                            setCustomEndDate("");
-                                                        }}
-                                                        className="text-gray-500 hover:text-gray-700"
-                                                    >
-                                                        ✕
-                                                    </button>
+                                                    <h4 className="font-medium text-gray-900 text-sm sm:text-base">Select Date Range</h4>
+                                                    <button onClick={() => {
+                                                        setShowCustomDatePicker(false);
+                                                        setCustomStartDate("");
+                                                        setCustomEndDate("");
+                                                    }} className="text-gray-500 hover:text-gray-700 text-sm">✕</button>
                                                 </div>
-
-                                                {/* Dates in One Row */}
-                                                <div className="grid grid-cols-2 gap-3">
+                                                <div className="grid grid-cols-2 gap-2 sm:gap-3">
                                                     <div>
-                                                        <label className="block text-xs font-medium text-gray-600 mb-1">
-                                                            Start Date
-                                                        </label>
-                                                        <input
-                                                            type="date"
-                                                            value={customStartDate}
-                                                            onChange={(e) => setCustomStartDate(e.target.value)}
-                                                            className="w-full px-3 py-1.5 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm"
-                                                        />
+                                                        <label className="block text-xs font-medium text-gray-600 mb-1">Start Date</label>
+                                                        <input type="date" value={customStartDate} onChange={(e) => setCustomStartDate(e.target.value)} className="w-full px-2 sm:px-3 py-1.5 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm" />
                                                     </div>
-
                                                     <div>
-                                                        <label className="block text-xs font-medium text-gray-600 mb-1">
-                                                            End Date
-                                                        </label>
-                                                        <input
-                                                            type="date"
-                                                            value={customEndDate}
-                                                            onChange={(e) => setCustomEndDate(e.target.value)}
-                                                            className="w-full px-3 py-1.5 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm"
-                                                        />
+                                                        <label className="block text-xs font-medium text-gray-600 mb-1">End Date</label>
+                                                        <input type="date" value={customEndDate} onChange={(e) => setCustomEndDate(e.target.value)} className="w-full px-2 sm:px-3 py-1.5 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm" />
                                                     </div>
                                                 </div>
-
-                                                {/* Buttons */}
                                                 <div className="flex justify-end space-x-2 pt-2">
-                                                    <button
-                                                        onClick={() => {
-                                                            setCustomStartDate("");
-                                                            setCustomEndDate("");
-                                                        }}
-                                                        className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800"
-                                                    >
-                                                        Clear
-                                                    </button>
-
-                                                    <button
-                                                        onClick={() => {
-                                                            // 🔥 Call your API here
-                                                            console.log("Start:", customStartDate);
-                                                            console.log("End:", customEndDate);
-                                                            setShowCustomDatePicker(false);
-                                                        }}
-                                                        className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
-                                                    >
-                                                        Apply
-                                                    </button>
+                                                    <button onClick={() => { setCustomStartDate(""); setCustomEndDate(""); }} className="px-2 sm:px-3 py-1 text-xs sm:text-sm text-gray-600 hover:text-gray-800">Clear</button>
+                                                    <button onClick={() => { setShowCustomDatePicker(false); }} className="px-2 sm:px-3 py-1 text-xs sm:text-sm bg-blue-600 text-white rounded hover:bg-blue-700">Apply</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -676,135 +623,78 @@ export default function EmployeeDashboardPage() {
                                 </div>
 
                                 {/* Branches Filter */}
-                                <div className="flex-1 min-w-50 relative">
-                                    <select
-                                        value={selectedBranch}
-                                        onChange={(e) => setSelectedBranch(e.target.value)}
-                                        className="w-full px-4 py-2.5 shadow rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-semibold appearance-none bg-white pr-10"
-                                        disabled={branchesLoading || !!branchesError}
-                                    >
+                                <div className="flex-1 min-w-[150px] sm:min-w-[180px] relative">
+                                    <select value={selectedBranch} onChange={(e) => setSelectedBranch(e.target.value)} className="w-full px-3 sm:px-4 py-2 sm:py-2.5 shadow rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-semibold appearance-none bg-white pr-8 sm:pr-10 text-sm sm:text-base" disabled={branchesLoading || !!branchesError}>
                                         <option value="">All Branches</option>
-                                        {branchesLoading ? (
-                                            <option disabled>Loading branches...</option>
-                                        ) : branchesError ? (
-                                            <option disabled>Failed to load branches</option>
-                                        ) : branches.length > 0 ? (
-                                            branches.map((branch) => (
-                                                <option key={branch.id} value={branch.branch_name}>
-                                                    {branch.branch_name}
-                                                </option>
-                                            ))
-                                        ) : (
-                                            <option disabled>No branches found</option>
-                                        )}
+                                        {branchesLoading ? <option disabled>Loading branches...</option> : branchesError ? <option disabled>Failed to load branches</option> : branches.length > 0 ? branches.map((branch) => (<option key={branch.id} value={branch.branch_name}>{branch.branch_name}</option>)) : <option disabled>No branches found</option>}
                                     </select>
-
-                                    {/* Custom dropdown arrow */}
-                                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                        <img src={arrow_down_dropdown} alt="" />
+                                    <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:pr-3 pointer-events-none">
+                                        <img src={arrow_down_dropdown} alt="" className="w-3 h-3 sm:w-4 sm:h-4" />
                                     </div>
                                 </div>
 
-                          
-
-                                {/* Stock Status Filter */}
-                                <div className="flex-1 min-w-50 relative">
-                                    <select
-                                        value={selectedStatus}
-                                        onChange={(e) => setSelectedStatus(e.target.value)}
-                                        className="w-full px-4 py-2.5 shadow rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-semibold appearance-none bg-white pr-10"
-                                    >
+                                {/* Status Filter */}
+                                <div className="flex-1 min-w-[150px] sm:min-w-[180px] relative">
+                                    <select value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)} className="w-full px-3 sm:px-4 py-2 sm:py-2.5 shadow rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-semibold appearance-none bg-white pr-8 sm:pr-10 text-sm sm:text-base">
                                         <option value="">All Status</option>
                                         <option value="Active">Active</option>
                                         <option value="On Leave">On Leave</option>
                                         <option value="Inactive">Inactive</option>
                                     </select>
-
-                                    {/* Custom dropdown arrow */}
-                                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                        <img src={arrow_down_dropdown} alt="" />
+                                    <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:pr-3 pointer-events-none">
+                                        <img src={arrow_down_dropdown} alt="" className="w-3 h-3 sm:w-4 sm:h-4" />
                                     </div>
                                 </div>
 
-                                {/* Filter Icon Button - Fixed small width */}
+                                {/* Filter Icon Button */}
                                 <div className="shrink-0">
-                                    <button
-                                        className="w-14 h-14 flex items-center justify-center cursor-pointer hover:bg-gray-50 rounded-lg"
-                                        onClick={() => {
-                                            // Reset all filters
-                                            setSelectedDate('');
-                                            setSelectedBranch('');
-                                            setSelectedCategory('');
-                                            setSelectedStatus('');
-                                            setSearchQuery('');
-                                            setCurrentPage(1);
-                                        }}
-                                    >
-                                        <img src={filterIcon} alt="Filter" className="w-7 h-7" />
+                                    <button className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 flex items-center justify-center cursor-pointer hover:bg-gray-50 rounded-lg" onClick={() => {
+                                        setSelectedDate('');
+                                        setSelectedBranch('');
+                                        setSelectedCategory('');
+                                        setSelectedStatus('');
+                                        setSearchQuery('');
+                                        setCurrentPage(1);
+                                    }}>
+                                        <img src={filterIcon} alt="Filter" className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" />
                                     </button>
                                 </div>
                             </div>
 
                             {/* Search and Actions Row */}
-                            <div className="pt-6">
-                                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                                    {/* Search Field with Auto-complete */}
-                                    <div className="relative w-full sm:w-auto">
+                            <div className="pt-4 sm:pt-5 md:pt-6">
+                                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+                                    <div className="relative w-full sm:flex-1">
                                         <div className="relative">
                                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
-                                                <img src={search_icon} alt="Search" className="w-5 h-5 text-gray-400" />
+                                                <img src={search_icon} alt="Search" className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
                                             </div>
-                                            <input
-                                                type="text"
-                                                value={searchQuery}
-                                                onChange={handleSearchChange}
-                                                onFocus={() => searchQuery.length >= 2 && setShowSuggestions(true)}
-                                                onBlur={handleSearchBlur}
-                                                placeholder="Search by Employee ID, Name, Role, Branch..."
-                                                className="pl-10 pr-4 py-2.5 border border-[#00000080] rounded-lg focus:border-blue-500 w-full sm:w-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            />
-
-                                            {/* Search Suggestions Dropdown */}
+                                            <input type="text" value={searchQuery} onChange={handleSearchChange} onFocus={() => searchQuery.length >= 2 && setShowSuggestions(true)} onBlur={handleSearchBlur} placeholder="Search by Employee ID, Name, Role, Branch..." className="pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-2.5 border border-[#00000080] rounded-lg focus:border-blue-500 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" />
                                             {showSuggestions && searchSuggestions.length > 0 && (
                                                 <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg">
                                                     <ul className="py-1 max-h-60 overflow-auto">
                                                         {searchSuggestions.map((suggestion, index) => (
-                                                            <li
-                                                                key={index}
-                                                                className="px-4 py-2.5 hover:bg-gray-50 cursor-pointer text-gray-700 hover:text-gray-900 border-b border-gray-100 last:border-b-0"
-                                                                onClick={() => handleSuggestionClick(suggestion)}
-                                                            >
+                                                            <li key={index} className="px-3 sm:px-4 py-2 hover:bg-gray-50 cursor-pointer text-gray-700 hover:text-gray-900 border-b border-gray-100 last:border-b-0 text-sm" onClick={() => handleSuggestionClick(suggestion)}>
                                                                 <div className="flex items-center space-x-2">
-                                                                    <img src={search_icon} alt="" className="w-4 h-4 text-gray-400" />
-                                                                    <span className="text-sm">{suggestion}</span>
+                                                                    <img src={search_icon} alt="" className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
+                                                                    <span className="text-xs sm:text-sm">{suggestion}</span>
                                                                 </div>
                                                             </li>
                                                         ))}
                                                     </ul>
-                                                    <div className="px-4 py-2 text-xs text-gray-500 bg-gray-50 border-t border-gray-200">
-                                                        {searchSuggestions.length} suggestion{searchSuggestions.length !== 1 ? 's' : ''}
-                                                    </div>
+                                                    <div className="px-3 sm:px-4 py-2 text-xs text-gray-500 bg-gray-50 border-t border-gray-200">{searchSuggestions.length} suggestion{searchSuggestions.length !== 1 ? 's' : ''}</div>
                                                 </div>
                                             )}
                                         </div>
                                     </div>
-
-                                    {/* Action Buttons */}
-                                    <div className="flex items-center space-x-3 w-full sm:w-auto">
-                                        <button
-                                            onClick={handleExportToPDF}
-                                            className="flex items-center justify-center space-x-2 px-4 py-2.5 border border-gray-300 rounded-lg cursor-pointer transition-colors w-full sm:w-auto hover:bg-gray-50"
-                                        >
-                                            <img src={export_pdf} alt="Add" className="w-7 h-7" />
-                                            <span className="text-lg font-medium text-black">Export PDF</span>
+                                    <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                                        <button onClick={handleExportToPDF} className="flex items-center justify-center space-x-2 px-3 sm:px-4 py-2 border border-gray-300 rounded-lg cursor-pointer transition-colors w-full sm:w-auto hover:bg-gray-50">
+                                            <img src={export_pdf} alt="Add" className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" />
+                                            <span className="text-sm sm:text-base md:text-lg font-medium text-black">Export PDF</span>
                                         </button>
-
-                                        <button
-                                            onClick={handleExportToExcel}
-                                            className="flex items-center justify-center space-x-2 px-4 py-2.5 border border-gray-300 rounded-lg cursor-pointer transition-colors w-full sm:w-auto hover:bg-gray-50"
-                                        >
-                                            <img src={export_excel} alt="Export" className="w-7 h-7" />
-                                            <span className="text-lg font-medium text-gray-700">Export Excel</span>
+                                        <button onClick={handleExportToExcel} className="flex items-center justify-center space-x-2 px-3 sm:px-4 py-2 border border-gray-300 rounded-lg cursor-pointer transition-colors w-full sm:w-auto hover:bg-gray-50">
+                                            <img src={export_excel} alt="Export" className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" />
+                                            <span className="text-sm sm:text-base md:text-lg font-medium text-gray-700">Export Excel</span>
                                         </button>
                                     </div>
                                 </div>
@@ -812,89 +702,60 @@ export default function EmployeeDashboardPage() {
                         </div>
 
                         {/* Table */}
-                        <div className="overflow-x-auto shadow">
-                            <div className="mb-4">
-                                <h2 className="text-[18px] font-semibold text-gray-900 px-4 pt-2 rounded-xl">Employees</h2>
-                                {searchQuery && (
-                                    <p className="text-sm text-gray-600 mt-1 px-4">
-                                        Showing {filteredEmployees.length} of {employees.length} employees
-                                        {searchQuery && ` for "${searchQuery}"`}
-                                    </p>
-                                )}
+                        <div className="overflow-x-auto shadow rounded-lg">
+                            <div className="mb-3 sm:mb-4">
+                                <h2 className="text-base sm:text-lg md:text-[18px] font-semibold text-gray-900 px-3 sm:px-4 pt-2 rounded-xl">Employees</h2>
+                                {searchQuery && (<p className="text-xs sm:text-sm text-gray-600 mt-1 px-3 sm:px-4">Showing {filteredEmployees.length} of {employees.length} employees{searchQuery && ` for "${searchQuery}"`}</p>)}
                             </div>
-                            <table className="min-w-full">
-                                <thead className='bg-[#F6F8FA] overflow-hidden'>
+                            <table className="min-w-[800px] sm:min-w-full">
+                                <thead className="bg-[#F6F8FA]">
                                     <tr className="border-b border-gray-200">
-                                        <th className="px-4 py-3 text-left text-[16px] font-semibold text-[#37638F] uppercase tracking-wider">
-                                            EMP ID
-                                        </th>
-                                        <th className="px-4 py-3 text-left text-[16px] font-semibold text-[#37638F] uppercase tracking-wider">
-                                            NAME
-                                        </th>
-                                        <th className="px-4 py-3 text-left text-[16px] font-semibold text-[#37638F] uppercase tracking-wider">
-                                            ROLE
-                                        </th>
-                                        <th className="px-4 py-3 text-left text-[16px] font-semibold text-[#37638F] uppercase tracking-wider">
-                                            BRANCH
-                                        </th>
-                                        <th className="px-4 py-3 text-left text-[16px] font-semibold text-[#37638F] uppercase tracking-wider">
-                                            DEPARTMENT
-                                        </th>
-                                        <th className="px-4 py-3 text-left text-[16px] font-semibold text-[#37638F] uppercase tracking-wider">
-                                            STATUS
-                                        </th>
+                                        <th className="px-3 sm:px-4 py-2 sm:py-3 text-left text-sm sm:text-[16px] font-semibold text-[#37638F] uppercase tracking-wider whitespace-nowrap">EMP ID</th>
+                                        <th className="px-3 sm:px-4 py-2 sm:py-3 text-left text-sm sm:text-[16px] font-semibold text-[#37638F] uppercase tracking-wider whitespace-nowrap">NAME</th>
+                                        <th className="px-3 sm:px-4 py-2 sm:py-3 text-left text-sm sm:text-[16px] font-semibold text-[#37638F] uppercase tracking-wider whitespace-nowrap">ROLE</th>
+                                        <th className="px-3 sm:px-4 py-2 sm:py-3 text-left text-sm sm:text-[16px] font-semibold text-[#37638F] uppercase tracking-wider whitespace-nowrap">BRANCH</th>
+                                        <th className="px-3 sm:px-4 py-2 sm:py-3 text-left text-sm sm:text-[16px] font-semibold text-[#37638F] uppercase tracking-wider whitespace-nowrap">DEPARTMENT</th>
+                                        <th className="px-3 sm:px-4 py-2 sm:py-3 text-left text-sm sm:text-[16px] font-semibold text-[#37638F] uppercase tracking-wider whitespace-nowrap">STATUS</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-200">
-                                    {currentItems.length === 0 ? (
-                                        <tr>
-
-                                        </tr>
-                                    ) : (
-                                        currentItems.map((employee: Employee, index: number) => (
-                                            <tr key={index} className="hover:bg-gray-50 transition-colors" onClick={(e) => { e.stopPropagation(); handleRowClick(employee.id) }}>
-                                                <td className="px-4 py-4 whitespace-nowrap">
-                                                    <span className="text-sm font-medium text-gray-900">{employee.employee_id}</span>
-                                                </td>
-                                                <td className="px-4 py-4 whitespace-nowrap">
-                                                    <span className="text-sm font-medium text-gray-900">{employee.name}</span>
-                                                </td>
-                                                <td className="px-4 py-4 whitespace-nowrap">
-                                                    <span className="text-sm text-gray-700">{employee.role?.role_name ?? 'N/A'}</span>
-                                                </td>
-                                                <td className="px-4 py-4 whitespace-nowrap">
-                                                    <span className="text-sm text-gray-700">{employee.branch?.branch_name ?? 'N/A'}</span>
-                                                </td>
-                                                <td className="px-4 py-4 whitespace-nowrap">
-                                                    <span className="text-sm text-gray-700">{employee.department ?? 'N/A'}</span>
-                                                </td>
-                                                <td className="px-4 py-4 whitespace-nowrap">
-                                                    <span className={`text-sm font-medium ${getStatusColor(employee.is_active ? 'Active' : 'Inactive')}`}>
-                                                        {employee.is_active ? 'Active' : 'Inactive'}
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        ))
-                                    )}
-
                                     {employeeLoading ? (
                                         <tr>
-                                            <td colSpan={6} className="px-4 py-8 text-center">
+                                            <td colSpan={6} className="px-3 sm:px-4 py-8 text-center">
                                                 <div className="flex justify-center items-center">
-                                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                                                    <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-blue-500"></div>
                                                 </div>
                                             </td>
                                         </tr>
                                     ) : currentItems.length === 0 ? (
                                         <tr>
-                                            <td colSpan={6} className="px-4 py-8 text-center">
-                                                <div className="text-gray-500 text-lg">No employees found.</div>
+                                            <td colSpan={6} className="px-3 sm:px-4 py-8 text-center">
+                                                <div className="text-gray-500 text-sm sm:text-base">No employees found.</div>
                                             </td>
                                         </tr>
                                     ) : (
-                                        currentItems.map((employee: Employee) => (
-                                            <tr key={employee.id} className="hover:bg-gray-50 transition-colors" onClick={() => handleRowClick(employee.id)}>
-                                                {/* cells here */}
+                                        currentItems.map((employee: Employee, index: number) => (
+                                            <tr key={index} className="hover:bg-gray-50 transition-colors cursor-pointer" onClick={(e) => { e.stopPropagation(); handleRowClick(employee.id) }}>
+                                                <td className="px-3 sm:px-4 py-3 sm:py-4 whitespace-nowrap">
+                                                    <span className="text-xs sm:text-sm font-medium text-gray-900">{employee.employee_id}</span>
+                                                </td>
+                                                <td className="px-3 sm:px-4 py-3 sm:py-4 whitespace-nowrap">
+                                                    <span className="text-xs sm:text-sm font-medium text-gray-900">{employee.name}</span>
+                                                </td>
+                                                <td className="px-3 sm:px-4 py-3 sm:py-4 whitespace-nowrap">
+                                                    <span className="text-xs sm:text-sm text-gray-700">{employee.role?.role_name ?? 'N/A'}</span>
+                                                </td>
+                                                <td className="px-3 sm:px-4 py-3 sm:py-4 whitespace-nowrap">
+                                                    <span className="text-xs sm:text-sm text-gray-700">{employee.branch?.branch_name ?? 'N/A'}</span>
+                                                </td>
+                                                <td className="px-3 sm:px-4 py-3 sm:py-4 whitespace-nowrap">
+                                                    <span className="text-xs sm:text-sm text-gray-700">{employee.department ?? 'N/A'}</span>
+                                                </td>
+                                                <td className="px-3 sm:px-4 py-3 sm:py-4 whitespace-nowrap">
+                                                    <span className={`text-xs sm:text-sm font-medium ${getStatusColor(employee.is_active ? 'Active' : 'Inactive')}`}>
+                                                        {employee.is_active ? 'Active' : 'Inactive'}
+                                                    </span>
+                                                </td>
                                             </tr>
                                         ))
                                     )}
@@ -903,130 +764,60 @@ export default function EmployeeDashboardPage() {
                         </div>
 
                         {/* Pagination */}
-                        <div className="px-4 py-4">
-                            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                                <div className="text-sm text-gray-500">
-                                    Showing <span className="font-medium">{startIndex + 1}</span> to <span className="font-medium">
-                                        {Math.min(endIndex, filteredEmployees.length)}
-                                    </span> of <span className="font-medium">{filteredEmployees.length}</span> employees
+                        <div className="px-2 sm:px-3 md:px-4 py-3 sm:py-4">
+                            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+                                <div className="text-xs sm:text-sm text-gray-500 text-center sm:text-left">
+                                    Showing <span className="font-medium">{startIndex + 1}</span> to <span className="font-medium">{Math.min(endIndex, filteredEmployees.length)}</span> of <span className="font-medium">{filteredEmployees.length}</span> employees
                                 </div>
-                                <div className="flex items-center space-x-2">
-                                    <button
-                                        onClick={handlePrevious}
-                                        disabled={currentPage === 1}
-                                        className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${currentPage === 1
-                                            ? 'text-gray-400 bg-gray-100 cursor-not-allowed'
-                                            : 'text-gray-700 bg-gray-100 hover:bg-gray-200'
-                                            }`}
-                                    >
-                                        Previous
-                                    </button>
-
+                                <div className="flex flex-wrap items-center justify-center gap-1 sm:gap-2">
+                                    <button onClick={handlePrevious} disabled={currentPage === 1} className={`px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium rounded-lg transition-colors ${currentPage === 1 ? 'text-gray-400 bg-gray-100 cursor-not-allowed' : 'text-gray-700 bg-gray-100 hover:bg-gray-200'}`}>Previous</button>
                                     {getPageNumbers().map((pageNumber, index) => (
                                         pageNumber === '...' ? (
-                                            <span key={`ellipsis-${index}`} className="px-3 py-1.5 text-sm text-gray-500">
-                                                ...
-                                            </span>
+                                            <span key={`ellipsis-${index}`} className="px-2 sm:px-3 py-1 text-xs sm:text-sm text-gray-500">...</span>
                                         ) : (
-                                            <button
-                                                key={`page-${pageNumber}`}
-                                                onClick={() => handlePageChange(pageNumber as number)}
-                                                className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${currentPage === pageNumber
-                                                    ? 'text-blue-600 bg-blue-50 hover:bg-blue-100'
-                                                    : 'text-gray-700 hover:bg-gray-100'
-                                                    }`}
-                                            >
-                                                {pageNumber}
-                                            </button>
+                                            <button key={`page-${pageNumber}`} onClick={() => handlePageChange(pageNumber as number)} className={`px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium rounded-lg transition-colors ${currentPage === pageNumber ? 'text-blue-600 bg-blue-50 hover:bg-blue-100' : 'text-gray-700 hover:bg-gray-100'}`}>{pageNumber}</button>
                                         )
                                     ))}
-
-                                    <button
-                                        onClick={handleNext}
-                                        disabled={currentPage === totalPages}
-                                        className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${currentPage === totalPages
-                                            ? 'text-gray-400 bg-gray-100 cursor-not-allowed'
-                                            : 'text-gray-700 bg-gray-100 hover:bg-gray-200'
-                                            }`}
-                                    >
-                                        Next
-                                    </button>
+                                    <button onClick={handleNext} disabled={currentPage === totalPages} className={`px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium rounded-lg transition-colors ${currentPage === totalPages ? 'text-gray-400 bg-gray-100 cursor-not-allowed' : 'text-gray-700 bg-gray-100 hover:bg-gray-200'}`}>Next</button>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Right Column - Action Buttons (2/12) */}
-                    <div className="lg:col-span-2 bg-white flex flex-row justify-between lg:flex-col gap-4 p-8 items-center">
-                        {/* Add New Employee */}
-                        <Link to={`${basePath}/hr/add_employee`}>
-                            <button className="w-24 h-36 lg:w-28 lg:h-40 p-2 bg-white border border-gray-100 rounded-full hover:bg-gray-50 transition-colors shadow-sm hover:shadow-lg relative flex items-center justify-center group cursor-pointer overflow-hidden">
-                                {/* Icon */}
-                                <img
-                                    src={add_icon}
-                                    alt=""
-                                    className="bg-[#CFF6FF] p-4 rounded-full transition-transform duration-300 group-hover:-translate-y-8"
-                                />
-                                {/* Hover Text */}
-                                <span className="absolute bottom-4 text-sm text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-center w-full px-1">
-                                    Add New Employee
-                                </span>
+                    {/* Right Column - Action Buttons */}
+                    <div className="lg:col-span-2 bg-white flex flex-row lg:flex-col justify-between gap-3 sm:gap-4 p-4 sm:p-6 md:p-8 items-center">
+                        <Link to={`${basePath}/hr/add_employee`} className="flex-1 lg:flex-none">
+                            <button className="w-full lg:w-24 xl:w-28 h-full lg:h-36 xl:h-40 bg-white border border-gray-100 rounded-full hover:bg-gray-50 transition-colors shadow-sm hover:shadow-lg relative flex items-center justify-center group cursor-pointer overflow-hidden">
+                                <img src={add_icon} alt="" className="bg-[#CFF6FF] p-3 sm:p-4 rounded-full transition-transform duration-300 group-hover:-translate-y-8 w-10 h-10 sm:w-12 sm:h-12" />
+                                <span className="absolute bottom-2 sm:bottom-4 text-xs sm:text-sm text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-center w-full px-1">Add New Employee</span>
                             </button>
                         </Link>
 
-                        {/* Mark Attendance */}
-                        <Link to={`${basePath}/hr/mark_attendance`}>
-                            <button className="w-24 h-36 lg:w-28 lg:h-40 bg-white border border-gray-100 rounded-full hover:bg-gray-50 transition-colors shadow-sm hover:shadow-lg relative flex items-center justify-center group cursor-pointer overflow-hidden">
-                                <img
-                                    src={user_icon}
-                                    alt=""
-                                    className="bg-[#CFF6FF] p-4 rounded-full transition-transform duration-300 group-hover:-translate-y-8"
-                                />
-                                <span className="absolute bottom-4 text-sm text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-center w-full px-1">
-                                    Mark Attendance (Manual)
-                                </span>
+                        <Link to={`${basePath}/hr/mark_attendance`} className="flex-1 lg:flex-none">
+                            <button className="w-full lg:w-24 xl:w-28 h-full lg:h-36 xl:h-40 bg-white border border-gray-100 rounded-full hover:bg-gray-50 transition-colors shadow-sm hover:shadow-lg relative flex items-center justify-center group cursor-pointer overflow-hidden">
+                                <img src={user_icon} alt="" className="bg-[#CFF6FF] p-3 sm:p-4 rounded-full transition-transform duration-300 group-hover:-translate-y-8 w-10 h-10 sm:w-12 sm:h-12" />
+                                <span className="absolute bottom-2 sm:bottom-4 text-xs sm:text-sm text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-center w-full px-1">Mark Attendance (Manual)</span>
                             </button>
                         </Link>
 
-                        {/* Review Leave Request */}
-                        <Link to={`${basePath}/hr/leave_requests`}>
-                            <button className="w-24 h-36 lg:w-28 lg:h-40 bg-white border border-gray-100 rounded-full hover:bg-gray-50 transition-colors shadow-sm hover:shadow-lg relative flex items-center justify-center group cursor-pointer overflow-hidden">
-                                <img
-                                    src={back_icon}
-                                    alt=""
-                                    className="bg-[#CFF6FF] p-4 rounded-full transition-transform duration-300 group-hover:-translate-y-8"
-                                />
-                                <span className="absolute bottom-4 text-sm text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-center w-full px-1">
-                                    Review Leave Request
-                                </span>
+                        <Link to={`${basePath}/hr/leave_requests`} className="flex-1 lg:flex-none">
+                            <button className="w-full lg:w-24 xl:w-28 h-full lg:h-36 xl:h-40 bg-white border border-gray-100 rounded-full hover:bg-gray-50 transition-colors shadow-sm hover:shadow-lg relative flex items-center justify-center group cursor-pointer overflow-hidden">
+                                <img src={back_icon} alt="" className="bg-[#CFF6FF] p-3 sm:p-4 rounded-full transition-transform duration-300 group-hover:-translate-y-8 w-10 h-10 sm:w-12 sm:h-12" />
+                                <span className="absolute bottom-2 sm:bottom-4 text-xs sm:text-sm text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-center w-full px-1">Review Leave Request</span>
                             </button>
                         </Link>
 
-                        {/* Add Bonus */}
-                        <Link to={`${basePath}/hr/add_bonuses`}>
-                            <button className="w-24 h-36 lg:w-28 lg:h-40 bg-white border border-gray-100 rounded-full hover:bg-gray-50 transition-colors shadow-sm hover:shadow-lg relative flex items-center justify-center group cursor-pointer overflow-hidden">
-                                <img
-                                    src={bonuses_icon}
-                                    alt=""
-                                    className="w-14 bg-[#CFF6FF] p-4 rounded-full transition-transform duration-300 group-hover:-translate-y-8"
-                                />
-                                <span className="absolute bottom-8 text-sm text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-center w-full px-1">
-                                    Add Bonus
-                                </span>
+                        <Link to={`${basePath}/hr/add_bonuses`} className="flex-1 lg:flex-none">
+                            <button className="w-full lg:w-24 xl:w-28 h-full lg:h-36 xl:h-40 bg-white border border-gray-100 rounded-full hover:bg-gray-50 transition-colors shadow-sm hover:shadow-lg relative flex items-center justify-center group cursor-pointer overflow-hidden">
+                                <img src={bonuses_icon} alt="" className="w-10 h-10 sm:w-12 sm:h-12 bg-[#CFF6FF] p-3 sm:p-4 rounded-full transition-transform duration-300 group-hover:-translate-y-8" />
+                                <span className="absolute bottom-6 sm:bottom-8 text-xs sm:text-sm text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-center w-full px-1">Add Bonus</span>
                             </button>
                         </Link>
 
-                        {/* Payroll */}
-                        <Link to={`${basePath}/hr/payrolls`}>
-                            <button className="w-24 h-36 lg:w-28 lg:h-40 bg-white border border-gray-100 rounded-full hover:bg-gray-50 transition-colors shadow-sm hover:shadow-lg relative flex items-center justify-center group cursor-pointer overflow-hidden">
-                                <img
-                                    src={payrolls}
-                                    alt=""
-                                    className="w-14 bg-[#CFF6FF] p-4 rounded-full transition-transform duration-300 group-hover:-translate-y-8"
-                                />
-                                <span className="absolute bottom-8 text-sm text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-center w-full px-1">
-                                    Payroll
-                                </span>
+                        <Link to={`${basePath}/hr/payrolls`} className="flex-1 lg:flex-none">
+                            <button className="w-full lg:w-24 xl:w-28 h-full lg:h-36 xl:h-40 bg-white border border-gray-100 rounded-full hover:bg-gray-50 transition-colors shadow-sm hover:shadow-lg relative flex items-center justify-center group cursor-pointer overflow-hidden">
+                                <img src={payrolls} alt="" className="w-10 h-10 sm:w-12 sm:h-12 bg-[#CFF6FF] p-3 sm:p-4 rounded-full transition-transform duration-300 group-hover:-translate-y-8" />
+                                <span className="absolute bottom-6 sm:bottom-8 text-xs sm:text-sm text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-center w-full px-1">Payroll</span>
                             </button>
                         </Link>
                     </div>

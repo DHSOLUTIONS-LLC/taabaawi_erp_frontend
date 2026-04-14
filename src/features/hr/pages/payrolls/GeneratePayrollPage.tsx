@@ -10,12 +10,16 @@ import type { RootState } from '../../../../app/store';
 import { useAppSelector } from '../../../../app/hooks';
 
 export default function GeneratePayrollPage() {
-        const { user } = useAppSelector((state: RootState) => state.auth);
-    
+    const { user } = useAppSelector((state: RootState) => state.auth);
+    // Check user role
+    const isSuperAdmin = user?.role?.role_name === 'Super Admin';
+    const isHR = user?.role?.role_name === 'HR';
+    const basePath = isSuperAdmin ? '/admin' : isHR ? '' : '';
+
     const navigate = useNavigate();
     const [selectedEmployee, setSelectedEmployee] = useState('');
     const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
-    
+
     const { data: employeesResponse } = useGetEmployeesQuery();
     const [generatePayroll, { isLoading }] = useGeneratePayrollMutation();
 
@@ -23,7 +27,7 @@ export default function GeneratePayrollPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         if (!selectedEmployee || !selectedMonth) {
             alert('Please select employee and month');
             return;
@@ -34,9 +38,9 @@ export default function GeneratePayrollPage() {
                 user_id: parseInt(selectedEmployee),
                 payroll_month: selectedMonth
             }).unwrap();
-            
+
             alert('Payroll generated successfully');
-            navigate('/hr/payrolls');
+            navigate(`${basePath}/hr/payrolls`);
         } catch (error: any) {
             console.error('Failed to generate payroll:', error);
             alert(error?.data?.message || 'Failed to generate payroll');
@@ -54,14 +58,11 @@ export default function GeneratePayrollPage() {
         });
     }
 
-     // Check user role
-    const isSuperAdmin = user?.role?.role_name === 'Super Admin';
-    const isHR = user?.role?.role_name === 'HR';
-    const basePath = isSuperAdmin ? '/admin' : isHR ? '' : '';
+
 
     return (
         <DashboardLayout>
-            <div className="space-y-6 p-4 md:p-6">
+            <div className="space-y-6">
                 {/* Header */}
                 <div className="flex flex-row justify-between items-center">
                     <Link to={`${basePath}/hr/payrolls`} className="flex flex-row items-center">
@@ -71,7 +72,7 @@ export default function GeneratePayrollPage() {
                 </div>
 
                 {/* Form */}
-                <div className="bg-white rounded-xl p-6 max-w-2xl mx-auto">
+                <div className="bg-white rounded-xl p-2 md:p-6 max-w-full mx-auto">
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {/* Employee Selection */}
                         <div>

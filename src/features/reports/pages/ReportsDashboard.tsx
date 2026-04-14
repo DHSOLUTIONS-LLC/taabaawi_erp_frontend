@@ -26,7 +26,7 @@ export const ReportsDashboard = () => {
     <DashboardLayout>
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-full mx-auto px-2 md:px-6 lg:px-8 py-4 sm:py-6 lg:py-4">
-          
+
           {/* Header */}
           <div className="mb-6 sm:mb-8">
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Reports & Analytics</h1>
@@ -51,8 +51,8 @@ export const ReportsDashboard = () => {
 
             {mobileMenuOpen && (
               <>
-                <div 
-                  className="fixed inset-0 z-10" 
+                <div
+                  className="fixed inset-0 z-10"
                   onClick={() => setMobileMenuOpen(false)}
                 />
                 <div className="absolute left-4 right-4 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg z-20">

@@ -76,12 +76,12 @@ const BlogPostDetailPage: React.FC = () => {
     );
   };
 
-return (
+  return (
     <>
       <DashboardLayout>
         <div className="min-h-screen bg-gray-50">
           <div className="max-w-full mx-auto">
-            
+
             {/* Navigation */}
             <div className="mb-2">
               <button

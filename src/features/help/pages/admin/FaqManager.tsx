@@ -30,6 +30,7 @@ export default function FaqManager() {
   const [showModal, setShowModal] = useState(false);
   const [selectedFaq, setSelectedFaq] = useState<HelpFaq | null>(null);
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   // Filters
   const [filters, setFilters] = useState({
@@ -63,28 +64,22 @@ export default function FaqManager() {
   });
 
   // Extract data safely
-const faqs = Array.isArray(apiResponse?.data?.data) 
-  ? apiResponse.data.data 
-  : [];
+  const faqs = Array.isArray(apiResponse?.data?.data)
+    ? apiResponse.data.data
+    : [];
 
-  const total = typeof apiResponse?.data?.total === 'number' 
-  ? apiResponse.data.total 
-  : 0;
-  // Debug logs – keep until table shows data
-  console.log('API Response (raw):', apiResponse);
-  console.log('Extracted faqs (length):', faqs.length);
-  console.log('Total count:', total);
-  console.log('Loading states:', { isLoading, isFetching, error });
+  const total = typeof apiResponse?.data?.total === 'number'
+    ? apiResponse.data.total
+    : 0;
 
   // Fetch categories
   const { data: categoriesData } = useGetHelpCategoriesQuery({ is_active: true });
+  const categories = Array.isArray(categoriesData?.data) ? categoriesData.data : [];
 
   // Mutations
   const [deleteFaq] = useDeleteFaqMutation();
   const [updateFaq] = useUpdateFaqMutation();
   const [createFaq] = useCreateFaqMutation();
-
-  const categories = Array.isArray(categoriesData?.data) ? categoriesData.data : [];
 
   // Handle direct URL edit (/:id)
   useEffect(() => {
@@ -100,7 +95,7 @@ const faqs = Array.isArray(apiResponse?.data?.data)
         setShowModal(true);
       }
     }
-  }, [id, faqs]); // Depend on faqs array
+  }, [id, faqs]);
 
   const handleDelete = async (faq: HelpFaq) => {
     if (!window.confirm(`Are you sure you want to delete this FAQ?`)) return;
@@ -157,8 +152,8 @@ const faqs = Array.isArray(apiResponse?.data?.data)
       label: 'Question',
       render: (faq: HelpFaq) => (
         <div>
-          <div className="font-medium text-gray-900">{faq.question}</div>
-          <div className="text-xs text-gray-500">{faq.answer.substring(0, 80)}...</div>
+          <div className="font-medium text-gray-900 text-sm sm:text-base break-words">{faq.question}</div>
+          <div className="text-xs text-gray-500">{faq.answer.substring(0, 60)}...</div>
         </div>
       ),
     },
@@ -166,7 +161,7 @@ const faqs = Array.isArray(apiResponse?.data?.data)
       key: 'module',
       label: 'Module',
       render: (faq: HelpFaq) => (
-        <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-700">
+        <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-700 whitespace-nowrap">
           {faq.module || 'General'}
         </span>
       ),
@@ -198,9 +193,8 @@ const faqs = Array.isArray(apiResponse?.data?.data)
             e.stopPropagation();
             handleToggleFeatured(faq);
           }}
-          className={`px-2 py-1 text-xs font-medium rounded-full ${
-            faq.is_featured ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-700'
-          }`}
+          className={`px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap ${faq.is_featured ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-700'
+            }`}
         >
           {faq.is_featured ? 'Featured' : 'Regular'}
         </button>
@@ -212,9 +206,8 @@ const faqs = Array.isArray(apiResponse?.data?.data)
       className: 'text-center',
       render: (faq: HelpFaq) => (
         <span
-          className={`px-2 py-1 text-xs font-medium rounded-full ${
-            faq.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
-          }`}
+          className={`px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap ${faq.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+            }`}
         >
           {faq.is_active ? 'Active' : 'Inactive'}
         </span>
@@ -293,12 +286,12 @@ const faqs = Array.isArray(apiResponse?.data?.data)
 
   return (
     <HelpLayout>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">FAQs Management</h1>
-            <p className="text-sm text-gray-500 mt-1">Create and manage frequently asked questions</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">FAQs Management</h1>
+            <p className="text-xs sm:text-sm text-gray-500 mt-1">Create and manage frequently asked questions</p>
           </div>
           <button
             onClick={() => {
@@ -306,7 +299,7 @@ const faqs = Array.isArray(apiResponse?.data?.data)
               setSelectedFaq(null);
               setShowModal(true);
             }}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="w-full sm:w-auto flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
           >
             <img src={add_icon} alt="" className="w-4 h-4 mr-2" />
             New FAQ
@@ -314,65 +307,78 @@ const faqs = Array.isArray(apiResponse?.data?.data)
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-xl p-4 border border-gray-200">
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="flex-1 min-w-[200px]">
-              <div className="relative">
-                <img
-                  src={search_icon}
-                  alt=""
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
-                />
-                <input
-                  type="text"
-                  value={filters.search}
-                  onChange={(e) => setFilters({ ...filters, search: e.target.value, page: 1 })}
-                  placeholder="Search FAQs..."
-                  className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm"
-                />
-              </div>
+        <div className="bg-white rounded-xl p-3 sm:p-4 border border-gray-200">
+          {/* Mobile Filter Toggle */}
+          <button
+            onClick={() => setShowMobileFilters(!showMobileFilters)}
+            className="w-full sm:hidden flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg"
+          >
+            <div className="flex items-center gap-2">
+              <img src={search_icon} alt="" className="w-4 h-4" />
+              <span className="text-sm text-gray-600">Filters</span>
+              {(filters.search || filters.module || filters.category_id || filters.is_featured) && (
+                <span className="px-1.5 py-0.5 bg-blue-100 text-blue-600 rounded-full text-xs">Active</span>
+              )}
             </div>
+            <svg className={`w-4 h-4 text-gray-500 transition-transform ${showMobileFilters ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
 
-            <select
-              value={filters.module}
-              onChange={(e) => setFilters({ ...filters, module: e.target.value, page: 1 })}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
-            >
-              <option value="">All Modules</option>
-              <option value="General">General</option>
-              <option value="POS">POS</option>
-              <option value="Accounting">Accounting</option>
-            </select>
+          <div className={`${showMobileFilters ? 'block' : 'hidden'} sm:block space-y-3 sm:space-y-0 mt-3 sm:mt-0`}>
+            <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3">
+              <div className="flex-1 min-w-[200px]">
+                <div className="relative">
+                  <img src={search_icon} alt="" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
+                  <input
+                    type="text"
+                    value={filters.search}
+                    onChange={(e) => setFilters({ ...filters, search: e.target.value, page: 1 })}
+                    placeholder="Search FAQs..."
+                    className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm"
+                  />
+                </div>
+              </div>
 
-            <select
-              value={filters.category_id}
-              onChange={(e) => setFilters({ ...filters, category_id: e.target.value, page: 1 })}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
-            >
-              <option value="">All Categories</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.category_name}
-                </option>
-              ))}
-            </select>
+              <select
+                value={filters.module}
+                onChange={(e) => setFilters({ ...filters, module: e.target.value, page: 1 })}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+              >
+                <option value="">All Modules</option>
+                <option value="General">General</option>
+                <option value="POS">POS</option>
+                <option value="Accounting">Accounting</option>
+              </select>
 
-            <select
-              value={filters.is_featured}
-              onChange={(e) => setFilters({ ...filters, is_featured: e.target.value, page: 1 })}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
-            >
-              <option value="">All FAQs</option>
-              <option value="true">Featured Only</option>
-              <option value="false">Regular Only</option>
-            </select>
+              <select
+                value={filters.category_id}
+                onChange={(e) => setFilters({ ...filters, category_id: e.target.value, page: 1 })}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+              >
+                <option value="">All Categories</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>{c.category_name}</option>
+                ))}
+              </select>
 
-            <button
-              onClick={() => setFilters({ ...filters, page: 1 })}
-              className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900"
-            >
-              Clear Filters
-            </button>
+              <select
+                value={filters.is_featured}
+                onChange={(e) => setFilters({ ...filters, is_featured: e.target.value, page: 1 })}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+              >
+                <option value="">All FAQs</option>
+                <option value="true">Featured Only</option>
+                <option value="false">Regular Only</option>
+              </select>
+
+              <button
+                onClick={() => setFilters({ search: '', module: '', category_id: '', is_featured: '', page: 1, per_page: 10 })}
+                className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900"
+              >
+                Clear
+              </button>
+            </div>
           </div>
         </div>
 
@@ -389,23 +395,22 @@ const faqs = Array.isArray(apiResponse?.data?.data)
 
         {/* Pagination */}
         {total > filters.per_page && (
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-gray-500">
-              Showing {((filters.page - 1) * filters.per_page) + 1} to{' '}
-              {Math.min(filters.page * filters.per_page, total)} of {total} FAQs
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <p className="text-xs sm:text-sm text-gray-500 text-center sm:text-left">
+              Showing {((filters.page - 1) * filters.per_page) + 1} to {Math.min(filters.page * filters.per_page, total)} of {total} FAQs
             </p>
-            <div className="flex gap-2">
+            <div className="flex justify-center gap-2">
               <button
                 onClick={() => setFilters({ ...filters, page: filters.page - 1 })}
                 disabled={filters.page === 1}
-                className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40"
+                className="px-3 sm:px-4 py-1.5 sm:py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 transition-colors"
               >
                 Previous
               </button>
               <button
                 onClick={() => setFilters({ ...filters, page: filters.page + 1 })}
                 disabled={filters.page * filters.per_page >= total}
-                className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40"
+                className="px-3 sm:px-4 py-1.5 sm:py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 transition-colors"
               >
                 Next
               </button>
@@ -416,7 +421,7 @@ const faqs = Array.isArray(apiResponse?.data?.data)
         {/* Modal */}
         {showModal && (
           <div className="fixed inset-0 z-50 overflow-y-auto">
-            <div className="flex items-center justify-center min-h-screen px-4">
+            <div className="flex items-center justify-center min-h-screen px-4 py-8">
               <div
                 className="fixed inset-0 bg-gray-500 opacity-75"
                 onClick={() => {
@@ -426,8 +431,8 @@ const faqs = Array.isArray(apiResponse?.data?.data)
               />
 
               <div className="relative bg-white rounded-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-                <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-gray-900">
+                <div className="sticky top-0 bg-white border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+                  <h2 className="text-base sm:text-lg font-semibold text-gray-900">
                     {modalMode === 'edit' ? 'Edit FAQ' : 'Create New FAQ'}
                   </h2>
                   <button
@@ -435,13 +440,13 @@ const faqs = Array.isArray(apiResponse?.data?.data)
                       setShowModal(false);
                       navigate(`${basePath}/help/faqs`);
                     }}
-                    className="text-gray-400 hover:text-gray-500"
+                    className="text-gray-400 hover:text-gray-500 p-1"
                   >
-                    <img src={close_icon} alt="Close" className="w-5 h-5" />
+                    <img src={close_icon} alt="Close" className="w-4 h-4 sm:w-5 sm:h-5" />
                   </button>
                 </div>
 
-                <div className="p-6">
+                <div className="p-4 sm:p-6">
                   <HelpForm
                     fields={formFields}
                     initialData={selectedFaq || undefined}

@@ -16,58 +16,36 @@ interface Customer {
   nationality?: string;
   id_number?: string;
   id_type?: 'National' | 'Passport' | 'Civil ID';
-  
-  // Address
   address?: string;
   city?: string;
   state?: string;
   country?: string;
   postal_code?: string;
-  
-  // Company info
   company_name?: string;
   company_vat?: string;
   job_title?: string;
-  
-  // Preferences
   preferred_contact_method?: 'Email' | 'Phone' | 'SMS' | 'WhatsApp';
   preferred_language?: string;
-  communication_preferences?: {
-    email: boolean;
-    sms: boolean;
-    whatsapp: boolean;
-  };
-  
-  // Loyalty
+  communication_preferences?: { email: boolean; sms: boolean; whatsapp: boolean };
   loyalty_points: number;
   lifetime_points: number;
   loyalty_tier?: 'Bronze' | 'Silver' | 'Gold' | 'Platinum';
   loyalty_enrolled_date?: string;
-  
-  // Statistics
   total_orders: number;
   total_spent: number;
   average_order_value: number;
   last_order_date?: string;
-  
-  // Status
   status: 'Active' | 'Inactive' | 'Blocked' | 'Lead';
   is_active: boolean;
   is_verified: boolean;
-  
-  // Metadata
   notes?: string;
   tags?: string[];
   created_by?: number;
   created_at: string;
   updated_at: string;
   deleted_at?: string;
-  
-  // Relations
   createdBy?: any;
 }
-
-
 
 export interface CustomerDuplicate {
   id: number;
@@ -80,13 +58,10 @@ export interface CustomerDuplicate {
   reviewed_at?: string;
   created_at: string;
   updated_at: string;
-  
-  // Relations
   customer1?: Customer;
   customer2?: Customer;
   reviewedBy?: any;
 }
-
 
 interface Props {
   duplicates: CustomerDuplicate[];
@@ -97,11 +72,11 @@ interface Props {
 }
 
 const statusColor: Record<CustomerDuplicate['status'], string> = {
-  'Pending':            'bg-yellow-100 text-yellow-700',
-  'Confirmed Duplicate':'bg-red-100 text-red-700',
-  'Not Duplicate':      'bg-green-100 text-green-700',
-  'Ignored':            'bg-gray-100 text-gray-500',
-  'Merged':             'bg-blue-100 text-blue-700',
+  'Pending': 'bg-yellow-100 text-yellow-700',
+  'Confirmed Duplicate': 'bg-red-100 text-red-700',
+  'Not Duplicate': 'bg-green-100 text-green-700',
+  'Ignored': 'bg-gray-100 text-gray-500',
+  'Merged': 'bg-blue-100 text-blue-700',
 };
 
 export const DuplicateTable = ({ duplicates, meta, isLoading, currentPage, perPage }: Props) => {
@@ -111,67 +86,71 @@ export const DuplicateTable = ({ duplicates, meta, isLoading, currentPage, perPa
   const totalPages = meta ? Math.ceil(meta.total / perPage) : 1;
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+
+    <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+      <div className="xl:col-span-4 overflow-x-auto">
+        <table className="w-full text-sm min-w-[700px]">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
               {['Customer 1', 'Customer 2', 'Match Score', 'Matched Fields', 'Status', 'Actions'].map(h => (
-                <th key={h} className="px-4 py-3 text-left font-medium text-gray-500">{h}</th>
+                <th key={h} className="px-3 sm:px-4 py-3 text-left font-medium text-gray-500 whitespace-nowrap">{h}</th>
               ))}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
             {isLoading
               ? Array.from({ length: perPage }).map((_, i) => (
-                  <tr key={i} className="animate-pulse">
-                    {Array.from({ length: 6 }).map((_, j) => (
-                      <td key={j} className="px-4 py-3"><div className="h-4 bg-gray-100 rounded w-3/4" /></td>
-                    ))}
-                  </tr>
-                ))
+                <tr key={i} className="animate-pulse">
+                  {Array.from({ length: 6 }).map((_, j) => (
+                    <td key={j} className="px-3 sm:px-4 py-3"><div className="h-4 bg-gray-100 rounded w-3/4" /></td>
+                  ))}
+                </tr>
+              ))
               : duplicates.length === 0
-              ? (
+                ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-10 text-center text-gray-400">
+                    <td colSpan={6} className="px-3 sm:px-4 py-10 text-center text-gray-400">
                       No duplicates found
                     </td>
                   </tr>
                 )
-              : duplicates.map(d => (
+                : duplicates.map(d => (
                   <tr key={d.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3">
-                      <div className="font-medium text-gray-800">{d.customer1?.full_name}</div>
+                    <td className="px-3 sm:px-4 py-3">
+                      <div className="font-medium text-gray-800 text-sm">{d.customer1?.full_name}</div>
                       <div className="text-xs text-gray-400">{d.customer1?.email}</div>
                     </td>
-                    <td className="px-4 py-3">
-                      <div className="font-medium text-gray-800">{d.customer2?.full_name}</div>
+                    <td className="px-3 sm:px-4 py-3">
+                      <div className="font-medium text-gray-800 text-sm">{d.customer2?.full_name}</div>
                       <div className="text-xs text-gray-400">{d.customer2?.email}</div>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-3 sm:px-4 py-3">
                       <div className="flex items-center gap-2">
-                        <div className="h-1.5 w-16 bg-gray-100 rounded-full overflow-hidden">
+                        <div className="h-1.5 w-12 sm:w-16 bg-gray-100 rounded-full overflow-hidden">
                           <div
                             className={`h-full rounded-full ${d.similarity_score >= 80 ? 'bg-red-500' : d.similarity_score >= 60 ? 'bg-yellow-500' : 'bg-green-500'}`}
                             style={{ width: `${d.similarity_score}%` }}
                           />
                         </div>
-                        <span className="font-medium text-gray-700">{d.similarity_score}%</span>
+                        <span className="font-medium text-gray-700 text-xs sm:text-sm">{d.similarity_score}%</span>
                       </div>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-3 sm:px-4 py-3">
                       <div className="flex flex-wrap gap-1">
-                        {d.matching_fields?.map(f => (
+                        {d.matching_fields?.slice(0, 2).map(f => (
                           <span key={f} className="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">{f}</span>
                         ))}
+                        {d.matching_fields?.length > 2 && (
+                          <span className="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">+{d.matching_fields.length - 2}</span>
+                        )}
                       </div>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-3 sm:px-4 py-3">
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColor[d.status]}`}>
                         {d.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-3 sm:px-4 py-3">
                       {d.status === 'Pending' && (
                         <div className="flex items-center gap-1">
                           <button
@@ -206,20 +185,24 @@ export const DuplicateTable = ({ duplicates, meta, isLoading, currentPage, perPa
       </div>
 
       {meta && (
-        <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 text-sm text-gray-500">
-          <span>Showing {(currentPage - 1) * perPage + 1}–{Math.min(currentPage * perPage, meta.total)} of {meta.total}</span>
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-3 sm:px-4 py-3 border-t border-gray-100 text-sm text-gray-500">
+          <span className="text-xs sm:text-sm">Showing {(currentPage - 1) * perPage + 1}–{Math.min(currentPage * perPage, meta.total)} of {meta.total}</span>
           <div className="flex items-center gap-1">
             <button
               disabled={currentPage === 1}
               onClick={() => dispatch(setDuplicateFilters({ page: currentPage - 1 }))}
-              className="px-3 py-1.5 border border-gray-200 rounded-lg disabled:opacity-40 hover:bg-gray-50"
-            >Prev</button>
-            <span className="px-3 py-1.5">{currentPage} / {totalPages}</span>
+              className="px-2 sm:px-3 py-1 sm:py-1.5 border border-gray-200 rounded-lg disabled:opacity-40 hover:bg-gray-50 text-sm"
+            >
+              Prev
+            </button>
+            <span className="px-2 sm:px-3 py-1 sm:py-1.5 text-sm">{currentPage} / {totalPages}</span>
             <button
               disabled={currentPage === totalPages}
               onClick={() => dispatch(setDuplicateFilters({ page: currentPage + 1 }))}
-              className="px-3 py-1.5 border border-gray-200 rounded-lg disabled:opacity-40 hover:bg-gray-50"
-            >Next</button>
+              className="px-2 sm:px-3 py-1 sm:py-1.5 border border-gray-200 rounded-lg disabled:opacity-40 hover:bg-gray-50 text-sm"
+            >
+              Next
+            </button>
           </div>
         </div>
       )}

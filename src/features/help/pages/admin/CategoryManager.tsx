@@ -51,9 +51,9 @@ export default function CategoryManager() {
       alert('Cannot delete category with existing articles or FAQs');
       return;
     }
-    
+
     if (!window.confirm(`Are you sure you want to delete "${category.category_name}"?`)) return;
-    
+
     try {
       await deleteCategory(category.id).unwrap();
       refetch();
@@ -78,7 +78,6 @@ export default function CategoryManager() {
   };
 
   const handleMove = async (categoryId: number, direction: 'up' | 'down') => {
-    // Implement reorder logic
     const category = categories.find(c => c.id === categoryId);
     if (!category) return;
 
@@ -94,7 +93,7 @@ export default function CategoryManager() {
 
     const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
     const tempOrder = category.sort_order;
-    
+
     try {
       await updateCategory({ id: categoryId, data: { sort_order: siblings[newIndex].sort_order } }).unwrap();
       await updateCategory({ id: siblings[newIndex].id, data: { sort_order: tempOrder } }).unwrap();
@@ -112,86 +111,105 @@ export default function CategoryManager() {
     );
   };
 
-  const renderCategoryRow = (category: CategoryNode) => {
-    const hasChildren = category.children && category.children.length > 0;
-    const isExpanded = expandedIds.includes(category.id);
+  const renderCategoryRows = (nodes: CategoryNode[]) => {
+    return nodes.map((category) => {
+      const hasChildren = category.children && category.children.length > 0;
+      const isExpanded = expandedIds.includes(category.id);
+      const indentLevel = category.level;
 
-    return (
-      <div key={category.id}>
-        <div 
-          className="flex items-center py-3 px-4 hover:bg-gray-50 border-b border-gray-100"
-          style={{ paddingLeft: `${category.level * 24 + 16}px` }}
-        >
-          <div className="flex-1 flex items-center">
-            {hasChildren && (
-              <button
-                onClick={() => toggleExpand(category.id)}
-                className="mr-2 w-5 h-5 flex items-center justify-center text-gray-500 hover:text-gray-700"
-              >
-                {isExpanded ? '▼' : '►'}
-              </button>
-            )}
-            {!hasChildren && <div className="w-5 mr-2" />}
-            
-            <div className="flex-1">
-              <div className="font-medium text-gray-900">{category.category_name}</div>
-              <div className="text-xs text-gray-500">{category.description || 'No description'}</div>
-            </div>
+      return (
+        <tbody key={category.id}>
+          <tr className="hover:bg-gray-50 border-b border-gray-100">
+            {/* Category Name with Expand/Collapse */}
+            <td className="px-1 md:px-3 py-1 md:py-3">
+              <div className="flex items-center" style={{ paddingLeft: `${indentLevel * 20}px` }}>
+                {hasChildren && (
+                  <button
+                    onClick={() => toggleExpand(category.id)}
+                    className="mr-2 w-5 h-5 flex items-center justify-center text-gray-500 hover:text-gray-700 flex-shrink-0"
+                  >
+                    {isExpanded ? '▼' : '►'}
+                  </button>
+                )}
+                {!hasChildren && <div className="w-5 mr-2 flex-shrink-0" />}
+                <div>
+                  <div className="font-medium text-gray-900 text-sm sm:text-base break-words">
+                    {category.category_name}
+                  </div>
+                  {category.description && (
+                    <div className="text-xs text-gray-500 mt-0.5 break-words">
+                      {category.description}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </td>
 
-            <div className="flex items-center space-x-4 text-sm text-gray-500 mr-4">
-              <span title="Articles">{category.article_count} articles</span>
-              <span title="FAQs">{category.faq_count} FAQs</span>
-              <span className={`px-2 py-0.5 text-xs rounded-full ${
-                category.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
-              }`}>
+            {/* Statistics */}
+            <td className="px-1 md:px-3 py-1 md:py-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 rounded-full text-xs">
+                  📄 {category.article_count || 0}
+                </span>
+                <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-50 text-purple-700 rounded-full text-xs">
+                  ❓ {category.faq_count || 0}
+                </span>
+
+              </div>
+            </td>
+
+            {/* status */}
+            <td className="px-1 md:px-3 py-1 md:py-3">
+              <span className={`px-2 py-1 text-xs rounded-full ${category.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+                }`}>
                 {category.is_active ? 'Active' : 'Inactive'}
               </span>
-            </div>
-          </div>
+            </td>
 
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => handleMove(category.id, 'up')}
-              className="p-1 text-gray-400 hover:text-gray-600"
-              title="Move Up"
-            >
-              ↑
-            </button>
-            <button
-              onClick={() => handleMove(category.id, 'down')}
-              className="p-1 text-gray-400 hover:text-gray-600"
-              title="Move Down"
-            >
-              ↓
-            </button>
-            <button
-              onClick={() => {
-                setSelectedCategory(category);
-                setShowModal(true);
-              }}
-              className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
-              title="Edit"
-            >
-              <img src={edit_icon} alt="Edit" className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => handleDelete(category)}
-              className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg"
-              title="Delete"
-              disabled={category.article_count > 0 || category.faq_count > 0}
-            >
-              <img src={delete_icon} alt="Delete" className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
+            {/* Actions */}
+            <td className="px-1 md:px-3 py-1 md:py-3 whitespace-nowrap">
+              <div className="flex items-center gap-1 sm:gap-2">
+                {/* <button
+                  onClick={() => handleMove(category.id, 'up')}
+                  className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                  title="Move Up"
+                >
+                  ↑
+                </button>
+                <button
+                  onClick={() => handleMove(category.id, 'down')}
+                  className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                  title="Move Down"
+                >
+                  ↓
+                </button> */}
+                <button
+                  onClick={() => {
+                    setSelectedCategory(category);
+                    setShowModal(true);
+                  }}
+                  className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                  title="Edit"
+                >
+                  <img src={edit_icon} alt="Edit" className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => handleDelete(category)}
+                  className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-40"
+                  title="Delete"
+                  disabled={category.article_count > 0 || category.faq_count > 0}
+                >
+                  <img src={delete_icon} alt="Delete" className="w-4 h-4" />
+                </button>
+              </div>
+            </td>
+          </tr>
 
-        {hasChildren && isExpanded && (
-          <div>
-            {category.children?.map(child => renderCategoryRow(child))}
-          </div>
-        )}
-      </div>
-    );
+          {/* Render children if expanded */}
+          {hasChildren && isExpanded && renderCategoryRows(category.children!)}
+        </tbody>
+      );
+    });
   };
 
   const formFields = [
@@ -266,70 +284,94 @@ export default function CategoryManager() {
 
   return (
     <HelpLayout>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Categories Management</h1>
-            <p className="text-sm text-gray-500 mt-1">Organize help content into categories</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Categories Management</h1>
+            <p className="text-xs sm:text-sm text-gray-500 mt-1">Organize help content into categories</p>
           </div>
           <button
             onClick={() => {
               setSelectedCategory(null);
               setShowModal(true);
             }}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="w-full sm:w-auto flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
           >
             <img src={add_icon} alt="" className="w-4 h-4 mr-2" />
             New Category
           </button>
         </div>
 
-        {/* Category Tree */}
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
-            <div className="flex items-center text-xs font-semibold text-gray-600 uppercase">
-              <div className="flex-1">Category Name</div>
-              <div className="w-48">Statistics</div>
-              <div className="w-24 text-center">Actions</div>
-            </div>
+        {/* Category Table */}
+
+        <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+          <div className="xl:col-span-4 overflow-x-auto">
+            <table className="w-full min-w-[600px]">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-1 md:px-3 py-1 md:py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                    Category Name
+                  </th>
+                  <th className="px-1 md:px-3 py-1 md:py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                    Statistics
+                  </th>
+                  <th className="px-1 md:px-3 py-1 md:py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                    Status
+                  </th>
+                  <th className="px-1 md:px-3 py-1 md:py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+
+              {isLoading ? (
+                <tbody>
+                  <tr>
+                    <td colSpan={3} className="text-center py-12">
+                      <div className="flex justify-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              ) : categoryTree.length === 0 ? (
+                <tbody>
+                  <tr>
+                    <td colSpan={3} className="text-center py-12 text-gray-500">
+                      No categories found. Create your first category.
+                    </td>
+                  </tr>
+                </tbody>
+              ) : (
+                renderCategoryRows(categoryTree)
+              )}
+            </table>
+
           </div>
 
-          <div className="divide-y divide-gray-100">
-            {isLoading ? (
-              <div className="flex justify-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
-              </div>
-            ) : categoryTree.length === 0 ? (
-              <div className="text-center py-12 text-gray-500">
-                No categories found. Create your first category.
-              </div>
-            ) : (
-              categoryTree.map(category => renderCategoryRow(category))
-            )}
-          </div>
         </div>
 
         {/* Modal */}
         {showModal && (
           <div className="fixed inset-0 z-50 overflow-y-auto">
-            <div className="flex items-center justify-center min-h-screen px-4">
+            <div className="flex items-center justify-center min-h-screen px-4 py-8">
               <div className="fixed inset-0 bg-gray-500 opacity-75" onClick={() => setShowModal(false)}></div>
-              
-              <div className="relative bg-white rounded-lg w-full max-w-2xl">
-                <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-gray-900">
+
+              <div className="relative bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <div className="sticky top-0 bg-white border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+                  <h2 className="text-base sm:text-lg font-semibold text-gray-900">
                     {selectedCategory ? 'Edit Category' : 'Create New Category'}
                   </h2>
                   <button
                     onClick={() => setShowModal(false)}
-                    className="text-gray-400 hover:text-gray-500"
+                    className="text-gray-400 hover:text-gray-500 p-1"
                   >
-                    <img src={close_icon} alt="Close" className="w-5 h-5" />
+                    <img src={close_icon} alt="Close" className="w-4 h-4 sm:w-5 sm:h-5" />
                   </button>
                 </div>
-                
-                <div className="p-6">
+
+                <div className="p-4 sm:p-6">
                   <HelpForm
                     fields={formFields}
                     initialData={selectedCategory || undefined}

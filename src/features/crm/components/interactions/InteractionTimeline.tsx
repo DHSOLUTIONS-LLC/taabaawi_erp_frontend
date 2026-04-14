@@ -78,13 +78,11 @@ const typeColor: Record<CustomerInteraction['interaction_type'], string> = {
   Other: 'bg-gray-50 text-gray-500',
 };
 
-
 interface InteractionTimelineProps {
   customer: Customer;
   interactions?: CustomerInteraction[];
   isLoading?: boolean;
 }
-
 
 export const InteractionTimeline = ({ customer, interactions: propInteractions, isLoading }: InteractionTimelineProps) => {
   const dispatch = useDispatch();
@@ -94,12 +92,11 @@ export const InteractionTimeline = ({ customer, interactions: propInteractions, 
     return <div className="text-center py-8 text-gray-400">Loading interactions...</div>;
   }
 
-
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h3 className="font-medium text-gray-800">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <h3 className="font-medium text-gray-800 text-sm sm:text-base">
           Interactions
           {interactions.length > 0 && (
             <span className="ml-2 text-xs text-gray-400 font-normal">({interactions.length})</span>
@@ -107,13 +104,13 @@ export const InteractionTimeline = ({ customer, interactions: propInteractions, 
         </h3>
         <button
           onClick={() => dispatch(openInteractionModal(customer))}
-          className="flex items-center gap-1 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          className="flex items-center justify-center gap-1 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 w-full sm:w-auto"
         >
           <Plus className="h-3.5 w-3.5" /> Log
         </button>
       </div>
 
-      {/* Table */}
+      {/* Table/Cards */}
       {interactions.length === 0
         ? (
           <div className="text-center py-10 text-gray-400 border border-dashed border-gray-200 rounded-lg">
@@ -122,51 +119,86 @@ export const InteractionTimeline = ({ customer, interactions: propInteractions, 
           </div>
         )
         : (
-          <div className="border border-gray-100 rounded-lg overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b border-gray-100">
-                <tr>
-                  <th className="px-3 py-2.5 text-left font-medium text-gray-500">Type</th>
-                  <th className="px-3 py-2.5 text-left font-medium text-gray-500">Subject</th>
-                  <th className="px-3 py-2.5 text-left font-medium text-gray-500">Description</th>
-                  <th className="px-3 py-2.5 text-left font-medium text-gray-500">Sentiment</th>
-                  <th className="px-3 py-2.5 text-left font-medium text-gray-500">Date</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50">
-                {interactions.map((interaction: any) => {
-                  const Icon = typeIcon[interaction.interaction_type as keyof typeof typeIcon] ?? MoreHorizontal;
-                  return (
-                    <tr key={interaction.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-3 py-2.5">
-                        <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium ${typeColor[interaction.interaction_type as keyof typeof typeColor] ?? 'bg-gray-50 text-gray-500'}`}>
-                          <Icon className="h-3 w-3" />
-                          {interaction.interaction_type}
-                        </div>
-                      </td>
-                      <td className="px-3 py-2.5 font-medium text-gray-800">{interaction.subject}</td>
-                      <td className="px-3 py-2.5 text-gray-500 max-w-xs truncate" title={interaction.description}>
-                        {interaction.description ?? '0'}
-                      </td>
-                      <td className="px-3 py-2.5">
-                        {interaction.sentiment ? (
-                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${interaction.sentiment === 'Positive' ? 'bg-green-100 text-green-700' :
+          <>
+            {/* Desktop Table View */}
+            <div className="hidden md:block border border-gray-100 rounded-lg overflow-hidden">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50 border-b border-gray-100">
+                  <tr>
+                    <th className="px-3 py-2.5 text-left font-medium text-gray-500">Type</th>
+                    <th className="px-3 py-2.5 text-left font-medium text-gray-500">Subject</th>
+                    <th className="px-3 py-2.5 text-left font-medium text-gray-500">Description</th>
+                    <th className="px-3 py-2.5 text-left font-medium text-gray-500">Sentiment</th>
+                    <th className="px-3 py-2.5 text-left font-medium text-gray-500">Date</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {interactions.map((interaction: any) => {
+                    const Icon = typeIcon[interaction.interaction_type as keyof typeof typeIcon] ?? MoreHorizontal;
+                    return (
+                      <tr key={interaction.id} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-3 py-2.5">
+                          <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium ${typeColor[interaction.interaction_type as keyof typeof typeColor] ?? 'bg-gray-50 text-gray-500'}`}>
+                            <Icon className="h-3 w-3" />
+                            {interaction.interaction_type}
+                          </div>
+                        </td>
+                        <td className="px-3 py-2.5 font-medium text-gray-800 text-sm">{interaction.subject}</td>
+                        <td className="px-3 py-2.5 text-gray-500 text-sm max-w-xs truncate" title={interaction.description}>
+                          {interaction.description ?? '-'}
+                        </td>
+                        <td className="px-3 py-2.5">
+                          {interaction.sentiment ? (
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${interaction.sentiment === 'Positive' ? 'bg-green-100 text-green-700' :
                               interaction.sentiment === 'Negative' ? 'bg-red-100 text-red-700' :
                                 'bg-gray-100 text-gray-500'
-                            }`}>
-                            {interaction.sentiment}
-                          </span>
-                        ) : '0'}
-                      </td>
-                      <td className="px-3 py-2.5 text-gray-400 text-xs whitespace-nowrap">
+                              }`}>
+                              {interaction.sentiment}
+                            </span>
+                          ) : '-'}
+                        </td>
+                        <td className="px-3 py-2.5 text-gray-400 text-xs whitespace-nowrap">
+                          {new Date(interaction.interaction_date ?? interaction.created_at).toLocaleDateString()}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden space-y-3">
+              {interactions.map((interaction: any) => {
+                const Icon = typeIcon[interaction.interaction_type as keyof typeof typeIcon] ?? MoreHorizontal;
+                return (
+                  <div key={interaction.id} className="bg-gray-50 rounded-lg p-3">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium ${typeColor[interaction.interaction_type as keyof typeof typeColor] ?? 'bg-gray-50 text-gray-500'}`}>
+                        <Icon className="h-3 w-3" />
+                        {interaction.interaction_type}
+                      </div>
+                      <span className="text-xs text-gray-400">
                         {new Date(interaction.interaction_date ?? interaction.created_at).toLocaleDateString()}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                      </span>
+                    </div>
+                    <p className="font-medium text-gray-800 text-sm mb-1">{interaction.subject}</p>
+                    {interaction.description && (
+                      <p className="text-xs text-gray-500 mb-2 line-clamp-2">{interaction.description}</p>
+                    )}
+                    {interaction.sentiment && (
+                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${interaction.sentiment === 'Positive' ? 'bg-green-100 text-green-700' :
+                        interaction.sentiment === 'Negative' ? 'bg-red-100 text-red-700' :
+                          'bg-gray-100 text-gray-500'
+                        }`}>
+                        {interaction.sentiment}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </>
         )
       }
     </div>

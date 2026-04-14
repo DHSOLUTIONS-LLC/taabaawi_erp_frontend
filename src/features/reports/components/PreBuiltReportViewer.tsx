@@ -15,12 +15,12 @@ import {
 type ReportKey = 'sales' | 'products' | 'inventory' | 'customers' | 'employees' | 'financial';
 
 const REPORT_CONFIG: Record<ReportKey, { label: string; description: string }> = {
-  sales:     { label: 'Sales Summary',          description: 'Daily sales, revenue, discounts and tax' },
-  products:  { label: 'Top Selling Products',   description: 'Best performing products by quantity sold' },
-  inventory: { label: 'Inventory Status',       description: 'Stock levels, low stock and out of stock items' },
-  customers: { label: 'Customer Analysis',      description: 'Customer activity, top spenders and segments' },
-  employees: { label: 'Employee Performance',   description: 'Sales performance per employee' },
-  financial: { label: 'Financial Summary',      description: 'Revenue, costs, gross and net profit' },
+  sales: { label: 'Sales Summary', description: 'Daily sales, revenue, discounts and tax' },
+  products: { label: 'Top Selling Products', description: 'Best performing products by quantity sold' },
+  inventory: { label: 'Inventory Status', description: 'Stock levels, low stock and out of stock items' },
+  customers: { label: 'Customer Analysis', description: 'Customer activity, top spenders and segments' },
+  employees: { label: 'Employee Performance', description: 'Sales performance per employee' },
+  financial: { label: 'Financial Summary', description: 'Revenue, costs, gross and net profit' },
 };
 
 const ResultTable = ({ data }: { data: any[] }) => {
@@ -69,21 +69,21 @@ const ReportPanel = ({
 
   const params = { start_date: dates.start_date, end_date: dates.end_date };
 
-  const { data: sales,     isFetching: l1 } = useGetSalesSummaryQuery(params,        { skip: skipQuery || reportKey !== 'sales' });
-  const { data: products,  isFetching: l2 } = useGetTopSellingProductsQuery(params,  { skip: skipQuery || reportKey !== 'products' });
-  const { data: inventory, isFetching: l3 } = useGetInventoryStatusQuery({},         { skip: skipQuery || reportKey !== 'inventory' });
-  const { data: customers, isFetching: l4 } = useGetCustomerAnalysisQuery(params,    { skip: skipQuery || reportKey !== 'customers' });
+  const { data: sales, isFetching: l1 } = useGetSalesSummaryQuery(params, { skip: skipQuery || reportKey !== 'sales' });
+  const { data: products, isFetching: l2 } = useGetTopSellingProductsQuery(params, { skip: skipQuery || reportKey !== 'products' });
+  const { data: inventory, isFetching: l3 } = useGetInventoryStatusQuery({}, { skip: skipQuery || reportKey !== 'inventory' });
+  const { data: customers, isFetching: l4 } = useGetCustomerAnalysisQuery(params, { skip: skipQuery || reportKey !== 'customers' });
   const { data: employees, isFetching: l5 } = useGetEmployeePerformanceQuery(params, { skip: skipQuery || reportKey !== 'employees' });
-  const { data: financial, isFetching: l6 } = useGetFinancialSummaryQuery(params,    { skip: skipQuery || reportKey !== 'financial' });
+  const { data: financial, isFetching: l6 } = useGetFinancialSummaryQuery(params, { skip: skipQuery || reportKey !== 'financial' });
 
   const dataMap: Record<ReportKey, any> = { sales, products, inventory, customers, employees, financial };
   const loadingMap: Record<ReportKey, boolean> = {
     sales: l1, products: l2, inventory: l3, customers: l4, employees: l5, financial: l6,
   };
 
-  const rawData    = dataMap[reportKey];
-  const isLoading  = loadingMap[reportKey];
-  const config     = REPORT_CONFIG[reportKey];
+  const rawData = dataMap[reportKey];
+  const isLoading = loadingMap[reportKey];
+  const config = REPORT_CONFIG[reportKey];
 
   // extract array from response
   const getRows = (): any[] => {
@@ -103,7 +103,7 @@ const ReportPanel = ({
     return rawData.totals ?? rawData.summary ?? null;
   };
 
-  const rows    = getRows();
+  const rows = getRows();
   const summary = getSummary();
 
   const handleRun = () => {
@@ -115,9 +115,9 @@ const ReportPanel = ({
     if (!rows.length) return;
     const csv = [Object.keys(rows[0]).join(','), ...rows.map(r => Object.values(r).join(','))].join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href     = url;
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
     a.download = `${reportKey}_report.csv`;
     a.click();
     URL.revokeObjectURL(url);
@@ -132,8 +132,8 @@ const ReportPanel = ({
         </div>
         <div className="flex items-center justify-end gap-2">
           {rows.length > 0 && (
-            <button 
-              onClick={handleExport} 
+            <button
+              onClick={handleExport}
               className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500 transition-colors"
               title="Export CSV"
             >
@@ -148,8 +148,8 @@ const ReportPanel = ({
             <Play className="h-3 w-3" /> {isLoading ? 'Running...' : 'Run'}
           </button>
           {rawData && (
-            <button 
-              onClick={() => setOpen(p => !p)} 
+            <button
+              onClick={() => setOpen(p => !p)}
               className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500 transition-colors"
             >
               {open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -182,7 +182,7 @@ const ReportPanel = ({
 
 export const PreBuiltReportViewer = () => {
   const dispatch = useDispatch();
-  const dates    = useSelector((s: RootState) => s.reports.preBuiltDates);
+  const dates = useSelector((s: RootState) => s.reports.preBuiltDates);
   const [skipMap, setSkipMap] = useState<Record<ReportKey, boolean>>({
     sales: true, products: true, inventory: true, customers: true, employees: true, financial: true,
   });

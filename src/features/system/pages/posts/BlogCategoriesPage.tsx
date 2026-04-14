@@ -28,7 +28,7 @@ const BlogCategoriesPage: React.FC = () => {
     setSelectedCategory(null);
   };
 
- return (
+  return (
     <DashboardLayout>
       <div className="container mx-auto">
         {/* Header */}

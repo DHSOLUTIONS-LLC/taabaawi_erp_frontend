@@ -20,21 +20,21 @@ type TabType = 'categories' | 'articles' | 'faqs' | 'saved';
 
 // Skeleton loader component for cards
 const CardSkeleton = () => (
-  <div className="bg-white rounded-xl border border-gray-200 p-5 animate-pulse">
+  <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-5 animate-pulse">
     <div className="flex items-start justify-between mb-3">
       <div className="flex items-center space-x-3">
-        <div className="w-10 h-10 bg-gray-200 rounded-lg" />
-        <div className="h-5 w-32 bg-gray-200 rounded" />
+        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-200 rounded-lg" />
+        <div className="h-4 sm:h-5 w-24 sm:w-32 bg-gray-200 rounded" />
       </div>
-      <div className="w-4 h-4 bg-gray-200 rounded" />
+      <div className="w-3 h-3 sm:w-4 sm:h-4 bg-gray-200 rounded" />
     </div>
     <div className="space-y-2 mb-4">
-      <div className="h-4 bg-gray-200 rounded w-full" />
-      <div className="h-4 bg-gray-200 rounded w-3/4" />
+      <div className="h-3 sm:h-4 bg-gray-200 rounded w-full" />
+      <div className="h-3 sm:h-4 bg-gray-200 rounded w-3/4" />
     </div>
     <div className="flex items-center">
-      <div className="w-3 h-3 bg-gray-200 rounded-full mr-1" />
-      <div className="h-3 w-24 bg-gray-200 rounded" />
+      <div className="w-2 h-2 sm:w-3 sm:h-3 bg-gray-200 rounded-full mr-1" />
+      <div className="h-2 sm:h-3 w-16 sm:w-24 bg-gray-200 rounded" />
     </div>
   </div>
 );
@@ -42,14 +42,14 @@ const CardSkeleton = () => (
 // Compact skeleton for articles/faqs
 const CompactSkeleton = () => (
   <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 animate-pulse">
-    <div className="flex items-center space-x-3">
-      <div className="w-5 h-5 bg-gray-200 rounded" />
-      <div className="space-y-1">
-        <div className="h-4 w-48 bg-gray-200 rounded" />
-        <div className="h-3 w-32 bg-gray-200 rounded" />
+    <div className="flex items-center space-x-3 flex-1">
+      <div className="w-4 h-4 sm:w-5 sm:h-5 bg-gray-200 rounded flex-shrink-0" />
+      <div className="space-y-1 flex-1">
+        <div className="h-3 sm:h-4 w-32 sm:w-48 bg-gray-200 rounded" />
+        <div className="h-2 sm:h-3 w-24 sm:w-32 bg-gray-200 rounded" />
       </div>
     </div>
-    <div className="w-4 h-4 bg-gray-200 rounded" />
+    <div className="w-3 h-3 sm:w-4 sm:h-4 bg-gray-200 rounded flex-shrink-0 ml-2" />
   </div>
 );
 
@@ -60,6 +60,7 @@ export default function HelpBrowse() {
   const [searchParams] = useSearchParams();
   const [currentPage, setCurrentPage] = useState(1);
   const [isTabChanging, setIsTabChanging] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   // Initialize from URL params
   useEffect(() => {
@@ -171,13 +172,13 @@ export default function HelpBrowse() {
   const renderSkeletons = () => {
     if (activeTab === 'categories') {
       return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           {[...Array(6)].map((_, i) => <CardSkeleton key={i} />)}
         </div>
       );
     }
     return (
-      <div className="space-y-3">
+      <div className="space-y-2 sm:space-y-3">
         {[...Array(5)].map((_, i) => <CompactSkeleton key={i} />)}
       </div>
     );
@@ -193,17 +194,17 @@ export default function HelpBrowse() {
       case 'categories':
         if (categories.length === 0) {
           return (
-            <div className="text-center py-12 text-gray-500">
-              <svg className="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="text-center py-8 sm:py-12 px-4">
+              <svg className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              <p className="text-lg font-medium">No categories found</p>
-              <p className="text-sm mt-1">Try adjusting your filters or check back later</p>
+              <p className="text-base sm:text-lg font-medium text-gray-900">No categories found</p>
+              <p className="text-xs sm:text-sm text-gray-500 mt-1">Try adjusting your filters or check back later</p>
             </div>
           );
         }
         return (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             {categories.map(category => (
               <HelpCard key={category.id} type="category" data={category} />
             ))}
@@ -213,18 +214,18 @@ export default function HelpBrowse() {
       case 'articles':
         if (articles.length === 0) {
           return (
-            <div className="text-center py-12 text-gray-500">
-              <svg className="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="text-center py-8 sm:py-12 px-4">
+              <svg className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              <p className="text-lg font-medium">No articles found</p>
-              <p className="text-sm mt-1">Try adjusting your filters or search terms</p>
+              <p className="text-base sm:text-lg font-medium text-gray-900">No articles found</p>
+              <p className="text-xs sm:text-sm text-gray-500 mt-1">Try adjusting your filters or search terms</p>
             </div>
           );
         }
         return (
-          <div className="space-y-3">
-            {articles.map(article => (
+          <div className="space-y-2 sm:space-y-3">
+            {articles.map((article: any) => (
               <HelpCard key={article.id} type="article" data={article} variant="compact" />
             ))}
           </div>
@@ -233,18 +234,18 @@ export default function HelpBrowse() {
       case 'faqs':
         if (faqs.length === 0) {
           return (
-            <div className="text-center py-12 text-gray-500">
-              <svg className="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="text-center py-8 sm:py-12 px-4">
+              <svg className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <p className="text-lg font-medium">No FAQs found</p>
-              <p className="text-sm mt-1">Try adjusting your filters or search terms</p>
+              <p className="text-base sm:text-lg font-medium text-gray-900">No FAQs found</p>
+              <p className="text-xs sm:text-sm text-gray-500 mt-1">Try adjusting your filters or search terms</p>
             </div>
           );
         }
         return (
-          <div className="space-y-3">
-            {faqs.map(faq => (
+          <div className="space-y-2 sm:space-y-3">
+            {faqs.map((faq: any) => (
               <HelpCard key={faq.id} type="faq" data={faq} variant="compact" />
             ))}
           </div>
@@ -252,12 +253,12 @@ export default function HelpBrowse() {
 
       case 'saved':
         return (
-          <div className="text-center py-12 text-gray-500">
-            <svg className="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="text-center py-8 sm:py-12 px-4">
+            <svg className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
             </svg>
-            <p className="text-lg font-medium">No saved items</p>
-            <p className="text-sm mt-1">Save articles and FAQs to access them quickly</p>
+            <p className="text-base sm:text-lg font-medium text-gray-900">No saved items</p>
+            <p className="text-xs sm:text-sm text-gray-500 mt-1">Save articles and FAQs to access them quickly</p>
           </div>
         );
 
@@ -291,24 +292,24 @@ export default function HelpBrowse() {
 
     return (
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-4 border-t border-gray-200">
-        <div className="text-sm text-gray-500 order-2 sm:order-1">
+        <div className="text-xs sm:text-sm text-gray-500 order-2 sm:order-1 text-center sm:text-left">
           Showing {((currentPage - 1) * perPage) + 1} to {Math.min(currentPage * perPage, total)} of {total} items
         </div>
         <div className="flex items-center gap-2 order-1 sm:order-2">
           <button
             onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
             disabled={currentPage === 1}
-            className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             Previous
           </button>
-          <span className="px-3 py-1.5 text-sm font-medium text-gray-700">
+          <span className="px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium text-gray-700">
             Page {currentPage} of {totalPages}
           </span>
           <button
             onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
             disabled={currentPage === totalPages}
-            className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             Next
           </button>
@@ -319,18 +320,60 @@ export default function HelpBrowse() {
 
   return (
     <HelpLayout>
-      <div className="flex flex-col lg:flex-row gap-6">
-        {/* Sidebar - Hidden on mobile, visible on desktop */}
-        <div className="lg:w-64 flex-shrink-0">
-          <HelpSidebar />
+      <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
+        {/* Mobile Sidebar Toggle */}
+        <div className="lg:hidden mb-3">
+          <button
+            onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
+            className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-200 rounded-lg shadow-sm"
+          >
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h7" />
+              </svg>
+              <span className="text-sm font-medium text-gray-700">Menu</span>
+            </div>
+            <svg className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${mobileSidebarOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
         </div>
+
+        {/* Sidebar - Hidden on mobile, visible on desktop */}
+        <div className={`
+  lg:w-64 lg:block lg:flex-shrink-0
+  ${mobileSidebarOpen ? 'fixed inset-0 z-50 bg-white p-4 overflow-y-auto' : 'hidden'}
+  lg:relative lg:inset-auto lg:bg-transparent lg:p-0 lg:overflow-visible
+`}>
+          {mobileSidebarOpen && (
+            <button
+              onClick={() => setMobileSidebarOpen(false)}
+              className="lg:hidden absolute top-4 right-4 p-2 text-gray-500 hover:text-gray-700 z-10"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
+          <HelpSidebar onMobileItemClick={() => setMobileSidebarOpen(false)} />
+        </div>
+
+        {/* Overlay for mobile sidebar */}
+        {mobileSidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            onClick={() => setMobileSidebarOpen(false)}
+          />
+        )}
 
         {/* Main Content */}
         <div className="flex-1 min-w-0">
           {/* Breadcrumb - Responsive */}
-          <div className="mb-4 overflow-x-auto">
-            <HelpBreadcrumb items={breadcrumbItems} />
-          </div>
+          {breadcrumbItems.length > 0 && (
+            <div className="mb-3 sm:mb-4 overflow-x-auto">
+              <HelpBreadcrumb items={breadcrumbItems} />
+            </div>
+          )}
 
           {/* Tabs - Responsive with horizontal scroll on mobile */}
           <div className="border-b border-gray-200 overflow-x-auto">
@@ -342,13 +385,13 @@ export default function HelpBrowse() {
 
           {/* Filters - Only show for articles and faqs */}
           {(activeTab === 'articles' || activeTab === 'faqs') && (
-            <div className="mt-4">
+            <div className="mt-3 sm:mt-4">
               <HelpFilters />
             </div>
           )}
 
           {/* Content with loading state */}
-          <div className="mt-6">
+          <div className="mt-4 sm:mt-6">
             {renderContent()}
           </div>
 

@@ -79,12 +79,12 @@ export default function HelpManagement() {
 
   return (
     <HelpLayout>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6 ">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Help Center Management</h1>
-            <p className="text-sm text-gray-500 mt-1">Manage categories, articles, and FAQs</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Help Center Management</h1>
+            <p className="text-xs sm:text-sm text-gray-500 mt-1">Manage categories, articles, and FAQs</p>
           </div>
           <button
             onClick={() => {
@@ -92,7 +92,7 @@ export default function HelpManagement() {
               else if (activeTab === 'articles') navigate(`${basePath}/help/articles`);
               else navigate(`${basePath}/help/faqs/new`);
             }}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="w-full sm:w-auto flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
           >
             <img src={add_icon} alt="" className="w-4 h-4 mr-2" />
             Add New
@@ -100,83 +100,120 @@ export default function HelpManagement() {
         </div>
 
         {/* Stats Cards - Now showing actual data */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {/* Categories Card */}
-          <div className="bg-white rounded-xl p-6 border border-gray-200">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-2xl font-bold text-gray-900">{stats.categories.total}</span>
+          <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l5 5a2 2 0 01.586 1.414V19a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2z" />
+                </svg>
+              </div>
+              <span className="text-xl sm:text-2xl font-bold text-gray-900">{stats.categories.total}</span>
             </div>
             <h3 className="text-sm font-medium text-gray-500 mb-2">Categories</h3>
-            <div className="flex justify-between text-xs">
+            <div className="flex flex-wrap items-center gap-2 text-xs">
               <span className="text-green-600">{stats.categories.active} Active</span>
-              <span className="text-gray-400">•</span>
+              <span className="text-gray-300">•</span>
               <span className="text-yellow-600">{stats.categories.inactive} Inactive</span>
             </div>
           </div>
 
           {/* Articles Card */}
-          <div className="bg-white rounded-xl p-6 border border-gray-200">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-2xl font-bold text-gray-900">{stats.articles.total}</span>
+          <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <span className="text-xl sm:text-2xl font-bold text-gray-900">{stats.articles.total}</span>
             </div>
             <h3 className="text-sm font-medium text-gray-500 mb-2">Articles</h3>
-            <div className="flex justify-between text-xs">
+            <div className="flex flex-wrap items-center gap-2 text-xs">
               <span className="text-green-600">{stats.articles.published} Published</span>
-              <span className="text-gray-400">•</span>
+              <span className="text-gray-300">•</span>
               <span className="text-yellow-600">{stats.articles.drafts} Drafts</span>
             </div>
           </div>
 
           {/* FAQs Card */}
-          <div className="bg-white rounded-xl p-6 border border-gray-200">
-            <div className="flex items-center justify-between mb-4">
-              <img src={faq_icon} alt="" className="w-8 h-8" />
-              <span className="text-2xl font-bold text-gray-900">{stats.faqs.total}</span>
+          <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 hover:shadow-md transition-shadow sm:col-span-2 lg:col-span-1">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <span className="text-xl sm:text-2xl font-bold text-gray-900">{stats.faqs.total}</span>
             </div>
             <h3 className="text-sm font-medium text-gray-500 mb-2">FAQs</h3>
-            <div className="flex justify-between text-xs">
+            <div className="flex flex-wrap items-center gap-2 text-xs">
               <span className="text-green-600">{stats.faqs.active} Active</span>
-              <span className="text-gray-400">•</span>
+              <span className="text-gray-300">•</span>
               <span className="text-red-600">{stats.faqs.inactive} Inactive</span>
             </div>
           </div>
         </div>
 
         {/* Management Tabs */}
-        <HelpTabs
-          tabs={[
-            { id: 'categories', label: 'Categories', count: stats.categories.total },
-            { id: 'articles', label: 'Articles', count: stats.articles.total },
-            { id: 'faqs', label: 'FAQs', count: stats.faqs.total }
-          ]}
-          activeTab={activeTab}
-          onTabChange={(tab) => setActiveTab(tab as any)}
-        />
+        <div className="overflow-x-auto">
+          <HelpTabs
+            tabs={[
+              { id: 'categories', label: 'Categories', count: stats.categories.total },
+              { id: 'articles', label: 'Articles', count: stats.articles.total },
+              { id: 'faqs', label: 'FAQs', count: stats.faqs.total }
+            ]}
+            activeTab={activeTab}
+            onTabChange={(tab) => setActiveTab(tab as any)}
+          />
+        </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mt-4 sm:mt-6">
           <button
             onClick={() => navigate(`${basePath}/help/categories`)}
-            className="bg-white p-6 rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all text-left"
+            className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all text-left group"
           >
-            <h3 className="font-semibold text-gray-900 mb-2">Manage Categories</h3>
-            <p className="text-sm text-gray-500">Create, edit, and organize help categories</p>
+            <div className="flex items-center gap-3 sm:gap-4 mb-2">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l5 5a2 2 0 01.586 1.414V19a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2z" />
+                </svg>
+              </div>
+              <h3 className="font-semibold text-gray-900 text-sm sm:text-base">Manage Categories</h3>
+            </div>
+            <p className="text-xs sm:text-sm text-gray-500 ml-11 sm:ml-14">Create, edit, and organize help categories</p>
           </button>
 
           <button
             onClick={() => navigate(`${basePath}/help/articles`)}
-            className="bg-white p-6 rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all text-left"
+            className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all text-left group"
           >
-            <h3 className="font-semibold text-gray-900 mb-2">Manage Articles</h3>
-            <p className="text-sm text-gray-500">Write and publish help articles</p>
+            <div className="flex items-center gap-3 sm:gap-4 mb-2">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <h3 className="font-semibold text-gray-900 text-sm sm:text-base">Manage Articles</h3>
+            </div>
+            <p className="text-xs sm:text-sm text-gray-500 ml-11 sm:ml-14">Write and publish help articles</p>
           </button>
 
           <button
             onClick={() => navigate(`${basePath}/help/faqs`)}
-            className="bg-white p-6 rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all text-left"
+            className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all text-left group sm:col-span-2 lg:col-span-1"
           >
-            <h3 className="font-semibold text-gray-900 mb-2">Manage FAQs</h3>
-            <p className="text-sm text-gray-500">Create and organize frequently asked questions</p>
+            <div className="flex items-center gap-3 sm:gap-4 mb-2">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200 transition-colors">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="font-semibold text-gray-900 text-sm sm:text-base">Manage FAQs</h3>
+            </div>
+            <p className="text-xs sm:text-sm text-gray-500 ml-11 sm:ml-14">Create and organize frequently asked questions</p>
           </button>
         </div>
       </div>

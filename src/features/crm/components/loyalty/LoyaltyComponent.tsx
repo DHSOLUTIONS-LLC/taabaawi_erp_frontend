@@ -21,8 +21,6 @@ const tierProgress: Record<string, { next: string; max: number }> = {
   Platinum: { next: 'Max', max: 15000 },
 };
 
-
-
 interface Customer {
   id: number;
   first_name: string;
@@ -36,58 +34,38 @@ interface Customer {
   nationality?: string;
   id_number?: string;
   id_type?: 'National' | 'Passport' | 'Civil ID';
-
-  // Address
   address?: string;
   city?: string;
   state?: string;
   country?: string;
   postal_code?: string;
-
-  // Company info
   company_name?: string;
   company_vat?: string;
   job_title?: string;
-
-  // Preferences
   preferred_contact_method?: 'Email' | 'Phone' | 'SMS' | 'WhatsApp';
   preferred_language?: string;
-  communication_preferences?: {
-    email: boolean;
-    sms: boolean;
-    whatsapp: boolean;
-  };
-
-  // Loyalty
+  communication_preferences?: { email: boolean; sms: boolean; whatsapp: boolean };
   loyalty_points: number;
   lifetime_points: number;
   loyalty_tier?: 'Bronze' | 'Silver' | 'Gold' | 'Platinum';
   loyalty_enrolled_date?: string;
-
-  // Statistics
   total_orders: number;
   total_spent: number;
   average_order_value: number;
   last_order_date?: string;
-
-  // Status
   status: 'Active' | 'Inactive' | 'Blocked' | 'Lead';
   is_active: boolean;
   is_verified: boolean;
-
-  // Metadata
   notes?: string;
   tags?: string[];
   created_by?: number;
   created_at: string;
   updated_at: string;
   deleted_at?: string;
-
-  // Relations
   createdBy?: any;
 }
 
-// ── Loyalty Card ─────────────────────────────────────────────────────────────
+// Loyalty Card
 export const LoyaltyCard = ({ customer }: { customer: Customer }) => {
   const dispatch = useDispatch();
   const { data } = useGetLoyaltyBalanceQuery(customer.id);
@@ -96,8 +74,8 @@ export const LoyaltyCard = ({ customer }: { customer: Customer }) => {
   const pct = Math.min((customer.lifetime_points / progress.max) * 100, 100);
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-4">
-      <div className="flex items-center justify-between">
+    <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-5 space-y-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex items-center gap-2">
           <Star className="h-4 w-4 text-yellow-500" />
           <span className="font-medium text-gray-800">Loyalty</span>
@@ -106,30 +84,30 @@ export const LoyaltyCard = ({ customer }: { customer: Customer }) => {
         <div className="flex gap-2">
           <button
             onClick={() => dispatch(openAdjustPointsModal({ mode: 'add', customer }))}
-            className="flex items-center gap-1 px-2.5 py-1.5 text-xs bg-green-50 text-green-700 rounded-lg hover:bg-green-100"
+            className="flex items-center justify-center gap-1 px-2.5 py-1.5 text-xs bg-green-50 text-green-700 rounded-lg hover:bg-green-100"
           >
             <Plus className="h-3 w-3" /> Add
           </button>
           <button
             onClick={() => dispatch(openAdjustPointsModal({ mode: 'redeem', customer }))}
-            className="flex items-center gap-1 px-2.5 py-1.5 text-xs bg-orange-50 text-orange-700 rounded-lg hover:bg-orange-100"
+            className="flex items-center justify-center gap-1 px-2.5 py-1.5 text-xs bg-orange-50 text-orange-700 rounded-lg hover:bg-orange-100"
           >
             <Minus className="h-3 w-3" /> Redeem
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-3 text-center">
-        <div className="bg-gray-50 rounded-lg p-3">
-          <p className="text-xl font-semibold text-gray-800">{customer.loyalty_points?.toLocaleString()}</p>
+      <div className="grid grid-cols-3 gap-2 sm:gap-3 text-center">
+        <div className="bg-gray-50 rounded-lg p-2 sm:p-3">
+          <p className="text-lg sm:text-xl font-semibold text-gray-800">{customer.loyalty_points?.toLocaleString()}</p>
           <p className="text-xs text-gray-400">Available</p>
         </div>
-        <div className="bg-gray-50 rounded-lg p-3">
-          <p className="text-xl font-semibold text-gray-800">{customer.lifetime_points?.toLocaleString()}</p>
+        <div className="bg-gray-50 rounded-lg p-2 sm:p-3">
+          <p className="text-lg sm:text-xl font-semibold text-gray-800">{customer.lifetime_points?.toLocaleString()}</p>
           <p className="text-xs text-gray-400">Lifetime</p>
         </div>
-        <div className="bg-gray-50 rounded-lg p-3">
-          <p className="text-xl font-semibold text-gray-800">{balance?.points_expiring_soon ?? '0'}</p>
+        <div className="bg-gray-50 rounded-lg p-2 sm:p-3">
+          <p className="text-lg sm:text-xl font-semibold text-gray-800">{balance?.points_expiring_soon ?? '0'}</p>
           <p className="text-xs text-gray-400">Expiring Soon</p>
         </div>
       </div>
@@ -137,7 +115,7 @@ export const LoyaltyCard = ({ customer }: { customer: Customer }) => {
       {/* Tier progress */}
       {progress.next !== 'Max' && (
         <div>
-          <div className="flex justify-between text-xs text-gray-400 mb-1">
+          <div className="flex flex-col sm:flex-row sm:justify-between text-xs text-gray-400 mb-1 gap-1">
             <span>Progress to {progress.next}</span>
             <span>{customer.lifetime_points?.toLocaleString()} / {progress.max.toLocaleString()}</span>
           </div>
@@ -153,14 +131,10 @@ export const LoyaltyCard = ({ customer }: { customer: Customer }) => {
   );
 };
 
-// ── Loyalty Transaction Table ─────────────────────────────────────────────────
+// Loyalty Transaction Table
 export const LoyaltyTransactionTable = ({ customerId }: { customerId: number }) => {
   const { data, isLoading } = useGetLoyaltyTransactionsQuery({ customerId, per_page: 10 });
-  const transactions = data?.data?.data;
-  // const transactions = Array.isArray(data?.data) ? data.data : 
-  //                   Array.isArray(data) ? data : [];
-
-  // console.log('transaction logs:', transactions)
+  const transactions = data?.data?.data ?? [];
 
   const typeColor: Record<string, string> = {
     Earned: 'text-green-600',
@@ -175,19 +149,19 @@ export const LoyaltyTransactionTable = ({ customerId }: { customerId: number }) 
       <h3 className="font-medium text-gray-800 text-sm">Point History</h3>
       {isLoading
         ? <div className="animate-pulse space-y-2">{Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="h-10 bg-gray-50 rounded" />
+          <div key={i} className="h-12 bg-gray-50 rounded" />
         ))}</div>
         : transactions.length === 0
           ? <p className="text-sm text-gray-400 text-center py-6">No transactions yet</p>
           : (
-            <div className="divide-y divide-gray-50">
+            <div className="space-y-2">
               {transactions.map((t: any) => (
-                <div key={t.id} className="flex items-center justify-between py-2.5">
+                <div key={t.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-2.5 border-b border-gray-100">
                   <div>
-                    <p className="text-sm text-gray-700">{t.description}</p>
+                    <p className="text-sm text-gray-700 break-words">{t.description}</p>
                     <p className="text-xs text-gray-400">{new Date(t.created_at).toLocaleDateString()}</p>
                   </div>
-                  <div className="text-right">
+                  <div className="text-left sm:text-right mt-1 sm:mt-0">
                     <p className={`text-sm font-medium ${typeColor[t.transaction_type] ?? ''}`}>
                       {t.points > 0 ? '+' : ''}{t.points.toLocaleString()}
                     </p>
@@ -202,7 +176,7 @@ export const LoyaltyTransactionTable = ({ customerId }: { customerId: number }) 
   );
 };
 
-// ── Adjust Points Modal ───────────────────────────────────────────────────────
+// Adjust Points Modal
 export const AdjustPointsModal = () => {
   const dispatch = useDispatch();
   const { isAdjustPointsModalOpen, adjustPointsMode, selectedCustomer } = useSelector(
@@ -226,17 +200,17 @@ export const AdjustPointsModal = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="bg-white rounded-xl w-full max-w-sm shadow-xl">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-          <h2 className="font-semibold text-gray-800">
+        <div className="flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-100">
+          <h2 className="font-semibold text-gray-800 text-sm sm:text-base">
             {isAdd ? 'Add Points' : 'Redeem Points'} — {selectedCustomer.full_name}
           </h2>
           <button onClick={() => dispatch(closeAdjustPointsModal())} className="p-1 hover:bg-gray-100 rounded">
             <X className="h-4 w-4" />
           </button>
         </div>
-        <form onSubmit={handleSubmit(onSubmit)} className="p-5 space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="p-4 sm:p-5 space-y-4">
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1">Points *</label>
             <input
@@ -256,13 +230,19 @@ export const AdjustPointsModal = () => {
               {...register('description', { required: true })}
             />
           </div>
-          <div className="flex justify-end gap-2">
-            <button type="button" onClick={() => dispatch(closeAdjustPointsModal())}
-              className="px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50">
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-2">
+            <button
+              type="button"
+              onClick={() => dispatch(closeAdjustPointsModal())}
+              className="w-full sm:w-auto px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50"
+            >
               Cancel
             </button>
-            <button type="submit" disabled={loading}
-              className={`px-5 py-2 text-sm text-white rounded-lg disabled:opacity-50 ${isAdd ? 'bg-green-600 hover:bg-green-700' : 'bg-orange-500 hover:bg-orange-600'}`}>
+            <button
+              type="submit"
+              disabled={loading}
+              className={`w-full sm:w-auto px-5 py-2 text-sm text-white rounded-lg disabled:opacity-50 ${isAdd ? 'bg-green-600 hover:bg-green-700' : 'bg-orange-500 hover:bg-orange-600'}`}
+            >
               {loading ? 'Saving...' : isAdd ? 'Add Points' : 'Redeem Points'}
             </button>
           </div>

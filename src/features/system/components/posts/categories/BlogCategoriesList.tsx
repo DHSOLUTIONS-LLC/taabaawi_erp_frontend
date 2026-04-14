@@ -67,7 +67,7 @@ const BlogCategoriesList: React.FC<Props> = ({ onSelect, onEdit }) => {
           {category.posts_count || 0}
         </td>
         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-           
+
           <button
             onClick={() => onEdit?.(category)}
             className="text-indigo-600 hover:text-indigo-900 mr-3"
@@ -89,44 +89,44 @@ const BlogCategoriesList: React.FC<Props> = ({ onSelect, onEdit }) => {
 
   return (
     <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
-<div className="xl:col-span-4 overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Name
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Slug
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Status
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Posts
-            </th>
-            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Actions
-            </th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {categories.length === 0 ? (
+      <div className="xl:col-span-4 overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
             <tr>
-              <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
-                No categories found
-              </td>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Name
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Slug
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Status
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Posts
+              </th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
             </tr>
-          ) : (
-            categories
-              .filter(c => !c.parent_id) // Only top-level categories
-              .map(category => renderCategoryRow(category))
-          )}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {categories.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                  No categories found
+                </td>
+              </tr>
+            ) : (
+              categories
+                .filter(c => !c.parent_id) // Only top-level categories
+                .map(category => renderCategoryRow(category))
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
-    </div>
-    
+
   );
 };
 

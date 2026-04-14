@@ -25,7 +25,7 @@ export default function HelpDetail() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { savedItems } = useAppSelector(state => state.help);
-  
+
   const [contentType, setContentType] = useState<'article' | 'faq'>('article');
 
   // Determine if we're viewing article or FAQ
@@ -40,27 +40,27 @@ export default function HelpDetail() {
   }, [slug, id]);
 
   // Fetch data
-  const { 
-    data: articleData, 
+  const {
+    data: articleData,
     isLoading: articleLoading,
-    error: articleError 
-  } = useGetArticleBySlugQuery(slug || '', { 
-    skip: !slug || contentType !== 'article' 
+    error: articleError
+  } = useGetArticleBySlugQuery(slug || '', {
+    skip: !slug || contentType !== 'article'
   });
 
-  const { 
+  const {
     data: articleByIdData,
-    isLoading: articleByIdLoading 
-  } = useGetArticleByIdQuery(Number(id), { 
-    skip: !id || contentType !== 'article' 
+    isLoading: articleByIdLoading
+  } = useGetArticleByIdQuery(Number(id), {
+    skip: !id || contentType !== 'article'
   });
 
-  const { 
-    data: faqData, 
+  const {
+    data: faqData,
     isLoading: faqLoading,
-    error: faqError 
-  } = useGetFaqByIdQuery(Number(id), { 
-    skip: !id || contentType !== 'faq' 
+    error: faqError
+  } = useGetFaqByIdQuery(Number(id), {
+    skip: !id || contentType !== 'faq'
   });
 
   // Get related articles
@@ -77,21 +77,21 @@ export default function HelpDetail() {
   const error = articleError || faqError;
 
   const isSaved = savedItems.some(
-    item => item.id === (article?.id || faq?.id) && 
-    item.type === contentType
+    item => item.id === (article?.id || faq?.id) &&
+      item.type === contentType
   );
 
   const handleSaveToggle = () => {
     if (!article && !faq) return;
 
     if (isSaved) {
-      dispatch(unsaveItem({ 
-        id: article?.id as any || faq?.id, 
-        type: contentType 
+      dispatch(unsaveItem({
+        id: article?.id as any || faq?.id,
+        type: contentType
       }));
     } else {
-      dispatch(saveItem({ 
-        id: article?.id as any || faq?.id, 
+      dispatch(saveItem({
+        id: article?.id as any || faq?.id,
         type: contentType,
         title: article?.title || faq?.question || ''
       }));
@@ -129,8 +129,10 @@ export default function HelpDetail() {
   const breadcrumbItems = [
     ...(contentType === 'article' && article ? [
       { label: 'Articles', path: '/help/browse?tab=articles' },
-      { label: article.category?.category_name || 'Category', 
-        path: `/help/category/${article.category_id}` },
+      {
+        label: article.category?.category_name || 'Category',
+        path: `/help/category/${article.category_id}`
+      },
       { label: article.title }
     ] : []),
     ...(contentType === 'faq' && faq ? [
@@ -153,12 +155,12 @@ export default function HelpDetail() {
   if (error || (!article && !faq)) {
     return (
       <HelpLayout>
-        <div className="text-center py-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Content Not Found</h2>
-          <p className="text-gray-600 mb-6">The article or FAQ you're looking for doesn't exist.</p>
+        <div className="text-center py-12 px-4">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Content Not Found</h2>
+          <p className="text-sm sm:text-base text-gray-600 mb-6">The article or FAQ you're looking for doesn't exist.</p>
           <button
             onClick={() => navigate('/help')}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             Go to Help Center
           </button>
@@ -169,43 +171,45 @@ export default function HelpDetail() {
 
   return (
     <HelpLayout>
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-full mx-auto">
         {/* Navigation */}
-        <div className="mb-4 flex items-center justify-between">
+        <div className="mb-4 flex flex-row sm:items-center justify-between gap-3">
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center text-gray-600 hover:text-blue-600"
+            className="flex items-center justify-center sm:justify-start text-gray-600 hover:text-blue-600 transition-colors text-sm sm:text-base"
           >
-            <img src={arrow_left} alt="" className="w-4 h-4 mr-1" />
+            <img src={arrow_left} alt="" className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
             Back
           </button>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center justify-center sm:justify-end space-x-1.5 sm:space-x-2">
             <button
               onClick={handleShare}
-              className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
+              className="p-1.5 sm:p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
               title="Share"
             >
-              <img src={share_icon} alt="Share" className="w-4 h-4" />
+              <img src={share_icon} alt="Share" className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
-            <button
+            {/* <button
               onClick={handlePrint}
-              className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
+              className="p-1.5 sm:p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
               title="Print"
             >
-              <img src={print_icon} alt="Print" className="w-4 h-4" />
+              <img src={print_icon} alt="Print" className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
             <button
               onClick={handleDownload}
-              className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
+              className="p-1.5 sm:p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
               title="Download"
             >
-              <img src={download_icon} alt="Download" className="w-4 h-4" />
-            </button>
+              <img src={download_icon} alt="Download" className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            </button> */}
           </div>
         </div>
-
-        <HelpBreadcrumb items={breadcrumbItems} />
+        {/* Breadcrumb - Responsive with horizontal scroll */}
+        <div className="mb-4 overflow-x-auto">
+          <HelpBreadcrumb items={breadcrumbItems} />
+        </div>
 
         {/* Main Content */}
         {contentType === 'article' && article && (
@@ -228,9 +232,9 @@ export default function HelpDetail() {
 
         {/* Related Articles */}
         {contentType === 'article' && relatedArticles.length > 0 && (
-          <div className="mt-8">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Related Articles</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="mt-6 sm:mt-8">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Related Articles</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
               {relatedArticles.map(related => (
                 <HelpCard key={related.id} type="article" data={related} variant="compact" />
               ))}

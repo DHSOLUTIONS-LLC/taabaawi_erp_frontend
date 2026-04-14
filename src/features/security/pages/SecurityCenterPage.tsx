@@ -146,11 +146,11 @@ const SecurityCenterPage: React.FC = () => {
 
   const stats = statsData?.data;
 
- return (
+  return (
     <DashboardLayout>
       <div className="min-h-screen bg-gray-50">
         <div className="mx-auto">
-          
+
           {/* Header */}
           <div className="mb-6 sm:mb-8">
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Security Center</h1>
@@ -187,11 +187,10 @@ const SecurityCenterPage: React.FC = () => {
                     dispatch(setActiveTab(tab.id as any));
                     setCurrentPage(1);
                   }}
-                  className={`py-2.5 md:py-3 px-1 border-b-2 font-medium text-sm md:text-base transition-colors whitespace-nowrap ${
-                    activeTab === tab.id
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                  className={`py-2.5 md:py-3 px-1 border-b-2 font-medium text-sm md:text-base transition-colors whitespace-nowrap ${activeTab === tab.id
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
                 >
                   <span className="mr-2 text-base md:text-lg">{tab.icon}</span>
                   {tab.label}
@@ -249,55 +248,55 @@ const SecurityCenterPage: React.FC = () => {
               <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
                 <h2 className="text-base sm:text-lg font-semibold text-gray-900">Activity Logs</h2>
               </div>
-                <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
-              <div className="xl:col-span-4 overflow-x-auto">
-  <table className="w-full min-w-[800px]">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
-                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
-                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
-                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">IP Address</th>
-                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {logsLoading ? (
-                      <TableLoader colSpan={5} />
-                    ) : logs.length === 0 ? (
+              <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+                <div className="xl:col-span-4 overflow-x-auto">
+                  <table className="w-full min-w-[800px]">
+                    <thead className="bg-gray-50">
                       <tr>
-                        <td colSpan={5} className="px-4 sm:px-6 py-8 text-center text-gray-500">
-                          No logs found
-                        </td>
+                        <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
+                        <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
+                        <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
+                        <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">IP Address</th>
+                        <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
                       </tr>
-                    ) : (
-                      logs.map((log: any) => (
-                        <tr key={log.id} className="hover:bg-gray-50 transition-colors">
-                          <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-900 whitespace-nowrap">
-                            {log.user_name || log.user?.name || 'System'}
-                          </td>
-                          <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
-                            <span className="inline-flex px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
-                              {log.action}
-                            </span>
-                          </td>
-                          <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-600 break-words max-w-xs">
-                            {log.description}
-                          </td>
-                          <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-500 whitespace-nowrap">
-                            {log.ip_address || 'Unknown'}
-                          </td>
-                          <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-500 whitespace-nowrap">
-                            {log.created_at ? format(new Date(log.created_at), 'MMM dd, HH:mm') : 'Unknown'}
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {logsLoading ? (
+                        <TableLoader colSpan={5} />
+                      ) : logs.length === 0 ? (
+                        <tr>
+                          <td colSpan={5} className="px-4 sm:px-6 py-8 text-center text-gray-500">
+                            No logs found
                           </td>
                         </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-                 </div>
-                  </div>
-               
+                      ) : (
+                        logs.map((log: any) => (
+                          <tr key={log.id} className="hover:bg-gray-50 transition-colors">
+                            <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-900 whitespace-nowrap">
+                              {log.user_name || log.user?.name || 'System'}
+                            </td>
+                            <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                              <span className="inline-flex px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+                                {log.action}
+                              </span>
+                            </td>
+                            <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-600 break-words max-w-xs">
+                              {log.description}
+                            </td>
+                            <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-500 whitespace-nowrap">
+                              {log.ip_address || 'Unknown'}
+                            </td>
+                            <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-500 whitespace-nowrap">
+                              {log.created_at ? format(new Date(log.created_at), 'MMM dd, HH:mm') : 'Unknown'}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
             </div>
           )}
 
@@ -307,60 +306,59 @@ const SecurityCenterPage: React.FC = () => {
               <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
                 <h2 className="text-base sm:text-lg font-semibold text-gray-900">Login History</h2>
               </div>
-                <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
-              <div className="xl:col-span-4 overflow-x-auto">
-  <table className="w-full min-w-[800px]">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
-                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">IP Address</th>
-                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Device</th>
-                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {loginsLoading ? (
-                      <TableLoader colSpan={5} />
-                    ) : logins.length === 0 ? (
+              <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+                <div className="xl:col-span-4 overflow-x-auto">
+                  <table className="w-full min-w-[800px]">
+                    <thead className="bg-gray-50">
                       <tr>
-                        <td colSpan={5} className="px-4 sm:px-6 py-8 text-center text-gray-500">
-                          No login history found
-                        </td>
+                        <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
+                        <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                        <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">IP Address</th>
+                        <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Device</th>
+                        <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
                       </tr>
-                    ) : (
-                      logins.map((login: any) => (
-                        <tr key={login.id} className="hover:bg-gray-50 transition-colors">
-                          <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-900 whitespace-nowrap">
-                            {login.user?.name || 'Unknown User'}
-                          </td>
-                          <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
-                            <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
-                              login.login_status === 'success'
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-red-100 text-red-800'
-                            }`}>
-                              {login.login_status}
-                              {login.is_suspicious && ' ⚠️'}
-                            </span>
-                          </td>
-                          <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-500 whitespace-nowrap">
-                            {login.ip_address || 'Unknown'}
-                          </td>
-                          <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-500 whitespace-nowrap">
-                            {login.device_type || 'Unknown'}
-                          </td>
-                          <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-500 whitespace-nowrap">
-                            {login.login_at ? format(new Date(login.login_at), 'MMM dd, HH:mm') : 'Unknown'}
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {loginsLoading ? (
+                        <TableLoader colSpan={5} />
+                      ) : logins.length === 0 ? (
+                        <tr>
+                          <td colSpan={5} className="px-4 sm:px-6 py-8 text-center text-gray-500">
+                            No login history found
                           </td>
                         </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-                 </div> 
-                 </div>
-           
+                      ) : (
+                        logins.map((login: any) => (
+                          <tr key={login.id} className="hover:bg-gray-50 transition-colors">
+                            <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-900 whitespace-nowrap">
+                              {login.user?.name || 'Unknown User'}
+                            </td>
+                            <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                              <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${login.login_status === 'success'
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-red-100 text-red-800'
+                                }`}>
+                                {login.login_status}
+                                {login.is_suspicious && ' ⚠️'}
+                              </span>
+                            </td>
+                            <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-500 whitespace-nowrap">
+                              {login.ip_address || 'Unknown'}
+                            </td>
+                            <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-500 whitespace-nowrap">
+                              {login.device_type || 'Unknown'}
+                            </td>
+                            <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-500 whitespace-nowrap">
+                              {login.login_at ? format(new Date(login.login_at), 'MMM dd, HH:mm') : 'Unknown'}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
             </div>
           )}
 
@@ -369,7 +367,7 @@ const SecurityCenterPage: React.FC = () => {
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
               <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <h2 className="text-base sm:text-lg font-semibold text-gray-900">Security Alerts</h2>
-                <select 
+                <select
                   className="w-full sm:w-auto border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                 >
                   <option value="all">All Alerts</option>
@@ -393,11 +391,10 @@ const SecurityCenterPage: React.FC = () => {
                       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                         <div className="flex-1">
                           <div className="flex flex-wrap items-center gap-2 mb-2">
-                            <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
-                              alert.severity === 'critical' ? 'bg-red-100 text-red-800' :
+                            <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${alert.severity === 'critical' ? 'bg-red-100 text-red-800' :
                               alert.severity === 'high' ? 'bg-orange-100 text-orange-800' :
-                              'bg-yellow-100 text-yellow-800'
-                            }`}>
+                                'bg-yellow-100 text-yellow-800'
+                              }`}>
                               {alert.severity}
                             </span>
                             <span className="text-xs sm:text-sm text-gray-500">{alert.alert_type}</span>
@@ -427,58 +424,58 @@ const SecurityCenterPage: React.FC = () => {
               <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
                 <h2 className="text-base sm:text-lg font-semibold text-gray-900">Active Sessions</h2>
               </div>
-                <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
-              <div className="xl:col-span-4 overflow-x-auto">
-   <table className="w-full min-w-[800px]">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
-                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">IP Address</th>
-                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Device</th>
-                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Last Activity</th>
-                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {sessionsLoading ? (
-                      <TableLoader colSpan={5} />
-                    ) : sessions.length === 0 ? (
+              <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+                <div className="xl:col-span-4 overflow-x-auto">
+                  <table className="w-full min-w-[800px]">
+                    <thead className="bg-gray-50">
                       <tr>
-                        <td colSpan={5} className="px-4 sm:px-6 py-8 text-center text-gray-500">
-                          No active sessions
-                        </td>
+                        <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
+                        <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">IP Address</th>
+                        <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Device</th>
+                        <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Last Activity</th>
+                        <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                       </tr>
-                    ) : (
-                      sessions.map((session: any) => (
-                        <tr key={session.id} className="hover:bg-gray-50 transition-colors">
-                          <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-900 whitespace-nowrap">
-                            {session.user?.name || 'Unknown User'}
-                          </td>
-                          <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-500 whitespace-nowrap">
-                            {session.ip_address || 'Unknown'}
-                          </td>
-                          <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-500 whitespace-nowrap">
-                            {session.device_type || 'Unknown'}
-                          </td>
-                          <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-500 whitespace-nowrap">
-                            {session.last_activity_at ? format(new Date(session.last_activity_at), 'MMM dd, HH:mm') : 'Unknown'}
-                          </td>
-                          <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
-                            <button
-                              onClick={() => handleTerminateSession(session.id)}
-                              className="text-red-600 hover:text-red-800 text-sm font-medium"
-                            >
-                              Terminate
-                            </button>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {sessionsLoading ? (
+                        <TableLoader colSpan={5} />
+                      ) : sessions.length === 0 ? (
+                        <tr>
+                          <td colSpan={5} className="px-4 sm:px-6 py-8 text-center text-gray-500">
+                            No active sessions
                           </td>
                         </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-                  </div>
-                    </div>
-              
+                      ) : (
+                        sessions.map((session: any) => (
+                          <tr key={session.id} className="hover:bg-gray-50 transition-colors">
+                            <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-900 whitespace-nowrap">
+                              {session.user?.name || 'Unknown User'}
+                            </td>
+                            <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-500 whitespace-nowrap">
+                              {session.ip_address || 'Unknown'}
+                            </td>
+                            <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-500 whitespace-nowrap">
+                              {session.device_type || 'Unknown'}
+                            </td>
+                            <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-500 whitespace-nowrap">
+                              {session.last_activity_at ? format(new Date(session.last_activity_at), 'MMM dd, HH:mm') : 'Unknown'}
+                            </td>
+                            <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                              <button
+                                onClick={() => handleTerminateSession(session.id)}
+                                className="text-red-600 hover:text-red-800 text-sm font-medium"
+                              >
+                                Terminate
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
             </div>
           )}
 
@@ -488,72 +485,72 @@ const SecurityCenterPage: React.FC = () => {
               <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
                 <h2 className="text-base sm:text-lg font-semibold text-gray-900">Deleted Records</h2>
               </div>
-                <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
-              <div className="xl:col-span-4 overflow-x-auto">
-    <table className="w-full min-w-[800px]">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Model</th>
-                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Identifier</th>
-                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Deleted By</th>
-                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Deleted At</th>
-                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {deletedLoading ? (
-                      <TableLoader colSpan={6} />
-                    ) : deleted.length === 0 ? (
+              <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+                <div className="xl:col-span-4 overflow-x-auto">
+                  <table className="w-full min-w-[800px]">
+                    <thead className="bg-gray-50">
                       <tr>
-                        <td colSpan={6} className="px-4 sm:px-6 py-8 text-center text-gray-500">
-                          No deleted records found
-                        </td>
+                        <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Model</th>
+                        <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Identifier</th>
+                        <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Deleted By</th>
+                        <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Deleted At</th>
+                        <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                        <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                       </tr>
-                    ) : (
-                      deleted.map((record: any) => (
-                        <tr key={record.id} className="hover:bg-gray-50 transition-colors">
-                          <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-600 whitespace-nowrap">
-                            {record.model_type}
-                          </td>
-                          <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-900 whitespace-nowrap">
-                            {record.record_identifier}
-                          </td>
-                          <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-500 whitespace-nowrap">
-                            {record.deleted_by_name || 'System'}
-                          </td>
-                          <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-500 whitespace-nowrap">
-                            {record.deleted_at ? format(new Date(record.deleted_at), 'MMM dd, yyyy') : 'Unknown'}
-                          </td>
-                          <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
-                            {record.is_restored ? (
-                              <span className="inline-flex px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
-                                Restored
-                              </span>
-                            ) : (
-                              <span className="inline-flex px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">
-                                Deleted
-                              </span>
-                            )}
-                          </td>
-                          <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
-                            {!record.is_restored && (
-                              <button
-                                onClick={() => handleRestoreRecord(record.id)}
-                                className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                              >
-                                Restore
-                              </button>
-                            )}
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {deletedLoading ? (
+                        <TableLoader colSpan={6} />
+                      ) : deleted.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="px-4 sm:px-6 py-8 text-center text-gray-500">
+                            No deleted records found
                           </td>
                         </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
+                      ) : (
+                        deleted.map((record: any) => (
+                          <tr key={record.id} className="hover:bg-gray-50 transition-colors">
+                            <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-600 whitespace-nowrap">
+                              {record.model_type}
+                            </td>
+                            <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-900 whitespace-nowrap">
+                              {record.record_identifier}
+                            </td>
+                            <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-500 whitespace-nowrap">
+                              {record.deleted_by_name || 'System'}
+                            </td>
+                            <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-500 whitespace-nowrap">
+                              {record.deleted_at ? format(new Date(record.deleted_at), 'MMM dd, yyyy') : 'Unknown'}
+                            </td>
+                            <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                              {record.is_restored ? (
+                                <span className="inline-flex px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
+                                  Restored
+                                </span>
+                              ) : (
+                                <span className="inline-flex px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">
+                                  Deleted
+                                </span>
+                              )}
+                            </td>
+                            <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                              {!record.is_restored && (
+                                <button
+                                  onClick={() => handleRestoreRecord(record.id)}
+                                  className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                                >
+                                  Restore
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
                 </div>
-                </div>
-               
+              </div>
+
             </div>
           )}
         </div>

@@ -16,54 +16,34 @@ interface Customer {
   nationality?: string;
   id_number?: string;
   id_type?: 'National' | 'Passport' | 'Civil ID';
-  
-  // Address
   address?: string;
   city?: string;
   state?: string;
   country?: string;
   postal_code?: string;
-  
-  // Company info
   company_name?: string;
   company_vat?: string;
   job_title?: string;
-  
-  // Preferences
   preferred_contact_method?: 'Email' | 'Phone' | 'SMS' | 'WhatsApp';
   preferred_language?: string;
-  communication_preferences?: {
-    email: boolean;
-    sms: boolean;
-    whatsapp: boolean;
-  };
-  
-  // Loyalty
+  communication_preferences?: { email: boolean; sms: boolean; whatsapp: boolean };
   loyalty_points: number;
   lifetime_points: number;
   loyalty_tier?: 'Bronze' | 'Silver' | 'Gold' | 'Platinum';
   loyalty_enrolled_date?: string;
-  
-  // Statistics
   total_orders: number;
   total_spent: number;
   average_order_value: number;
   last_order_date?: string;
-  
-  // Status
   status: 'Active' | 'Inactive' | 'Blocked' | 'Lead';
   is_active: boolean;
   is_verified: boolean;
-  
-  // Metadata
   notes?: string;
   tags?: string[];
   created_by?: number;
   created_at: string;
   updated_at: string;
   deleted_at?: string;
-  
-  // Relations
   createdBy?: any;
 }
 
@@ -112,35 +92,40 @@ export const CustomerForm = ({ mode, customer, onClose }: Props) => {
       if (mode === 'create') await create(data).unwrap();
       else await update({ id: customer!.id, data }).unwrap();
       onClose();
-    } catch {}
+    } catch { }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-xl">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-          <h2 className="font-semibold text-gray-800">{mode === 'create' ? 'New Customer' : 'Edit Customer'}</h2>
-          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded"><X className="h-4 w-4" /></button>
+        <div className="flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-100">
+          <h2 className="font-semibold text-gray-800 text-sm sm:text-base">
+            {mode === 'create' ? 'New Customer' : 'Edit Customer'}
+          </h2>
+          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded">
+            <X className="h-4 w-4" />
+          </button>
         </div>
 
-        {/* Tabs */}
-        <div className="flex border-b border-gray-100 px-5">
+        {/* Tabs - Responsive with horizontal scroll */}
+        <div className="flex border-b border-gray-100 px-3 sm:px-5 overflow-x-auto">
           {TABS.map(t => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${
-                tab === t ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
-            >{t}</button>
+              className={`px-2 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium border-b-2 -mb-px transition-colors whitespace-nowrap ${tab === t ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'
+                }`}
+            >
+              {t}
+            </button>
           ))}
         </div>
 
         {/* Body */}
-        <form onSubmit={handleSubmit(onSubmit)} className="flex-1 overflow-y-auto p-5">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex-1 overflow-y-auto p-4 sm:p-5">
           {tab === 'Personal' && (
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <Input label="First Name *" {...register('first_name', { required: 'Required' })} error={errors.first_name} />
               <Input label="Last Name *" {...register('last_name', { required: 'Required' })} error={errors.last_name} />
               <Input label="Date of Birth" type="date" {...register('date_of_birth')} />
@@ -168,7 +153,7 @@ export const CustomerForm = ({ mode, customer, onClose }: Props) => {
           )}
 
           {tab === 'Contact' && (
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <Input label="Email *" type="email" {...register('email', { required: 'Required' })} error={errors.email} />
               <Input label="Phone *" {...register('phone', { required: 'Required' })} error={errors.phone} />
               <Input label="Alternative Phone" {...register('alternative_phone')} />
@@ -176,14 +161,14 @@ export const CustomerForm = ({ mode, customer, onClose }: Props) => {
               <Input label="State" {...register('state')} />
               <Input label="Country" {...register('country')} />
               <Input label="Postal Code" {...register('postal_code')} />
-              <div className="col-span-2">
+              <div className="col-span-1 sm:col-span-2">
                 <Input label="Address" {...register('address')} />
               </div>
             </div>
           )}
 
           {tab === 'Company' && (
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <Input label="Company Name" {...register('company_name')} />
               <Input label="VAT Number" {...register('company_vat')} />
               <Input label="Job Title" {...register('job_title')} />
@@ -191,7 +176,7 @@ export const CustomerForm = ({ mode, customer, onClose }: Props) => {
           )}
 
           {tab === 'Preferences' && (
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <Select label="Preferred Contact" {...register('preferred_contact_method')}>
                 <option value="">Select</option>
                 <option value="Email">Email</option>
@@ -200,7 +185,7 @@ export const CustomerForm = ({ mode, customer, onClose }: Props) => {
                 <option value="WhatsApp">WhatsApp</option>
               </Select>
               <Input label="Preferred Language" {...register('preferred_language')} />
-              <div className="col-span-2">
+              <div className="col-span-1 sm:col-span-2">
                 <label className="block text-xs font-medium text-gray-600 mb-1">Notes</label>
                 <textarea
                   rows={3}
@@ -211,14 +196,14 @@ export const CustomerForm = ({ mode, customer, onClose }: Props) => {
             </div>
           )}
 
-          <div className="flex justify-end gap-2 mt-6 pt-4 border-t border-gray-100">
-            <button type="button" onClick={onClose} className="px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50">
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 mt-6 pt-4 border-t border-gray-100">
+            <button type="button" onClick={onClose} className="w-full sm:w-auto px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50">
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-5 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              className="w-full sm:w-auto px-5 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
             >
               {loading ? 'Saving...' : mode === 'create' ? 'Create Customer' : 'Save Changes'}
             </button>

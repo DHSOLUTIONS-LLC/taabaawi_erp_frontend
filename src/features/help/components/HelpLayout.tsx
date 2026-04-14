@@ -5,7 +5,6 @@ import DashboardLayout from '../../../layouts/DashboardLayout';
 import { useAppSelector } from '../../../app/hooks';
 import search_icon from '../../../assets/icons/search_icon.svg';
 import type { RootState } from '../../../app/store';
-// import help_icon from '../../../assets/icons/he.svg';
 
 interface HelpLayoutProps {
   children: ReactNode;
@@ -19,9 +18,6 @@ export default function HelpLayout({ children, showSearch = true }: HelpLayoutPr
   const basePath = isSuperAdmin ? '/admin' : '';
   const isAdmin = user?.role?.role_name === 'Super Admin' || user?.role?.role_name === 'Admin';
 
-
-
-
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -31,62 +27,130 @@ export default function HelpLayout({ children, showSearch = true }: HelpLayoutPr
     }
   };
 
-
   return (
     <DashboardLayout>
       <div className="min-h-screen bg-gray-50">
         {/* Header */}
-        <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div className="bg-white sticky top-0 z-10 shadow-sm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              <div className="flex items-center space-x-4">
+            {/* Mobile Header - Logo and Menu Toggle */}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between py-3 md:py-0 md:h-16">
+              {/* Logo and Mobile Menu Button */}
+              <div className="flex items-center justify-between">
                 <Link to={`${basePath}/help`} className="flex items-center space-x-2">
-                  {/* <img src={help_icon} alt="Help" className="w-6 h-6" /> */}
-                  <span className="text-lg font-semibold text-gray-900">Help Center</span>
+                  <span className="text-base sm:text-lg font-semibold text-gray-900">Help Center</span>
                 </Link>
 
-                <nav className="hidden md:flex space-x-4 ml-8">
-                  <Link to={`${basePath}/help`} className="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium">
-                    Dashboard
-                  </Link>
-                  <Link to={`${basePath}/help/browse`} className="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium">
-                    Browse
-                  </Link>
-
-                  {/* <Link to={`${basePath}/help/saved`} className="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium">
-                    Saved
-                  </Link> */}
-                  {isAdmin && (
-                    <Link to={`${basePath}/help/management`} className="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium">
-                      Manage
-                    </Link>
-                  )}
-                </nav>
+                {/* Mobile Menu Button */}
+                <div className="md:hidden">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const mobileMenu = document.getElementById('mobile-menu');
+                      if (mobileMenu) {
+                        mobileMenu.classList.toggle('hidden');
+                      }
+                    }}
+                    className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none"
+                  >
+                    <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                  </button>
+                </div>
               </div>
 
+              {/* Desktop Navigation */}
+              <nav className="hidden md:flex items-center space-x-4 ml-8">
+                <Link to={`${basePath}/help`} className="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors">
+                  Dashboard
+                </Link>
+                <Link to={`${basePath}/help/browse`} className="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors">
+                  Browse
+                </Link>
+                {isAdmin && (
+                  <Link to={`${basePath}/help/management`} className="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors">
+                    Manage
+                  </Link>
+                )}
+              </nav>
+
+              {/* Search Bar - Desktop */}
               {showSearch && (
-                <form onSubmit={handleSearch} className="flex-1 max-w-lg ml-4">
-                  <div className="relative">
-                    <img
-                      src={search_icon}
-                      alt=""
-                      className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
-                    />
-                    <input
-                      type="text"
-                      name="search"
-                      placeholder="Search for help..."
-                      className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                </form>
+                <div className="hidden md:block flex-1 max-w-lg ml-4">
+                  <form onSubmit={handleSearch}>
+                    <div className="relative">
+                      <img
+                        src={search_icon}
+                        alt=""
+                        className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+                      />
+                      <input
+                        type="text"
+                        name="search"
+                        placeholder="Search for help..."
+                        className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                  </form>
+                </div>
+              )}
+            </div>
+
+            {/* Mobile Menu */}
+            <div id="mobile-menu" className="hidden md:hidden pb-3">
+              <nav className="flex flex-col space-y-1">
+                <Link
+                  to={`${basePath}/help`}
+                  onClick={() => document.getElementById('mobile-menu')?.classList.add('hidden')}
+                  className="text-gray-700 hover:text-blue-600 hover:bg-gray-50 px-3 py-2 text-sm font-medium rounded-lg transition-colors"
+                >
+                  Dashboard
+                </Link>
+                <Link
+                  to={`${basePath}/help/browse`}
+                  onClick={() => document.getElementById('mobile-menu')?.classList.add('hidden')}
+                  className="text-gray-700 hover:text-blue-600 hover:bg-gray-50 px-3 py-2 text-sm font-medium rounded-lg transition-colors"
+                >
+                  Browse
+                </Link>
+                {isAdmin && (
+                  <Link
+                    to={`${basePath}/help/management`}
+                    onClick={() => document.getElementById('mobile-menu')?.classList.add('hidden')}
+                    className="text-gray-700 hover:text-blue-600 hover:bg-gray-50 px-3 py-2 text-sm font-medium rounded-lg transition-colors"
+                  >
+                    Manage
+                  </Link>
+                )}
+              </nav>
+
+              {/* Search Bar - Mobile */}
+              {showSearch && (
+                <div className="mt-3 pt-3 border-t border-gray-200">
+                  <form onSubmit={handleSearch}>
+                    <div className="relative">
+                      <img
+                        src={search_icon}
+                        alt=""
+                        className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+                      />
+                      <input
+                        type="text"
+                        name="search"
+                        placeholder="Search for help..."
+                        className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                  </form>
+                </div>
               )}
             </div>
           </div>
         </div>
 
         {/* Main Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-full mx-auto py-4 sm:py-6">
           {children}
         </div>
       </div>

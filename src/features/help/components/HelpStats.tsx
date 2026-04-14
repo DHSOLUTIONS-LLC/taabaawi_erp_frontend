@@ -30,7 +30,7 @@ interface HelpStatsProps {
   dateRange?: { start: string; end: string };
 }
 
-export default function HelpStats({  }: HelpStatsProps) {
+export default function HelpStats({ }: HelpStatsProps) {
   const { data: statsData, isLoading } = useGetFaqStatisticsQuery();
 
   if (isLoading) {
@@ -77,7 +77,7 @@ export default function HelpStats({  }: HelpStatsProps) {
 
   // Popular Articles Chart Data
   const popularArticlesData = {
-    labels: stats.popular_articles?.map((a: any) => a.title) || [],
+    labels: stats.popular_articles?.map((a: any) => a.title?.substring(0, 20) + (a.title?.length > 20 ? '...' : '')) || [],
     datasets: [
       {
         label: 'Views',
@@ -129,36 +129,41 @@ export default function HelpStats({  }: HelpStatsProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {overviewCards.map((card, index) => (
-          <div key={index} className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-2xl">{card.icon}</span>
-              <span className={`text-xs font-medium px-2 py-1 rounded-full bg-${card.color}-100 text-${card.color}-700`}>
+          <div key={index} className="bg-white rounded-xl p-3 sm:p-4 md:p-6 shadow-sm border border-gray-200">
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
+              <span className="text-xl sm:text-2xl">{card.icon}</span>
+              <span className={`text-xs font-medium px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full bg-${card.color}-100 text-${card.color}-700`}>
                 {card.change}
               </span>
             </div>
-            <h3 className="text-sm text-gray-500 mb-1">{card.label}</h3>
-            <p className="text-2xl font-bold text-gray-900">{card.value}</p>
+            <h3 className="text-xs sm:text-sm text-gray-500 mb-0.5 sm:mb-1">{card.label}</h3>
+            <p className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">{card.value}</p>
           </div>
         ))}
       </div>
 
       {/* Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Popular Articles */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Popular Articles</h3>
-          <div className="h-64">
+        <div className="bg-white rounded-xl p-3 sm:p-4 md:p-6 shadow-sm border border-gray-200">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Popular Articles</h3>
+          <div className="h-48 sm:h-56 md:h-64">
             <Bar
               data={popularArticlesData}
               options={{
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                  legend: { display: false }
+                  legend: { display: false },
+                  tooltip: { bodyFont: { size: 11 } }
+                },
+                scales: {
+                  x: { ticks: { font: { size: 10 } } },
+                  y: { ticks: { font: { size: 10 } } }
                 }
               }}
             />
@@ -166,16 +171,16 @@ export default function HelpStats({  }: HelpStatsProps) {
         </div>
 
         {/* Module Distribution */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Content by Module</h3>
-          <div className="h-64 flex items-center justify-center">
+        <div className="bg-white rounded-xl p-3 sm:p-4 md:p-6 shadow-sm border border-gray-200">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Content by Module</h3>
+          <div className="h-48 sm:h-56 md:h-64 flex items-center justify-center">
             <Pie
               data={moduleData}
               options={{
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                  legend: { position: 'right' }
+                  legend: { position: 'bottom', labels: { font: { size: 10 } } }
                 }
               }}
             />
@@ -183,16 +188,21 @@ export default function HelpStats({  }: HelpStatsProps) {
         </div>
 
         {/* Feedback Trends */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 lg:col-span-2">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Feedback Trends</h3>
-          <div className="h-80">
+        <div className="bg-white rounded-xl p-3 sm:p-4 md:p-6 shadow-sm border border-gray-200 lg:col-span-2">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Feedback Trends</h3>
+          <div className="h-56 sm:h-64 md:h-80">
             <Line
               data={feedbackData}
               options={{
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
-                  y: { beginAtZero: true }
+                  y: { beginAtZero: true, ticks: { font: { size: 10 } } },
+                  x: { ticks: { font: { size: 10 } } }
+                },
+                plugins: {
+                  tooltip: { bodyFont: { size: 11 } },
+                  legend: { labels: { font: { size: 11 } } }
                 }
               }}
             />
@@ -201,58 +211,58 @@ export default function HelpStats({  }: HelpStatsProps) {
       </div>
 
       {/* Additional Stats Table */}
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Detailed Statistics</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="p-4 bg-gray-50 rounded-lg">
-            <h4 className="text-sm font-medium text-gray-500 mb-2">Engagement</h4>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-sm">Avg. Time on Page</span>
+      <div className="bg-white rounded-xl p-3 sm:p-4 md:p-6 shadow-sm border border-gray-200 overflow-x-auto">
+        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Detailed Statistics</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+          <div className="p-3 sm:p-4 bg-gray-50 rounded-lg">
+            <h4 className="text-xs sm:text-sm font-medium text-gray-500 mb-2">Engagement</h4>
+            <div className="space-y-1.5 sm:space-y-2">
+              <div className="flex justify-between text-xs sm:text-sm">
+                <span>Avg. Time on Page</span>
                 <span className="font-medium">4m 32s</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-sm">Bounce Rate</span>
+              <div className="flex justify-between text-xs sm:text-sm">
+                <span>Bounce Rate</span>
                 <span className="font-medium">23%</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-sm">Return Visitors</span>
+              <div className="flex justify-between text-xs sm:text-sm">
+                <span>Return Visitors</span>
                 <span className="font-medium">45%</span>
               </div>
             </div>
           </div>
 
-          <div className="p-4 bg-gray-50 rounded-lg">
-            <h4 className="text-sm font-medium text-gray-500 mb-2">Content Quality</h4>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-sm">Avg. Helpfulness</span>
+          <div className="p-3 sm:p-4 bg-gray-50 rounded-lg">
+            <h4 className="text-xs sm:text-sm font-medium text-gray-500 mb-2">Content Quality</h4>
+            <div className="space-y-1.5 sm:space-y-2">
+              <div className="flex justify-between text-xs sm:text-sm">
+                <span>Avg. Helpfulness</span>
                 <span className="font-medium">87%</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-sm">Total Feedback</span>
+              <div className="flex justify-between text-xs sm:text-sm">
+                <span>Total Feedback</span>
                 <span className="font-medium">1,234</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-sm">Comments</span>
+              <div className="flex justify-between text-xs sm:text-sm">
+                <span>Comments</span>
                 <span className="font-medium">89</span>
               </div>
             </div>
           </div>
 
-          <div className="p-4 bg-gray-50 rounded-lg">
-            <h4 className="text-sm font-medium text-gray-500 mb-2">Search</h4>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-sm">Avg. Searches/Day</span>
+          <div className="p-3 sm:p-4 bg-gray-50 rounded-lg">
+            <h4 className="text-xs sm:text-sm font-medium text-gray-500 mb-2">Search</h4>
+            <div className="space-y-1.5 sm:space-y-2">
+              <div className="flex justify-between text-xs sm:text-sm">
+                <span>Avg. Searches/Day</span>
                 <span className="font-medium">234</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-sm">No Result Rate</span>
+              <div className="flex justify-between text-xs sm:text-sm">
+                <span>No Result Rate</span>
                 <span className="font-medium">12%</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-sm">Top Search</span>
+              <div className="flex justify-between text-xs sm:text-sm">
+                <span>Top Search</span>
                 <span className="font-medium">"invoice"</span>
               </div>
             </div>

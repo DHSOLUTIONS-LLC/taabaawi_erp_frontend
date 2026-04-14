@@ -8,14 +8,14 @@ const BlogCreatePage: React.FC = () => {
   const navigate = useNavigate();
 
 
-  
-        const { user } = useAppSelector((state: RootState) => state.auth);
-  
-    const isSuperAdmin = user?.role?.role_name === 'Super Admin';
-    const basePath = isSuperAdmin ? '/admin' : '';
 
-    
- return (
+  const { user } = useAppSelector((state: RootState) => state.auth);
+
+  const isSuperAdmin = user?.role?.role_name === 'Super Admin';
+  const basePath = isSuperAdmin ? '/admin' : '';
+
+
+  return (
     <DashboardLayout>
       <div className="container mx-auto max-w-full">
         {/* Header */}

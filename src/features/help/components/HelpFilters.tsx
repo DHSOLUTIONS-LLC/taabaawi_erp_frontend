@@ -11,12 +11,12 @@ export default function HelpFilters() {
 
   if (activeTab === 'faqs') {
     return (
-      <div className="bg-white rounded-lg p-4 mt-4 border border-gray-200">
-        <div className="flex flex-wrap gap-4">
+      <div className="bg-white rounded-lg p-3 sm:p-4 mt-3 sm:mt-4 border border-gray-200">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
           <select
             value={filters.module}
             onChange={(e) => dispatch(setFilters({ module: e.target.value }))}
-            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+            className="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
           >
             <option value="">All Modules</option>
             <option value="General">General</option>
@@ -31,12 +31,12 @@ export default function HelpFilters() {
 
   if (activeTab === 'articles') {
     return (
-      <div className="bg-white rounded-lg p-4 mt-4 border border-gray-200">
-        <div className="flex flex-wrap gap-4">
+      <div className="bg-white rounded-lg p-3 sm:p-4 mt-3 sm:mt-4 border border-gray-200">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
           <select
             value={filters.difficulty}
             onChange={(e) => dispatch(setFilters({ difficulty: e.target.value as any }))}
-            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+            className="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
           >
             <option value="">All Difficulties</option>
             {DIFFICULTY_LEVELS.map(level => (
@@ -47,7 +47,7 @@ export default function HelpFilters() {
           <select
             value={filters.article_type}
             onChange={(e) => dispatch(setFilters({ article_type: e.target.value as any }))}
-            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+            className="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
           >
             <option value="">All Types</option>
             {ARTICLE_TYPES.map(type => (

@@ -16,20 +16,20 @@ export const ReportModal = () => {
 
   const { register, handleSubmit, formState: { errors } } = useForm({
     defaultValues: isEdit && selectedReport ? {
-      report_name:  selectedReport.report_name,
-      report_type:  selectedReport.report_type,
-      description:  selectedReport.description  ?? '',
-      data_source:  selectedReport.data_source,
-      chart_type:   selectedReport.chart_type   ?? 'None',
-      visibility:   selectedReport.visibility   ?? 'Private',
+      report_name: selectedReport.report_name,
+      report_type: selectedReport.report_type,
+      description: selectedReport.description ?? '',
+      data_source: selectedReport.data_source,
+      chart_type: selectedReport.chart_type ?? 'None',
+      visibility: selectedReport.visibility ?? 'Private',
       is_scheduled: selectedReport.is_scheduled ?? false,
     } : {
-      report_name:  '',
-      report_type:  'Sales Report',
-      description:  '',
-      data_source:  '',
-      chart_type:   'None',
-      visibility:   'Private',
+      report_name: '',
+      report_type: 'Sales Report',
+      description: '',
+      data_source: '',
+      chart_type: 'None',
+      visibility: 'Private',
       is_scheduled: false,
     },
   });
@@ -43,15 +43,15 @@ export const ReportModal = () => {
     dispatch(closeReportModal());
   };
 
-return (
+  return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="bg-white rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-xl">
         <div className="sticky top-0 bg-white z-10 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100">
           <h2 className="font-semibold text-gray-800 text-sm sm:text-base">
             {isEdit ? 'Edit Report' : 'New Saved Report'}
           </h2>
-          <button 
-            onClick={() => dispatch(closeReportModal())} 
+          <button
+            onClick={() => dispatch(closeReportModal())}
             className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
           >
             <X className="h-4 w-4" />

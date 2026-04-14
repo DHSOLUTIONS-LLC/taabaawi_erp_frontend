@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import { useGetAIStatisticsQuery, useGetAILogsQuery } from '../../../services/aiContentApi';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import { format } from 'date-fns';
-import { 
-  ChartBarIcon, 
-  DocumentTextIcon, 
-  TagIcon, 
+import {
+  ChartBarIcon,
+  DocumentTextIcon,
+  TagIcon,
   ClockIcon,
   CheckCircleIcon,
   XCircleIcon,
-  ArrowPathIcon 
+  ArrowPathIcon
 } from '@heroicons/react/24/outline';
 
 const AIContentDashboard: React.FC = () => {
@@ -112,91 +112,91 @@ const AIContentDashboard: React.FC = () => {
   return (
     <DashboardLayout>
       <div className="mx-auto">
-      {/* Header */}
-<div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 sm:mb-8">
-  <div>
-    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">AI Content Dashboard</h1>
-    <p className="text-sm sm:text-base text-gray-600 mt-1">Monitor AI usage, costs, and generation logs</p>
-  </div>
-  <button
-    onClick={handleRefresh}
-    className="w-full sm:w-auto flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-  >
-    <ArrowPathIcon className="w-5 h-5 mr-2" />
-    Refresh
-  </button>
-</div>
-
-{/* Statistics Cards */}
-{statsLoading ? (
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
-    {[...Array(4)].map((_, i) => (
-      <div key={i} className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-5 animate-pulse">
-        <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
-        <div className="h-7 sm:h-8 bg-gray-200 rounded w-3/4"></div>
-      </div>
-    ))}
-  </div>
-) : (
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
-    <StatCard
-      title="Total Generations"
-      value={stats?.successful_requests || 0}
-      icon={<DocumentTextIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />}
-      color="bg-blue-500"
-    />
-    <StatCard
-      title="Total Tokens Used"
-      value={stats?.total_tokens?.toLocaleString() || 0}
-      icon={<ChartBarIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />}
-      color="bg-green-500"
-    />
-    <StatCard
-      title="Avg Response Time"
-      value={`${Math.round(stats?.average_response_time_ms || 0)}ms`}
-      icon={<ClockIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />}
-      color="bg-purple-500"
-    />
-    <StatCard
-      title="Success Rate"
-      value={`${Math.round((stats?.success_rate || 0) * 100)}%`}
-      icon={<CheckCircleIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />}
-      color="bg-orange-500"
-    />
-  </div>
-)}
-
-{/* Usage by Type Chart */}
-{stats?.usage_by_type && (
-  <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 mb-6 sm:mb-8">
-    <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Usage by Content Type</h2>
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-      {Object.entries(stats.usage_by_type).map(([type, count]) => (
-        <div key={type} className="bg-gray-50 rounded-lg p-3 sm:p-4 hover:shadow-sm transition-shadow">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs sm:text-sm font-medium text-gray-700 capitalize">
-              {type.replace(/_/g, ' ')}
-            </span>
-            <span className="text-base sm:text-lg font-bold text-blue-600">{count as number}</span>
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 sm:mb-8">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">AI Content Dashboard</h1>
+            <p className="text-sm sm:text-base text-gray-600 mt-1">Monitor AI usage, costs, and generation logs</p>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div
-              className="bg-blue-600 rounded-full h-2 transition-all duration-500"
-              style={{
-                width: `${((count as number) / (stats.total_generations || 1)) * 100}%`,
-              }}
+          <button
+            onClick={handleRefresh}
+            className="w-full sm:w-auto flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <ArrowPathIcon className="w-5 h-5 mr-2" />
+            Refresh
+          </button>
+        </div>
+
+        {/* Statistics Cards */}
+        {statsLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-5 animate-pulse">
+                <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
+                <div className="h-7 sm:h-8 bg-gray-200 rounded w-3/4"></div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+            <StatCard
+              title="Total Generations"
+              value={stats?.successful_requests || 0}
+              icon={<DocumentTextIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />}
+              color="bg-blue-500"
+            />
+            <StatCard
+              title="Total Tokens Used"
+              value={stats?.total_tokens?.toLocaleString() || 0}
+              icon={<ChartBarIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />}
+              color="bg-green-500"
+            />
+            <StatCard
+              title="Avg Response Time"
+              value={`${Math.round(stats?.average_response_time_ms || 0)}ms`}
+              icon={<ClockIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />}
+              color="bg-purple-500"
+            />
+            <StatCard
+              title="Success Rate"
+              value={`${Math.round((stats?.success_rate || 0) * 100)}%`}
+              icon={<CheckCircleIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />}
+              color="bg-orange-500"
             />
           </div>
-          <div className="mt-2 text-right">
-            <span className="text-xs text-gray-400">
-              {((count as number) / (stats.total_generations || 1) * 100).toFixed(1)}% of total
-            </span>
+        )}
+
+        {/* Usage by Type Chart */}
+        {stats?.usage_by_type && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 mb-6 sm:mb-8">
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Usage by Content Type</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              {Object.entries(stats.usage_by_type).map(([type, count]) => (
+                <div key={type} className="bg-gray-50 rounded-lg p-3 sm:p-4 hover:shadow-sm transition-shadow">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs sm:text-sm font-medium text-gray-700 capitalize">
+                      {type.replace(/_/g, ' ')}
+                    </span>
+                    <span className="text-base sm:text-lg font-bold text-blue-600">{count as number}</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className="bg-blue-600 rounded-full h-2 transition-all duration-500"
+                      style={{
+                        width: `${((count as number) / (stats.total_generations || 1)) * 100}%`,
+                      }}
+                    />
+                  </div>
+                  <div className="mt-2 text-right">
+                    <span className="text-xs text-gray-400">
+                      {((count as number) / (stats.total_generations || 1) * 100).toFixed(1)}% of total
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      ))}
-    </div>
-  </div>
-)}
+        )}
 
         {/* Usage by User */}
         {stats?.usage_by_user && stats.usage_by_user.length > 0 && (
@@ -265,90 +265,90 @@ const AIContentDashboard: React.FC = () => {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
             </div>
           ) : (
-              <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
- <div className="xl:col-span-4 overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Type
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Prompt
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Generated
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      User
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Tokens
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Time
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Date
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {logs.length === 0 ? (
+            <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+              <div className="xl:col-span-4 overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
                     <tr>
-                      <td colSpan={8} className="px-6 py-8 text-center text-gray-500">
-                        No logs found
-                      </td>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Type
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Prompt
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Generated
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        User
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Tokens
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Time
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Date
+                      </th>
                     </tr>
-                  ) : (
-                    logs.map((log) => (
-                      <tr key={log.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            {getContentTypeIcon(log.content_type)}
-                            <span className="ml-2 text-sm text-gray-900 capitalize">
-                              {log.content_type.replace('_', ' ')}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="text-sm text-gray-900 max-w-xs truncate">
-                            {log.prompt}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="text-sm text-gray-900 max-w-xs truncate">
-                            {log.generated_content}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{log.user?.name || 'Unknown'}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{log.tokens_used}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{log.response_time_ms}ms</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {getStatusBadge(log.status)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">
-                            {format(new Date(log.created_at), 'MMM dd, yyyy HH:mm')}
-                          </div>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {logs.length === 0 ? (
+                      <tr>
+                        <td colSpan={8} className="px-6 py-8 text-center text-gray-500">
+                          No logs found
                         </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+                    ) : (
+                      logs.map((log) => (
+                        <tr key={log.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              {getContentTypeIcon(log.content_type)}
+                              <span className="ml-2 text-sm text-gray-900 capitalize">
+                                {log.content_type.replace('_', ' ')}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="text-sm text-gray-900 max-w-xs truncate">
+                              {log.prompt}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="text-sm text-gray-900 max-w-xs truncate">
+                              {log.generated_content}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{log.user?.name || 'Unknown'}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{log.tokens_used}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{log.response_time_ms}ms</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {getStatusBadge(log.status)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">
+                              {format(new Date(log.created_at), 'MMM dd, yyyy HH:mm')}
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
-                </div>
-           
+
           )}
 
           {/* Pagination */}

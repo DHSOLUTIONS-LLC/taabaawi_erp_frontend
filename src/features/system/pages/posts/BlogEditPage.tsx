@@ -7,13 +7,13 @@ import { useAppSelector } from '../../../../app/hooks';
 import type { RootState } from '../../../../app/store';
 
 const BlogEditPage: React.FC = () => {
-  
-              const { user } = useAppSelector((state: RootState) => state.auth);
-        
-          const isSuperAdmin = user?.role?.role_name === 'Super Admin';
-          const basePath = isSuperAdmin ? '/admin' : '';
 
-          
+  const { user } = useAppSelector((state: RootState) => state.auth);
+
+  const isSuperAdmin = user?.role?.role_name === 'Super Admin';
+  const basePath = isSuperAdmin ? '/admin' : '';
+
+
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const postId = parseInt(id || '0');

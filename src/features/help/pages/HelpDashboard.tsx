@@ -68,8 +68,8 @@ export default function HelpDashboard() {
   const quickStats = [
     { label: 'Total Articles', value: totalArticles, icon: '📄' },
     { label: 'Total FAQs', value: totalFaqs, icon: '❓' },
-    { label: 'Helpfulness', value: `${avgHelpfulness}%`, icon: '👍' },
-    { label: 'Today\'s Views', value: todayViews.toLocaleString(), icon: '👁️' },
+    // { label: 'Helpfulness', value: `${avgHelpfulness}%`, icon: '👍' },
+    // { label: 'Today\'s Views', value: todayViews.toLocaleString(), icon: '👁️' },
   ];
 
   if (isLoading) {

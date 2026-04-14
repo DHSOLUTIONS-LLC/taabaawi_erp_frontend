@@ -167,14 +167,14 @@ const BlogPostForm: React.FC<Props> = ({ post, onSuccess }) => {
         fd.append('allow_comments', data.allow_comments ? '1' : '0');
         fd.append('is_featured', data.is_featured ? '1' : '0');
 
-        if (data.slug)             fd.append('slug', data.slug);
-        if (data.excerpt)          fd.append('excerpt', data.excerpt);
-        if (data.image_alt_text)   fd.append('image_alt_text', data.image_alt_text);
-        if (data.meta_title)       fd.append('meta_title', data.meta_title);
+        if (data.slug) fd.append('slug', data.slug);
+        if (data.excerpt) fd.append('excerpt', data.excerpt);
+        if (data.image_alt_text) fd.append('image_alt_text', data.image_alt_text);
+        if (data.meta_title) fd.append('meta_title', data.meta_title);
         if (data.meta_description) fd.append('meta_description', data.meta_description);
-        if (data.meta_keywords)    fd.append('meta_keywords', data.meta_keywords);
-        if (data.canonical_url)    fd.append('canonical_url', data.canonical_url);
-        if (data.category_id)      fd.append('category_id', String(Number(data.category_id)));
+        if (data.meta_keywords) fd.append('meta_keywords', data.meta_keywords);
+        if (data.canonical_url) fd.append('canonical_url', data.canonical_url);
+        if (data.category_id) fd.append('category_id', String(Number(data.category_id)));
 
         if (data.status === 'published') {
           fd.append('published_at', data.published_at || new Date().toISOString().split('T')[0]);
@@ -201,14 +201,14 @@ const BlogPostForm: React.FC<Props> = ({ post, onSuccess }) => {
           is_featured: data.is_featured ?? false,
         };
 
-        if (data.slug)             payload.slug = data.slug;
-        if (data.excerpt)          payload.excerpt = data.excerpt;
-        if (data.image_alt_text)   payload.image_alt_text = data.image_alt_text;
-        if (data.meta_title)       payload.meta_title = data.meta_title;
+        if (data.slug) payload.slug = data.slug;
+        if (data.excerpt) payload.excerpt = data.excerpt;
+        if (data.image_alt_text) payload.image_alt_text = data.image_alt_text;
+        if (data.meta_title) payload.meta_title = data.meta_title;
         if (data.meta_description) payload.meta_description = data.meta_description;
-        if (data.meta_keywords)    payload.meta_keywords = data.meta_keywords;
-        if (data.canonical_url)    payload.canonical_url = data.canonical_url;
-        if (data.category_id)      payload.category_id = Number(data.category_id);
+        if (data.meta_keywords) payload.meta_keywords = data.meta_keywords;
+        if (data.canonical_url) payload.canonical_url = data.canonical_url;
+        if (data.category_id) payload.category_id = Number(data.category_id);
 
         if (data.status === 'published') {
           payload.published_at = data.published_at || new Date().toISOString().split('T')[0];

@@ -241,7 +241,7 @@ export default function CreateAccountPage() {
           </div>
 
           {/* Actions - Stack buttons on mobile */}
-          <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 pt-4 border-t">
+          <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 pt-4 border-t border-gray-300">
             <button
               type="button"
               onClick={() => navigate(`${basePath}/accounting/chart-of-accounts`)}

@@ -31,8 +31,8 @@ export default function JournalEntryLines({
   const accounts: any[] = (() => {
     const raw = accountsData as any;
     if (Array.isArray(raw?.data?.data)) return raw.data.data;
-    if (Array.isArray(raw?.data))       return raw.data;
-    if (Array.isArray(raw))             return raw;
+    if (Array.isArray(raw?.data)) return raw.data;
+    if (Array.isArray(raw)) return raw;
     return [];
   })();
 
@@ -57,7 +57,7 @@ export default function JournalEntryLines({
     ]);
   };
 
-  const totalDebit  = lines.reduce((sum, l) => sum + num(l.debit), 0);
+  const totalDebit = lines.reduce((sum, l) => sum + num(l.debit), 0);
   const totalCredit = lines.reduce((sum, l) => sum + num(l.credit), 0);
   const bothSidesHaveValues = totalDebit > 0 && totalCredit > 0;
   const isBalanced = bothSidesHaveValues && Math.abs(totalDebit - totalCredit) <= 0.001;
@@ -94,7 +94,7 @@ export default function JournalEntryLines({
                       <option value="">Select Account</option>
                       {accounts.map((acc: any) => (
                         <option key={acc.id} value={acc.id}>
-                          {acc.account_code} - {acc.account_name}
+                          {acc.account_name}
                         </option>
                       ))}
                     </select>
@@ -126,9 +126,8 @@ export default function JournalEntryLines({
                     onChange={(e) => updateLine(line.id, { debit: parseFloat(e.target.value) || 0 })}
                     placeholder="0.000"
                     disabled={readOnly || line.credit > 0}
-                    className={`w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-right focus:ring-2 focus:ring-blue-500 ${
-                      line.credit > 0 ? 'bg-gray-100 cursor-not-allowed opacity-50' : ''
-                    }`}
+                    className={`w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-right focus:ring-2 focus:ring-blue-500 ${line.credit > 0 ? 'bg-gray-100 cursor-not-allowed opacity-50' : ''
+                      }`}
                   />
                 </td>
 
@@ -142,9 +141,8 @@ export default function JournalEntryLines({
                     onChange={(e) => updateLine(line.id, { credit: parseFloat(e.target.value) || 0 })}
                     placeholder="0.000"
                     disabled={readOnly || line.debit > 0}
-                    className={`w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-right focus:ring-2 focus:ring-blue-500 ${
-                      line.debit > 0 ? 'bg-gray-100 cursor-not-allowed opacity-60' : ''
-                    }`}
+                    className={`w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-right focus:ring-2 focus:ring-blue-500 ${line.debit > 0 ? 'bg-gray-100 cursor-not-allowed opacity-60' : ''
+                      }`}
                   />
                 </td>
 
@@ -254,9 +252,8 @@ export default function JournalEntryLines({
                   onChange={(e) => updateLine(line.id, { debit: parseFloat(e.target.value) || 0 })}
                   placeholder="0.000"
                   disabled={readOnly || line.credit > 0}
-                  className={`w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-right focus:ring-2 focus:ring-blue-500 ${
-                    line.credit > 0 ? 'bg-gray-100 cursor-not-allowed opacity-50' : ''
-                  }`}
+                  className={`w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-right focus:ring-2 focus:ring-blue-500 ${line.credit > 0 ? 'bg-gray-100 cursor-not-allowed opacity-50' : ''
+                    }`}
                 />
               </div>
               <div>
@@ -269,9 +266,8 @@ export default function JournalEntryLines({
                   onChange={(e) => updateLine(line.id, { credit: parseFloat(e.target.value) || 0 })}
                   placeholder="0.000"
                   disabled={readOnly || line.debit > 0}
-                  className={`w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-right focus:ring-2 focus:ring-blue-500 ${
-                    line.debit > 0 ? 'bg-gray-100 cursor-not-allowed opacity-60' : ''
-                  }`}
+                  className={`w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-right focus:ring-2 focus:ring-blue-500 ${line.debit > 0 ? 'bg-gray-100 cursor-not-allowed opacity-60' : ''
+                    }`}
                 />
               </div>
             </div>

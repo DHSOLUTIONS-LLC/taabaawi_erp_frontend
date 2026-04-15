@@ -112,7 +112,7 @@ export default function HelpForm({
     const error = errors[field.name];
     const isTouched = touched[field.name];
 
-    const baseInputClass = `w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent ${isTouched && error ? 'border-red-500' : 'border-gray-300'
+    const baseInputClass = `w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent ${isTouched && error ? 'border-red-500' : 'border-gray-300'
       }`;
 
     switch (field.type) {

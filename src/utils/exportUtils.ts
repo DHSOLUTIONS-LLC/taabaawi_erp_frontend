@@ -101,8 +101,8 @@ export const exportToWord = (
                 </thead>
                 <tbody>
                     ${products
-                      .map(
-                        (product) => `
+      .map(
+        (product) => `
                         <tr>
                             <td>${product.name || product.product_name || ""}</td>
                             <td>${product.sku || ""}</td>
@@ -114,8 +114,8 @@ export const exportToWord = (
                             <td>${product.status || (product.is_active ? "In Stock" : "Out of Stock")}</td>
                         </tr>
                     `,
-                      )
-                      .join("")}
+      )
+      .join("")}
                 </tbody>
             </table>
         </body>
@@ -173,7 +173,7 @@ export const exportToPDF = (products: any[], filename: string = "products") => {
       "Product Name",
       "SKU",
       "Category",
-      "Branch",
+      // "Branch",
       "Quantity",
       "Cost (KWD)",
       "Price (KWD)",
@@ -235,9 +235,9 @@ export const exportToPDF = (products: any[], filename: string = "products") => {
         product.name || product.product_name || "",
         product.sku || "",
         product.category?.category_name ||
-          product.category_name ||
-          "Uncategorized",
-        product.branch || product.branch_name || "Main Warehouse",
+        product.category_name ||
+        "Uncategorized",
+        // product.branch || product.branch_name || "Main Warehouse",
         String(product.quantity || product.stock_quantity || 0),
         `KWD ${product.cost || product.cost_price || 0}`,
         `KWD ${product.price || product.selling_price || 0}`,

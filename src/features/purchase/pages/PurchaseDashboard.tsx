@@ -362,7 +362,7 @@ export default function PurchaseDashboard() {
         <button
           key={item.label}
           onClick={() => navigate(item.path)}
-          className={`p-3 sm:p-4 border rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium text-gray-700 text-left transition-colors ${item.color}`}
+          className={`p-3 sm:p-4 border border-gray-300 rounded-md sm:rounded-xl text-xs sm:text-sm font-medium text-gray-700 text-left transition-colors ${item.color}`}
         >
           {item.label} →
         </button>

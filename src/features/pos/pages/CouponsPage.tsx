@@ -203,11 +203,11 @@ export default function CouponsPage() {
               </div>
               <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by code or name..."
-                className="pl-9 pr-4 py-2 border rounded-lg w-60 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
+                className="pl-9 pr-4 py-2 border border-gray-300 rounded-md w-60 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
             </div>
             <div className="relative">
               <select value={channelFilter} onChange={(e) => setChannelFilter(e.target.value)}
-                className="pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500">
+                className="pl-3 pr-8 py-2 border border-gray-300 rounded-md text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <option value="">All Channels</option>
                 <option value="POS">POS</option>
                 <option value="Website">Website</option>
@@ -220,7 +220,7 @@ export default function CouponsPage() {
             </div>
             <div className="relative">
               <select value={activeFilter} onChange={(e) => setActiveFilter(e.target.value)}
-                className="pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500">
+                className="pl-3 pr-8 py-2 border border-gray-300 rounded-md text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <option value="">All Status</option>
                 <option value="true">Active</option>
                 <option value="false">Inactive</option>
@@ -230,7 +230,7 @@ export default function CouponsPage() {
               </div>
             </div>
           </div>
-          <button onClick={handleExport} className="flex items-center gap-2 px-3 py-2 border rounded-lg hover:bg-gray-50 text-sm">
+          <button onClick={handleExport} className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 text-sm">
             <img src={export_excel} alt="" className="w-5 h-5" />
             Export
           </button>
@@ -370,10 +370,10 @@ export default function CouponsPage() {
             </p>
             <div className="flex gap-2">
               <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}
-                className="px-3 py-1.5 border rounded-lg text-sm disabled:opacity-50 hover:bg-gray-50">Previous</button>
+                className="px-3 py-1.5 border border-gray-300 rounded-md text-sm disabled:opacity-50 hover:bg-gray-50">Previous</button>
               <span className="px-3 py-1.5 bg-[#1773CF] text-white rounded-lg text-sm">{currentPage}</span>
               <button onClick={() => setCurrentPage(p => Math.min(pagination.last_page, p + 1))} disabled={currentPage === pagination.last_page}
-                className="px-3 py-1.5 border rounded-lg text-sm disabled:opacity-50 hover:bg-gray-50">Next</button>
+                className="px-3 py-1.5 border border-gray-300 rounded-md text-sm disabled:opacity-50 hover:bg-gray-50">Next</button>
             </div>
           </div>
         )}
@@ -427,25 +427,25 @@ export default function CouponsPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Coupon Code *</label>
                   <input type="text" value={form.coupon_code} onChange={(e) => F('coupon_code', e.target.value.toUpperCase())}
                     disabled={!!editingCoupon}
-                    className="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 uppercase font-mono disabled:bg-gray-50"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 uppercase font-mono disabled:bg-gray-50"
                     placeholder="SAVE10" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Coupon Name *</label>
                   <input type="text" value={form.coupon_name} onChange={(e) => F('coupon_name', e.target.value)}
-                    className="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Summer Sale 10%" />
                 </div>
                 <div className="col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                   <input type="text" value={form.description} onChange={(e) => F('description', e.target.value)}
-                    className="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Optional description..." />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Discount Type *</label>
                   <select value={form.discount_type} onChange={(e) => F('discount_type', e.target.value)}
-                    className="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none">
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none">
                     <option value="Percentage">Percentage (%)</option>
                     <option value="Fixed Amount">Fixed Amount (KWD)</option>
                   </select>
@@ -456,14 +456,14 @@ export default function CouponsPage() {
                   </label>
                   <input type="number" value={form.discount_value} onChange={(e) => F('discount_value', e.target.value)}
                     step="0.001" min="0"
-                    className="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="10" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Min Purchase Amount (KWD)</label>
                   <input type="number" value={form.min_purchase_amount} onChange={(e) => F('min_purchase_amount', e.target.value)}
                     step="0.001" min="0"
-                    className="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="0.000" />
                 </div>
                 {form.discount_type === 'Percentage' && (
@@ -471,7 +471,7 @@ export default function CouponsPage() {
                     <label className="block text-sm font-medium text-gray-700 mb-1">Max Discount Amount (KWD)</label>
                     <input type="number" value={form.max_discount_amount} onChange={(e) => F('max_discount_amount', e.target.value)}
                       step="0.001" min="0"
-                      className="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="Optional cap" />
                   </div>
                 )}
@@ -479,31 +479,31 @@ export default function CouponsPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Total Usage Limit</label>
                   <input type="number" value={form.usage_limit} onChange={(e) => F('usage_limit', e.target.value)}
                     min="1"
-                    className="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Unlimited" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Usage Per User</label>
                   <input type="number" value={form.usage_limit_per_user} onChange={(e) => F('usage_limit_per_user', e.target.value)}
                     min="1"
-                    className="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="1" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Valid From *</label>
                   <input type="date" value={form.valid_from} onChange={(e) => F('valid_from', e.target.value)}
-                    className="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Valid Until *</label>
                   <input type="date" value={form.valid_until} onChange={(e) => F('valid_until', e.target.value)}
                     min={form.valid_from}
-                    className="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Channel *</label>
                   <select value={form.channel} onChange={(e) => F('channel', e.target.value)}
-                    className="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none">
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none">
                     <option value="All">All</option>
                     <option value="POS">POS</option>
                     <option value="Website">Website</option>

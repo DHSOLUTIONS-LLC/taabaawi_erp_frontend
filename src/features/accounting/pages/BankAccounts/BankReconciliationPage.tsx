@@ -113,17 +113,17 @@ export default function BankReconciliationPage() {
 
         {/* Account Summary Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-          <div className="bg-white rounded-xl p-4 sm:p-5 shadow-sm">
+          <div className="bg-white rounded-xl p-4 sm:p-5">
             <p className="text-xs sm:text-sm text-gray-500">Current Balance</p>
             <p className="text-lg sm:text-2xl font-bold text-blue-600 mt-1 break-words">
               {account.currency} {num(account.current_balance).toFixed(3)}
             </p>
           </div>
-          <div className="bg-white rounded-xl p-4 sm:p-5 shadow-sm">
+          <div className="bg-white rounded-xl p-4 sm:p-5">
             <p className="text-xs sm:text-sm text-gray-500">Pending Transactions</p>
             <p className="text-lg sm:text-2xl font-bold text-orange-600 mt-1">{pendingTransactions.length}</p>
           </div>
-          <div className="bg-white rounded-xl p-4 sm:p-5 shadow-sm sm:col-span-2 lg:col-span-1">
+          <div className="bg-white rounded-xl p-4 sm:p-5 sm:col-span-2 lg:col-span-1">
             <p className="text-xs sm:text-sm text-gray-500">Selected Amount</p>
             <p className="text-lg sm:text-2xl font-bold text-green-600 mt-1 break-words">
               {account.currency} {selectedTotal.toFixed(3)}

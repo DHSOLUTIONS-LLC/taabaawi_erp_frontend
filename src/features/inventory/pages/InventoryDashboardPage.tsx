@@ -33,8 +33,8 @@ import dropdown_arrow_icon from "../../../assets/icons/dropdown_arrow_icon.svg";
 import export_excel from "../../../assets/icons/export_excel.svg";
 import export_pdf from "../../../assets/icons/export_pdf.svg";
 import search_icon from "../../../assets/icons/search_icon.svg";
-import sort_asc from "../../../assets/icons/sort_icon.png";
-import sort_desc from "../../../assets/icons/sort_icon.png";
+// import sort_asc from "../../../assets/icons/sort_icon.png";
+// import sort_desc from "../../../assets/icons/sort_icon.png";
 import { useAppSelector } from "../../../app/hooks";
 import type { RootState } from "../../../app/store";
 
@@ -620,125 +620,124 @@ export default function DashboardPage() {
         {/* Stat Cards - Same UI as first dashboard */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4">
           <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-2 gap-3 md:gap-4 xl:gap-6">
-          {statCards.map((card) => (
-            <div
-              key={card.label}
-              className="bg-white rounded-lg p-4 md:p-5 xl:p-6 min-w-0"
-            >
-              <div className="flex justify-between items-start">
-                <div className="min-w-0 flex-1 pr-2">
-                  <p className="text-sm md:text-base font-medium text-gray-600 truncate">
-                    {card.label}
-                  </p>
-                  <p className="text-lg md:text-xl xl:text-2xl font-semibold text-gray-900 mt-6 md:mt-8 break-words">
-                    {card.value}
+            {statCards.map((card) => (
+              <div
+                key={card.label}
+                className="bg-white rounded-lg p-4 md:p-5 xl:p-6 min-w-0"
+              >
+                <div className="flex justify-between items-start">
+                  <div className="min-w-0 flex-1 pr-2">
+                    <p className="text-sm md:text-base font-medium text-gray-600 truncate">
+                      {card.label}
+                    </p>
+                    <p className="text-lg md:text-xl xl:text-2xl font-semibold text-gray-900 mt-6 md:mt-8 break-words">
+                      {card.value}
+                    </p>
+                  </div>
+                  <div className="w-10 h-10 rounded-lg bg-[#F7F9FB] flex items-center justify-center shrink-0">
+                    <img src={card.icon} alt="" className="w-5 h-5" />
+                  </div>
+                </div>
+                <div className="flex items-center mt-2 gap-1">
+                  <p
+                    className={`text-xs md:text-sm font-semibold truncate ${card.label === "Low Stock Products" && statistics.lowStockCount > 0 ? "text-red-600" : "text-gray-600"}`}
+                  >
+                    {card.sub}
                   </p>
                 </div>
-                <div className="w-10 h-10 rounded-lg bg-[#F7F9FB] flex items-center justify-center shrink-0">
-                  <img src={card.icon} alt="" className="w-5 h-5" />
-                </div>
               </div>
-              <div className="flex items-center mt-2 gap-1">
-                <p
-                  className={`text-xs md:text-sm font-semibold truncate ${card.label === "Low Stock Products" && statistics.lowStockCount > 0 ? "text-red-600" : "text-gray-600"}`}
-                >
-                  {card.sub}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Quick Actions Row */}
-        <div className="grid grid-cols-1 xl:grid-cols-1 gap-4 md:gap-6">
-          {/* Quick Actions Card */}
-          <div className="bg-white rounded-2xl p-5 md:p-6 shadow-sm">
-            <div className="space-y-6">
-              <div className="text-center">
-                <p className="text-xl md:text-2xl font-semibold text-gray-900">
-                  Quick Actions
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <button
-                  onClick={() => setShowAddProductModal(true)}
-                  className="flex items-center gap-4 bg-white rounded-2xl p-2 border-2 border-[#0088FF] hover:border-blue-700 hover:shadow-md transition-all w-full group"
-                >
-                  <div className="w-12 h-12 rounded-2xl bg-[#ECF0F4] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                    <img src={addIcon} alt="Add Product" className="w-6 h-6" />
-                  </div>
-                  <div className="text-left">
-                    <span className="text-lg font-medium text-gray-900">
-                      Add Product
-                    </span>
-                  </div>
-                </button>
-
-                <button
-                  onClick={() => setShowBulkTransfer(!showBulkTransfer)}
-                  className={`flex items-center gap-4 bg-white rounded-2xl p-2 border-2 border-[#0088FF] hover:border-blue-700 hover:shadow-md transition-all w-full group ${
-                    showBulkTransfer ? "border-blue-700 bg-blue-50" : ""
-                  }`}
-                >
-                  <div className="w-12 h-12 rounded-2xl bg-[#ECF0F4] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                    <img
-                      src={transfer_stock}
-                      alt="Bulk Transfer"
-                      className="w-6 h-6"
-                    />
-                  </div>
-                  <div className="text-left">
-                    <span className="text-lg font-medium text-gray-900">
-                      Bulk Transfer Stock
-                    </span>
-                  </div>
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <button
-                  onClick={() => setShowBulkDiscountModal(true)}
-                  className="flex items-center gap-4 bg-white rounded-2xl p-2 border-2 border-[#0088FF] hover:border-blue-700 hover:shadow-md transition-all w-full group"
-                >
-                  <div className="w-12 h-12 rounded-2xl bg-[#ECF0F4] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                    <img
-                      src={bulk_discount}
-                      alt="Bulk Discount"
-                      className="w-6 h-6"
-                    />
-                  </div>
-                  <div className="text-left">
-                    <span className="text-lg font-medium text-gray-900">
-                      Bulk Discount (Import Excel)
-                    </span>
-                  </div>
-                </button>
-
-                <Link
-                  to={`${basePath}/inventory/reports`}
-                  className="flex items-center gap-4 bg-white rounded-2xl p-5 border-2 border-[#0088FF] hover:border-blue-700 hover:shadow-md transition-all w-full group"
-                >
-                  <div className="w-12 h-12 rounded-2xl bg-[#ECF0F4] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                    <img
-                      src={inventory_report}
-                      alt="Reports"
-                      className="w-6 h-6"
-                    />
-                  </div>
-                  <div className="text-left">
-                    <span className="text-lg font-medium text-gray-900">
-                      Inventory Reports
-                    </span>
-                  </div>
-                </Link>
-              </div>
-            </div>
+            ))}
           </div>
 
-          {/* Empty space for layout balance - can be removed if not needed */}
-          <div className="hidden xl:block"></div>
-        </div>
+          {/* Quick Actions Row */}
+          <div className="grid grid-cols-1 xl:grid-cols-1 gap-4 md:gap-6">
+            {/* Quick Actions Card */}
+            <div className="bg-white rounded-2xl p-5 md:p-6 ">
+              <div className="space-y-6">
+                <div className="text-center">
+                  <p className="text-xl md:text-2xl font-semibold text-gray-900">
+                    Quick Actions
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <button
+                    onClick={() => setShowAddProductModal(true)}
+                    className="flex items-center gap-4 bg-white rounded-2xl p-5 border-2 border-[#0088FF] hover:border-blue-700 hover:shadow-md transition-all w-full group"
+                  >
+                    <div className="w-12 h-12 rounded-2xl bg-[#ECF0F4] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                      <img src={addIcon} alt="Add Product" className="w-6 h-6" />
+                    </div>
+                    <div className="text-left">
+                      <span className="text-lg font-medium text-gray-900">
+                        Add Product
+                      </span>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => setShowBulkTransfer(!showBulkTransfer)}
+                    className={`flex items-center gap-4 bg-white rounded-2xl p-5 border-2 border-[#0088FF] hover:border-blue-700 hover:shadow-md transition-all w-full group ${showBulkTransfer ? "border-blue-700 bg-blue-50" : ""
+                      }`}
+                  >
+                    <div className="w-12 h-12 rounded-2xl bg-[#ECF0F4] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                      <img
+                        src={transfer_stock}
+                        alt="Bulk Transfer"
+                        className="w-6 h-6"
+                      />
+                    </div>
+                    <div className="text-left">
+                      <span className="text-lg font-medium text-gray-900">
+                        Bulk Transfer Stock
+                      </span>
+                    </div>
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <button
+                    onClick={() => setShowBulkDiscountModal(true)}
+                    className="flex items-center gap-4 bg-white rounded-2xl p-2 border-2 border-[#0088FF] hover:border-blue-700 hover:shadow-md transition-all w-full group"
+                  >
+                    <div className="w-12 h-12 rounded-2xl bg-[#ECF0F4] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                      <img
+                        src={bulk_discount}
+                        alt="Bulk Discount"
+                        className="w-6 h-6"
+                      />
+                    </div>
+                    <div className="text-left">
+                      <span className="text-lg font-medium text-gray-900">
+                        Bulk Discount (Import Excel)
+                      </span>
+                    </div>
+                  </button>
+
+                  <Link
+                    to={`${basePath}/inventory/reports`}
+                    className="flex items-center gap-4 bg-white rounded-2xl p-5 border-2 border-[#0088FF] hover:border-blue-700 hover:shadow-md transition-all w-full group"
+                  >
+                    <div className="w-12 h-12 rounded-2xl bg-[#ECF0F4] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                      <img
+                        src={inventory_report}
+                        alt="Reports"
+                        className="w-6 h-6"
+                      />
+                    </div>
+                    <div className="text-left">
+                      <span className="text-lg font-medium text-gray-900">
+                        Inventory Reports
+                      </span>
+                    </div>
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* Empty space for layout balance - can be removed if not needed */}
+            <div className="hidden xl:block"></div>
+          </div>
         </div>
 
         {/* Main Table Section */}
@@ -753,11 +752,10 @@ export default function DashboardPage() {
                   setCurrentPage(1);
                   setBranchId(null);
                 }}
-                className={`px-6 py-3 text-base font-medium transition-all relative ${
-                  activeTab === "products"
-                    ? "text-blue-600 border-b-2 border-blue-600 font-semibold"
-                    : "text-gray-500 hover:text-gray-700"
-                }`}
+                className={`px-6 py-3 text-base font-medium transition-all relative ${activeTab === "products"
+                  ? "text-blue-600 border-b-2 border-blue-600 font-semibold"
+                  : "text-gray-500 hover:text-gray-700"
+                  }`}
               >
                 Products
               </button>
@@ -767,11 +765,10 @@ export default function DashboardPage() {
                   setShowBulkTransfer(false);
                   setCurrentPage(1);
                 }}
-                className={`px-6 py-3 text-base font-medium transition-all relative ${
-                  activeTab === "inventory"
-                    ? "text-blue-600 border-b-2 border-blue-600 font-semibold"
-                    : "text-gray-500 hover:text-gray-700"
-                }`}
+                className={`px-6 py-3 text-base font-medium transition-all relative ${activeTab === "inventory"
+                  ? "text-blue-600 border-b-2 border-blue-600 font-semibold"
+                  : "text-gray-500 hover:text-gray-700"
+                  }`}
               >
                 Inventory Details
               </button>
@@ -986,7 +983,7 @@ export default function DashboardPage() {
                           type="checkbox"
                           checked={
                             selectedProductIds.length ===
-                              productsToDisplay.length &&
+                            productsToDisplay.length &&
                             productsToDisplay.length > 0
                           }
                           onChange={handleSelectAll}
@@ -1012,10 +1009,10 @@ export default function DashboardPage() {
                           Weight
                         </th>
                         <th className="px-4 md:px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
-                          CP
+                          Cost Price
                         </th>
                         <th className="px-4 md:px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
-                          SP
+                          Sale Price
                         </th>
                       </>
                     ) : (
@@ -1141,14 +1138,14 @@ export default function DashboardPage() {
                               {typeof product.cost_price === "string"
                                 ? parseFloat(product.cost_price).toFixed(3)
                                 : (product.cost_price as number)?.toFixed(3) ||
-                                  "0.000"}
+                                "0.000"}
                             </td>
                             <td className="px-4 md:px-5 py-3 md:py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
                               {typeof product.selling_price === "string"
                                 ? parseFloat(product.selling_price).toFixed(3)
                                 : (product.selling_price as number)?.toFixed(
-                                    3,
-                                  ) || "0.000"}
+                                  3,
+                                ) || "0.000"}
                             </td>
                           </>
                         ) : (

@@ -23,7 +23,7 @@ import {
   useReactTable,
   getCoreRowModel,
   getFilteredRowModel,
-  getPaginationRowModel,
+  // getPaginationRowModel,
   getSortedRowModel,
   flexRender,
 } from "@tanstack/react-table";
@@ -747,7 +747,7 @@ export default function POSOrdersPage() {
                     className="w-4 h-4 sm:w-5 sm:h-5"
                   />
                   <span className="text-xs sm:text-sm font-medium text-black">
-                    PDF
+                    Export PDF
                   </span>
                 </button>
 
@@ -762,7 +762,7 @@ export default function POSOrdersPage() {
                     className="w-4 h-4 sm:w-5 sm:h-5"
                   />
                   <span className="text-xs sm:text-sm font-medium text-gray-700">
-                    Excel
+                    Export Excel
                   </span>
                 </button>
               </div>

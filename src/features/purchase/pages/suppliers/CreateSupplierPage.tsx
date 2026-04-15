@@ -377,7 +377,7 @@ return (
         </div>
 
         {/* Footer - Responsive Buttons */}
-        <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t">
+        <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t border-gray-300">
           <button
             type="button"
             onClick={onClose}

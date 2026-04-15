@@ -87,7 +87,7 @@ export default function CurrencySelector({
             value={value || ''}
             onChange={handleCurrencyChange}
             disabled={disabled || currencies.length === 0}
-            className={`w-full px-4 py-3 border rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 transition-colors ${
+            className={`w-full px-4 py-3 border border-gray-300 rounded-md appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 transition-colors ${
               error ? 'border-red-500' : 'border-gray-300'
             } ${disabled ? 'bg-gray-50 cursor-not-allowed opacity-60' : ''}`}
           >
@@ -113,7 +113,7 @@ export default function CurrencySelector({
               value={customRate}
               onChange={handleRateChange}
               placeholder="Exchange Rate"
-              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+              className={`w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 ${
                 error ? 'border-red-500' : 'border-gray-300'
               }`}
             />

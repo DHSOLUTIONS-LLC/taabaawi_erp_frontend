@@ -83,14 +83,14 @@ export default function AccountsReceivablePage() {
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-          <div className="bg-white rounded-xl p-4 sm:p-5 shadow-sm">
+          <div className="bg-white rounded-xl p-4 sm:p-5">
             <p className="text-xs sm:text-sm text-gray-500">Total Outstanding</p>
             <p className="text-lg sm:text-2xl font-bold text-blue-600 mt-1 break-words">
               KWD {totalOutstanding.toFixed(3)}
             </p>
             <p className="text-xs text-gray-400 mt-1">{receivables.length} invoices</p>
           </div>
-          <div className="bg-white rounded-xl p-4 sm:p-5 shadow-sm">
+          <div className="bg-white rounded-xl p-4 sm:p-5">
             <p className="text-xs sm:text-sm text-gray-500">Overdue Amount</p>
             <p className="text-lg sm:text-2xl font-bold text-orange-600 mt-1 break-words">
               KWD {totalOverdue.toFixed(3)}
@@ -99,7 +99,7 @@ export default function AccountsReceivablePage() {
               {receivables.filter((ar: any) => ar.status === 'Overdue').length} overdue
             </p>
           </div>
-          <div className="bg-white rounded-xl p-4 sm:p-5 shadow-sm sm:col-span-2 lg:col-span-1">
+          <div className="bg-white rounded-xl p-4 sm:p-5 sm:col-span-2 lg:col-span-1">
             <p className="text-xs sm:text-sm text-gray-500">This Month</p>
             <p className="text-lg sm:text-2xl font-bold text-green-600 mt-1 break-words">
               KWD {receivables

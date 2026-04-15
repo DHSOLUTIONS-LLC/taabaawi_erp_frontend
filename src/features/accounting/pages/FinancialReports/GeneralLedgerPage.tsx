@@ -139,7 +139,7 @@ export default function GeneralLedgerPage() {
         </div>
 
         {/* Report Content */}
-        <div className="bg-white rounded-xl p-6 shadow-sm print:p-0">
+        <div className="bg-white rounded-xl p-4 print:p-0">
           {!accountId ? (
             <div className="text-center py-12">
               <p className="text-gray-500">Please select an account to view the general ledger</p>

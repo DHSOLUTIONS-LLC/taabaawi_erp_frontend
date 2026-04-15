@@ -90,7 +90,7 @@ export default function ProfitLossPage() {
         </div>
 
         {/* Report Content */}
-        <div className="bg-white rounded-xl p-6 shadow-sm print:p-0">
+        <div className="bg-white rounded-xl p-4 print:p-0">
           <ReportHeader
             title="Profit & Loss Statement"
             subtitle={`For the period ${new Date(dateRange.start_date).toLocaleDateString()} to ${new Date(dateRange.end_date).toLocaleDateString()}`}

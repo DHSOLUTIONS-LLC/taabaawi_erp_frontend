@@ -175,10 +175,10 @@ export default function InvoiceDetailPage() {
 
   const formattedDate = invoice.created_at
     ? new Date(invoice.created_at).toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      })
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    })
     : "—";
 
   return (
@@ -260,12 +260,12 @@ export default function InvoiceDetailPage() {
                 </button>
               )}
 
-            <button
+            {/* <button
               onClick={() => window.print()}
               className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
             >
               Print
-            </button>
+            </button> */}
           </div>
         </div>
 
@@ -482,12 +482,12 @@ export default function InvoiceDetailPage() {
                                 <td className="px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-700">
                                   {inst.due_date
                                     ? new Date(
-                                        inst.due_date,
-                                      ).toLocaleDateString("en-GB", {
-                                        day: "2-digit",
-                                        month: "short",
-                                        year: "numeric",
-                                      })
+                                      inst.due_date,
+                                    ).toLocaleDateString("en-GB", {
+                                      day: "2-digit",
+                                      month: "short",
+                                      year: "numeric",
+                                    })
                                     : "—"}
                                 </td>
                                 <td className="px-4 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm font-medium text-gray-900">
@@ -495,13 +495,12 @@ export default function InvoiceDetailPage() {
                                 </td>
                                 <td className="px-4 sm:px-6 py-3 sm:py-4 text-center">
                                   <span
-                                    className={`inline-block px-2 sm:px-2.5 py-1 rounded-full text-xs font-medium ${
-                                      inst.status === "Paid"
+                                    className={`inline-block px-2 sm:px-2.5 py-1 rounded-full text-xs font-medium ${inst.status === "Paid"
                                         ? "bg-green-100 text-green-700"
                                         : inst.status === "Overdue"
                                           ? "bg-red-100 text-red-700"
                                           : "bg-gray-100 text-gray-600"
-                                    }`}
+                                      }`}
                                   >
                                     {inst.status}
                                   </span>
@@ -605,13 +604,13 @@ export default function InvoiceDetailPage() {
                     <p className="text-sm text-gray-900 mt-0.5">
                       {invoice.valid_till
                         ? new Date(invoice.valid_till).toLocaleDateString(
-                            "en-GB",
-                            {
-                              day: "2-digit",
-                              month: "short",
-                              year: "numeric",
-                            },
-                          )
+                          "en-GB",
+                          {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                          },
+                        )
                         : "—"}
                     </p>
                   </div>

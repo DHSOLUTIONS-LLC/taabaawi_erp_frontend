@@ -26,7 +26,7 @@ export default function BudgetLines({
 }: BudgetLinesProps) {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  
+
   const validateLine = (line: BudgetLine) => {
     const newErrors: Record<string, string> = {};
     if (!line.account_id) {
@@ -40,7 +40,7 @@ export default function BudgetLines({
 
   const handleUpdate = (id: string, updates: Partial<BudgetLine>) => {
     onUpdate(id, updates);
-    
+
     const line = { ...lines.find(l => l.id === id), ...updates } as BudgetLine;
     const lineErrors = validateLine(line);
     setErrors(prev => ({ ...prev, ...lineErrors }));
@@ -75,14 +75,13 @@ export default function BudgetLines({
                       value={line.account_id}
                       onChange={(e) => handleUpdate(line.id, { account_id: e.target.value })}
                       disabled={readOnly}
-                      className={`w-full px-3 py-2 border rounded-lg text-sm appearance-none bg-white pr-8 ${
-                        errors[`line_${line.id}_account`] ? 'border-red-500' : 'border-gray-300'
-                      }`}
+                      className={`w-full px-3 py-2 border border-gray-300 rounded-md text-sm appearance-none bg-white pr-8 ${errors[`line_${line.id}_account`] ? 'border-red-500' : 'border-gray-300'
+                        }`}
                     >
                       <option value="">Select Account</option>
                       {accounts.map((acc: any) => (
                         <option key={acc.id} value={acc.id}>
-                          {acc.account_code} - {acc.account_name} ({acc.account_type})
+                          {acc.account_name}
                         </option>
                       ))}
                     </select>
@@ -99,14 +98,13 @@ export default function BudgetLines({
                     type="number"
                     step="0.001"
                     value={line.budgeted_amount || ''}
-                    onChange={(e) => handleUpdate(line.id, { 
-                      budgeted_amount: parseFloat(e.target.value) || 0 
+                    onChange={(e) => handleUpdate(line.id, {
+                      budgeted_amount: parseFloat(e.target.value) || 0
                     })}
                     placeholder="0.000"
                     disabled={readOnly}
-                    className={`w-full px-3 py-2 border rounded-lg text-sm text-right ${
-                      errors[`line_${line.id}_amount`] ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                    className={`w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-right ${errors[`line_${line.id}_amount`] ? 'border-red-500' : 'border-gray-300'
+                      }`}
                   />
                   {errors[`line_${line.id}_amount`] && (
                     <p className="text-xs text-red-500 mt-1">{errors[`line_${line.id}_amount`]}</p>

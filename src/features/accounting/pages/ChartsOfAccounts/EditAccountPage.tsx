@@ -131,7 +131,7 @@ export default function EditAccountPage() {
 
  return (
     <DashboardLayout>
-      <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6">
+      <div className="max-w-full mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
         <div className="flex items-center gap-3 sm:gap-4">
           <button 
@@ -288,7 +288,7 @@ export default function EditAccountPage() {
           </div>
 
           {/* Actions */}
-          <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 pt-4 border-t">
+          <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 pt-4 border-t border-gray-300">
             <button
               type="button"
               onClick={() => navigate(`${basePath}/accounting/chart-of-accounts/${accountId}`)}

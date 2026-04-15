@@ -164,7 +164,7 @@ export default function CreatePurchaseReturnPage() {
             <select
               value={selectedPoId}
               onChange={(e) => { setSelectedPoId(e.target.value); setErrors({}); }}
-              className={`w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-lg appearance-none bg-white pr-8 sm:pr-10 focus:ring-2 focus:ring-blue-500 text-sm sm:text-base ${
+              className={`w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-md appearance-none bg-white pr-8 sm:pr-10 focus:ring-2 focus:ring-blue-500 text-sm sm:text-base ${
                 errors.po ? 'border-red-400' : 'border-gray-300'
               }`}
             >

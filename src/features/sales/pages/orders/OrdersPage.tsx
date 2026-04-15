@@ -13,9 +13,11 @@ import type { RootState } from "../../../../app/store";
 import { canSwitchBranch } from "../../../../utils/roleHelpers";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import jsPDF from "jspdf";
 
 import search_icon from "../../../../assets/icons/search_icon.svg";
 import export_excel from "../../../../assets/icons/export_excel.svg";
+import export_pdf from "../../../../assets/icons/export_pdf.svg"
 import date_icon from "../../../../assets/icons/date_icon.svg";
 import dropdown_arrow_icon from "../../../../assets/icons/dropdown_arrow_icon.svg";
 import market_icon from "../../../../assets/icons/market_icon.svg";
@@ -112,7 +114,7 @@ export default function OrdersPage() {
     }
   };
 
-  const handleExport = () => {
+  const handleExportExcel = () => {
     try {
       const data = orders.map((o: any) => ({
         "Order #": o.order_number,
@@ -134,6 +136,156 @@ export default function OrdersPage() {
       );
     } catch (e) {
       console.error(e);
+    }
+  };
+
+  const handleExportPdf = () => {
+    if (orders.length === 0) {
+      alert("No orders data to export");
+      return;
+    }
+
+    try {
+      // Create PDF in landscape mode
+      const doc = new jsPDF("landscape", "mm", "a4");
+
+      // Set margins
+      const marginLeft = 10;
+      const marginTop = 20;
+      let yPos = marginTop;
+
+      // Title
+      doc.setFontSize(18);
+      doc.setFont("helvetica", "bold");
+      doc.text("ORDERS REPORT", 148.5, yPos, { align: "center" });
+      yPos += 10;
+
+      // Report details
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(100);
+      doc.text(`Generated: ${new Date().toLocaleString()}`, marginLeft, yPos);
+      doc.text(`Total Orders: ${orders.length}`, 250, yPos, {
+        align: "right",
+      });
+      yPos += 8;
+
+      // Draw line
+      doc.setDrawColor(200, 200, 200);
+      doc.line(marginLeft, yPos, 287, yPos);
+      yPos += 10;
+
+      // Define column widths for 8 columns
+      const colWidths = [30, 40, 30, 30, 30, 35, 30, 30];
+      const headers = [
+        "Order #",
+        "Customer",
+        "Channel",
+        "Order Status",
+        "Payment Status",
+        "Payment Method",
+        "Total",
+        "Date",
+      ];
+
+      // Draw table header
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(255);
+      doc.setFillColor(59, 130, 246);
+
+      let xPos = marginLeft;
+      headers.forEach((header, index) => {
+        doc.rect(xPos, yPos, colWidths[index], 8, "F");
+        doc.text(header, xPos + 2, yPos + 5.5);
+        xPos += colWidths[index];
+      });
+
+      yPos += 8;
+      doc.setTextColor(0);
+      doc.setFont("helvetica", "normal");
+
+      // Draw table rows
+      orders.forEach((order: any, rowIndex: number) => {
+        // Check if we need a new page
+        if (yPos > 190) {
+          doc.addPage("landscape");
+          yPos = marginTop;
+
+          // Draw header again on new page
+          doc.setFont("helvetica", "bold");
+          doc.setTextColor(255);
+          doc.setFillColor(59, 130, 246);
+          xPos = marginLeft;
+          headers.forEach((header, index) => {
+            doc.rect(xPos, yPos, colWidths[index], 8, "F");
+            doc.text(header, xPos + 2, yPos + 5.5);
+            xPos += colWidths[index];
+          });
+          yPos += 8;
+          doc.setTextColor(0);
+          doc.setFont("helvetica", "normal");
+        }
+
+        // Alternate row colors
+        if (rowIndex % 2 === 0) {
+          doc.setFillColor(248, 248, 248);
+          xPos = marginLeft;
+          colWidths.forEach((width) => {
+            doc.rect(xPos, yPos, width, 8, "F");
+            xPos += width;
+          });
+        }
+
+        // Prepare row data (matching Excel export exactly)
+        const rowData = [
+          order.order_number || "-",
+          order.customer_name || "-",
+          order.channel || "-",
+          order.order_status || "-",
+          order.payment_status || "-",
+          order.payment_method || "-",
+          `KD ${parseFloat(order.total_amount || 0).toFixed(3)}`,
+          new Date(order.created_at).toLocaleDateString(),
+        ];
+
+        // Draw cell content
+        xPos = marginLeft;
+        doc.setFontSize(8);
+        rowData.forEach((cell, index) => {
+          let text = String(cell);
+          const maxWidth = colWidths[index] - 4;
+
+          // Truncate text if too long (especially for customer name)
+          while (doc.getTextWidth(text) > maxWidth && text.length > 3) {
+            text = text.substring(0, text.length - 4) + "...";
+          }
+
+          // Align total column to the right
+          const align = index === 6 ? "right" : "left";
+          const xOffset = align === "right" ? colWidths[index] - 2 : 2;
+
+          doc.text(text, xPos + xOffset, yPos + 5.5, { align });
+          xPos += colWidths[index];
+        });
+
+        yPos += 8;
+      });
+
+      // Add page numbers
+      const pageCount = doc.internal.pages.length;
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(150);
+        doc.text(`Page ${i} of ${pageCount}`, 148.5, 205, { align: "center" });
+      }
+
+      // Save PDF
+      doc.save(`orders_${new Date().toISOString().split("T")[0]}.pdf`);
+    } catch (error) {
+      console.error("PDF export failed:", error);
+      alert("Failed to export to PDF");
     }
   };
 
@@ -166,7 +318,7 @@ export default function OrdersPage() {
                 setStartDate(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full pl-12 pr-4 py-3.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-12 pr-4 py-3.5 border border-gray-300 rounded-md"
             />
           </div>
           <div className="relative">
@@ -181,7 +333,7 @@ export default function OrdersPage() {
                 setEndDate(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full pl-12 pr-4 py-3.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-12 pr-4 py-3.5 border border-gray-300 rounded-md"
             />
           </div>
           <div className="relative">
@@ -195,7 +347,7 @@ export default function OrdersPage() {
                   setSelectedBranch(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="w-full pl-12 pr-10 py-3.5 border rounded-xl appearance-none bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-12 pr-4 py-3.5 border border-gray-300 rounded-md"
               >
                 <option value="">All Branches</option>
                 {branches.map((b: any) => (
@@ -216,7 +368,7 @@ export default function OrdersPage() {
           </div>
           <button
             onClick={() => navigate(`${basePath}/sales/create-order`)}
-            className="flex items-center justify-center gap-2 px-6 py-3.5 bg-[#1773CF] text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors"
+            className="flex items-center justify-center gap-2 px-6 py-3.5 bg-[#1773CF] text-white rounded-md font-semibold hover:bg-blue-700 transition-colors"
           >
             <svg
               className="w-5 h-5"
@@ -257,7 +409,7 @@ export default function OrdersPage() {
           ].map((card) => (
             <div
               key={card.label}
-              className="bg-white rounded-xl p-5 shadow-sm border border-gray-100"
+              className="bg-white rounded-xl p-5"
             >
               <p className="text-sm text-gray-500 mb-1">{card.label}</p>
               <p className={`text-[18px] lg:text-2xl font-bold ${card.color}`}>
@@ -289,7 +441,7 @@ export default function OrdersPage() {
                     setCurrentPage(1);
                   }}
                   placeholder="Search orders..."
-                  className="w-full sm:w-56 pl-8 sm:pl-9 pr-3 sm:pr-4 py-1.5 sm:py-2 border rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full sm:w-56 pl-8 sm:pl-9 pr-3 sm:pr-4 py-1.5 sm:py-2 border border-gray-300 rounded-md "
                 />
               </div>
 
@@ -300,7 +452,7 @@ export default function OrdersPage() {
                   setOrderStatus(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="w-full sm:w-auto px-2 sm:px-3 py-1.5 sm:py-2 border rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full sm:w-auto px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md"
               >
                 <option value="">All Statuses</option>
                 {[
@@ -327,7 +479,7 @@ export default function OrdersPage() {
                   setPaymentStatus(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="w-full sm:w-auto px-2 sm:px-3 py-1.5 sm:py-2 border rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full sm:w-auto px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md"
               >
                 <option value="">All Payments</option>
                 {[
@@ -350,7 +502,7 @@ export default function OrdersPage() {
                   setChannel(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="w-full sm:w-auto px-2 sm:px-3 py-1.5 sm:py-2 border rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full sm:w-auto px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md"
               >
                 <option value="">All Channels</option>
                 {["Website", "Mobile App", "POS", "Phone", "Manual"].map(
@@ -364,17 +516,28 @@ export default function OrdersPage() {
             </div>
 
             {/* Export Button */}
-            <div className="w-full sm:w-auto">
+            <div className="w-full sm:w-auto flex flex-row md:space-x-2">
               <button
-                onClick={handleExport}
-                className="w-full sm:w-auto flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 border rounded-lg hover:bg-gray-50 text-xs sm:text-sm transition-colors"
+                onClick={handleExportPdf}
+                className="w-full sm:w-auto flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 border border-gray-300 rounded-md"
+              >
+                <img
+                  src={export_pdf}
+                  alt=""
+                  className="w-4 h-4 sm:w-5 sm:h-5"
+                />
+                <span>Export PDF</span>
+              </button>
+              <button
+                onClick={handleExportExcel}
+                className="w-full sm:w-auto flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 border border-gray-300 rounded-md"
               >
                 <img
                   src={export_excel}
                   alt=""
                   className="w-4 h-4 sm:w-5 sm:h-5"
                 />
-                <span>Export</span>
+                <span>Export Excel</span>
               </button>
             </div>
           </div>
@@ -506,7 +669,7 @@ export default function OrdersPage() {
 
           {/* Pagination */}
           {pagination?.last_page > 1 && (
-            <div className="px-6 py-4 border-t flex items-center justify-between">
+            <div className="px-6 py-4 border-t border-gray-300 flex items-center justify-between">
               <p className="text-sm text-gray-500">
                 Showing {pagination.from}–{pagination.to} of {pagination.total}
               </p>
@@ -514,7 +677,7 @@ export default function OrdersPage() {
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="px-3 py-1.5 border rounded-lg text-sm disabled:opacity-50 hover:bg-gray-50"
+                  className="px-3 py-1.5 border border-gray-300 rounded-md text-sm disabled:opacity-50 hover:bg-gray-50"
                 >
                   Previous
                 </button>
@@ -526,7 +689,7 @@ export default function OrdersPage() {
                     setCurrentPage((p) => Math.min(pagination.last_page, p + 1))
                   }
                   disabled={currentPage === pagination.last_page}
-                  className="px-3 py-1.5 border rounded-lg text-sm disabled:opacity-50 hover:bg-gray-50"
+                  className="px-3 py-1.5 border border-gray-300 rounded-md text-sm disabled:opacity-50 hover:bg-gray-50"
                 >
                   Next
                 </button>

@@ -103,7 +103,7 @@ export default function InvoicesPage() {
           {stats.map((stat) => (
             <div
               key={stat.label}
-              className="bg-white rounded-xl p-4 sm:p-5 shadow-sm"
+              className="bg-white rounded-xl p-4 sm:p-5"
             >
               <p className="text-xs sm:text-sm text-gray-500">{stat.label}</p>
               <p className={`text-xl sm:text-2xl font-bold mt-1 ${stat.color}`}>

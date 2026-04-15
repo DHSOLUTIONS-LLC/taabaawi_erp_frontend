@@ -106,7 +106,7 @@ export default function CreateBankTransactionPage() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6">
+      <div className="max-w-full mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
         <div className="flex items-start gap-3 sm:gap-4">
           <button onClick={() => navigate(`${basePath}/accounting/bank-accounts/${id}`)} className="flex-shrink-0 mt-1">
@@ -136,7 +136,7 @@ export default function CreateBankTransactionPage() {
                   name="transaction_date"
                   value={formData.transaction_date}
                   onChange={handleChange}
-                  className={`w-full px-4 py-2.5 sm:py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base ${
+                  className={`w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 text-sm sm:text-base ${
                     errors.transaction_date ? 'border-red-400' : 'border-gray-300'
                   }`}
                   required
@@ -178,7 +178,7 @@ export default function CreateBankTransactionPage() {
                   value={formData.amount}
                   onChange={handleChange}
                   placeholder="0.000"
-                  className={`w-full px-4 py-2.5 sm:py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base ${
+                  className={`w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 text-sm sm:text-base ${
                     errors.amount ? 'border-red-400' : 'border-gray-300'
                   }`}
                   required
@@ -196,7 +196,7 @@ export default function CreateBankTransactionPage() {
                   value={formData.description}
                   onChange={handleChange}
                   placeholder="Transaction description"
-                  className={`w-full px-4 py-2.5 sm:py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base ${
+                  className={`w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 text-sm sm:text-base ${
                     errors.description ? 'border-red-400' : 'border-gray-300'
                   }`}
                   required

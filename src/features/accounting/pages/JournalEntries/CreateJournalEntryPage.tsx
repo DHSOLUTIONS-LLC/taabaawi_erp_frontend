@@ -143,7 +143,7 @@ export default function CreateJournalEntryPage() {
                   value={formData.entry_date}
                   onChange={handleChange}
                   max={new Date().toISOString().split('T')[0]}
-                  className={`w-full px-4 py-2.5 sm:py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base ${errors.entry_date ? 'border-red-400' : 'border-gray-300'
+                  className={`w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 text-sm sm:text-base ${errors.entry_date ? 'border-red-400' : 'border-gray-300'
                     }`}
                 />
                 {errors.entry_date && <p className="text-xs text-red-500 mt-1">{errors.entry_date[0]}</p>}
@@ -159,7 +159,7 @@ export default function CreateJournalEntryPage() {
                   value={formData.description}
                   onChange={handleChange}
                   placeholder="Brief description of the transaction"
-                  className={`w-full px-4 py-2.5 sm:py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base ${errors.description ? 'border-red-400' : 'border-gray-300'
+                  className={`w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 text-sm sm:text-base ${errors.description ? 'border-red-400' : 'border-gray-300'
                     }`}
                 />
                 {errors.description && <p className="text-xs text-red-500 mt-1">{errors.description[0]}</p>}

@@ -76,7 +76,7 @@ export default function CreateBankAccountPage() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6">
+      <div className="max-w-full mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
         <div className="flex items-center gap-3 sm:gap-4">
           <button onClick={() => navigate(`${basePath}/accounting/bank-accounts`)} className="flex-shrink-0 mt-1">

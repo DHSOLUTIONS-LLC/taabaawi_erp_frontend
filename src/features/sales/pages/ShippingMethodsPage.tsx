@@ -101,7 +101,7 @@ export default function ShippingMethodsPage() {
     } catch (err: any) {
       alert(
         err?.data?.message ||
-          "Failed to delete. It may be used in existing orders.",
+        "Failed to delete. It may be used in existing orders.",
       );
     }
   };
@@ -167,7 +167,7 @@ export default function ShippingMethodsPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search shipping methods..."
-              className="w-full pl-8 sm:pl-9 pr-3 sm:pr-4 py-2 sm:py-2.5 border rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-8 sm:pl-9 pr-3 sm:pr-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
         </div>
@@ -301,7 +301,7 @@ export default function ShippingMethodsPage() {
                     setForm((f) => ({ ...f, method_name: e.target.value }))
                   }
                   placeholder="e.g. Standard Delivery"
-                  className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
@@ -316,7 +316,7 @@ export default function ShippingMethodsPage() {
                     setForm((f) => ({ ...f, provider: e.target.value }))
                   }
                   placeholder="e.g. Aramex, DHL"
-                  className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
@@ -332,7 +332,7 @@ export default function ShippingMethodsPage() {
                   }
                   rows={2}
                   placeholder="Short description"
-                  className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
@@ -350,7 +350,7 @@ export default function ShippingMethodsPage() {
                       setForm((f) => ({ ...f, base_cost: e.target.value }))
                     }
                     placeholder="0.000"
-                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
@@ -365,7 +365,7 @@ export default function ShippingMethodsPage() {
                       setForm((f) => ({ ...f, cost_per_kg: e.target.value }))
                     }
                     placeholder="0.000"
-                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
@@ -386,7 +386,7 @@ export default function ShippingMethodsPage() {
                       }))
                     }
                     placeholder="1"
-                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
@@ -403,7 +403,7 @@ export default function ShippingMethodsPage() {
                       }))
                     }
                     placeholder="5"
-                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
@@ -414,16 +414,14 @@ export default function ShippingMethodsPage() {
                   onClick={() =>
                     setForm((f) => ({ ...f, is_active: !f.is_active }))
                   }
-                  className={`relative inline-flex h-5 w-10 sm:h-6 sm:w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    form.is_active ? "bg-green-500" : "bg-gray-300"
-                  }`}
+                  className={`relative inline-flex h-5 w-10 sm:h-6 sm:w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${form.is_active ? "bg-green-500" : "bg-gray-300"
+                    }`}
                 >
                   <span
-                    className={`inline-block h-3.5 w-3.5 sm:h-4 sm:w-4 transform rounded-full bg-white transition-transform ${
-                      form.is_active
+                    className={`inline-block h-3.5 w-3.5 sm:h-4 sm:w-4 transform rounded-full bg-white transition-transform ${form.is_active
                         ? "translate-x-5 sm:translate-x-6"
                         : "translate-x-1"
-                    }`}
+                      }`}
                   />
                 </button>
                 <span className="text-xs sm:text-sm text-gray-700">
@@ -433,10 +431,10 @@ export default function ShippingMethodsPage() {
             </div>
 
             {/* Footer Buttons */}
-            <div className="px-4 sm:px-6 py-3 sm:py-4 border-t flex flex-col sm:flex-row gap-2 sm:gap-3">
+            <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-gray-300 flex flex-col sm:flex-row gap-2 sm:gap-3">
               <button
                 onClick={() => setShowModal(false)}
-                className="w-full sm:flex-1 py-2 sm:py-2.5 border rounded-xl font-medium text-gray-700 hover:bg-gray-50 transition-colors text-sm"
+                className="w-full sm:flex-1 py-2 sm:py-2.5 border border-gray-300 rounded-xl font-medium text-gray-700 hover:bg-gray-50 transition-colors text-sm"
               >
                 Cancel
               </button>

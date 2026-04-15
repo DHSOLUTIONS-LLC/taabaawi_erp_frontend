@@ -441,7 +441,7 @@ export default function CreateOrderPage() {
                     type="text"
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
-                    className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-50 ${
+                    className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 bg-gray-50 ${
                       errors.customerName ? "border-red-500" : "border-gray-300"
                     }`}
                     placeholder="Auto-filled from customer"
@@ -461,7 +461,7 @@ export default function CreateOrderPage() {
                     type="email"
                     value={customerEmail}
                     onChange={(e) => setCustomerEmail(e.target.value)}
-                    className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-50 ${
+                    className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 bg-gray-50 ${
                       errors.customerEmail
                         ? "border-red-500"
                         : "border-gray-300"
@@ -483,7 +483,7 @@ export default function CreateOrderPage() {
                     type="text"
                     value={customerPhone}
                     onChange={(e) => setCustomerPhone(e.target.value)}
-                    className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-50 ${
+                    className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 bg-gray-50 ${
                       errors.customerPhone
                         ? "border-red-500"
                         : "border-gray-300"
@@ -514,7 +514,7 @@ export default function CreateOrderPage() {
                     type="text"
                     value={shippingAddress}
                     onChange={(e) => setShippingAddress(e.target.value)}
-                    className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                    className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 ${
                       errors.shippingAddress
                         ? "border-red-500"
                         : "border-gray-300"
@@ -535,7 +535,7 @@ export default function CreateOrderPage() {
                     <select
                       value={shippingCity}
                       onChange={(e) => setShippingCity(e.target.value)}
-                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10 ${
+                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10 ${
                         errors.shippingCity
                           ? "border-red-500"
                           : "border-gray-300"
@@ -582,7 +582,7 @@ export default function CreateOrderPage() {
                     <select
                       value={shippingCountry}
                       onChange={(e) => setShippingCountry(e.target.value)}
-                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10 ${
+                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10 ${
                         errors.shippingCountry
                           ? "border-red-500"
                           : "border-gray-300"
@@ -884,7 +884,7 @@ export default function CreateOrderPage() {
                           );
                         }
                       }}
-                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10 ${
+                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10 ${
                         errors.shippingMethod
                           ? "border-red-500"
                           : "border-gray-300"

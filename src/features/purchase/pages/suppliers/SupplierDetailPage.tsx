@@ -96,19 +96,19 @@ export default function SupplierDetailPage() {
 
     {/* Stats Cards - Responsive Grid */}
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-      <div className="bg-white rounded-xl p-4 md:p-5 shadow-sm">
+      <div className="bg-white rounded-xl p-4 md:p-5">
         <p className="text-xs md:text-sm text-gray-500">Total Orders</p>
         <p className="text-xl md:text-2xl font-bold text-gray-900 mt-1">{stats?.total_purchase_orders || 0}</p>
       </div>
-      <div className="bg-white rounded-xl p-4 md:p-5 shadow-sm">
+      <div className="bg-white rounded-xl p-4 md:p-5">
         <p className="text-xs md:text-sm text-gray-500">Total Purchases</p>
         <p className="text-lg md:text-2xl font-bold text-blue-600 mt-1 break-words">KWD {Number(stats?.total_purchase_amount || 0).toFixed(3)}</p>
       </div>
-      <div className="bg-white rounded-xl p-4 md:p-5 shadow-sm">
+      <div className="bg-white rounded-xl p-4 md:p-5">
         <p className="text-xs md:text-sm text-gray-500">Total Payments</p>
         <p className="text-lg md:text-2xl font-bold text-green-600 mt-1 break-words">KWD {Number(stats?.total_payments || 0).toFixed(3)}</p>
       </div>
-      <div className="bg-white rounded-xl p-4 md:p-5 shadow-sm">
+      <div className="bg-white rounded-xl p-4 md:p-5">
         <p className="text-xs md:text-sm text-gray-500">Outstanding</p>
         <p className="text-lg md:text-2xl font-bold text-orange-600 mt-1 break-words">KWD {Number(stats?.outstanding_balance || 0).toFixed(3)}</p>
       </div>

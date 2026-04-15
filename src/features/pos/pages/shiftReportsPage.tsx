@@ -15,10 +15,10 @@ import search_icon from "../../../assets/icons/search_icon.svg";
 import export_pdf from "../../../assets/icons/export_pdf.svg";
 import export_excel from "../../../assets/icons/export_excel.svg";
 import market_icon from "../../../assets/icons/market_icon.svg";
-import dropdown_arrow_icon from "../../../assets/icons/dropdown_arrow_icon.svg";
 import date_icon from "../../../assets/icons/date_icon.svg";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import jsPDF from "jspdf";
 
 export default function ShiftReportsPage() {
   const { user } = useAppSelector((state: RootState) => state.auth);
@@ -137,9 +137,157 @@ export default function ShiftReportsPage() {
   };
 
   const handleExportToPDF = () => {
-    alert(
-      "Select a report and use the Export button inside it for PDF export.",
-    );
+    if (filteredRegisters.length === 0) {
+      alert("No cash register data to export");
+      return;
+    }
+
+    try {
+      // Create PDF in landscape mode
+      const doc = new jsPDF("landscape", "mm", "a4");
+
+      // Set margins
+      const marginLeft = 10;
+      const marginTop = 20;
+      let yPos = marginTop;
+
+      // Title
+      doc.setFontSize(18);
+      doc.setFont("helvetica", "bold");
+      doc.text("SHIFT REPORTS", 148.5, yPos, { align: "center" });
+      yPos += 10;
+
+      // Report details
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(100);
+      doc.text(`Generated: ${new Date().toLocaleString()}`, marginLeft, yPos);
+      doc.text(`Total Shifts: ${filteredRegisters.length}`, 250, yPos, {
+        align: "right",
+      });
+      yPos += 8;
+
+      // Draw line
+      doc.setDrawColor(200, 200, 200);
+      doc.line(marginLeft, yPos, 287, yPos);
+      yPos += 10;
+
+      // Define column widths for 8 columns
+      const colWidths = [35, 35, 30, 45, 30, 30, 25, 30];
+      const headers = [
+        "Cashier",
+        "Branch",
+        "Shift Date",
+        "Shift Time",
+        "Opening Cash",
+        "Actual Cash",
+        "Difference",
+        "Status",
+      ];
+
+      // Draw table header
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(255);
+      doc.setFillColor(59, 130, 246);
+
+      let xPos = marginLeft;
+      headers.forEach((header, index) => {
+        doc.rect(xPos, yPos, colWidths[index], 8, "F");
+        doc.text(header, xPos + 2, yPos + 5.5);
+        xPos += colWidths[index];
+      });
+
+      yPos += 8;
+      doc.setTextColor(0);
+      doc.setFont("helvetica", "normal");
+
+      // Draw table rows
+      filteredRegisters.forEach((register: any, rowIndex: number) => {
+        // Check if we need a new page
+        if (yPos > 190) {
+          doc.addPage("landscape");
+          yPos = marginTop;
+
+          // Draw header again on new page
+          doc.setFont("helvetica", "bold");
+          doc.setTextColor(255);
+          doc.setFillColor(59, 130, 246);
+          xPos = marginLeft;
+          headers.forEach((header, index) => {
+            doc.rect(xPos, yPos, colWidths[index], 8, "F");
+            doc.text(header, xPos + 2, yPos + 5.5);
+            xPos += colWidths[index];
+          });
+          yPos += 8;
+          doc.setTextColor(0);
+          doc.setFont("helvetica", "normal");
+        }
+
+        // Alternate row colors
+        if (rowIndex % 2 === 0) {
+          doc.setFillColor(248, 248, 248);
+          xPos = marginLeft;
+          colWidths.forEach((width) => {
+            doc.rect(xPos, yPos, width, 8, "F");
+            xPos += width;
+          });
+        }
+
+        // Prepare row data (matching Excel export exactly)
+        const openedAt = new Date(register.opened_at);
+        const closedAt = register.closed_at ? new Date(register.closed_at) : null;
+
+        const rowData = [
+          register.user?.name || "-",
+          register.branch?.branch_name || "-",
+          openedAt.toLocaleDateString(),
+          `${openedAt.toLocaleTimeString()} - ${closedAt ? closedAt.toLocaleTimeString() : ""}`,
+          `KD ${parseFloat(register.opening_balance || 0).toFixed(3)}`,
+          `KD ${parseFloat(register.closing_balance || 0).toFixed(3)}`,
+          register.difference ? `KD ${register.difference}` : "-",
+          register.status || "-",
+        ];
+
+        // Draw cell content
+        xPos = marginLeft;
+        doc.setFontSize(8);
+        rowData.forEach((cell, index) => {
+          let text = String(cell);
+          const maxWidth = colWidths[index] - 4;
+
+          // Truncate text if too long (especially for shift time)
+          while (doc.getTextWidth(text) > maxWidth && text.length > 3) {
+            text = text.substring(0, text.length - 4) + "...";
+          }
+
+          // Align currency columns to the right
+          const rightAlignedColumns = [4, 5, 6]; // Opening Cash, Actual Cash, Difference
+          const align = rightAlignedColumns.includes(index) ? "right" : "left";
+          const xOffset = align === "right" ? colWidths[index] - 2 : 2;
+
+          doc.text(text, xPos + xOffset, yPos + 5.5, { align });
+          xPos += colWidths[index];
+        });
+
+        yPos += 8;
+      });
+
+      // Add page numbers
+      const pageCount = doc.internal.pages.length;
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(150);
+        doc.text(`Page ${i} of ${pageCount}`, 148.5, 205, { align: "center" });
+      }
+
+      // Save PDF
+      doc.save(`shift_reports_${new Date().toISOString().split("T")[0]}.pdf`);
+    } catch (error) {
+      console.error("PDF export failed:", error);
+      alert("Failed to export to PDF");
+    }
   };
 
   return (
@@ -159,7 +307,7 @@ export default function ShiftReportsPage() {
                 setStartDate(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full pl-12 pr-10 py-3.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-12 pr-10 py-3.5 border border-gray-300 rounded-md "
               placeholder="Start Date"
             />
           </div>
@@ -177,7 +325,7 @@ export default function ShiftReportsPage() {
                 setEndDate(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full pl-12 pr-10 py-3.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-12 pr-10 py-3.5 border border-gray-300 rounded-md "
               placeholder="End Date"
             />
           </div>
@@ -194,7 +342,7 @@ export default function ShiftReportsPage() {
                   setSelectedBranch(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="w-full pl-12 pr-10 py-3.5 border rounded-xl appearance-none bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-12 pr-10 py-3.5 border border-gray-300 rounded-md  "
               >
                 <option value="">All Branches</option>
                 {branches.map((b: any) => (
@@ -209,9 +357,7 @@ export default function ShiftReportsPage() {
                   ?.branch_name || "My Branch"}
               </div>
             )}
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-              <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
-            </div>
+
           </div>
 
           {/* Status filter */}
@@ -222,34 +368,32 @@ export default function ShiftReportsPage() {
                 setStatusFilter(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full px-4 py-3.5 border rounded-xl appearance-none bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3.5 border border-gray-300 rounded-md"
             >
               <option value="">All Statuses</option>
               <option value="Open">Open</option>
               <option value="Closed">Closed</option>
             </select>
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-              <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
-            </div>
+
           </div>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-          <div className="bg-white rounded-lg p-6 shadow">
+          <div className="bg-white rounded-lg p-4">
             <p className="text-sm text-gray-500 mb-3">Today's Shifts</p>
             <p className="text-3xl font-semibold">
               {dailySummary?.total_shifts || totalShifts}
             </p>
           </div>
-          <div className="bg-white rounded-lg p-6 shadow">
+          <div className="bg-white rounded-lg p-4">
             <p className="text-sm text-gray-500 mb-3">Total Sales</p>
             <p className="text-3xl font-semibold">
               KD{" "}
               {parseFloat(dailySummary?.total_sales || totalSales).toFixed(3)}
             </p>
           </div>
-          <div className="bg-white rounded-lg p-6 shadow">
+          <div className="bg-white rounded-lg p-4">
             <p className="text-sm text-gray-500 mb-3">Cash Difference</p>
             <p
               className={`text-3xl font-semibold ${totalDifference >= 0 ? "text-green-600" : "text-red-600"}`}
@@ -260,7 +404,7 @@ export default function ShiftReportsPage() {
               ).toFixed(3)}
             </p>
           </div>
-          <div className="bg-white rounded-lg p-6 shadow">
+          <div className="bg-white rounded-lg p-4">
             <p className="text-sm text-gray-500 mb-3">Total Transactions</p>
             <p className="text-3xl font-semibold">
               {dailySummary?.total_transactions ||
@@ -288,13 +432,13 @@ export default function ShiftReportsPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by cashier or branch..."
-                className="pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-2.5 text-sm sm:text-base border rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-2.5 text-sm sm:text-base border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div className="flex flex-col sm:flex-row lg:flex-row space-y-2 sm:space-y-0 sm:space-x-3 space-x-0 lg:space-x-3">
               <button
                 onClick={handleExportToPDF}
-                className="flex items-center justify-center space-x-2 px-3 sm:px-4 py-1.5 sm:py-2 border rounded-lg hover:bg-gray-50 transition-colors"
+                className="flex items-center justify-center space-x-2 px-3 sm:px-4 py-1.5 sm:py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
               >
                 <img
                   src={export_pdf}
@@ -305,7 +449,7 @@ export default function ShiftReportsPage() {
               </button>
               <button
                 onClick={handleExportToExcel}
-                className="flex items-center justify-center space-x-2 px-3 sm:px-4 py-1.5 sm:py-2 border rounded-lg hover:bg-gray-50 transition-colors"
+                className="flex items-center justify-center space-x-2 px-3 sm:px-4 py-1.5 sm:py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
               >
                 <img
                   src={export_excel}
@@ -320,7 +464,7 @@ export default function ShiftReportsPage() {
 
         {/* Table */}
         <div className="bg-white rounded-xl shadow overflow-hidden">
-          <div className="px-6 py-4 border-b">
+          <div className="px-6 py-4 border-b border-gray-300">
             <h2 className="text-xl font-bold">Cashier Shift Details</h2>
             {pagination && (
               <p className="text-sm text-gray-500 mt-0.5">
@@ -396,9 +540,9 @@ export default function ShiftReportsPage() {
                             {" — "}
                             {r.closed_at
                               ? new Date(r.closed_at).toLocaleTimeString(
-                                  "en-GB",
-                                  { hour: "2-digit", minute: "2-digit" },
-                                )
+                                "en-GB",
+                                { hour: "2-digit", minute: "2-digit" },
+                              )
                               : "Open"}
                           </td>
                           <td className="px-4 py-4 text-sm text-gray-700">
@@ -416,11 +560,10 @@ export default function ShiftReportsPage() {
                           </td>
                           <td className="px-4 py-4">
                             <span
-                              className={`px-2 py-1 text-xs font-medium rounded-full ${
-                                r.status === "Open"
+                              className={`px-2 py-1 text-xs font-medium rounded-full ${r.status === "Open"
                                   ? "bg-green-100 text-green-800"
                                   : "bg-gray-100 text-gray-700"
-                              }`}
+                                }`}
                             >
                               {r.status}
                             </span>
@@ -444,7 +587,7 @@ export default function ShiftReportsPage() {
 
           {/* Pagination */}
           {pagination && pagination.last_page > 1 && (
-            <div className="px-6 py-4 border-t">
+            <div className="px-6 py-4 border-t border-gray-300">
               <div className="flex items-center justify-between">
                 <div className="text-sm text-gray-500">
                   Showing {pagination.from} to {pagination.to} of{" "}
@@ -454,7 +597,7 @@ export default function ShiftReportsPage() {
                   <button
                     onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                     disabled={currentPage === 1}
-                    className="px-3 py-1.5 text-sm border rounded-lg disabled:opacity-50 hover:bg-gray-50 font-medium"
+                    className="px-3 py-1.5 text-sm border border-gray-300 rounded-md disabled:opacity-50 hover:bg-gray-50 font-medium"
                   >
                     Previous
                   </button>
@@ -468,7 +611,7 @@ export default function ShiftReportsPage() {
                       )
                     }
                     disabled={currentPage === pagination.last_page}
-                    className="px-3 py-1.5 text-sm border rounded-lg disabled:opacity-50 hover:bg-gray-50 font-medium"
+                    className="px-3 py-1.5 text-sm border border-gray-300 rounded-md disabled:opacity-50 hover:bg-gray-50 font-medium"
                   >
                     Next
                   </button>

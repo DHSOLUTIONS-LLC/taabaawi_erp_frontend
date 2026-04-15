@@ -24,7 +24,7 @@ export default function BudgetVsActualPage() {
   console.log('budget lines:', data)
 
   const report = (data as any)?.data;
-
+  console.log('reports ..................', report)
   const handleExport = (format: 'pdf' | 'excel') => {
     console.log(`Exporting budget vs actual as ${format}`);
   };
@@ -126,7 +126,7 @@ export default function BudgetVsActualPage() {
             <div className="h-3 sm:h-4 w-full bg-gray-200 rounded-full overflow-hidden">
               <div
                 className={`h-full transition-all duration-300 ${report.utilization_percentage > 100 ? 'bg-red-500' :
-                    report.utilization_percentage > 80 ? 'bg-yellow-500' : 'bg-green-500'
+                  report.utilization_percentage > 80 ? 'bg-yellow-500' : 'bg-green-500'
                   }`}
                 style={{ width: `${Math.min(report.utilization_percentage, 100)}%` }}
               />
@@ -171,7 +171,7 @@ export default function BudgetVsActualPage() {
                           <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
                             <div
                               className={`h-full ${line.utilization_percentage > 100 ? 'bg-red-500' :
-                                  line.utilization_percentage > 80 ? 'bg-yellow-500' : 'bg-green-500'
+                                line.utilization_percentage > 80 ? 'bg-yellow-500' : 'bg-green-500'
                                 }`}
                               style={{ width: `${Math.min(line.utilization_percentage, 100)}%` }}
                             />

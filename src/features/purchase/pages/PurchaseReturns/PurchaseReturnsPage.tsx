@@ -76,21 +76,21 @@ export default function PurchaseReturnsPage() {
 
         {/* Stats - Responsive Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-          <div className="bg-white rounded-xl p-4 md:p-5 shadow-sm">
+          <div className="bg-white rounded-xl p-4 md:p-5">
             <p className="text-xs md:text-sm text-gray-500">Total Returns</p>
             <p className="text-xl md:text-2xl font-bold text-gray-900 mt-1">
               {stats?.total_returns ?? returns.length}
             </p>
           </div>
 
-          <div className="bg-white rounded-xl p-4 md:p-5 shadow-sm">
+          <div className="bg-white rounded-xl p-4 md:p-5">
             <p className="text-xs md:text-sm text-gray-500">Pending Review</p>
             <p className="text-xl md:text-2xl font-bold text-yellow-600 mt-1">
               {stats?.pending ?? returns.filter((r: any) => r.status === 'Pending').length}
             </p>
           </div>
 
-          <div className="bg-white rounded-xl p-4 md:p-5 shadow-sm">
+          <div className="bg-white rounded-xl p-4 md:p-5">
             <p className="text-xs md:text-sm text-gray-500">Total Return Value</p>
             <p className="text-lg md:text-2xl font-bold text-blue-600 mt-1 break-words">
               KWD {num(stats?.total_return_amount ??
@@ -99,7 +99,7 @@ export default function PurchaseReturnsPage() {
             </p>
           </div>
 
-          <div className="bg-white rounded-xl p-4 md:p-5 shadow-sm">
+          <div className="bg-white rounded-xl p-4 md:p-5">
             <p className="text-xs md:text-sm text-gray-500">Completed</p>
             <p className="text-xl md:text-2xl font-bold text-green-600 mt-1">
               {stats?.completed ?? returns.filter((r: any) => r.status === 'Completed').length}

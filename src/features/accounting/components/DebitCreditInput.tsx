@@ -42,7 +42,7 @@ export default function DebitCreditInput({ value, onChange, disabled = false, er
             onBlur={() => setActiveField(null)}
             placeholder="0.000"
             disabled={disabled || isCreditActive}
-            className={`w-full pl-10 pr-3 py-2 border rounded-lg text-sm text-right font-mono ${
+            className={`w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm text-right font-mono ${
               isDebitActive 
                 ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500' 
                 : error 
@@ -67,7 +67,7 @@ export default function DebitCreditInput({ value, onChange, disabled = false, er
             onBlur={() => setActiveField(null)}
             placeholder="0.000"
             disabled={disabled || isDebitActive}
-            className={`w-full pl-10 pr-3 py-2 border rounded-lg text-sm text-right font-mono ${
+            className={`w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm text-right font-mono ${
               isCreditActive 
                 ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500' 
                 : error 

@@ -94,7 +94,7 @@ export default function BalanceSheetPage() {
         </div>
 
         {/* Report Content */}
-        <div className="bg-white rounded-xl p-6 shadow-sm print:p-0">
+        <div className="bg-white rounded-xl p-4 print:p-0">
           <ReportHeader
             title="Balance Sheet"
             subtitle={`As of ${new Date(asOfDate).toLocaleDateString()}`}

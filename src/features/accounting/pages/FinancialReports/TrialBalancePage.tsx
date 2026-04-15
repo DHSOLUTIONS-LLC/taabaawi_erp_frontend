@@ -94,7 +94,7 @@ export default function TrialBalancePage() {
         </div>
 
         {/* Report Content */}
-        <div className="bg-white rounded-xl p-6 shadow-sm print:p-0">
+        <div className="bg-white rounded-xl p-4 print:p-0">
           <ReportHeader
             title="Trial Balance"
             subtitle={`As of ${new Date(asOfDate).toLocaleDateString()}`}

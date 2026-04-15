@@ -57,7 +57,7 @@ const BlogEditPage: React.FC = () => {
         </div>
 
         {/* Form */}
-        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+        <div className="bg-white rounded-lg  p-4 sm:p-6">
           <BlogPostForm post={data.data} />
         </div>
       </div>

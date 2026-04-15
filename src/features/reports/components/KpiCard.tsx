@@ -31,7 +31,7 @@ export const KpiCard = ({ kpi }: { kpi: KpiMetric }) => {
   };
 
   return (
-    <div className={`border rounded-lg p-4 ${statusColor[status]}`}>
+    <div className={`border border-gray-300 rounded-md p-4 ${statusColor[status]}`}>
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           <p className="text-xs font-medium uppercase tracking-wide opacity-70">{kpi.kpi_category}</p>

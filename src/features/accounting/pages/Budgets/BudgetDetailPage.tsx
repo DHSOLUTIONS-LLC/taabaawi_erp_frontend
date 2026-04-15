@@ -185,19 +185,19 @@ export default function BudgetDetailPage() {
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-          <div className="bg-white rounded-xl p-4 sm:p-5 shadow-sm">
+          <div className="bg-white rounded-xl p-4 sm:p-5">
             <p className="text-xs sm:text-sm text-gray-500">Total Budgeted</p>
             <p className="text-lg sm:text-2xl font-bold text-gray-900 mt-1 break-words">
               KWD {num(budget.total_budget_amount).toFixed(3)}
             </p>
           </div>
-          <div className="bg-white rounded-xl p-4 sm:p-5 shadow-sm">
+          <div className="bg-white rounded-xl p-4 sm:p-5">
             <p className="text-xs sm:text-sm text-gray-500">Total Actual</p>
             <p className="text-lg sm:text-2xl font-bold text-blue-600 mt-1 break-words">
               KWD {num(budget.total_actual).toFixed(3)}
             </p>
           </div>
-          <div className="bg-white rounded-xl p-4 sm:p-5 shadow-sm sm:col-span-2 lg:col-span-1">
+          <div className="bg-white rounded-xl p-4 sm:p-5 sm:col-span-2 lg:col-span-1">
             <p className="text-xs sm:text-sm text-gray-500">Variance</p>
             <p className={`text-lg sm:text-2xl font-bold mt-1 break-words ${num(budget.total_variance) >= 0 ? 'text-green-600' : 'text-red-600'
               }`}>
@@ -264,7 +264,7 @@ export default function BudgetDetailPage() {
                     <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
                       <div
                         className={`h-full transition-all duration-300 ${utilization > 100 ? 'bg-red-500' :
-                            utilization > 80 ? 'bg-yellow-500' : 'bg-green-500'
+                          utilization > 80 ? 'bg-yellow-500' : 'bg-green-500'
                           }`}
                         style={{ width: `${Math.min(utilization, 100)}%` }}
                       />

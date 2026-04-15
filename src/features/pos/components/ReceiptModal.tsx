@@ -18,28 +18,195 @@ export default function ReceiptModal({ isOpen, onClose, saleId, onNewSale }: Rec
 
     const handlePrint = () => {
         const content = receiptRef.current;
-        if (!content) return;
+        if (!content) {
+            console.error("Receipt content not found");
+            return;
+        }
+
+        // Clone the content to avoid modifying the original
+        const cloneContent = content.cloneNode(true) as HTMLElement;
+
+        // Get all styles from the original page
+        const styles = document.querySelectorAll('style, link[rel="stylesheet"]');
+        let stylesHTML = '';
+        styles.forEach((style) => {
+            if (style.tagName === 'STYLE') {
+                stylesHTML += style.outerHTML;
+            } else if (style.tagName === 'LINK') {
+                stylesHTML += style.outerHTML;
+            }
+        });
+
+        // Create print window
         const printWindow = window.open('', '_blank');
-        if (!printWindow) return;
+        if (!printWindow) {
+            alert("Please allow pop-ups to print the receipt");
+            return;
+        }
+
+        // Write the print content
         printWindow.document.write(`
-      <html>
-        <head>
-          <title>Receipt - ${receipt?.sale_number}</title>
-          <style>
-            body { font-family: 'Courier New', monospace; font-size: 12px; margin: 0; padding: 20px; max-width: 300px; }
-            .divider { border-top: 1px dashed #000; margin: 8px 0; }
-            .row { display: flex; justify-content: space-between; margin: 3px 0; }
-            .center { text-align: center; }
-            .bold { font-weight: bold; }
-            .large { font-size: 16px; }
-          </style>
-        </head>
-        <body>${content.innerHTML}</body>
-      </html>
-    `);
+            <!DOCTYPE html>
+            <html>
+                <head>
+                    <title>Receipt - ${receipt?.sale_number || 'Print'}</title>
+                    <meta charset="utf-8" />
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                    ${stylesHTML}
+                    <style>
+                        /* Print-specific styles */
+                        body {
+                            font-family: 'Courier New', monospace;
+                            font-size: 12px;
+                            margin: 0;
+                            padding: 20px;
+                            background: white;
+                        }
+                        .print-container {
+                            max-width: 300px;
+                            margin: 0 auto;
+                        }
+                        .divider {
+                            border-top: 1px dashed #000;
+                            margin: 8px 0;
+                        }
+                        .row {
+                            display: flex;
+                            justify-content: space-between;
+                            margin: 3px 0;
+                        }
+                        .center {
+                            text-align: center;
+                        }
+                        .bold {
+                            font-weight: bold;
+                        }
+                        .large {
+                            font-size: 16px;
+                        }
+                        .text-gray-500 { color: #6b7280; }
+                        .text-gray-600 { color: #4b5563; }
+                        .text-red-500 { color: #ef4444; }
+                        .text-red-600 { color: #dc2626; }
+                        .text-green-600 { color: #16a34a; }
+                        .text-purple-600 { color: #9333ea; }
+                        .text-pink-700 { color: #be185d; }
+                        .font-semibold { font-weight: 600; }
+                        .font-bold { font-weight: 700; }
+                        .text-xs { font-size: 11px; }
+                        .text-sm { font-size: 13px; }
+                        .text-base { font-size: 14px; }
+                        .border-t { border-top: 1px solid #e5e7eb; }
+                        .border-dashed { border-style: dashed; }
+                        .border-gray-200 { border-color: #e5e7eb; }
+                        .border-gray-300 { border-color: #d1d5db; }
+                        .bg-pink-100 { background-color: #fce7f3; }
+                        .rounded-full { border-radius: 9999px; }
+                        .px-3 { padding-left: 12px; padding-right: 12px; }
+                        .py-1 { padding-top: 4px; padding-bottom: 4px; }
+                        .mt-1 { margin-top: 4px; }
+                        .mb-3 { margin-bottom: 12px; }
+                        .my-2 { margin-top: 8px; margin-bottom: 8px; }
+                        .space-y-0\\.5 > * + * { margin-top: 2px; }
+                        .space-y-1 > * + * { margin-top: 4px; }
+                        .space-y-2 > * + * { margin-top: 8px; }
+                        .flex { display: flex; }
+                        .justify-between { justify-content: space-between; }
+                        .justify-center { justify-content: center; }
+                        .text-center { text-align: center; }
+                        .flex-1 { flex: 1; }
+                        .pr-2 { padding-right: 8px; }
+                        @media print {
+                            body {
+                                margin: 0;
+                                padding: 0;
+                            }
+                            .no-print {
+                                display: none;
+                            }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="print-container">
+                        ${cloneContent.innerHTML}
+                    </div>
+                    <script>
+                        window.onload = () => {
+                            window.print();
+                            window.onafterprint = () => {
+                                window.close();
+                            };
+                        };
+                    </script>
+                </body>
+            </html>
+        `);
+
         printWindow.document.close();
-        printWindow.print();
-        printWindow.close();
+    };
+
+    const handlePrintAlternative = () => {
+        // Alternative method using iframe
+        const content = receiptRef.current;
+        if (!content) return;
+
+        const printFrame = document.createElement('iframe');
+        printFrame.style.position = 'absolute';
+        printFrame.style.width = '0px';
+        printFrame.style.height = '0px';
+        printFrame.style.border = '0';
+        document.body.appendChild(printFrame);
+
+        const frameDoc = printFrame.contentWindow?.document;
+        if (!frameDoc) return;
+
+        const cloneContent = content.cloneNode(true) as HTMLElement;
+
+        frameDoc.write(`
+            <!DOCTYPE html>
+            <html>
+                <head>
+                    <title>Receipt - ${receipt?.sale_number}</title>
+                    <style>
+                        body {
+                            font-family: 'Courier New', monospace;
+                            font-size: 12px;
+                            margin: 0;
+                            padding: 20px;
+                            max-width: 300px;
+                            margin: 0 auto;
+                        }
+                        .divider { border-top: 1px dashed #000; margin: 8px 0; }
+                        .row { display: flex; justify-content: space-between; margin: 3px 0; }
+                        .center { text-align: center; }
+                        .bold { font-weight: bold; }
+                        .large { font-size: 16px; }
+                        .text-gray-500 { color: #6b7280; }
+                        .text-gray-600 { color: #4b5563; }
+                        .text-red-600 { color: #dc2626; }
+                        .text-green-600 { color: #16a34a; }
+                        .border-t { border-top: 1px solid #e5e7eb; }
+                        .border-dashed { border-style: dashed; }
+                        .font-bold { font-weight: bold; }
+                        .font-semibold { font-weight: 600; }
+                        .text-xs { font-size: 11px; }
+                        .mb-3 { margin-bottom: 12px; }
+                        .my-2 { margin-top: 8px; margin-bottom: 8px; }
+                    </style>
+                </head>
+                <body>${cloneContent.innerHTML}</body>
+            </html>
+        `);
+
+        frameDoc.close();
+
+        setTimeout(() => {
+            printFrame.contentWindow?.print();
+            setTimeout(() => {
+                document.body.removeChild(printFrame);
+            }, 100);
+        }, 100);
     };
 
     return (
@@ -214,4 +381,4 @@ export default function ReceiptModal({ isOpen, onClose, saleId, onNewSale }: Rec
             </div>
         </div>
     );
-}   
+}

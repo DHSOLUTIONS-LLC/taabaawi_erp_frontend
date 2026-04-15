@@ -112,7 +112,7 @@ const BranchesDashboard: React.FC = () => {
     };
 
     const StatCard = ({ title, value, icon: Icon, color }: any) => (
-        <div className="bg-white rounded-lg shadow p-4">
+        <div className="bg-white rounded-lg p-4">
             <div className="flex items-center justify-between">
                 <div>
                     <p className="text-sm text-gray-600">{title}</p>
@@ -139,7 +139,7 @@ const BranchesDashboard: React.FC = () => {
 
     return (
         <DashboardLayout>
-            <div className="container mx-auto py-2 md:py-8">
+            <div className="mx-auto py-2 md:py-8">
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
                     <div>
@@ -267,151 +267,151 @@ const BranchesDashboard: React.FC = () => {
                 {/* Branches Table */}
                 <div className="bg-white rounded-lg shadow overflow-hidden">
                     <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
-   <div className="xl:col-span-4 overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Name
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Type
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Contact
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Features
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Status
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Actions
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                                {isLoading || isFetching ? (
+                        <div className="xl:col-span-4 overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200">
+                                <thead className="bg-gray-50">
                                     <tr>
-                                        <td colSpan={6} className="px-6 py-8 text-center">
-                                            <div className="flex justify-center">
-                                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                                            </div>
-                                            <p className="mt-2 text-sm text-gray-500">Loading branches...</p>
-                                        </td>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Name
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Type
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Contact
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Features
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Status
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Actions
+                                        </th>
                                     </tr>
-                                ) : filteredBranches.length === 0 ? (
-                                    <tr>
-                                        <td colSpan={6} className="px-6 py-8 text-center">
-                                            <div className="text-gray-500">
-                                                <Building2 className="w-12 h-12 mx-auto text-gray-300 mb-2" />
-                                                <p>No branches found</p>
-                                                {hasActiveFilters && (
-                                                    <button
-                                                        onClick={clearAllFilters}
-                                                        className="mt-2 text-blue-600 hover:text-blue-800 text-sm"
-                                                    >
-                                                        Clear all filters
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ) : (
-                                    filteredBranches?.map((branch: any) => (
-                                        <tr key={branch.id} className="hover:bg-gray-50 transition-colors">
-                                            <td className="px-6 py-4">
-                                                <div className="font-medium text-gray-900">{branch.branch_name}</div>
-                                                <div className="text-xs text-gray-500 mt-1">
-                                                    {branch.address?.substring(0, 50)}
-                                                    {branch.address?.length > 50 && '...'}
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                    {isLoading || isFetching ? (
+                                        <tr>
+                                            <td colSpan={6} className="px-6 py-8 text-center">
+                                                <div className="flex justify-center">
+                                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                                                 </div>
+                                                <p className="mt-2 text-sm text-gray-500">Loading branches...</p>
                                             </td>
-                                            <td className="px-6 py-4">
-                                                <div className="flex flex-wrap gap-1">
-                                                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${getTypeColor(branch.branch_type)}`}>
-                                                        {branch.branch_type}
-                                                    </span>
-                                                    {branch.is_temporary && (
-                                                        <span className="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full">
-                                                            Temporary
-                                                        </span>
+                                        </tr>
+                                    ) : filteredBranches.length === 0 ? (
+                                        <tr>
+                                            <td colSpan={6} className="px-6 py-8 text-center">
+                                                <div className="text-gray-500">
+                                                    <Building2 className="w-12 h-12 mx-auto text-gray-300 mb-2" />
+                                                    <p>No branches found</p>
+                                                    {hasActiveFilters && (
+                                                        <button
+                                                            onClick={clearAllFilters}
+                                                            className="mt-2 text-blue-600 hover:text-blue-800 text-sm"
+                                                        >
+                                                            Clear all filters
+                                                        </button>
                                                     )}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                {branch.phone && (
-                                                    <div className="text-sm text-gray-900">{branch.phone}</div>
-                                                )}
-                                                {branch.email && (
-                                                    <div className="text-xs text-gray-500 mt-1">{branch.email}</div>
-                                                )}
-                                                {!branch.phone && !branch.email && (
-                                                    <span className="text-xs text-gray-400">No contact info</span>
-                                                )}
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="flex flex-wrap gap-1">
-                                                    {branch.has_pos && (
-                                                        <span className="px-1.5 py-0.5 bg-blue-100 text-blue-800 text-xs rounded font-medium">
-                                                            POS
-                                                        </span>
-                                                    )}
-                                                    {branch.has_inventory && (
-                                                        <span className="px-1.5 py-0.5 bg-green-100 text-green-800 text-xs rounded font-medium">
-                                                            Inventory
-                                                        </span>
-                                                    )}
-                                                    {branch.has_cash_bank && (
-                                                        <span className="px-1.5 py-0.5 bg-yellow-100 text-yellow-800 text-xs rounded font-medium">
-                                                            Cash/Bank
-                                                        </span>
-                                                    )}
-                                                    {!branch.has_pos && !branch.has_inventory && !branch.has_cash_bank && (
-                                                        <span className="text-xs text-gray-400">No features</span>
-                                                    )}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <button
-                                                    onClick={() => handleStatusToggle(branch.id, branch.is_active)}
-                                                    className={`px-2 py-1 text-xs font-medium rounded-full transition-colors ${branch.is_active
-                                                            ? 'bg-green-100 text-green-800 hover:bg-green-200'
-                                                            : 'bg-red-100 text-red-800 hover:bg-red-200'
-                                                        }`}
-                                                >
-                                                    {branch.is_active ? 'Active' : 'Inactive'}
-                                                </button>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="flex space-x-3">
-                                                    <button
-                                                        onClick={() => navigate(`${basePath}/branches/edit/${branch.id}`)}
-                                                        className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors"
-                                                    >
-                                                        Edit
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleDelete(branch.id)}
-                                                        className="text-red-600 hover:text-red-800 text-sm font-medium transition-colors"
-                                                    >
-                                                        Delete
-                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
+                                    ) : (
+                                        filteredBranches?.map((branch: any) => (
+                                            <tr key={branch.id} className="hover:bg-gray-50 transition-colors">
+                                                <td className="px-6 py-4">
+                                                    <div className="font-medium text-gray-900">{branch.branch_name}</div>
+                                                    <div className="text-xs text-gray-500 mt-1">
+                                                        {branch.address?.substring(0, 50)}
+                                                        {branch.address?.length > 50 && '...'}
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="flex flex-wrap gap-1">
+                                                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${getTypeColor(branch.branch_type)}`}>
+                                                            {branch.branch_type}
+                                                        </span>
+                                                        {branch.is_temporary && (
+                                                            <span className="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full">
+                                                                Temporary
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    {branch.phone && (
+                                                        <div className="text-sm text-gray-900">{branch.phone}</div>
+                                                    )}
+                                                    {branch.email && (
+                                                        <div className="text-xs text-gray-500 mt-1">{branch.email}</div>
+                                                    )}
+                                                    {!branch.phone && !branch.email && (
+                                                        <span className="text-xs text-gray-400">No contact info</span>
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="flex flex-wrap gap-1">
+                                                        {branch.has_pos && (
+                                                            <span className="px-1.5 py-0.5 bg-blue-100 text-blue-800 text-xs rounded font-medium">
+                                                                POS
+                                                            </span>
+                                                        )}
+                                                        {branch.has_inventory && (
+                                                            <span className="px-1.5 py-0.5 bg-green-100 text-green-800 text-xs rounded font-medium">
+                                                                Inventory
+                                                            </span>
+                                                        )}
+                                                        {branch.has_cash_bank && (
+                                                            <span className="px-1.5 py-0.5 bg-yellow-100 text-yellow-800 text-xs rounded font-medium">
+                                                                Cash/Bank
+                                                            </span>
+                                                        )}
+                                                        {!branch.has_pos && !branch.has_inventory && !branch.has_cash_bank && (
+                                                            <span className="text-xs text-gray-400">No features</span>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <button
+                                                        onClick={() => handleStatusToggle(branch.id, branch.is_active)}
+                                                        className={`px-2 py-1 text-xs font-medium rounded-full transition-colors ${branch.is_active
+                                                            ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                                                            : 'bg-red-100 text-red-800 hover:bg-red-200'
+                                                            }`}
+                                                    >
+                                                        {branch.is_active ? 'Active' : 'Inactive'}
+                                                    </button>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="flex space-x-3">
+                                                        <button
+                                                            onClick={() => navigate(`${basePath}/branches/edit/${branch.id}`)}
+                                                            className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors"
+                                                        >
+                                                            Edit
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDelete(branch.id)}
+                                                            className="text-red-600 hover:text-red-800 text-sm font-medium transition-colors"
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                    </div>
-                 
+
 
                     {/* Pagination */}
                     {totalPages > 1 && (
-                        <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 border-t gap-3">
+                        <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 border-t border-gray-300 gap-3">
                             <div className="text-sm text-gray-500">
                                 Showing page {currentPage} of {totalPages}
                                 {filteredBranches?.length > 0 && ` • ${filteredBranches.length} branches`}
@@ -442,8 +442,8 @@ const BranchesDashboard: React.FC = () => {
                                                 key={pageNum}
                                                 onClick={() => setCurrentPage(pageNum)}
                                                 className={`px-3 py-1 text-sm rounded-md transition-colors ${currentPage === pageNum
-                                                        ? 'bg-blue-600 text-white'
-                                                        : 'border hover:bg-gray-50'
+                                                    ? 'bg-blue-600 text-white'
+                                                    : 'border hover:bg-gray-50'
                                                     }`}
                                             >
                                                 {pageNum}

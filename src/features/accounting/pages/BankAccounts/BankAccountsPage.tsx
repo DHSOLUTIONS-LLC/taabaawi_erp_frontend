@@ -79,19 +79,19 @@ export default function BankAccountsPage() {
 
 {/* Stats Cards */}
 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-  <div className="bg-white rounded-xl p-4 sm:p-5 shadow-sm">
+  <div className="bg-white rounded-xl p-4 sm:p-5">
     <p className="text-xs sm:text-sm text-gray-500">Total Balance</p>
     <p className="text-lg sm:text-2xl font-bold text-blue-600 mt-1 break-words">
       KWD {totalBalance.toFixed(3)}
     </p>
     <p className="text-xs text-gray-400 mt-1">Across all active accounts</p>
   </div>
-  <div className="bg-white rounded-xl p-4 sm:p-5 shadow-sm">
+  <div className="bg-white rounded-xl p-4 sm:p-5">
     <p className="text-xs sm:text-sm text-gray-500">Active Accounts</p>
     <p className="text-lg sm:text-2xl font-bold text-green-600 mt-1">{activeCount}</p>
     <p className="text-xs text-gray-400 mt-1">Currently active</p>
   </div>
-  <div className="bg-white rounded-xl p-4 sm:p-5 shadow-sm sm:col-span-2 lg:col-span-1">
+  <div className="bg-white rounded-xl p-4 sm:p-5 sm:col-span-2 lg:col-span-1">
     <p className="text-xs sm:text-sm text-gray-500">Total Accounts</p>
     <p className="text-lg sm:text-2xl font-bold text-gray-900 mt-1">{pagination?.total ?? accounts.length}</p>
     <p className="text-xs text-gray-400 mt-1">All bank accounts</p>

@@ -96,7 +96,7 @@ const AIContentDashboard: React.FC = () => {
   };
 
   const StatCard = ({ title, value, icon, color }: any) => (
-    <div className="bg-white rounded-lg shadow p-6">
+    <div className="bg-white rounded-lg p-4">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm text-gray-600 mb-1">{title}</p>
@@ -200,7 +200,7 @@ const AIContentDashboard: React.FC = () => {
 
         {/* Usage by User */}
         {stats?.usage_by_user && stats.usage_by_user.length > 0 && (
-          <div className="bg-white rounded-lg shadow p-6 mb-8">
+          <div className="bg-white rounded-lg p-4 mb-8">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Top Users</h2>
             <div className="space-y-3">
               {stats.usage_by_user.slice(0, 5).map((user) => (
@@ -217,7 +217,7 @@ const AIContentDashboard: React.FC = () => {
         )}
 
         {/* Filters */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <div className="bg-white rounded-lg p-4 mb-6">
           <div className="flex flex-wrap gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">

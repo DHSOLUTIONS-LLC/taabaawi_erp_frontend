@@ -49,7 +49,7 @@ const PaymentMethodsPage: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="container mx-auto px-2 py-2">
+      <div className="mx-auto px-2 py-2">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Payment Methods</h1>

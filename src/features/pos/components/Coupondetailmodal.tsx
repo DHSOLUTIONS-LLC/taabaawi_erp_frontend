@@ -64,10 +64,9 @@ export default function CouponDetailModal({ isOpen, onClose, couponId }: CouponD
             <>
               {/* Status badges */}
               <div className="flex gap-2 flex-wrap">
-                <span className={`px-3 py-1 text-xs font-medium rounded-full ${
-                  coupon.is_active && !isExpired ? 'bg-green-100 text-green-700' :
-                  isExpired ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-600'
-                }`}>
+                <span className={`px-3 py-1 text-xs font-medium rounded-full ${coupon.is_active && !isExpired ? 'bg-green-100 text-green-700' :
+                    isExpired ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-600'
+                  }`}>
                   {isExpired ? 'Expired' : coupon.is_active ? 'Active' : 'Inactive'}
                 </span>
                 <span className="px-3 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-700">
@@ -177,7 +176,7 @@ export default function CouponDetailModal({ isOpen, onClose, couponId }: CouponD
           )}
         </div>
 
-        <div className="px-6 py-4 border-t shrink-0">
+        <div className="px-6 py-4 border-t border-gray-300 shrink-0">
           <button onClick={onClose} className="w-full py-3 border border-gray-300 rounded-xl font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
             Close
           </button>

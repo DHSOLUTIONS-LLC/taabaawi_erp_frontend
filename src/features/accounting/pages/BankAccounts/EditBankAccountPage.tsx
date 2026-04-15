@@ -122,7 +122,7 @@ export default function EditBankAccountPage() {
 
 return (
     <DashboardLayout>
-      <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6 px-4 sm:px-0">
+      <div className="max-w-full mx-auto space-y-4 sm:space-y-6 px-4 sm:px-0">
         {/* Header */}
         <div className="flex items-start gap-3 sm:gap-4">
           <button onClick={() => navigate(`${basePath}/accounting/bank-accounts/${accountId}`)} className="flex-shrink-0 mt-1">

@@ -28,7 +28,7 @@ const BlogPostStats: React.FC = () => {
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {statCards.map((stat) => (
-          <div key={stat.label} className="bg-white rounded-lg shadow p-4">
+          <div key={stat.label} className="bg-white rounded-lg  p-4">
             <div className={`w-2 h-2 ${stat.color} rounded-full mb-2`}></div>
             <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
             <p className="text-xs text-gray-500">{stat.label}</p>

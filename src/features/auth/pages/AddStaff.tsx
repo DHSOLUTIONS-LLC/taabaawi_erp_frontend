@@ -246,7 +246,7 @@ export default function CreateInvoice() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className={`w-full px-4 py-3 border rounded-lg ${passwordError ? 'border-red-500' : 'border-gray-300'}`}
+                className={`w-full px-4 py-3 border border-gray-300 rounded-md ${passwordError ? 'border-red-500' : 'border-gray-300'}`}
                 placeholder="Minimum 6 characters"
                 required
               />
@@ -262,7 +262,7 @@ export default function CreateInvoice() {
                 type="password"
                 value={passwordConfirmation}
                 onChange={(e) => setPasswordConfirmation(e.target.value)}
-                className={`w-full px-4 py-3 border rounded-lg ${passwordError ? 'border-red-500' : 'border-gray-300'}`}
+                className={`w-full px-4 py-3 border border-gray-300 rounded-md ${passwordError ? 'border-red-500' : 'border-gray-300'}`}
                 placeholder="Re-enter password"
                 required
               />

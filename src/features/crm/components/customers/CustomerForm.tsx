@@ -58,7 +58,7 @@ const Input = ({ label, error, ...props }: any) => (
     <label className="block text-xs font-medium text-gray-600 mb-1">{label}</label>
     <input
       {...props}
-      className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 ${error ? 'border-red-400' : 'border-gray-200'}`}
+      className={`w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 ${error ? 'border-red-400' : 'border-gray-200'}`}
     />
     {error && <p className="text-xs text-red-500 mt-0.5">{error.message}</p>}
   </div>

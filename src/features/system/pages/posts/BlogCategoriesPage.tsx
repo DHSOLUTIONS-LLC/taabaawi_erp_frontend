@@ -30,7 +30,7 @@ const BlogCategoriesPage: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="container mx-auto">
+      <div className="mx-auto">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
           <div>
@@ -57,7 +57,7 @@ const BlogCategoriesPage: React.FC = () => {
           {/* Form */}
           <div className="flex-1 lg:flex-1">
             {showForm ? (
-              <div className="bg-white rounded-lg shadow p-4 sm:p-6 sticky top-4">
+              <div className="bg-white rounded-lg  p-4 sm:p-6 sticky top-4">
                 <h2 className="text-base sm:text-lg font-semibold text-gray-800 mb-4">
                   {selectedCategory ? 'Edit Category' : 'New Category'}
                 </h2>
@@ -68,7 +68,7 @@ const BlogCategoriesPage: React.FC = () => {
                 />
               </div>
             ) : (
-              <div className="bg-white rounded-lg shadow p-6 sm:p-8 text-center text-gray-500">
+              <div className="bg-white rounded-lg p-4 sm:p-8 text-center text-gray-500">
                 <svg className="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l5 5a2 2 0 01.586 1.414V19a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2z" />
                 </svg>

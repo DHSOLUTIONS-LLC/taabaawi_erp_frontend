@@ -132,7 +132,7 @@ return (
               max={outstanding}
               value={formData.amount}
               onChange={handleChange}
-              className={`w-full pl-14 pr-4 py-2.5 sm:py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-right font-mono text-sm sm:text-base ${
+              className={`w-full pl-14 pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 text-right font-mono text-sm sm:text-base ${
                 errors.amount ? 'border-red-400' : 'border-gray-300'
               }`}
               placeholder="0.000"
@@ -184,7 +184,7 @@ return (
             value={formData.payment_date}
             onChange={handleChange}
             max={new Date().toISOString().split('T')[0]}
-            className={`w-full px-4 py-2.5 sm:py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base ${
+            className={`w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 text-sm sm:text-base ${
               errors.payment_date ? 'border-red-400' : 'border-gray-300'
             }`}
           />

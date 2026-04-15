@@ -14,13 +14,14 @@ import type { RootState } from "../../../app/store";
 import { canSwitchBranch } from "../../../utils/roleHelpers";
 
 import search_icon from "../../../assets/icons/search_icon.svg";
-// import export_pdf from '../../../assets/icons/export_pdf.svg';
+import export_pdf from '../../../assets/icons/export_pdf.svg';
 import export_excel from "../../../assets/icons/export_excel.svg";
 import date_icon from "../../../assets/icons/date_icon.svg";
 import dropdown_arrow_icon from "../../../assets/icons/dropdown_arrow_icon.svg";
 import market_icon from "../../../assets/icons/market_icon.svg";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import jsPDF from "jspdf";
 
 export default function ReturnsPage() {
   const { user } = useAppSelector((state: RootState) => state.auth);
@@ -126,6 +127,158 @@ export default function ReturnsPage() {
     }
   };
 
+  const handleExportPdf = () => {
+    if (returns.length === 0) {
+      alert("No returns data to export");
+      return;
+    }
+
+    try {
+      // Create PDF in landscape mode
+      const doc = new jsPDF("landscape", "mm", "a4");
+
+      // Set margins
+      const marginLeft = 10;
+      const marginTop = 20;
+      let yPos = marginTop;
+
+      // Title
+      doc.setFontSize(18);
+      doc.setFont("helvetica", "bold");
+      doc.text("RETURNS REPORT", 148.5, yPos, { align: "center" });
+      yPos += 10;
+
+      // Report details
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(100);
+      doc.text(`Generated: ${new Date().toLocaleString()}`, marginLeft, yPos);
+      doc.text(`Total Returns: ${returns.length}`, 250, yPos, {
+        align: "right",
+      });
+      yPos += 8;
+
+      // Draw line
+      doc.setDrawColor(200, 200, 200);
+      doc.line(marginLeft, yPos, 287, yPos);
+      yPos += 10;
+
+      // Define column widths for 9 columns
+      const colWidths = [30, 30, 35, 35, 30, 30, 25, 40, 30];
+      const headers = [
+        "Return #",
+        "Sale #",
+        "Branch",
+        "Processed By",
+        "Refund Amount",
+        "Refund Method",
+        "Status",
+        "Reason",
+        "Date",
+      ];
+
+      // Draw table header
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(255);
+      doc.setFillColor(59, 130, 246);
+
+      let xPos = marginLeft;
+      headers.forEach((header, index) => {
+        doc.rect(xPos, yPos, colWidths[index], 8, "F");
+        doc.text(header, xPos + 2, yPos + 5.5);
+        xPos += colWidths[index];
+      });
+
+      yPos += 8;
+      doc.setTextColor(0);
+      doc.setFont("helvetica", "normal");
+
+      // Draw table rows
+      returns.forEach((returnItem: any, rowIndex: number) => {
+        // Check if we need a new page
+        if (yPos > 190) {
+          doc.addPage("landscape");
+          yPos = marginTop;
+
+          // Draw header again on new page
+          doc.setFont("helvetica", "bold");
+          doc.setTextColor(255);
+          doc.setFillColor(59, 130, 246);
+          xPos = marginLeft;
+          headers.forEach((header, index) => {
+            doc.rect(xPos, yPos, colWidths[index], 8, "F");
+            doc.text(header, xPos + 2, yPos + 5.5);
+            xPos += colWidths[index];
+          });
+          yPos += 8;
+          doc.setTextColor(0);
+          doc.setFont("helvetica", "normal");
+        }
+
+        // Alternate row colors
+        if (rowIndex % 2 === 0) {
+          doc.setFillColor(248, 248, 248);
+          xPos = marginLeft;
+          colWidths.forEach((width) => {
+            doc.rect(xPos, yPos, width, 8, "F");
+            xPos += width;
+          });
+        }
+
+        // Prepare row data (matching Excel export exactly)
+        const rowData = [
+          returnItem.return_number || "-",
+          returnItem.sale?.sale_number || "-",
+          returnItem.branch?.branch_name || "-",
+          returnItem.processed_by?.name || "-",
+          `KD ${parseFloat(returnItem.return_amount || 0).toFixed(3)}`,
+          returnItem.refund_method || "-",
+          returnItem.status || "-",
+          returnItem.reason || "-",
+          new Date(returnItem.return_date).toLocaleDateString(),
+        ];
+
+        // Draw cell content
+        xPos = marginLeft;
+        doc.setFontSize(8);
+        rowData.forEach((cell, index) => {
+          let text = String(cell);
+          const maxWidth = colWidths[index] - 4;
+
+          // Truncate text if too long (especially for Reason column)
+          while (doc.getTextWidth(text) > maxWidth && text.length > 3) {
+            text = text.substring(0, text.length - 4) + "...";
+          }
+
+          // Align currency column to the right
+          const align = index === 4 ? "right" : "left";
+          const xOffset = align === "right" ? colWidths[index] - 2 : 2;
+
+          doc.text(text, xPos + xOffset, yPos + 5.5, { align });
+          xPos += colWidths[index];
+        });
+
+        yPos += 8;
+      });
+
+      // Add page numbers
+      const pageCount = doc.internal.pages.length;
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(150);
+        doc.text(`Page ${i} of ${pageCount}`, 148.5, 205, { align: "center" });
+      }
+
+      // Save PDF
+      doc.save(`returns_${new Date().toISOString().split("T")[0]}.pdf`);
+    } catch (error) {
+      console.error("PDF export failed:", error);
+      alert("Failed to export to PDF");
+    }
+  };
+
   const statusBadge = (status: string) => {
     const map: Record<string, string> = {
       Approved: "bg-green-100 text-green-800",
@@ -148,7 +301,7 @@ export default function ReturnsPage() {
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="w-full pl-12 pr-10 py-3.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-12 pr-10 py-3.5 border border-gray-300 rounded-md "
             />
           </div>
           <div className="relative">
@@ -159,7 +312,7 @@ export default function ReturnsPage() {
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="w-full pl-12 pr-10 py-3.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-12 pr-10 py-3.5 border border-gray-300 rounded-md "
             />
           </div>
           <div className="relative">
@@ -170,7 +323,7 @@ export default function ReturnsPage() {
               <select
                 value={selectedBranch}
                 onChange={(e) => setSelectedBranch(e.target.value)}
-                className="w-full pl-12 pr-10 py-3.5 border rounded-xl appearance-none bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-12 pr-10 py-3.5 border border-gray-300 rounded-md  "
               >
                 <option value="">All Branches</option>
                 {branches.map((b: any) => (
@@ -191,7 +344,7 @@ export default function ReturnsPage() {
           </div>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="flex items-center justify-center gap-2 px-6 py-3.5 bg-[#1773CF] text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors"
+            className="flex items-center justify-center gap-2 px-6 py-3.5 bg-[#1773CF] text-white rounded-md font-semibold hover:bg-blue-700 transition-colors"
           >
             <svg
               className="w-5 h-5"
@@ -238,7 +391,7 @@ export default function ReturnsPage() {
               color: "text-yellow-600",
             },
           ].map((card) => (
-            <div key={card.label} className="bg-white rounded-xl p-5 shadow-sm">
+            <div key={card.label} className="bg-white rounded-xl p-5">
               <p className="text-sm text-gray-500 mb-1">{card.label}</p>
               <p className={`text-[18px] lg:text-2xl font-bold ${card.color}`}>
                 {card.value}
@@ -262,7 +415,7 @@ export default function ReturnsPage() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search returns..."
-                  className="w-full sm:w-56 pl-9 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  className="w-full sm:w-56 pl-9 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                 />
               </div>
 
@@ -270,7 +423,7 @@ export default function ReturnsPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full sm:w-auto px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">All Statuses</option>
                 <option value="Pending">Pending</option>
@@ -282,7 +435,7 @@ export default function ReturnsPage() {
               <select
                 value={refundMethodFilter}
                 onChange={(e) => setRefundMethodFilter(e.target.value)}
-                className="w-full sm:w-auto px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">All Methods</option>
                 <option value="Cash">Cash</option>
@@ -291,14 +444,23 @@ export default function ReturnsPage() {
               </select>
             </div>
 
+
+
             {/* Export Button */}
-            <div className="w-full sm:w-auto">
+            <div className="flex flex-row space-x-2 w-full sm:w-auto">
+              <button
+                onClick={handleExportPdf}
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 text-sm transition-colors"
+              >
+                <img src={export_pdf} alt="" className="w-5 h-5" />
+                Export PDF
+              </button>
               <button
                 onClick={handleExportExcel}
-                className="w-full sm:w-auto flex items-center justify-center gap-2 px-3 py-2 border rounded-lg hover:bg-gray-50 text-sm transition-colors"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 text-sm transition-colors"
               >
                 <img src={export_excel} alt="" className="w-5 h-5" />
-                Export
+                Export Excel
               </button>
             </div>
           </div>
@@ -416,7 +578,7 @@ export default function ReturnsPage() {
 
           {/* Pagination */}
           {pagination?.last_page > 1 && (
-            <div className="px-6 py-4 border-t flex items-center justify-between">
+            <div className="px-6 py-4 border-t border-gray-300 flex items-center justify-between">
               <p className="text-sm text-gray-500">
                 Showing {pagination.from}–{pagination.to} of {pagination.total}
               </p>
@@ -424,7 +586,7 @@ export default function ReturnsPage() {
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="px-3 py-1.5 border rounded-lg text-sm disabled:opacity-50 hover:bg-gray-50"
+                  className="px-3 py-1.5 border border-gray-300 rounded-md text-sm disabled:opacity-50 hover:bg-gray-50"
                 >
                   Previous
                 </button>
@@ -436,7 +598,7 @@ export default function ReturnsPage() {
                     setCurrentPage((p) => Math.min(pagination.last_page, p + 1))
                   }
                   disabled={currentPage === pagination.last_page}
-                  className="px-3 py-1.5 border rounded-lg text-sm disabled:opacity-50 hover:bg-gray-50"
+                  className="px-3 py-1.5 border border-gray-300 rounded-md text-sm disabled:opacity-50 hover:bg-gray-50"
                 >
                   Next
                 </button>
@@ -456,7 +618,7 @@ export default function ReturnsPage() {
               onChange={(e) => setRejectReason(e.target.value)}
               rows={3}
               placeholder="Enter rejection reason *"
-              className="w-full px-4 py-2.5 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
             />
             <div className="flex gap-3">
               <button

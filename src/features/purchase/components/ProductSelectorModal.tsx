@@ -256,7 +256,7 @@ export default function ProductSelectorModal({
               return (
                 <div
                   key={product.id}
-                  className={`border rounded-lg sm:rounded-xl overflow-hidden bg-white transition-all ${
+                  className={`border border-gray-300 rounded-md sm:rounded-xl overflow-hidden bg-white transition-all ${
                     inPOQty > 0
                       ? "border-blue-400 shadow-sm"
                       : "border-gray-200 hover:border-gray-300 hover:shadow-sm"

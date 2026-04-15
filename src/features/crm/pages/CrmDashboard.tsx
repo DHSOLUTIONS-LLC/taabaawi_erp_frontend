@@ -508,7 +508,7 @@ export const CrmDashboard = () => {
           />
           <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
             <div className="xl:col-span-4 overflow-x-auto">
-              <table className="">
+              <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-100">
                   <tr>
                     {['#', 'Customer', 'Tier', 'Lifetime Points', 'Orders', 'Total Spent'].map(h => (

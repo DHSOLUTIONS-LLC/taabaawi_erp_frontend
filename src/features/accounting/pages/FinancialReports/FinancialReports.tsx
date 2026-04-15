@@ -93,7 +93,7 @@ export default function FinancialReports() {
             <button
               key={report.id}
               onClick={() => navigate(`${basePath}${report.path}`)}
-              className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow text-left group"
+              className="bg-white rounded-xl p-4 hover:shadow-md transition-shadow text-left group"
             >
               <div className="flex items-start gap-4">
                 <div className={`p-3 rounded-xl ${report.color} group-hover:scale-110 transition-transform`}>

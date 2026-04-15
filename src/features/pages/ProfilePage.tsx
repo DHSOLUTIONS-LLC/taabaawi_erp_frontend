@@ -291,31 +291,31 @@ export default function ProfilePage() {
 
                 {/* Stats Row */}
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-                    <div className="bg-white rounded-xl p-5 shadow-sm text-center">
+                    <div className="bg-white rounded-xl p-5 text-center">
                         <p className="text-3xl font-bold text-gray-900">
                             {isLoading ? '...' : attendances.length}
                         </p>
                         <p className="text-sm text-gray-500 mt-1">Total Days</p>
                     </div>
-                    <div className="bg-white rounded-xl p-5 shadow-sm text-center">
+                    <div className="bg-white rounded-xl p-5 text-center">
                         <p className="text-3xl font-bold text-green-600">
                             {isLoading ? '...' : presentCount}
                         </p>
                         <p className="text-sm text-gray-500 mt-1">Present</p>
                     </div>
-                    <div className="bg-white rounded-xl p-5 shadow-sm text-center">
+                    <div className="bg-white rounded-xl p-5 text-center">
                         <p className="text-3xl font-bold text-yellow-500">
                             {isLoading ? '...' : lateCount}
                         </p>
                         <p className="text-sm text-gray-500 mt-1">Late</p>
                     </div>
-                    <div className="bg-white rounded-xl p-5 shadow-sm text-center">
+                    <div className="bg-white rounded-xl p-5 text-center">
                         <p className="text-3xl font-bold text-orange-500">
                             {isLoading ? '...' : halfDayCount}
                         </p>
                         <p className="text-sm text-gray-500 mt-1">Half Days</p>
                     </div>
-                    <div className="bg-white rounded-xl p-5 shadow-sm text-center">
+                    <div className="bg-white rounded-xl p-5 text-center">
                         <p className="text-3xl font-bold text-red-500">
                             {isLoading ? '...' : absentCount}
                         </p>

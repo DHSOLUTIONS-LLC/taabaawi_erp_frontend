@@ -52,6 +52,12 @@ export default function Sidebar({ onMenuSelect, mobileMenuOpen, closeMobileMenu 
   const [isReportsOpen, setIsReportsOpen] = useState(false);
   const [isSystemOpen, setIsSystemOpen] = useState(false);
   const [isBlogOpen, setIsBlogOpen] = useState(false);
+  const [isCrmOpen, setIsCrmOpen] = useState(false);
+  const [isHrOpen, setIsHrOpen] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [isAiContentOpen, setIsAiContentOpen] = useState(false);
+  const [isSecurityOpen, setIsSecurityOpen] = useState(false);
+  const [isBranchesOpen, setIsBranchesOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -165,7 +171,6 @@ export default function Sidebar({ onMenuSelect, mobileMenuOpen, closeMobileMenu 
       submenu: [
         { id: 'system-settings', label: 'Settings', path: `${basePath}/system/settings` },
         { id: 'payment-methods', label: 'Payment Methods', path: `${basePath}/system/payment-methods` },
-        // { id: 'seo', label: 'SEO Manager', path: `${basePath}/system/seo` },
       ]
     },
     hasPermission('') && {
@@ -188,31 +193,61 @@ export default function Sidebar({ onMenuSelect, mobileMenuOpen, closeMobileMenu 
       id: 'crm',
       label: 'CRM',
       icon: crm,
-      path: `${basePath}/crm`
+      path: `${basePath}/crm`,
+      submenu: [
+        { id: 'crm-dashboard', label: 'Dashboard', path: `${basePath}/crm` },
+        { id: 'crm-customers', label: 'Customers', path: `${basePath}/crm/customers` },
+      ],
     },
     hasAnyPermission(['view_users', 'create_user', 'edit_user', 'delete_user']) && {
       id: 'hr',
       label: 'HR & Users',
       icon: hr_users,
-      path: `${basePath}/hr`
+      path: `${basePath}/hr`,
+      submenu: [
+        { id: 'hr-dashboard', label: 'Dashboard', path: `${basePath}/hr` },
+        { id: 'hr-employees', label: 'Employees', path: `${basePath}/hr/employees` },
+        { id: 'hr-users', label: 'Users', path: `${basePath}/hr/users` },
+        { id: 'hr-roles', label: 'Roles & Permissions', path: `${basePath}/hr/roles` },
+        { id: 'hr-attendance', label: 'Attendance', path: `${basePath}/hr/attendance` },
+        { id: 'hr-leave', label: 'Leave Management', path: `${basePath}/hr/leave` },
+        { id: 'hr-payroll', label: 'Payroll', path: `${basePath}/hr/payroll` },
+      ],
     },
     hasAnyPermission(['view_users', 'create_user', 'edit_user', 'delete_user']) && {
       id: 'help',
       label: 'Help',
       icon: help,
-      path: `${basePath}/help`
+      path: `${basePath}/help`,
+      submenu: [
+        { id: 'help-docs', label: 'Documentation', path: `${basePath}/help` },
+        { id: 'help-faq', label: 'FAQ', path: `${basePath}/help/faq` },
+        { id: 'help-tickets', label: 'Support Tickets', path: `${basePath}/help/tickets` },
+        { id: 'help-tutorials', label: 'Tutorials', path: `${basePath}/help/tutorials` },
+      ],
     },
     {
       id: 'ai-content',
       label: 'AI Content',
       icon: ai_content,
       path: `${basePath}/ai-content`,
+      submenu: [
+        { id: 'ai-generate', label: 'Generate Content', path: `${basePath}/ai-content` },
+        { id: 'ai-templates', label: 'Templates', path: `${basePath}/ai-content/templates` },
+        { id: 'ai-history', label: 'Generation History', path: `${basePath}/ai-content/history` },
+        { id: 'ai-settings', label: 'AI Settings', path: `${basePath}/ai-content/settings` },
+      ],
     },
     {
       id: 'branches',
       label: 'Branches',
       icon: branches,
       path: `${basePath}/branches`,
+      submenu: [
+        { id: 'branches-list', label: 'All Branches', path: `${basePath}/branches` },
+        { id: 'branches-add', label: 'Add Branch', path: `${basePath}/branches/add` },
+        { id: 'branches-departments', label: 'Departments', path: `${basePath}/branches/departments` },
+      ],
     },
     hasAnyPermission(['view_users', 'create_user', 'edit_user', 'delete_user']) && {
       id: 'System',
@@ -224,7 +259,13 @@ export default function Sidebar({ onMenuSelect, mobileMenuOpen, closeMobileMenu 
       id: 'security',
       label: 'Security Center',
       icon: security_center,
-      path: `${basePath}/security`
+      path: `${basePath}/security`,
+      submenu: [
+        { id: 'security-dashboard', label: 'Dashboard', path: `${basePath}/security` },
+        { id: 'security-audit', label: 'Audit Logs', path: `${basePath}/security/audit-logs` },
+        { id: 'security-backups', label: 'Backups', path: `${basePath}/security/backups` },
+        { id: 'security-firewall', label: 'Firewall Rules', path: `${basePath}/security/firewall` },
+      ],
     },
   ].filter(Boolean) as MenuItem[];
 
@@ -255,6 +296,14 @@ export default function Sidebar({ onMenuSelect, mobileMenuOpen, closeMobileMenu 
   const isAccountingPathActive = location.pathname.startsWith(`${basePath}/accounting`);
   const isReportsPathActive = location.pathname.startsWith(`${basePath}/reports`);
   const isSalesPathActive = location.pathname.startsWith(`${basePath}/sales`);
+  const isCrmPathActive = location.pathname.startsWith(`${basePath}/crm`);
+  const isHrPathActive = location.pathname.startsWith(`${basePath}/hr`);
+  const isHelpPathActive = location.pathname.startsWith(`${basePath}/help`);
+  const isAiContentPathActive = location.pathname.startsWith(`${basePath}/ai-content`);
+  const isSecurityPathActive = location.pathname.startsWith(`${basePath}/security`);
+  const isBranchesPathActive = location.pathname.startsWith(`${basePath}/branches`);
+  const isSystemPathActive = location.pathname.startsWith(`${basePath}/system`);
+  const isBlogPathActive = location.pathname.startsWith(`${basePath}/blog`);
 
   useEffect(() => {
     if (isPurchasePathActive) setIsPurchaseOpen(true);
@@ -276,6 +325,38 @@ export default function Sidebar({ onMenuSelect, mobileMenuOpen, closeMobileMenu 
     if (isSalesPathActive) setIsSalesOpen(true);
   }, [isSalesPathActive]);
 
+  useEffect(() => {
+    if (isCrmPathActive) setIsCrmOpen(true);
+  }, [isCrmPathActive]);
+
+  useEffect(() => {
+    if (isHrPathActive) setIsHrOpen(true);
+  }, [isHrPathActive]);
+
+  useEffect(() => {
+    if (isHelpPathActive) setIsHelpOpen(true);
+  }, [isHelpPathActive]);
+
+  useEffect(() => {
+    if (isAiContentPathActive) setIsAiContentOpen(true);
+  }, [isAiContentPathActive]);
+
+  useEffect(() => {
+    if (isSecurityPathActive) setIsSecurityOpen(true);
+  }, [isSecurityPathActive]);
+
+  useEffect(() => {
+    if (isBranchesPathActive) setIsBranchesOpen(true);
+  }, [isBranchesPathActive]);
+
+  useEffect(() => {
+    if (isSystemPathActive) setIsSystemOpen(true);
+  }, [isSystemPathActive]);
+
+  useEffect(() => {
+    if (isBlogPathActive) setIsBlogOpen(true);
+  }, [isBlogPathActive]);
+
   const handleMenuClick = (menu: MenuItem) => {
     if (menu.submenu) {
       if (menu.id === 'pos') setIsPosOpen(prev => !prev);
@@ -285,6 +366,12 @@ export default function Sidebar({ onMenuSelect, mobileMenuOpen, closeMobileMenu 
       else if (menu.id === 'reports') setIsReportsOpen(prev => !prev);
       else if (menu.id === 'blog') setIsBlogOpen(prev => !prev);
       else if (menu.id === 'system') setIsSystemOpen(prev => !prev);
+      else if (menu.id === 'crm') setIsCrmOpen(prev => !prev);
+      else if (menu.id === 'hr') setIsHrOpen(prev => !prev);
+      else if (menu.id === 'help') setIsHelpOpen(prev => !prev);
+      else if (menu.id === 'ai-content') setIsAiContentOpen(prev => !prev);
+      else if (menu.id === 'security') setIsSecurityOpen(prev => !prev);
+      else if (menu.id === 'branches') setIsBranchesOpen(prev => !prev);
       return;
     }
 
@@ -302,6 +389,12 @@ export default function Sidebar({ onMenuSelect, mobileMenuOpen, closeMobileMenu 
   const findActiveMenuLabel = () => {
     const currentPath = location.pathname;
     for (const menu of operationMenus) {
+      if (menu.submenu) {
+        const activeSubmenu = menu.submenu.find(sub => sub.path === currentPath);
+        if (activeSubmenu) return activeSubmenu.label;
+      }
+    }
+    for (const menu of financeMenus) {
       if (menu.submenu) {
         const activeSubmenu = menu.submenu.find(sub => sub.path === currentPath);
         if (activeSubmenu) return activeSubmenu.label;
@@ -337,7 +430,13 @@ export default function Sidebar({ onMenuSelect, mobileMenuOpen, closeMobileMenu 
             (menu.id === 'accounting' && isAccountingOpen) ||
             (menu.id === 'reports' && isReportsOpen) ||
             (menu.id === 'blog' && isBlogOpen) ||
-            (menu.id === 'system' && isSystemOpen);
+            (menu.id === 'system' && isSystemOpen) ||
+            (menu.id === 'crm' && isCrmOpen) ||
+            (menu.id === 'hr' && isHrOpen) ||
+            (menu.id === 'help' && isHelpOpen) ||
+            (menu.id === 'ai-content' && isAiContentOpen) ||
+            (menu.id === 'security' && isSecurityOpen) ||
+            (menu.id === 'branches' && isBranchesOpen);
           const isParentActive = menu.submenu?.some(sub => sub.path === location.pathname);
 
           return (

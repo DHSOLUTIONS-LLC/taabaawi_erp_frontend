@@ -53,19 +53,19 @@ export default function JournalEntryDetailPage() {
   };
 
   const handleReverse = async (data?: { reversal_date: string; reason: string }) => {
-  if (!data) return;
-  try {
-    await reverseJournal({
-      id: journalId,
-      reversal_date: data.reversal_date,
-      reason: data.reason,
-    }).unwrap();
-    refetch();
-    setShowReverseModal(false);
-  } catch (err: any) {
-    alert(err?.data?.message || 'Failed to reverse journal entry');
-  }
-};
+    if (!data) return;
+    try {
+      await reverseJournal({
+        id: journalId,
+        reversal_date: data.reversal_date,
+        reason: data.reason,
+      }).unwrap();
+      refetch();
+      setShowReverseModal(false);
+    } catch (err: any) {
+      alert(err?.data?.message || 'Failed to reverse journal entry');
+    }
+  };
 
   if (isLoading) {
     return (
@@ -103,7 +103,7 @@ export default function JournalEntryDetailPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div className="flex items-center gap-3 sm:gap-4">
-            <button 
+            <button
               onClick={() => navigate(`${basePath}/accounting/journal-entries`)}
               className="flex-shrink-0 mt-1"
             >
@@ -171,7 +171,7 @@ export default function JournalEntryDetailPage() {
                     debit: num(l.debit),
                     credit: num(l.credit),
                   })) || []}
-                  onChange={() => {}}
+                  onChange={() => { }}
                   currency="KWD"
                   readOnly
                 />

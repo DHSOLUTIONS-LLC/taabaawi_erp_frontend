@@ -17,7 +17,7 @@ const BlogCreatePage: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="container mx-auto max-w-full">
+      <div className="mx-auto max-w-full">
         {/* Header */}
         <div className="mb-4 sm:mb-6">
           <button
@@ -30,7 +30,7 @@ const BlogCreatePage: React.FC = () => {
         </div>
 
         {/* Form */}
-        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+        <div className="bg-white rounded-lg  p-4 sm:p-6">
           <BlogPostForm />
         </div>
       </div>

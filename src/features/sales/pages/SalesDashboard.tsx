@@ -366,9 +366,9 @@ export default function SalesDashboardPage() {
 
   const b2bCount = Array.isArray(invoiceStatsData.by_type)
     ? invoiceStatsData.by_type.reduce((sum: number, t: any) => {
-        if (t?.invoice_type === "b2b") return sum + (t.count || 0);
-        return sum;
-      }, 0)
+      if (t?.invoice_type === "b2b") return sum + (t.count || 0);
+      return sum;
+    }, 0)
     : 0;
 
   console.log("b2bCount", b2bCount);
@@ -603,11 +603,10 @@ export default function SalesDashboardPage() {
                           e.stopPropagation();
                           setSelectedTimeframe(timeframe);
                         }}
-                        className={`px-3 py-1.5 text-xs md:text-sm font-medium rounded-lg transition-colors ${
-                          selectedTimeframe === timeframe
-                            ? "bg-blue-600 text-white"
-                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                        }`}
+                        className={`px-3 py-1.5 text-xs md:text-sm font-medium rounded-lg transition-colors ${selectedTimeframe === timeframe
+                          ? "bg-blue-600 text-white"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                          }`}
                       >
                         {timeframe === "weekly" ? "Weekly" : "Monthly"}
                       </button>
@@ -636,14 +635,14 @@ export default function SalesDashboardPage() {
                         currentData.dataPoints.length
                           ? currentData.dataPoints
                           : [
-                              { day: "Mon", revenue: 0 },
-                              { day: "Tue", revenue: 0 },
-                              { day: "Wed", revenue: 0 },
-                              { day: "Thu", revenue: 0 },
-                              { day: "Fri", revenue: 0 },
-                              { day: "Sat", revenue: 0 },
-                              { day: "Sun", revenue: 0 },
-                            ]
+                            { day: "Mon", revenue: 0 },
+                            { day: "Tue", revenue: 0 },
+                            { day: "Wed", revenue: 0 },
+                            { day: "Thu", revenue: 0 },
+                            { day: "Fri", revenue: 0 },
+                            { day: "Sat", revenue: 0 },
+                            { day: "Sun", revenue: 0 },
+                          ]
                       }
                       margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
                     >
@@ -679,7 +678,7 @@ export default function SalesDashboardPage() {
                 {/* Concentric circles — completely untouched */}
                 <div className="relative w-48 h-48 md:w-56 md:h-56 xl:w-64 xl:h-64 mx-auto mb-4 md:mb-6">
                   {channelBreakdownData?.data?.channel_breakdown &&
-                  channelBreakdownData.data.channel_breakdown.length > 0 ? (
+                    channelBreakdownData.data.channel_breakdown.length > 0 ? (
                     channelBreakdownData.data.channel_breakdown
                       .slice(0, 3)
                       .map((channel: any, index: number) => {
@@ -779,20 +778,20 @@ export default function SalesDashboardPage() {
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
                     <div className="text-2xl md:text-3xl font-bold text-gray-900">
                       {channelBreakdownData?.data?.channel_breakdown &&
-                      channelBreakdownData.data.channel_breakdown.length > 0
+                        channelBreakdownData.data.channel_breakdown.length > 0
                         ? Math.round(
-                            channelBreakdownData.data.channel_breakdown.reduce(
-                              (acc: number, c: any) =>
-                                acc +
-                                (parseFloat(c.total_revenue) /
-                                  (channelBreakdownData.data.summary
-                                    ?.total_revenue || 1)) *
-                                  100,
-                              0,
-                            ) /
-                              channelBreakdownData.data.channel_breakdown
-                                .length,
-                          )
+                          channelBreakdownData.data.channel_breakdown.reduce(
+                            (acc: number, c: any) =>
+                              acc +
+                              (parseFloat(c.total_revenue) /
+                                (channelBreakdownData.data.summary
+                                  ?.total_revenue || 1)) *
+                              100,
+                            0,
+                          ) /
+                          channelBreakdownData.data.channel_breakdown
+                            .length,
+                        )
                         : 30}
                       %
                     </div>
@@ -801,7 +800,7 @@ export default function SalesDashboardPage() {
 
                 <div className="space-y-3">
                   {channelBreakdownData?.data?.channel_breakdown &&
-                  channelBreakdownData.data.channel_breakdown.length > 0 ? (
+                    channelBreakdownData.data.channel_breakdown.length > 0 ? (
                     channelBreakdownData.data.channel_breakdown.map(
                       (channel: any) => {
                         const totalRev =
@@ -872,8 +871,8 @@ export default function SalesDashboardPage() {
                 >
                   <span className="truncate">
                     {filters.dateRange === "Custom" &&
-                    filters.customStartDate &&
-                    filters.customEndDate
+                      filters.customStartDate &&
+                      filters.customEndDate
                       ? `${filters.customStartDate} - ${filters.customEndDate}`
                       : filters.dateRange || "Date Range"}
                   </span>
@@ -1073,40 +1072,40 @@ export default function SalesDashboardPage() {
               filters.orderSource ||
               filters.paymentStatus ||
               filters.customerType) && (
-              <div className="mt-3 flex flex-wrap gap-2 items-center">
-                <span className="text-xs md:text-sm text-gray-500">
-                  Active Filters:
-                </span>
-                {filters.dateRange !== "Today" && (
-                  <span className="inline-flex items-center px-2 py-1 rounded-md bg-blue-50 text-blue-700 text-xs">
-                    Date:{" "}
-                    {filters.dateRange === "Custom"
-                      ? `${filters.customStartDate} to ${filters.customEndDate}`
-                      : filters.dateRange}
+                <div className="mt-3 flex flex-wrap gap-2 items-center">
+                  <span className="text-xs md:text-sm text-gray-500">
+                    Active Filters:
                   </span>
-                )}
-                {filters.invoiceType && (
-                  <span className="inline-flex items-center px-2 py-1 rounded-md bg-blue-50 text-blue-700 text-xs">
-                    Type: {filters.invoiceType}
-                  </span>
-                )}
-                {filters.orderSource && (
-                  <span className="inline-flex items-center px-2 py-1 rounded-md bg-blue-50 text-blue-700 text-xs">
-                    Source: {filters.orderSource}
-                  </span>
-                )}
-                {filters.paymentStatus && (
-                  <span className="inline-flex items-center px-2 py-1 rounded-md bg-blue-50 text-blue-700 text-xs">
-                    Payment: {filters.paymentStatus}
-                  </span>
-                )}
-                {filters.customerType && (
-                  <span className="inline-flex items-center px-2 py-1 rounded-md bg-blue-50 text-blue-700 text-xs">
-                    Customer: {filters.customerType}
-                  </span>
-                )}
-              </div>
-            )}
+                  {filters.dateRange !== "Today" && (
+                    <span className="inline-flex items-center px-2 py-1 rounded-md bg-blue-50 text-blue-700 text-xs">
+                      Date:{" "}
+                      {filters.dateRange === "Custom"
+                        ? `${filters.customStartDate} to ${filters.customEndDate}`
+                        : filters.dateRange}
+                    </span>
+                  )}
+                  {filters.invoiceType && (
+                    <span className="inline-flex items-center px-2 py-1 rounded-md bg-blue-50 text-blue-700 text-xs">
+                      Type: {filters.invoiceType}
+                    </span>
+                  )}
+                  {filters.orderSource && (
+                    <span className="inline-flex items-center px-2 py-1 rounded-md bg-blue-50 text-blue-700 text-xs">
+                      Source: {filters.orderSource}
+                    </span>
+                  )}
+                  {filters.paymentStatus && (
+                    <span className="inline-flex items-center px-2 py-1 rounded-md bg-blue-50 text-blue-700 text-xs">
+                      Payment: {filters.paymentStatus}
+                    </span>
+                  )}
+                  {filters.customerType && (
+                    <span className="inline-flex items-center px-2 py-1 rounded-md bg-blue-50 text-blue-700 text-xs">
+                      Customer: {filters.customerType}
+                    </span>
+                  )}
+                </div>
+              )}
           </div>
 
           {/* Table header */}
@@ -1134,7 +1133,7 @@ export default function SalesDashboardPage() {
                           type="checkbox"
                           checked={
                             selectedProductIds.length ===
-                              recentTransactions.length &&
+                            recentTransactions.length &&
                             recentTransactions.length > 0
                           }
                           onChange={handleSelectAll}
@@ -1207,17 +1206,16 @@ export default function SalesDashboardPage() {
                         </td>
                         <td className="px-4 md:px-5 py-3 md:py-4 whitespace-nowrap">
                           <span
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium ${
-                              transaction.status === "Paid"
-                                ? "bg-green-100 text-green-800"
-                                : transaction.status === "Unpaid"
-                                  ? "bg-red-100 text-red-800"
-                                  : transaction.status === "Partially Paid"
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium ${transaction.status === "Paid"
+                              ? "bg-green-100 text-green-800"
+                              : transaction.status === "Unpaid"
+                                ? "bg-red-100 text-red-800"
+                                : transaction.status === "Partially Paid"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : transaction.status === "Pending"
                                     ? "bg-yellow-100 text-yellow-800"
-                                    : transaction.status === "Pending"
-                                      ? "bg-yellow-100 text-yellow-800"
-                                      : "bg-gray-100 text-gray-800"
-                            }`}
+                                    : "bg-gray-100 text-gray-800"
+                              }`}
                           >
                             <span className="w-1.5 h-1.5 rounded-full bg-current opacity-70" />
                             {transaction.status}
@@ -1266,11 +1264,10 @@ export default function SalesDashboardPage() {
                 <button
                   key={pageNum}
                   onClick={() => setCurrentPage(pageNum)}
-                  className={`w-8 h-8 text-xs md:text-sm font-medium rounded-lg transition-colors ${
-                    currentPage === pageNum
-                      ? "bg-blue-600 text-white"
-                      : "text-gray-700 hover:bg-gray-100"
-                  }`}
+                  className={`w-8 h-8 text-xs md:text-sm font-medium rounded-lg transition-colors ${currentPage === pageNum
+                    ? "bg-blue-600 text-white"
+                    : "text-gray-700 hover:bg-gray-100"
+                    }`}
                 >
                   {pageNum}
                 </button>

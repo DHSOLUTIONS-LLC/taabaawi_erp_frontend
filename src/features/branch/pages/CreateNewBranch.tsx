@@ -108,7 +108,7 @@ const CreateNewBranch: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8">
+      <div className="mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8">
         {/* Header Section */}
         <div className="mb-4 sm:mb-6 md:mb-8">
           <button
@@ -149,7 +149,7 @@ const CreateNewBranch: React.FC = () => {
               {/* Basic Information Section */}
               <div>
                 <div className="flex items-center gap-2 mb-4 pb-2 border-b border-gray-200">
-                  <Building2 className="w-5 h-5 text-blue-600" />
+                  <Building2 className="w-5 h-5 text-black" />
                   <h2 className="text-base sm:text-lg font-semibold text-gray-900">Basic Information</h2>
                 </div>
                 
@@ -162,7 +162,7 @@ const CreateNewBranch: React.FC = () => {
                     <input
                       type="text"
                       {...register('branch_name', { required: 'Branch name is required' })}
-                      className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm sm:text-base ${
+                      className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm sm:text-base ${
                         errors.branch_name ? 'border-red-300 bg-red-50' : 'border-gray-300'
                       }`}
                       placeholder="Enter branch name"
@@ -211,7 +211,7 @@ const CreateNewBranch: React.FC = () => {
               {/* Contact Information Section */}
               <div>
                 <div className="flex items-center gap-2 mb-4 pb-2 border-b border-gray-200">
-                  <Phone className="w-5 h-5 text-blue-600" />
+                  <Phone className="w-5 h-5 text-black" />
                   <h2 className="text-base sm:text-lg font-semibold text-gray-900">Contact Information</h2>
                 </div>
                 
@@ -219,7 +219,7 @@ const CreateNewBranch: React.FC = () => {
                   {/* Address */}
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                      <MapPin className="inline w-4 h-4 mr-1" /> Address
+                       Address
                     </label>
                     <input
                       type="text"
@@ -232,7 +232,7 @@ const CreateNewBranch: React.FC = () => {
                   {/* Phone */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                      <Phone className="inline w-4 h-4 mr-1" /> Phone
+                      Phone
                     </label>
                     <input
                       type="tel"
@@ -245,7 +245,7 @@ const CreateNewBranch: React.FC = () => {
                   {/* Email */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                      <Mail className="inline w-4 h-4 mr-1" /> Email
+                      Email
                     </label>
                     <input
                       type="email"
@@ -260,7 +260,7 @@ const CreateNewBranch: React.FC = () => {
               {/* Features Section */}
               <div>
                 <div className="flex items-center gap-2 mb-4 pb-2 border-b border-gray-200">
-                  <Settings className="w-5 h-5 text-blue-600" />
+                  <Settings className="w-5 h-5 text-black" />
                   <h2 className="text-base sm:text-lg font-semibold text-gray-900">Features & Capabilities</h2>
                 </div>
                 

@@ -127,7 +127,7 @@ const SecurityCenterPage: React.FC = () => {
   };
 
   const StatCard = ({ title, value, icon, color, loading }: any) => (
-    <div className="bg-white rounded-lg shadow p-6">
+    <div className="bg-white rounded-lg p-4">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm text-gray-600">{title}</p>
@@ -207,35 +207,35 @@ const SecurityCenterPage: React.FC = () => {
                   title="Total Logins"
                   value={stats?.total_logins || 0}
                   icon="🔑"
-                  color="bg-blue-500"
+                  color="bg-gray-100"
                   loading={statsLoading}
                 />
                 <StatCard
                   title="Failed Logins"
                   value={stats?.failed_logins || 0}
                   icon="❌"
-                  color="bg-red-500"
+                  color="bg-gray-100"
                   loading={statsLoading}
                 />
                 <StatCard
                   title="Suspicious"
                   value={stats?.suspicious_logins || 0}
                   icon="⚠️"
-                  color="bg-yellow-500"
+                  color="bg-gray-100"
                   loading={statsLoading}
                 />
                 <StatCard
                   title="Active Sessions"
                   value={stats?.active_sessions || 0}
                   icon="👤"
-                  color="bg-green-500"
+                  color="bg-gray-100"
                   loading={statsLoading}
                 />
                 <StatCard
                   title="Unresolved Alerts"
                   value={stats?.unresolved_alerts || 0}
                   icon="🚨"
-                  color="bg-purple-500"
+                  color="bg-gray-100"
                   loading={statsLoading}
                 />
               </div>

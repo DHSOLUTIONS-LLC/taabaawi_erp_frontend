@@ -158,7 +158,7 @@ const LogoUploader: React.FC = () => {
               key={imageKey}
               src={preview || fullLogoUrl || ''}
               alt="Company Logo"
-              className="h-20 w-20 xs:h-16 xs:w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 object-contain border rounded-lg bg-gray-50 p-1"
+              className="h-20 w-20 xs:h-16 xs:w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 object-contain border border-gray-300 rounded-md bg-gray-50 p-1"
               onError={(e) => {
                 console.error('Image failed to load:', e.currentTarget.src);
                 // Show a fallback icon

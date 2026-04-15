@@ -300,17 +300,16 @@ export default function OrderDetailPage() {
         </div>
 
         {/* Tabs - Horizontal Scroll on Mobile */}
-        <div className="border-b overflow-x-auto">
+        <div className="border-b border-gray-300 overflow-x-auto">
           <div className="flex min-w-max sm:min-w-0">
             {(["details", "items", "history"] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
-                  activeTab === tab
+                className={`px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${activeTab === tab
                     ? "border-[#1773CF] text-[#1773CF]"
                     : "border-transparent text-gray-500 hover:text-gray-700"
-                }`}
+                  }`}
               >
                 {tab === "history"
                   ? "Status History"
@@ -401,14 +400,14 @@ export default function OrderDetailPage() {
                     </span>
                   </div>
                 ))}
-                <div className="flex justify-between pt-2 border-t font-bold text-sm sm:text-base">
+                <div className="flex justify-between pt-2 border-t border-gray-300 font-bold text-sm sm:text-base">
                   <span>Total</span>
                   <span className="text-[#1773CF]">
                     KD {Number(order.total_amount).toFixed(3)}
                   </span>
                 </div>
               </div>
-              <div className="mt-4 pt-4 border-t space-y-2 text-sm">
+              <div className="mt-4 pt-4 border-t border-gray-300 space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-500 text-xs sm:text-sm">
                     Method
@@ -604,7 +603,7 @@ export default function OrderDetailPage() {
                   value={trackingNumber}
                   onChange={(e) => setTrackingNumber(e.target.value)}
                   placeholder="e.g. 1Z999AA10123456784"
-                  className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div>
@@ -615,7 +614,7 @@ export default function OrderDetailPage() {
                   value={shippingProvider}
                   onChange={(e) => setShippingProvider(e.target.value)}
                   placeholder="e.g. Aramex, DHL, FedEx"
-                  className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>
@@ -650,7 +649,7 @@ export default function OrderDetailPage() {
               onChange={(e) => setCancelReason(e.target.value)}
               rows={3}
               placeholder="Enter cancellation reason *"
-              className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
+              className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
             />
             <div className="flex gap-3">
               <button
@@ -683,7 +682,7 @@ export default function OrderDetailPage() {
               onChange={(e) => setReturnReason(e.target.value)}
               rows={3}
               placeholder="Enter return reason *"
-              className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
+              className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
             />
             <div className="flex gap-3">
               <button

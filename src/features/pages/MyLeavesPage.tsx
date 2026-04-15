@@ -111,7 +111,7 @@ export default function MyLeavesPage() {
                     ) : leaveBalances.length > 0 ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
                             {leaveBalances.map((balance, index) => (
-                                <div key={index} className="bg-white rounded-xl p-4 sm:p-5 shadow-sm border border-gray-100">
+                                <div key={index} className="bg-white rounded-xl p-4 sm:p-5 border border-gray-100">
                                     <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2 sm:mb-3">{balance.leave_type}</p>
                                     <div className="flex items-end justify-between">
                                         <div>
@@ -135,19 +135,19 @@ export default function MyLeavesPage() {
                     ) : (
                         /* Summary stats if no balance API */
                         <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 sm:gap-4 mb-6">
-                            <div className="bg-white rounded-xl p-4 sm:p-5 shadow-sm text-center">
+                            <div className="bg-white rounded-xl p-4 sm:p-5 text-center">
                                 <p className="text-xl sm:text-2xl font-bold text-yellow-500">{PendingCount}</p>
                                 <p className="text-xs sm:text-sm text-gray-500 mt-1">Pending</p>
                             </div>
-                            <div className="bg-white rounded-xl p-4 sm:p-5 shadow-sm text-center">
+                            <div className="bg-white rounded-xl p-4 sm:p-5 text-center">
                                 <p className="text-xl sm:text-2xl font-bold text-green-600">{approvedCount}</p>
                                 <p className="text-xs sm:text-sm text-gray-500 mt-1">Approved</p>
                             </div>
-                            <div className="bg-white rounded-xl p-4 sm:p-5 shadow-sm text-center">
+                            <div className="bg-white rounded-xl p-4 sm:p-5 text-center">
                                 <p className="text-xl sm:text-2xl font-bold text-gray-500">{CancelledCount}</p>
                                 <p className="text-xs sm:text-sm text-gray-500 mt-1">Cancelled</p>
                             </div>
-                            <div className="bg-white rounded-xl p-4 sm:p-5 shadow-sm text-center">
+                            <div className="bg-white rounded-xl p-4 sm:p-5 text-center">
                                 <p className="text-xl sm:text-2xl font-bold text-red-500">{RejectedCount}</p>
                                 <p className="text-xs sm:text-sm text-gray-500 mt-1">Rejected</p>
                             </div>

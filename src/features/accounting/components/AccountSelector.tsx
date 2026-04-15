@@ -74,7 +74,7 @@ export default function AccountSelector({
         {/* Selected Account Display / Input */}
         <div
           onClick={() => !disabled && setShowDropdown(!showDropdown)}
-          className={`w-full px-4 py-3 border rounded-lg bg-white cursor-pointer flex items-center justify-between ${error ? 'border-red-500' : 'border-gray-300'
+          className={`w-full px-4 py-3 border border-gray-300 rounded-md bg-white cursor-pointer flex items-center justify-between ${error ? 'border-red-500' : 'border-gray-300'
             } ${disabled ? 'bg-gray-50 cursor-not-allowed' : 'hover:border-blue-400'}`}
         >
           {selectedAccount ? (

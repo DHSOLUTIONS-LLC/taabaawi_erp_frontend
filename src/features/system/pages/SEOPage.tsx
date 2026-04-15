@@ -50,7 +50,7 @@ const SEOPage: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="container mx-auto px-4 py-8">
+      <div className="mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">SEO Manager</h1>
@@ -82,14 +82,14 @@ const SEOPage: React.FC = () => {
 
         {/* Content */}
         {activeTab === 'sitemap' ? (
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg p-4">
             <h2 className="text-xl font-semibold text-gray-800 mb-4">Sitemap Generator</h2>
             <SitemapGenerator />
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Left Column - Form */}
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white rounded-lg p-4">
               <h2 className="text-xl font-semibold text-gray-800 mb-4">
                 SEO Settings - {pages.find(p => p.id === activeTab)?.label}
               </h2>
@@ -102,7 +102,7 @@ const SEOPage: React.FC = () => {
             </div>
 
             {/* Right Column - Preview */}
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white rounded-lg p-4">
               <h2 className="text-xl font-semibold text-gray-800 mb-4">Preview</h2>
               <SEOPreview
                 seo={seo || null}

@@ -116,7 +116,7 @@ export default function EditJournalEntryPage() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6 ">
+      <div className="max-w-full mx-auto space-y-4 sm:space-y-6 ">
         {/* Header */}
         <div className="flex items-center gap-3 sm:gap-4">
           <button

@@ -62,7 +62,8 @@ export default function CloseRegisterPage({
 
       // Step 2 — Auto-generate shift report after close
       const reportResult = await generateShiftReport(register.id).unwrap();
-      setShiftReport(reportResult?.data);
+      const shiftrep= setShiftReport(reportResult?.data);
+      console.log('shift report:',shiftrep )
       setStep("done");
     } catch (err: any) {
       setError(
@@ -113,9 +114,9 @@ export default function CloseRegisterPage({
           {step === "done" && (
             <div className="space-y-4">
               <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
-                <p className="font-bold text-green-800">
+                {/* <p className="font-bold text-green-800">
                   Report #{shiftReport?.report_number || "—"}
-                </p>
+                </p> */}
                 <p className="text-green-600 text-sm">
                   Shift closed & report saved
                 </p>

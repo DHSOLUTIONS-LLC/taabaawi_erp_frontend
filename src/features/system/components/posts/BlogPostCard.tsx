@@ -30,7 +30,7 @@ const BlogPostCard: React.FC<Props> = ({ post, onClick }) => {
   return (
     <div
       onClick={onClick}
-      className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer border border-gray-200"
+      className="bg-white rounded-lg overflow-hidden hover:shadow-sm transition-shadow cursor-pointer"
     >
       {/* Featured Image */}
       {post.featured_image && (
@@ -70,8 +70,8 @@ const BlogPostCard: React.FC<Props> = ({ post, onClick }) => {
         )}
 
         {/* Meta Info */}
-        <div className="flex items-center justify-between text-xs text-gray-500 border-t pt-3">
-          <div className="flex items-center space-x-2">
+        <div className="flex flex-col items-start justify-between text-xs text-gray-500 border-t border-gray-300 pt-3">
+          <div className="flex items-center space-x-2 mb-1">
             {post.author?.avatar ? (
               <img
                 src={post.author.avatar}
@@ -84,9 +84,9 @@ const BlogPostCard: React.FC<Props> = ({ post, onClick }) => {
             <span>{post.author?.name || 'Unknown'}</span>
           </div>
           <div className="flex items-center space-x-3">
-            <span>👁️ {post.view_count}</span>
+            {/* <span>👁️ {post.view_count}</span> */}
             {post.category && (
-              <span className="bg-blue-50 text-blue-600 px-2 py-1 rounded">
+              <span className="text-[10px]  text-blue-600 px-2 py-1 rounded">
                 {post.category.name}
               </span>
             )}

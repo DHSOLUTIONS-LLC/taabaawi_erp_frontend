@@ -619,7 +619,7 @@ export default function DashboardPage() {
       <div className="space-y-4 md:space-y-6 overflow-x-hidden min-w-0">
         {/* Stat Cards - Same UI as first dashboard */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4">
-          <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-2 gap-3 md:gap-4 xl:gap-6">
+          <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-2 gap-2 xl:gap-4">
             {statCards.map((card) => (
               <div
                 key={card.label}
@@ -698,7 +698,7 @@ export default function DashboardPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <button
                     onClick={() => setShowBulkDiscountModal(true)}
-                    className="flex items-center gap-4 bg-white rounded-2xl p-2 border-2 border-[#0088FF] hover:border-blue-700 hover:shadow-md transition-all w-full group"
+                    className="flex items-center gap-4 bg-white rounded-2xl p-5 border-2 border-[#0088FF] hover:border-blue-700 hover:shadow-md transition-all w-full group"
                   >
                     <div className="w-12 h-12 rounded-2xl bg-[#ECF0F4] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                       <img

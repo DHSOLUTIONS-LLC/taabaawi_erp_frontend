@@ -87,7 +87,7 @@ export default function PendingApprovalsPage() {
         </div>
 
         {/* Search */}
-        <div className="bg-white rounded-xl p-3 sm:p-4 shadow-sm">
+        <div className="bg-white rounded-xl p-3 sm:p-4">
           <div className="relative max-w-full sm:max-w-md">
             <img
               src={search_icon}

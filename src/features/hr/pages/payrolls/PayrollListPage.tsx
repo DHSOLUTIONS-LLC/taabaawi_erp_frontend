@@ -175,7 +175,7 @@ export default function PayrollListPage() {
                 {/* Statistics Cards */}
                 {statistics && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
-                        <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm">
+                        <div className="bg-white rounded-xl p-4 sm:p-6 ">
                             <p className="text-xs sm:text-sm text-gray-500 mb-2">Total Payrolls</p>
                             <p className="text-xl sm:text-2xl font-bold text-gray-900">{statistics.total_payrolls || 0}</p>
                             <div className="flex flex-wrap gap-2 mt-2 text-xs">
@@ -184,17 +184,17 @@ export default function PayrollListPage() {
                                 <span className="text-blue-500">Paid: {statistics.paid || 0}</span>
                             </div>
                         </div>
-                        <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm">
+                        <div className="bg-white rounded-xl p-4 sm:p-6 ">
                             <p className="text-xs sm:text-sm text-gray-500 mb-2">Total Basic Salary</p>
                             <p className="text-xl sm:text-2xl font-bold text-gray-900">{formatCurrency(statistics.total_basic_salary || '0')}</p>
                         </div>
-                        <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm">
+                        <div className="bg-white rounded-xl p-4 sm:p-6 ">
                             <p className="text-xs sm:text-sm text-gray-500 mb-2">Total Allowances & Bonuses</p>
                             <p className="text-xl sm:text-2xl font-bold text-gray-900">
                                 {formatCurrency((parseFloat(statistics.total_allowances || '0') + parseFloat(statistics.total_bonuses || '0')).toString())}
                             </p>
                         </div>
-                        <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm">
+                        <div className="bg-white rounded-xl p-4 sm:p-6 ">
                             <p className="text-xs sm:text-sm text-gray-500 mb-2">Total Net Salary</p>
                             <p className="text-xl sm:text-2xl font-bold text-green-600">{formatCurrency(statistics.total_net_salary || '0')}</p>
                         </div>
@@ -202,7 +202,7 @@ export default function PayrollListPage() {
                 )}
 
                 {/* Filters */}
-                <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm mb-6">
+                <div className="bg-white rounded-xl p-4 sm:p-6  mb-6">
                     <div className="flex flex-col lg:flex-row flex-wrap gap-3 sm:gap-4">
                         {/* Month Filter */}
                         <div className="flex-1 min-w-[150px] relative">

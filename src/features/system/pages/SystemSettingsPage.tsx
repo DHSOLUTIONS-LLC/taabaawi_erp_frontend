@@ -131,7 +131,7 @@ const SystemSettingsPage: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="mx-auto md:px-6 md:py-6">
+      <div className="mx-auto px-3 py-3">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">System Settings</h1>
@@ -224,7 +224,7 @@ const SystemSettingsPage: React.FC = () => {
 
         {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
-          <div className="bg-white rounded-lg shadow-sm sm:shadow-md p-4 sm:p-6 lg:p-8">
+          <div className="bg-white rounded-lg p-4 sm:p-6 lg:p-8">
             {activeTab === 'general' && (
               <GeneralSettings register={register} errors={errors} />
             )}

@@ -64,7 +64,7 @@ export default function ARAgingReportPage() {
         </div>
 
         {/* Report Content */}
-        <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm overflow-x-auto">
+        <div className="bg-white rounded-xl p-4 sm:p-6  overflow-x-auto">
           {isLoading ? (
             <div className="flex justify-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />

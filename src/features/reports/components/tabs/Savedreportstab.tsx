@@ -217,8 +217,8 @@ export const SavedReportsTab = () => {
                             <button onClick={() => setShowHistory(showHistory === r.id ? null : r.id)} title="History" className="p-1.5 hover:bg-blue-50 text-gray-400 hover:text-blue-600 rounded"><Clock className="h-3.5 w-3.5" /></button>
                             <button onClick={() => dispatch(openReportModal({ mode: 'edit', report: r }))} title="Edit" className="p-1.5 hover:bg-yellow-50 text-gray-400 hover:text-yellow-600 rounded"><Edit2 className="h-3.5 w-3.5" /></button>
                             <button onClick={() => handleDelete(r.id, r.report_name)} title="Delete" className="p-1.5 hover:bg-red-50 text-gray-400 hover:text-red-600 rounded"><Trash2 className="h-3.5 w-3.5" /></button>
-                            <button onClick={() => handleExport(r.id, 'csv')} title="Export CSV" className="p-1.5 hover:bg-gray-100 text-gray-400 rounded text-xs font-medium">CSV</button>
-                            <button onClick={() => handleExport(r.id, 'excel')} title="Export Excel" className="p-1.5 hover:bg-gray-100 text-gray-400 rounded text-xs font-medium">XLS</button>
+                            {/* <button onClick={() => handleExport(r.id, 'csv')} title="Export CSV" className="p-1.5 hover:bg-gray-100 text-gray-400 rounded text-xs font-medium">CSV</button>
+                            <button onClick={() => handleExport(r.id, 'excel')} title="Export Excel" className="p-1.5 hover:bg-gray-100 text-gray-400 rounded text-xs font-medium">XLS</button> */}
                             {execResults[r.id] && (
                               <button onClick={() => setExpandedId(expandedId === r.id ? null : r.id)} className="p-1.5 hover:bg-gray-100 text-gray-400 rounded">
                                 {expandedId === r.id ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}

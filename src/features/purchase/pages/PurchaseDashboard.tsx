@@ -250,7 +250,8 @@ export default function PurchaseDashboard() {
         </div>
         {pendingLoading ? (
           <div className="flex justify-center py-6 sm:py-8">
-            <Spinner />
+               <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-2"></div>
+                <p className="mt-2 text-gray-600">Loading pending approvals...</p>
           </div>
         ) : pendingPOs.length === 0 ? (
           <div className="text-center py-6 sm:py-8">
@@ -301,7 +302,8 @@ export default function PurchaseDashboard() {
         </div>
         {recentLoading ? (
           <div className="flex justify-center py-6 sm:py-8">
-            <Spinner />
+           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-2"></div>
+            <p className="mt-2 text-gray-600">Loading recent orders...</p>
           </div>
         ) : recentPOs.length === 0 ? (
           <div className="text-center py-6 sm:py-8">

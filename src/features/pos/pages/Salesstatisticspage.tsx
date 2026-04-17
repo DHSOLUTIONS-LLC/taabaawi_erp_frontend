@@ -121,7 +121,7 @@ export default function SalesStatisticsPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Payment method breakdown */}
-              <div className="bg-white rounded-xl shadow-sm p-6">
+              <div className="bg-white rounded-xl p-6">
                 <h3 className="font-bold text-gray-900 mb-4">Sales by Payment Method</h3>
                 {stats?.by_payment_method?.length ? (
                   <div className="space-y-3">
@@ -153,7 +153,7 @@ export default function SalesStatisticsPage() {
               </div>
 
               {/* Sales by Branch */}
-              <div className="bg-white rounded-xl shadow-sm p-6">
+              <div className="bg-white rounded-xl p-6">
                 <h3 className="font-bold text-gray-900 mb-4">Sales by Branch</h3>
                 {stats?.by_branch?.length ? (
                   <div className="space-y-3">
@@ -184,7 +184,7 @@ export default function SalesStatisticsPage() {
 
               {/* Top products */}
               {stats?.top_products?.length > 0 && (
-                <div className="bg-white rounded-xl shadow-sm p-6">
+                <div className="bg-white rounded-xl p-6">
                   <h3 className="font-bold text-gray-900 mb-4">Top Selling Products</h3>
                   <div className="space-y-3">
                     {stats.top_products.map((item: any, i: number) => (
@@ -205,7 +205,7 @@ export default function SalesStatisticsPage() {
 
               {/* Sales by day */}
               {stats?.daily_breakdown?.length > 0 && (
-                <div className="bg-white rounded-xl shadow-sm p-6">
+                <div className="bg-white rounded-xl p-6">
                   <h3 className="font-bold text-gray-900 mb-4">Daily Sales</h3>
                   <div className="space-y-2 max-h-64 overflow-y-auto">
                     {stats.daily_breakdown.map((day: any) => (

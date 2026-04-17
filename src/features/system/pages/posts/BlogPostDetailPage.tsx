@@ -8,8 +8,8 @@ import { useAppSelector } from '../../../../app/hooks';
 import type { RootState } from '../../../../app/store';
 
 
-const API_BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://erp-backend.ttexpresskw.com';
-
+const API_BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '');
+console.log('API_BASE_URL', API_BASE_URL)
 
 const BlogPostDetailPage: React.FC = () => {
 

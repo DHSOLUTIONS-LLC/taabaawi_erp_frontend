@@ -70,7 +70,7 @@ export default function BankAccountsPage() {
   </div>
   <button
     onClick={() => navigate(`${basePath}/accounting/bank-accounts/create`)}
-    className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
+    className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 text-black rounded-lg border border-blue-600 hover:bg-blue-700 hover:text-white transition-colors cursor-pointer text-sm sm:text-base"
   >
     <img src={add_icon} alt="" className="w-4 h-4" />
     New Bank Account

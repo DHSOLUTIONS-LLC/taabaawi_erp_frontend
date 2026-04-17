@@ -461,7 +461,7 @@ export default function OrderDetailPage() {
         )}
 
         {activeTab === "items" && (
-          <div className="bg-white rounded-xl overflow-hidden">
+          <div className="bg-white rounded-xl overflow-hidden shadow-sm">
             <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
               <div className="xl:col-span-4 overflow-x-auto">
                 <div className="min-w-[640px] md:min-w-full">

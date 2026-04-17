@@ -562,7 +562,8 @@ export default function CashRegistersPage() {
                     {isLoading ? (
                       <tr>
                         <td colSpan={10} className="text-center py-8">
-                          Loading...
+                             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                             <p>Loading cashbox</p>
                         </td>
                       </tr>
                     ) : filteredRegisters.length === 0 ? (

@@ -1267,12 +1267,12 @@ export default function FinancialReportsPage() {
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-xl p-3 sm:p-4 shadow-sm">
+        <div className="bg-white rounded-xl p-3 sm:p-4">
           {renderDateFilters()}
         </div>
 
         {/* Report Content */}
-        <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm print:p-0 overflow-x-auto">
+        <div className="bg-white rounded-xl p-4 sm:p-6  print:p-0 overflow-x-auto">
           <div className="mb-4">
             <h2 className="text-lg sm:text-xl font-bold text-gray-900">
               {TAB_CONFIG.find(t => t.id === activeTab)?.label}

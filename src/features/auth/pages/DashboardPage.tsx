@@ -151,6 +151,8 @@ export default function DashboardPage() {
       }));
   }, [channelData]);
 
+  console.log('channelPieData',channelPieData)
+
   const totalRevenue = useMemo(() => {
     if (selectedTimeframe === "weekly")
       return parseFloat(weeklyData?.data?.summary?.total_revenue) || 0;
@@ -318,7 +320,10 @@ export default function DashboardPage() {
 
             <div className="h-56 md:h-64 xl:h-72 w-full">
               {isLoading ? (
-                <Spinner />
+                <div>
+                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-2"></div>
+                  <p className="mt-2 text-gray-600">Loading revenue data...</p>
+                </div>
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart
@@ -347,7 +352,10 @@ export default function DashboardPage() {
             <h3 className="text-sm md:text-base xl:text-lg font-semibold text-gray-900 mb-4 md:mb-6">Channels Contribution</h3>
 
             {channelLoading ? (
-              <div className="h-64 flex items-center justify-center"><Spinner /></div>
+              <div className="h-64 flex items-center justify-center">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-2"></div>
+                <p className="mt-2 text-gray-600">Loading channel data...</p>
+              </div>
             ) : (
               <>
                 <div className="relative w-48 h-48 md:w-56 md:h-56 xl:w-64 xl:h-64 mx-auto mb-4 md:mb-6">
@@ -380,7 +388,7 @@ export default function DashboardPage() {
                     <>
                       <div className="absolute inset-0">
                         <svg className="w-full h-full" viewBox="0 0 100 100">
-                          <circle cx="50" cy="50" r="45" fill="none" stroke="#91C0EECC" strokeWidth="6" strokeLinecap="round" strokeDasharray="400.743" strokeDashoffset="155.508" transform="rotate(-190 50 50)" />
+                          <circle cx="50" cy="50" r="45" fill="none" stroke="#91C0EECC" strokeWidth="4" strokeLinecap="round" strokeDasharray="400.743" strokeDashoffset="155.508" transform="rotate(-190 50 50)" />
                         </svg>
                       </div>
                       <div className="absolute inset-0 p-2">
@@ -514,7 +522,11 @@ export default function DashboardPage() {
             </div>
 
             {lowStockLoading ? (
-              <div className="h-40"><Spinner /></div>
+              <div className="h-40">
+                <div className="flex items-center justify-center h-full"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+                </div>
+              
             ) : (lowStockResponse?.data || []).length === 0 ? (
               <div className="flex flex-col items-center justify-center py-10 text-gray-400 text-center gap-2">
                 <svg className="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">

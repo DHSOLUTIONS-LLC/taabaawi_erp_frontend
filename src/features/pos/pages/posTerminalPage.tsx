@@ -333,7 +333,7 @@ export default function POSTerminalPage() {
 
         <div className="bg-white mt-3 p-6 sm:p-8 lg:p-8">
           <div className="max-w-8xl mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-end">
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-2 lg:gap-6 items-end">
               <div className="lg:col-span-7">
                 <input
                   type="number"

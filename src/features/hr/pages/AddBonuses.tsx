@@ -277,7 +277,7 @@ export default function AddBonusesPage() {
                 </div>
 
                 {/* Products Table Section */}
-                <div className="bg-white rounded-xl overflow-hidden">
+                <div className="bg-white rounded-xl overflow-hidden shadow-sm">
                     {/* Filters Row */}
                     <div className="p-2 md:p-6">
                         <div className="flex flex-wrap md:flex-nowrap items-center gap-4">

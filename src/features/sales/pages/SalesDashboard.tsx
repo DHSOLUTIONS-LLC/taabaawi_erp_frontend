@@ -165,6 +165,7 @@ export default function SalesDashboardPage() {
   const { data: monthlyData } = useGetSalesMonthlyQuery();
   const { data: overviewData } = useGetSalesOverviewQuery();
   const { data: channelBreakdownData } = useGetChannelBreakdownQuery();
+  console.log('channelBreakdownData', channelBreakdownData);
 
   console.log("channel contribution:", channelBreakdownData);
   const { data: invoicesData, refetch: refetchInvoices } = useGetInvoicesQuery({

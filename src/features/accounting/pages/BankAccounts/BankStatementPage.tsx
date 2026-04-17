@@ -114,7 +114,7 @@ export default function BankStatementPage() {
         </div>
 
         {/* Statement Content */}
-        <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm print:p-0">
+        <div className="bg-white rounded-xl p-4 sm:p-6  print:p-0">
           {isLoading ? (
             <div className="flex justify-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />

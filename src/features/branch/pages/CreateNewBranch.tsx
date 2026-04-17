@@ -143,7 +143,7 @@ const CreateNewBranch: React.FC = () => {
         </div>
 
         {/* Form Section */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8">
               {/* Basic Information Section */}

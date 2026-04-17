@@ -25,7 +25,7 @@ export const ReportsDashboard = () => {
   return (
     <DashboardLayout>
       <div className="min-h-screen bg-gray-50">
-        <div className="max-w-full mx-auto px-2 md:px-6 lg:px-8 py-4 sm:py-6 lg:py-4">
+        <div className="max-w-full mx-auto xl:px-4 2xl:py-4">
 
           {/* Header */}
           <div className="mb-6 sm:mb-8">

@@ -91,7 +91,7 @@ export default function InvoicesPage() {
           </div>
           <button
             onClick={() => navigate(`${basePath}/sales/create_invoice`)}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer font-medium text-sm sm:text-base"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 text-blue-600 rounded-lg border border-blue-600 hover:bg-blue-100 transition-colors cursor-pointer font-medium text-sm sm:text-base"
           >
             <img src={add_icon} alt="" className="w-4 h-4" />
             Create Invoice

@@ -497,9 +497,9 @@ export default function EmployeeDashboardPage() {
         <DashboardLayout>
             <div className="space-y-4 sm:space-y-6">
                 {/* First Row - Stats */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
+                <div className="grid grid-cols-1 xl:grid-cols-12 gap-2 lg:gap-6">
                     {/* Left Column - Circular Graph Card */}
-                    <div className="lg:col-span-5 bg-white rounded-lg p-2 sm:p-3">
+                    <div className="lg:col-span-6 bg-white rounded-lg p-2 sm:p-3">
                         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 sm:gap-0">
                             {/* LEFT CONTENT */}
                             <div className="flex flex-col gap-3 p-4 sm:p-6 md:p-8 lg:p-12 order-2 sm:order-1">
@@ -530,9 +530,9 @@ export default function EmployeeDashboardPage() {
                     </div>
 
                     {/* Right Column - Info Cards */}
-                    <div className="lg:col-span-7 space-y-4 sm:space-y-6 md:space-y-8">
+                    <div className="lg:col-span-6 space-y-4 sm:space-y-6 md:space-y-8">
                         {/* First Row - 2 Cards */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 xl:gap-6">
                             {/* Total Employees Card */}
                             <div className="bg-white rounded-lg p-4 sm:p-5 md:p-6">
                                 <p className="text-gray-500 text-base sm:text-lg font-medium mb-12 sm:mb-16 md:mb-20">Total Employees</p>
@@ -547,7 +547,7 @@ export default function EmployeeDashboardPage() {
                         </div>
 
                         {/* Second Row - 3 Cards */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 lg:gap-8">
                             {/* Pending Leave Requests Card */}
                             <div className="bg-white rounded-lg p-4 sm:p-5 md:p-6">
                                 <p className="text-gray-500 text-base sm:text-lg font-medium mb-12 sm:mb-16 md:mb-20">Pending Leave Requests</p>
@@ -570,7 +570,7 @@ export default function EmployeeDashboardPage() {
                 </div>
 
                 {/* Second Row - Table and Action Buttons */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
+                <div className="grid grid-cols-1 xl:grid-cols-12 gap-2 lg:gap-6">
                     {/* Left Column - Employee Table (10/12) */}
                     <div className="lg:col-span-10 bg-white rounded-lg p-4 sm:p-5 md:p-6 overflow-x-auto">
                         {/* Filters Section */}

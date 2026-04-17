@@ -97,7 +97,7 @@ export default function HelpDashboard() {
         {/* Quick Stats - Real data from API */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {quickStats.map((stat, index) => (
-            <div key={index} className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
+            <div key={index} className="bg-white rounded-xl p-4">
               <div className="text-2xl mb-2">{stat.icon}</div>
               <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
               <div className="text-sm text-gray-500">{stat.label}</div>
@@ -124,7 +124,7 @@ export default function HelpDashboard() {
                   setSelectedModule(module.id);
                   navigate(`${basePath}/help/module/${module.id}`);
                 }}
-                className="bg-white rounded-xl p-4 border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all text-center group"
+                className="bg-white rounded-xl p-4 hover:border-blue-300 hover:shadow-md transition-all text-center group"
               >
                 <div className="text-3xl mb-2">{module.icon}</div>
                 <div className="text-sm font-medium text-gray-700 group-hover:text-blue-600">

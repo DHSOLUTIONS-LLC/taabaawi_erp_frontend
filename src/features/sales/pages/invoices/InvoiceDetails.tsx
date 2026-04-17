@@ -331,7 +331,7 @@ export default function InvoiceDetailPage() {
             </div>
 
             {/* Products Table */}
-            <div className="bg-white rounded-xl overflow-hidden">
+            <div className="bg-white rounded-xl overflow-hidden shadow-sm">
               <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100">
                 <h2 className="text-base font-semibold text-gray-900">
                   Products
@@ -444,7 +444,7 @@ export default function InvoiceDetailPage() {
             {invoice.invoice_type === "b2b" &&
               invoice.installments &&
               invoice.installments.length > 0 && (
-                <div className="bg-white rounded-xl overflow-hidden">
+                <div className="bg-white rounded-xl overflow-hidden shadow-sm">
                   <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100">
                     <h2 className="text-base font-semibold text-gray-900">
                       Installment Plan

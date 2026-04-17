@@ -355,7 +355,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Products Table Section */}
-                <div className="bg-white rounded-xl overflow-hidden">
+                <div className="bg-white rounded-xl overflow-hidden shadow-sm">
                     {/* Filters Row */}
                     <div className="md:p-6 p-2">
                         <div className="flex flex-wrap md:flex-nowrap items-center gap-4">

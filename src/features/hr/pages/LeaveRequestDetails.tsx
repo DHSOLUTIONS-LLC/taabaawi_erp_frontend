@@ -330,7 +330,7 @@ export default function LeaveRequestDetails() {
             <div className="min-h-screen bg-gray-50">
                 <div className="">
                     {/* First Row: Employee Name and Active Button */}
-                    <div className="px-2 sm:px-3 py-3 sm:py-6 mb-2 sm:mb-3">
+                    <div className="px-2 sm:px-3 py-2 xl:py-4 mb-2 sm:mb-3">
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                             <h1 className="text-xl sm:text-2xl font-bold text-gray-900 break-words">
                                 {employeeData.name}
@@ -345,7 +345,7 @@ export default function LeaveRequestDetails() {
                     </div>
 
                     {/* Personal Details Dropdown */}
-                    <div className="bg-white rounded-[20px] shadow-sm mb-2 md: mb-2 md:mb-6  overflow-hidden">
+                    <div className="bg-white rounded-[20px] mb-2 md: mb-2 md:mb-6  overflow-hidden">
                         <button
                             onClick={() => setPersonalDetailsOpen(!personalDetailsOpen)}
                             className="w-full p-6 flex items-center justify-between"
@@ -396,7 +396,7 @@ export default function LeaveRequestDetails() {
                     </div>
 
                     {/* Employment Details Dropdown */}
-                    <div className="bg-white rounded-[20px] shadow-sm  mb-2 md: mb-2 md:mb-6   overflow-hidden">
+                    <div className="bg-white rounded-[20px] mb-2 md: mb-2 md:mb-6   overflow-hidden">
                         <button
                             onClick={() => setEmploymentDetailsOpen(!employmentDetailsOpen)}
                             className="w-full p-6 flex items-center justify-between"
@@ -448,28 +448,28 @@ export default function LeaveRequestDetails() {
 
                     {/* Stats Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-8  mb-2 md:mb-6 ">
-                        <div className="bg-white rounded-xl shadow-sm p-6">
+                        <div className="bg-white rounded-xl p-6">
                             <div className="text-lg font-semibold text-gray-600  mb-2 md:mb-6 ">Total Working Days</div>
                             <div className="text-3xl font-semibold text-gray-900 mb-2">
                                 {employeeData.stats.totalWorkingDays}
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-xl shadow-sm p-6">
+                        <div className="bg-white rounded-xl p-6">
                             <div className="text-lg font-semibold text-gray-600  mb-2 md:mb-6 ">Present</div>
                             <div className="text-3xl font-semibold text-green-600 mb-2">
                                 {employeeData.stats.present}
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-xl shadow-sm p-6">
+                        <div className="bg-white rounded-xl p-6">
                             <div className="text-lg font-semibold text-gray-600  mb-2 md:mb-6 ">Late Arrivals</div>
                             <div className="text-3xl font-semibold text-yellow-600 mb-2">
                                 {employeeData.stats.lateArrivals}
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-xl shadow-sm p-6">
+                        <div className="bg-white rounded-xl p-6">
                             <div className="text-lg font-semibold text-gray-600  mb-2 md:mb-6 ">Absent</div>
                             <div className="text-3xl font-semibold text-red-600 mb-2">
                                 {employeeData.stats.absent}
@@ -478,7 +478,7 @@ export default function LeaveRequestDetails() {
                     </div>
 
                     {/* Last Sync Row */}
-                    <div className="bg-white rounded-full shadow-sm p-4  mb-2 md:mb-6 ">
+                    <div className="bg-white rounded-full p-4  mb-2 md:mb-6 ">
                         <div className="flex items-center justify-between">
                             <span className="text-md text-[#0088FF] font-semibold px-4">Last sync</span>
                             <span className="text-md font-medium text-[#0088FF] border rounded-full border-[#0088FF] py-2 px-4">

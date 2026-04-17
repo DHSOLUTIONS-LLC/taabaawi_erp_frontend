@@ -21,7 +21,7 @@ import file_icon from '../../../assets/icons/statement_icon.png';
 import account_rec from '../../../assets/icons/account_recieveable_.png';
 import account_payable from '../../../assets/icons/account_payable_.png';
 import bank_icon from '../../../assets/icons/bank_icon.png';
-import payment_icon from '../../../assets/icons/payment_icon.png';
+// import payment_icon from '../../../assets/icons/payment_icon.png';
 
 const num = (v: any) => parseFloat(v) || 0;
 

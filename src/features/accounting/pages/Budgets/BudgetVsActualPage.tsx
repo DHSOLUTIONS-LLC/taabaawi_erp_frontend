@@ -86,7 +86,7 @@ export default function BudgetVsActualPage() {
         </div>
 
         {/* Report Content */}
-        <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm overflow-x-auto">
+        <div className="bg-white rounded-xl p-4 sm:p-6  overflow-x-auto">
           <ReportHeader
             title={`Budget vs Actual: ${report.budget_name}`}
             subtitle={`Period: ${report.period}`}

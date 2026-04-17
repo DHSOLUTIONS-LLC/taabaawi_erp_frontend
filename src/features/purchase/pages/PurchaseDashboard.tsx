@@ -35,7 +35,7 @@ function extractList(raw: unknown): any[] {
 /** Normalize by_status: handles both array [{status,count}] and object {status: count} */
 function normalizeByStatus(raw: unknown): Array<{ label: string; count: number }> {
   if (!raw) return [];
-  
+
   // Handle array format
   if (Array.isArray(raw)) {
     return (raw as any[]).map((item) => ({
@@ -43,7 +43,7 @@ function normalizeByStatus(raw: unknown): Array<{ label: string; count: number }
       count: Number(item.count ?? 0),
     }));
   }
-  
+
   // Handle object format
   if (typeof raw === 'object') {
     return Object.entries(raw as Record<string, unknown>).map(([label, count]) => ({
@@ -51,7 +51,7 @@ function normalizeByStatus(raw: unknown): Array<{ label: string; count: number }
       count: Number(count),
     }));
   }
-  
+
   return [];
 }
 
@@ -125,253 +125,252 @@ export default function PurchaseDashboard() {
     isLoading: recentLoading,
   } = useGetPurchaseOrdersQuery({ per_page: 5, page: 1 });
 
-  const stats     = (statsData as any)?.data ?? (statsData as any);
+  const stats = (statsData as any)?.data ?? (statsData as any);
   const pendingPOs = extractList(pendingData);
-  const recentPOs  = extractList(recentData);
+  const recentPOs = extractList(recentData);
   const statusItems = normalizeByStatus(stats?.by_status);
 
   return (
-  <DashboardLayout>
-  <div className="space-y-4 sm:space-y-6 sm:p-0">
+    <DashboardLayout>
+      <div className="space-y-4 sm:space-y-6 sm:p-0">
 
-    {/* ── Header ── */}
-    <div className="flex flex-col sm:flex-row md:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
-      <div className="w-full sm:w-auto">
-        <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">Purchase Dashboard</h1>
-        <p className="text-xs sm:text-sm text-gray-500 mt-0.5">Overview of your purchasing activity</p>
-      </div>
-      <button
-        onClick={() => navigate(`${basePath}/purchase/orders/create`)}
-        className="w-full sm:w-auto flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
-      >
-        <img src={add_icon} alt="" className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-        Create PO
-      </button>
-    </div>
-
-    {/* ── Stat Cards ── */}
-    {statsLoading ? (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {[...Array(4)].map((_, i) => (
-          <div key={i} className="bg-white rounded-xl p-4 sm:p-6 animate-pulse">
-            <div className="h-3 sm:h-4 bg-gray-200 rounded w-20 sm:w-24 mb-2 sm:mb-3" />
-            <div className="h-6 sm:h-8 bg-gray-200 rounded w-12 sm:w-16" />
+        {/* ── Header ── */}
+        <div className="flex flex-col sm:flex-row md:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
+          <div className="w-full sm:w-auto">
+            <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">Purchase Dashboard</h1>
+            <p className="text-xs sm:text-sm text-gray-500 mt-0.5">Overview of your purchasing activity</p>
           </div>
-        ))}
-      </div>
-    ) : (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <StatCard
-          title="Total Orders"
-          value={Number(stats?.total_purchase_orders ?? stats?.total_orders ?? 0)}
-          sub="All time"
-          color="bg-blue-50"
-          icon={
-            <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-            </svg>
-          }
-        />
-        <StatCard
-          title="Total Value (KWD)"
-          value={`KWD ${num(stats?.total_purchase_value ?? stats?.total_value_kwd ?? 0).toFixed(3)}`}
-          sub="All purchase orders"
-          color="bg-green-50"
-          icon={
-            <svg className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          }
-        />
-        <StatCard
-          title="Pending Approval"
-          value={Number(stats?.pending_approval ?? pendingPOs.length)}
-          sub="Awaiting review"
-          color="bg-yellow-50"
-          icon={
-            <svg className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          }
-        />
-        <StatCard
-          title="This Month"
-          value={Number(stats?.this_month_orders ?? 0)}
-          sub={`KWD ${num(stats?.this_month_value ?? stats?.this_month_value_kwd ?? 0).toFixed(3)}`}
-          color="bg-purple-50"
-          icon={
-            <svg className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-          }
-        />
-      </div>
-    )}
+          <button
+            onClick={() => navigate(`${basePath}/purchase/orders/create`)}
+            className="w-full sm:w-auto flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
+          >
+            <img src={add_icon} alt="" className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            Create PO
+          </button>
+        </div>
 
-    {/* ── Status Breakdown ── */}
-    {statusItems.length > 0 && (
-      <div className="bg-white rounded-xl p-4 sm:p-6">
-        <h2 className="text-base font-semibold text-gray-900 mb-3 sm:mb-4">Orders by Status</h2>
-        <div className="flex flex-wrap gap-2 sm:gap-3">
-          {statusItems.map(({ label, count }) => (
-            <button
-              key={label}
-              onClick={() =>
-                navigate(`${basePath}/purchase/orders?status=${encodeURIComponent(label)}`)
+        {/* ── Stat Cards ── */}
+        {statsLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="bg-white rounded-xl p-4 sm:p-6 animate-pulse">
+                <div className="h-3 sm:h-4 bg-gray-200 rounded w-20 sm:w-24 mb-2 sm:mb-3" />
+                <div className="h-6 sm:h-8 bg-gray-200 rounded w-12 sm:w-16" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <StatCard
+              title="Total Orders"
+              value={Number(stats?.total_purchase_orders ?? stats?.total_orders ?? 0)}
+              sub="All time"
+              color="bg-blue-50"
+              icon={
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
               }
-              className={`px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium flex items-center gap-1.5 sm:gap-2 hover:opacity-80 transition-opacity ${
-                STATUS_COLORS[label] ?? 'bg-gray-100 text-gray-700'
-              }`}
+            />
+            <StatCard
+              title="Total Value (KWD)"
+              value={`KWD ${num(stats?.total_purchase_value ?? stats?.total_value_kwd ?? 0).toFixed(3)}`}
+              sub="All purchase orders"
+              color="bg-green-50"
+              icon={
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              }
+            />
+            <StatCard
+              title="Pending Approval"
+              value={Number(stats?.pending_approval ?? pendingPOs.length)}
+              sub="Awaiting review"
+              color="bg-yellow-50"
+              icon={
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              }
+            />
+            <StatCard
+              title="This Month"
+              value={Number(stats?.this_month_orders ?? 0)}
+              sub={`KWD ${num(stats?.this_month_value ?? stats?.this_month_value_kwd ?? 0).toFixed(3)}`}
+              color="bg-purple-50"
+              icon={
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              }
+            />
+          </div>
+        )}
+
+        {/* ── Status Breakdown ── */}
+        {statusItems.length > 0 && (
+          <div className="bg-white rounded-xl p-4 sm:p-6">
+            <h2 className="text-base font-semibold text-gray-900 mb-3 sm:mb-4">Orders by Status</h2>
+            <div className="flex flex-wrap gap-2 sm:gap-3">
+              {statusItems.map(({ label, count }) => (
+                <button
+                  key={label}
+                  onClick={() =>
+                    navigate(`${basePath}/purchase/orders?status=${encodeURIComponent(label)}`)
+                  }
+                  className={`px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium flex items-center gap-1.5 sm:gap-2 hover:opacity-80 transition-opacity ${STATUS_COLORS[label] ?? 'bg-gray-100 text-gray-700'
+                    }`}
+                >
+                  <span>{label}</span>
+                  <span className="font-bold">{count}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── Pending + Recent ── */}
+        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 sm:gap-6">
+          {/* Pending Approvals */}
+          <div className="bg-white rounded-xl p-4 sm:p-6">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <h2 className="text-base font-semibold text-gray-900">Pending Approvals</h2>
+              <button
+                onClick={() => navigate(`${basePath}/purchase/pending-approvals`)}
+                className="text-xs sm:text-sm text-blue-600 hover:underline"
+              >
+                View all
+              </button>
+            </div>
+            {pendingLoading ? (
+              <div className="flex justify-center py-6 sm:py-8">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-2"></div>
+                <p className="mt-2 text-gray-600">Loading pending approvals...</p>
+              </div>
+            ) : pendingPOs.length === 0 ? (
+              <div className="text-center py-6 sm:py-8">
+                <p className="text-gray-400 text-xs sm:text-sm">No pending approvals</p>
+              </div>
+            ) : (
+              <div className="space-y-2 sm:space-y-3">
+                {pendingPOs.slice(0, 5).map((po: any) => (
+                  <div
+                    key={po.id}
+                    className="flex flex-col sm:flex-row sm:items-center justify-between p-2.5 sm:p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors gap-2 sm:gap-0"
+                    onClick={() => navigate(`${basePath}/purchase/orders/${po.id}`)}
+                  >
+                    <div>
+                      <p className="text-xs sm:text-sm font-semibold text-blue-600 break-all">
+                        {String(po.po_number ?? '')}
+                      </p>
+                      <p className="text-xs text-gray-500 break-words">
+                        {String(po.supplier?.supplier_name ?? '')}
+                      </p>
+                    </div>
+                    <div className="text-left sm:text-right">
+                      <p className="text-xs sm:text-sm font-semibold text-gray-900">
+                        {String(po.currency ?? 'KWD')} {num(po.total_amount).toFixed(3)}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        {po.order_date
+                          ? new Date(po.order_date).toLocaleDateString()
+                          : ''}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Recent Orders */}
+          <div className="bg-white rounded-xl p-4 sm:p-6">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <h2 className="text-base font-semibold text-gray-900">Recent Orders</h2>
+              <button
+                onClick={() => navigate(`${basePath}/purchase/orders`)}
+                className="text-xs sm:text-sm text-blue-600 hover:underline"
+              >
+                View all
+              </button>
+            </div>
+            {recentLoading ? (
+              <div className="flex justify-center py-6 sm:py-8">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-2"></div>
+                <p className="mt-2 text-gray-600">Loading recent orders...</p>
+              </div>
+            ) : recentPOs.length === 0 ? (
+              <div className="text-center py-6 sm:py-8">
+                <p className="text-gray-400 text-xs sm:text-sm">No orders yet</p>
+              </div>
+            ) : (
+              <div className="space-y-2 sm:space-y-3">
+                {recentPOs.slice(0, 5).map((po: any) => (
+                  <div
+                    key={po.id}
+                    className="flex flex-col sm:flex-row sm:items-center justify-between p-2.5 sm:p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors gap-2 sm:gap-0"
+                    onClick={() => navigate(`${basePath}/purchase/orders/${po.id}`)}
+                  >
+                    <div>
+                      <p className="text-xs sm:text-sm font-semibold text-blue-600 break-all">
+                        {String(po.po_number ?? '')}
+                      </p>
+                      <p className="text-xs text-gray-500 break-words">
+                        {String(po.supplier?.supplier_name ?? '')}
+                      </p>
+                    </div>
+                    <div className="text-left sm:text-right">
+                      <div className="flex flex-wrap gap-1 sm:gap-2 mb-1 sm:mb-2">
+                        <span
+                          className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium ${STATUS_COLORS[po.status] ?? 'bg-gray-100 text-gray-700'}`}
+                        >
+                          {String(po.status ?? '')}
+                        </span>
+                        {po.payment_status && (
+                          <span
+                            className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium ${PAYMENT_COLORS[po.payment_status] ?? 'bg-gray-100 text-gray-700'}`}
+                          >
+                            {String(po.payment_status)}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-gray-400">
+                        {po.order_date
+                          ? new Date(po.order_date).toLocaleDateString()
+                          : ''}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* ── Quick Links ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          {[
+            { label: 'All Orders', path: `${basePath}/purchase/orders`, color: 'border-blue-200 hover:bg-blue-50' },
+            // { label: 'Pending   Approvals', path: `${basePath}/purchase/approvals`,  color: 'border-yellow-200 hover:bg-yellow-50' },
+            { label: 'Suppliers', path: `${basePath}/purchase/suppliers`, color: 'border-green-200 hover:bg-green-50' },
+            { label: 'Currencies', path: `${basePath}/purchase/currencies`, color: 'border-purple-200 hover:bg-purple-50' },
+          ].map((item) => (
+            <button
+              key={item.label}
+              onClick={() => navigate(item.path)}
+              className={`p-3 sm:p-4 border border-gray-300 rounded-md sm:rounded-xl text-xs sm:text-sm font-medium text-gray-700 text-left transition-colors ${item.color}`}
             >
-              <span>{label}</span>
-              <span className="font-bold">{count}</span>
+              {item.label} →
             </button>
           ))}
         </div>
+
       </div>
-    )}
-
-    {/* ── Pending + Recent ── */}
-    <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 sm:gap-6">
-      {/* Pending Approvals */}
-      <div className="bg-white rounded-xl p-4 sm:p-6">
-        <div className="flex items-center justify-between mb-3 sm:mb-4">
-          <h2 className="text-base font-semibold text-gray-900">Pending Approvals</h2>
-          <button
-            onClick={() => navigate(`${basePath}/purchase/pending-approvals`)}
-            className="text-xs sm:text-sm text-blue-600 hover:underline"
-          >
-            View all
-          </button>
-        </div>
-        {pendingLoading ? (
-          <div className="flex justify-center py-6 sm:py-8">
-               <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-2"></div>
-                <p className="mt-2 text-gray-600">Loading pending approvals...</p>
-          </div>
-        ) : pendingPOs.length === 0 ? (
-          <div className="text-center py-6 sm:py-8">
-            <p className="text-gray-400 text-xs sm:text-sm">No pending approvals</p>
-          </div>
-        ) : (
-          <div className="space-y-2 sm:space-y-3">
-            {pendingPOs.slice(0, 5).map((po: any) => (
-              <div
-                key={po.id}
-                className="flex flex-col sm:flex-row sm:items-center justify-between p-2.5 sm:p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors gap-2 sm:gap-0"
-                onClick={() => navigate(`${basePath}/purchase/orders/${po.id}`)}
-              >
-                <div>
-                  <p className="text-xs sm:text-sm font-semibold text-blue-600 break-all">
-                    {String(po.po_number ?? '')}
-                  </p>
-                  <p className="text-xs text-gray-500 break-words">
-                    {String(po.supplier?.supplier_name ?? '')}
-                  </p>
-                </div>
-                <div className="text-left sm:text-right">
-                  <p className="text-xs sm:text-sm font-semibold text-gray-900">
-                    {String(po.currency ?? 'KWD')} {num(po.total_amount).toFixed(3)}
-                  </p>
-                  <p className="text-xs text-gray-400">
-                    {po.order_date
-                      ? new Date(po.order_date).toLocaleDateString()
-                      : ''}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Recent Orders */}
-      <div className="bg-white rounded-xl p-4 sm:p-6">
-        <div className="flex items-center justify-between mb-3 sm:mb-4">
-          <h2 className="text-base font-semibold text-gray-900">Recent Orders</h2>
-          <button
-            onClick={() => navigate(`${basePath}/purchase/orders`)}
-            className="text-xs sm:text-sm text-blue-600 hover:underline"
-          >
-            View all
-          </button>
-        </div>
-        {recentLoading ? (
-          <div className="flex justify-center py-6 sm:py-8">
-           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-2"></div>
-            <p className="mt-2 text-gray-600">Loading recent orders...</p>
-          </div>
-        ) : recentPOs.length === 0 ? (
-          <div className="text-center py-6 sm:py-8">
-            <p className="text-gray-400 text-xs sm:text-sm">No orders yet</p>
-          </div>
-        ) : (
-          <div className="space-y-2 sm:space-y-3">
-            {recentPOs.slice(0, 5).map((po: any) => (
-              <div
-                key={po.id}
-                className="flex flex-col sm:flex-row sm:items-center justify-between p-2.5 sm:p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors gap-2 sm:gap-0"
-                onClick={() => navigate(`${basePath}/purchase/orders/${po.id}`)}
-              >
-                <div>
-                  <p className="text-xs sm:text-sm font-semibold text-blue-600 break-all">
-                    {String(po.po_number ?? '')}
-                  </p>
-                  <p className="text-xs text-gray-500 break-words">
-                    {String(po.supplier?.supplier_name ?? '')}
-                  </p>
-                </div>
-                <div className="text-left sm:text-right">
-                  <div className="flex flex-wrap gap-1 sm:gap-2 mb-1 sm:mb-2">
-                    <span
-                      className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium ${STATUS_COLORS[po.status] ?? 'bg-gray-100 text-gray-700'}`}
-                    >
-                      {String(po.status ?? '')}
-                    </span>
-                    {po.payment_status && (
-                      <span
-                        className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium ${PAYMENT_COLORS[po.payment_status] ?? 'bg-gray-100 text-gray-700'}`}
-                      >
-                        {String(po.payment_status)}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xs text-gray-400">
-                    {po.order_date
-                      ? new Date(po.order_date).toLocaleDateString()
-                      : ''}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-
-    {/* ── Quick Links ── */}
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-      {[
-        { label: 'All Orders',        path: `${basePath}/purchase/orders`,     color: 'border-blue-200 hover:bg-blue-50'   },
-        // { label: 'Pending   Approvals', path: `${basePath}/purchase/approvals`,  color: 'border-yellow-200 hover:bg-yellow-50' },
-        { label: 'Suppliers',         path: `${basePath}/purchase/suppliers`,  color: 'border-green-200 hover:bg-green-50'  },
-        { label: 'Currencies',        path: `${basePath}/purchase/currencies`, color: 'border-purple-200 hover:bg-purple-50' },
-      ].map((item) => (
-        <button
-          key={item.label}
-          onClick={() => navigate(item.path)}
-          className={`p-3 sm:p-4 border border-gray-300 rounded-md sm:rounded-xl text-xs sm:text-sm font-medium text-gray-700 text-left transition-colors ${item.color}`}
-        >
-          {item.label} →
-        </button>
-      ))}
-    </div>
-
-  </div>
-</DashboardLayout>
+    </DashboardLayout>
   );
 }

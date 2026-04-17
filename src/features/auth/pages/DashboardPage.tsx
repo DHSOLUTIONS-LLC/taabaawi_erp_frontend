@@ -151,7 +151,7 @@ export default function DashboardPage() {
       }));
   }, [channelData]);
 
-  console.log('channelPieData',channelPieData)
+  console.log('channelPieData', channelPieData)
 
   const totalRevenue = useMemo(() => {
     if (selectedTimeframe === "weekly")
@@ -524,9 +524,9 @@ export default function DashboardPage() {
             {lowStockLoading ? (
               <div className="h-40">
                 <div className="flex items-center justify-center h-full"></div>
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
-                </div>
-              
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+              </div>
+
             ) : (lowStockResponse?.data || []).length === 0 ? (
               <div className="flex flex-col items-center justify-center py-10 text-gray-400 text-center gap-2">
                 <svg className="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">

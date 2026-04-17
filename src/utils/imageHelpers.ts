@@ -57,14 +57,14 @@ export const getImageUrl = (imagePath: string | null | undefined): string => {
   if (!imagePath) {
     return 'https://images.unsplash.com/photo-1457089328109-e5d9bd499191?w=500&auto=format&fit=crop&q=60';
   }
-  
+
   // If it's already a full URL, return as is
   if (imagePath.startsWith('http')) {
     return imagePath;
   }
-  
+
   // Remove leading slash if present to avoid double slash
   const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
-  
+
   return `${API_BASE_URL}/storage/${cleanPath}`;
 };

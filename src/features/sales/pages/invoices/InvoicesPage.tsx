@@ -287,13 +287,13 @@ export default function InvoicesPage() {
                           <div className="text-sm text-gray-700">
                             {invoice.created_at
                               ? new Date(invoice.created_at).toLocaleDateString(
-                                  "en-GB",
-                                  {
-                                    day: "2-digit",
-                                    month: "short",
-                                    year: "numeric",
-                                  },
-                                )
+                                "en-GB",
+                                {
+                                  day: "2-digit",
+                                  month: "short",
+                                  year: "numeric",
+                                },
+                              )
                               : "—"}
                           </div>
                         </td>

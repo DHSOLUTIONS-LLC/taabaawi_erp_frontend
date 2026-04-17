@@ -125,20 +125,20 @@ export const SavedReportsTab = () => {
     await deleteReport(id);
   };
 
-  const handleExport = async (id: number, format: 'csv' | 'excel') => {
-    const base = import.meta.env.VITE_API_URL;
-    const token = localStorage.getItem('token');
-    const res = await fetch(`${base}/api/report-export/${id}/${format}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `report_${id}.${format === 'csv' ? 'csv' : 'xlsx'}`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
+  // const handleExport = async (id: number, format: 'csv' | 'excel') => {
+  //   const base = import.meta.env.VITE_API_URL;
+  //   const token = localStorage.getItem('token');
+  //   const res = await fetch(`${base}/api/report-export/${id}/${format}`, {
+  //     headers: { Authorization: `Bearer ${token}` },
+  //   });
+  //   const blob = await res.blob();
+  //   const url = URL.createObjectURL(blob);
+  //   const a = document.createElement('a');
+  //   a.href = url;
+  //   a.download = `report_${id}.${format === 'csv' ? 'csv' : 'xlsx'}`;
+  //   a.click();
+  //   URL.revokeObjectURL(url);
+  // };
 
   return (
     <div className="space-y-4">

@@ -4,9 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
 import { useAppSelector } from '../../../../app/hooks';
 import type { RootState } from '../../../../app/store';
-import { 
+import {
   useCreateBankAccountMutation,
-  useGetChartOfAccountsQuery 
+  useGetChartOfAccountsQuery
 } from '../../../../services/accountingApi';
 
 import arrow_back_icon from '../../../../assets/icons/arrow_back_icon.svg';
@@ -62,7 +62,7 @@ export default function CreateBankAccountPage() {
         ...formData,
         gl_account_id: formData.gl_account_id ? parseInt(formData.gl_account_id) : undefined,
       };
-      
+
       await createAccount(payload).unwrap();
       navigate(`${basePath}/accounting/bank-accounts`);
     } catch (err: any) {

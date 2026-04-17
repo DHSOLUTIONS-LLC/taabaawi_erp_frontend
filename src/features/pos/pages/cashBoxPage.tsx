@@ -562,8 +562,8 @@ export default function CashRegistersPage() {
                     {isLoading ? (
                       <tr>
                         <td colSpan={10} className="text-center py-8">
-                             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                             <p>Loading cashbox</p>
+                          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                          <p>Loading cashbox</p>
                         </td>
                       </tr>
                     ) : filteredRegisters.length === 0 ? (
@@ -618,8 +618,8 @@ export default function CashRegistersPage() {
                           <td className="px-6 py-4">
                             <span
                               className={`px-2 py-1 rounded-full text-xs ${register.status === "Open"
-                                  ? "bg-green-100 text-green-800"
-                                  : "bg-gray-100"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-gray-100"
                                 }`}
                             >
                               {register.status}
@@ -743,8 +743,8 @@ export default function CashRegistersPage() {
                             <td className="px-2 sm:px-4 py-2 whitespace-nowrap">
                               <span
                                 className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs ${movement.type === "Cash In"
-                                    ? "bg-green-100 text-green-800"
-                                    : "bg-red-100 text-red-800"
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-red-100 text-red-800"
                                   }`}
                               >
                                 {movement.type}

@@ -40,11 +40,11 @@ export default function TransferStockModal({ isOpen, onClose, product }: Transfe
     const branches = Array.isArray(branchesData) ? branchesData : [];
 
     // Get product stock by branch
-    const [getProductStock, { data: stockData, isLoading: stockLoading, error: stockError }] = 
+    const [getProductStock, { data: stockData, isLoading: stockLoading, error: stockError }] =
         inventoryApi.endpoints.getProductStock.useLazyQuery();
 
     // Use the stock transfer mutation
-    const [createStockTransfer, { isLoading: transferring }] = 
+    const [createStockTransfer, { isLoading: transferring }] =
         inventoryApi.endpoints.createStockTransfer.useMutation();
 
     // Fetch stock when modal opens and product changes
@@ -82,7 +82,7 @@ export default function TransferStockModal({ isOpen, onClose, product }: Transfe
     // Determine transfer type
     const getTransferType = () => {
         if (!fromBranchStock || !toBranchId) return 'Transfer';
-        
+
         const fromType = fromBranchStock.branch_type;
         const toType = branches.find((b: any) => b.id === toBranchId)?.branch_type;
 
@@ -107,75 +107,75 @@ export default function TransferStockModal({ isOpen, onClose, product }: Transfe
     };
 
     const handleConfirmTransfer = async () => {
-    // Validation
-    if (!fromBranchId) {
-        alert('Please select a source branch');
-        return;
-    }
-    if (!toBranchId) {
-        alert('Please select a destination branch');
-        return;
-    }
-    if (fromBranchId === toBranchId) {
-        alert('Source and destination branches must be different');
-        return;
-    }
-    if (finalQuantity <= 0) {
-        alert('Please enter a valid quantity');
-        return;
-    }
-    if (finalQuantity > maxAvailable) {
-        alert(`Only ${maxAvailable} units available in ${fromBranchStock?.branch_name}`);
-        return;
-    }
-
-    const fromBranchName = fromBranchStock?.branch_name;
-    const toBranchName = branches.find((b: any) => b.id === toBranchId)?.branch_name;
-
-    try {
-        const transferData = {
-            from_branch_id: fromBranchId,
-            to_branch_id: toBranchId,
-            transfer_type: getTransferType(),
-            notes: transferNotes || `Transfer ${finalQuantity} units from ${fromBranchName} to ${toBranchName}`,
-            items: [
-                {
-                    product_id: product.id,
-                    variant_id: null,
-                    quantity: finalQuantity,  // Changed from requested_quantity
-                    notes: `${product.name} - ${product.sku}`,
-                }
-            ],
-        };
-
-        console.log('📦 Creating stock transfer:', transferData);
-
-        const result = await createStockTransfer(transferData).unwrap();
-
-        console.log('Transfer completed:', result);
-
-        if (result.success) {
-            alert(`Successfully transferred ${finalQuantity} units from ${fromBranchName} to ${toBranchName}`);
-            onClose();
-            // Refresh stock data
-            getProductStock(product.id);
+        // Validation
+        if (!fromBranchId) {
+            alert('Please select a source branch');
+            return;
         }
-    } catch (error: any) {
-        console.error('Transfer failed:', error);
-        console.error('Error details:', {
-            status: error?.status,
-            message: error?.data?.message,
-            errors: error?.data?.errors,
-        });
-        
-        // Show detailed error message
-        const errorMessage = error?.data?.message || 
-                           error?.data?.errors?.[Object.keys(error?.data?.errors || {})[0]]?.[0] ||
-                           'Unknown error occurred';
-        
-        alert(`Transfer failed: ${errorMessage}`);
-    }
-};
+        if (!toBranchId) {
+            alert('Please select a destination branch');
+            return;
+        }
+        if (fromBranchId === toBranchId) {
+            alert('Source and destination branches must be different');
+            return;
+        }
+        if (finalQuantity <= 0) {
+            alert('Please enter a valid quantity');
+            return;
+        }
+        if (finalQuantity > maxAvailable) {
+            alert(`Only ${maxAvailable} units available in ${fromBranchStock?.branch_name}`);
+            return;
+        }
+
+        const fromBranchName = fromBranchStock?.branch_name;
+        const toBranchName = branches.find((b: any) => b.id === toBranchId)?.branch_name;
+
+        try {
+            const transferData = {
+                from_branch_id: fromBranchId,
+                to_branch_id: toBranchId,
+                transfer_type: getTransferType(),
+                notes: transferNotes || `Transfer ${finalQuantity} units from ${fromBranchName} to ${toBranchName}`,
+                items: [
+                    {
+                        product_id: product.id,
+                        variant_id: null,
+                        quantity: finalQuantity,  // Changed from requested_quantity
+                        notes: `${product.name} - ${product.sku}`,
+                    }
+                ],
+            };
+
+            console.log('📦 Creating stock transfer:', transferData);
+
+            const result = await createStockTransfer(transferData).unwrap();
+
+            console.log('Transfer completed:', result);
+
+            if (result.success) {
+                alert(`Successfully transferred ${finalQuantity} units from ${fromBranchName} to ${toBranchName}`);
+                onClose();
+                // Refresh stock data
+                getProductStock(product.id);
+            }
+        } catch (error: any) {
+            console.error('Transfer failed:', error);
+            console.error('Error details:', {
+                status: error?.status,
+                message: error?.data?.message,
+                errors: error?.data?.errors,
+            });
+
+            // Show detailed error message
+            const errorMessage = error?.data?.message ||
+                error?.data?.errors?.[Object.keys(error?.data?.errors || {})[0]]?.[0] ||
+                'Unknown error occurred';
+
+            alert(`Transfer failed: ${errorMessage}`);
+        }
+    };
 
     return (
         <>
@@ -285,12 +285,11 @@ export default function TransferStockModal({ isOpen, onClose, product }: Transfe
                                         </thead>
                                         <tbody className="bg-white divide-y divide-gray-200">
                                             {branchStock.map((branch) => (
-                                                <tr 
-                                                    key={branch.branch_id} 
-                                                    className={`hover:bg-gray-50 ${
-                                                        branch.branch_id === fromBranchId ? 'bg-blue-50' : 
-                                                        branch.branch_id === toBranchId ? 'bg-green-50' : ''
-                                                    }`}
+                                                <tr
+                                                    key={branch.branch_id}
+                                                    className={`hover:bg-gray-50 ${branch.branch_id === fromBranchId ? 'bg-blue-50' :
+                                                            branch.branch_id === toBranchId ? 'bg-green-50' : ''
+                                                        }`}
                                                 >
                                                     <td className="px-6 py-4 whitespace-nowrap">
                                                         <div className="text-sm font-medium text-gray-900">
@@ -419,7 +418,7 @@ export default function TransferStockModal({ isOpen, onClose, product }: Transfe
                                             onChange={(e) => handleQuantityChange(e.target.value)}
                                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white text-gray-900 font-medium cursor-pointer"
                                         >
-                                          
+
                                         </input>
                                         <div className="absolute right-3 top-11 pointer-events-none">
                                             <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />

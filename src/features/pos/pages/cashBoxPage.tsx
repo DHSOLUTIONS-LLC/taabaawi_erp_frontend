@@ -66,7 +66,7 @@ export default function CashRegistersPage() {
     },
   );
 
-  console.log('registerDetailsResponse', registerDetailsResponse)
+  console.log("registerDetailsResponse", registerDetailsResponse);
 
   const registers = registersResponse?.data?.data || [];
   const pagination = registersResponse?.data;
@@ -187,7 +187,7 @@ export default function CashRegistersPage() {
         "Closed At",
         "Opening Balance",
         "Closing Balance",
-        "Expected Balance",
+        // "Expected Balance",
         "Difference",
         "Status",
         "Total Sales",
@@ -247,10 +247,14 @@ export default function CashRegistersPage() {
           register.branch?.branch_name || "-",
           register.user?.name || "-",
           new Date(register.opened_at).toLocaleString(),
-          register.closed_at ? new Date(register.closed_at).toLocaleString() : "-",
+          register.closed_at
+            ? new Date(register.closed_at).toLocaleString()
+            : "-",
           formatCurrency(register.opening_balance),
-          register.closing_balance ? formatCurrency(register.closing_balance) : "-",
-          register.expected_balance ? formatCurrency(register.expected_balance) : "-",
+          register.closing_balance
+            ? formatCurrency(register.closing_balance)
+            : "-",
+          // register.expected_balance ? formatCurrency(register.expected_balance) : "-",
           register.difference || "0",
           register.status || "-",
           String(register.sales?.length || 0),
@@ -305,7 +309,6 @@ export default function CashRegistersPage() {
     return `KWD ${numValue.toFixed(3)}`;
   };
 
-
   // Export functions remain the same but use actual data
   const handleExportToExcel = () => {
     try {
@@ -318,7 +321,7 @@ export default function CashRegistersPage() {
           : "-",
         "Opening Balance": register.opening_balance,
         "Closing Balance": register.closing_balance || "-",
-        "Expected Balance": register.expected_balance || "-",
+        // "Expected Balance": register.expected_balance || "-",
         Difference: register.difference || "0",
         Status: register.status,
         "Total Sales": register.sales?.length || 0,
@@ -544,9 +547,9 @@ export default function CashRegistersPage() {
                       <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">
                         Closing
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">
+                      {/* <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">
                         Expected
-                      </th>
+                      </th> */}
                       <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">
                         Difference
                       </th>
@@ -595,11 +598,11 @@ export default function CashRegistersPage() {
                               ? `KD ${register.closing_balance}`
                               : "-"}
                           </td>
-                          <td className="px-6 py-4">
+                          {/* <td className="px-6 py-4">
                             {register.expected_balance
                               ? `KD ${register.expected_balance}`
                               : "-"}
-                          </td>
+                          </td> */}
                           <td className="px-6 py-4">
                             <span
                               className={
@@ -617,10 +620,11 @@ export default function CashRegistersPage() {
                           </td>
                           <td className="px-6 py-4">
                             <span
-                              className={`px-2 py-1 rounded-full text-xs ${register.status === "Open"
-                                ? "bg-green-100 text-green-800"
-                                : "bg-gray-100"
-                                }`}
+                              className={`px-2 py-1 rounded-full text-xs ${
+                                register.status === "Open"
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-gray-100"
+                              }`}
                             >
                               {register.status}
                             </span>
@@ -701,21 +705,25 @@ export default function CashRegistersPage() {
 
             <div className="p-4 sm:p-6">
               {/* Summary Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
                 <div className="bg-blue-50 p-3 sm:p-4 rounded-lg">
-                  <p className="text-xs sm:text-sm text-blue-600">Opening Balance</p>
+                  <p className="text-xs sm:text-sm text-blue-600">
+                    Opening Balance
+                  </p>
                   <p className="text-xl sm:text-2xl font-bold break-words">
                     KD {selectedRegister.opening_balance}
                   </p>
                 </div>
-                <div className="bg-green-50 p-3 sm:p-4 rounded-lg">
+                {/* <div className="bg-green-50 p-3 sm:p-4 rounded-lg">
                   <p className="text-xs sm:text-sm text-green-600">Expected Balance</p>
                   <p className="text-xl sm:text-2xl font-bold break-words">
                     KD {selectedRegister.expected_balance || "0.000"}
                   </p>
-                </div>
+                </div> */}
                 <div className="bg-purple-50 p-3 sm:p-4 rounded-lg">
-                  <p className="text-xs sm:text-sm text-purple-600">Closing Balance</p>
+                  <p className="text-xs sm:text-sm text-purple-600">
+                    Closing Balance
+                  </p>
                   <p className="text-xl sm:text-2xl font-bold break-words">
                     KD {selectedRegister.closing_balance || "0.000"}
                   </p>
@@ -723,17 +731,29 @@ export default function CashRegistersPage() {
               </div>
 
               {/* Cash Movements */}
-              <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Cash Movements</h3>
+              <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">
+                Cash Movements
+              </h3>
               <div className="overflow-x-auto mb-4 sm:mb-6">
                 <div className="inline-block min-w-full align-middle">
                   <table className="min-w-full">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm">Type</th>
-                        <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm">Amount</th>
-                        <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm">Reason</th>
-                        <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm">Time</th>
-                        <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm">Recorded By</th>
+                        <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm">
+                          Type
+                        </th>
+                        <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm">
+                          Amount
+                        </th>
+                        <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm">
+                          Reason
+                        </th>
+                        <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm">
+                          Time
+                        </th>
+                        <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm">
+                          Recorded By
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
@@ -742,10 +762,11 @@ export default function CashRegistersPage() {
                           <tr key={movement.id}>
                             <td className="px-2 sm:px-4 py-2 whitespace-nowrap">
                               <span
-                                className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs ${movement.type === "Cash In"
-                                  ? "bg-green-100 text-green-800"
-                                  : "bg-red-100 text-red-800"
-                                  }`}
+                                className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs ${
+                                  movement.type === "Cash In"
+                                    ? "bg-green-100 text-green-800"
+                                    : "bg-red-100 text-red-800"
+                                }`}
                               >
                                 {movement.type}
                               </span>
@@ -757,7 +778,9 @@ export default function CashRegistersPage() {
                               {movement.reason}
                             </td>
                             <td className="px-2 sm:px-4 py-2 text-xs sm:text-sm whitespace-nowrap">
-                              {new Date(movement.movement_date).toLocaleString()}
+                              {new Date(
+                                movement.movement_date,
+                              ).toLocaleString()}
                             </td>
                             <td className="px-2 sm:px-4 py-2 text-xs sm:text-sm whitespace-nowrap">
                               {movement.recorded_by?.name}
@@ -766,7 +789,10 @@ export default function CashRegistersPage() {
                         ))
                       ) : (
                         <tr>
-                          <td colSpan={5} className="text-center py-3 sm:py-4 text-xs sm:text-sm">
+                          <td
+                            colSpan={5}
+                            className="text-center py-3 sm:py-4 text-xs sm:text-sm"
+                          >
                             No cash movements
                           </td>
                         </tr>
@@ -777,24 +803,36 @@ export default function CashRegistersPage() {
               </div>
 
               {/* Sales from this register */}
-              <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Sales</h3>
+              <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">
+                Sales
+              </h3>
               <div className="overflow-x-auto">
                 <div className="inline-block min-w-full align-middle">
                   <table className="min-w-full">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm">Invoice</th>
-                        <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm">Time</th>
+                        <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm">
+                          Invoice
+                        </th>
+                        <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm">
+                          Time
+                        </th>
                         {/* <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm">Items</th> */}
-                        <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm">Total</th>
-                        <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm">Payment</th>
+                        <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm">
+                          Total
+                        </th>
+                        <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm">
+                          Payment
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
                       {selectedRegister.sales?.length > 0 ? (
                         selectedRegister.sales.map((sale: any) => (
                           <tr key={sale.id}>
-                            <td className="px-2 sm:px-4 py-2 text-xs sm:text-sm whitespace-nowrap">{sale.sale_number}</td>
+                            <td className="px-2 sm:px-4 py-2 text-xs sm:text-sm whitespace-nowrap">
+                              {sale.sale_number}
+                            </td>
                             <td className="px-2 sm:px-4 py-2 text-xs sm:text-sm whitespace-nowrap">
                               {new Date(sale.created_at).toLocaleString()}
                             </td>
@@ -804,12 +842,17 @@ export default function CashRegistersPage() {
                             <td className="px-2 sm:px-4 py-2 font-medium text-xs sm:text-sm whitespace-nowrap">
                               KD {sale.total_amount}
                             </td>
-                            <td className="px-2 sm:px-4 py-2 text-xs sm:text-sm whitespace-nowrap">{sale.payment_method}</td>
+                            <td className="px-2 sm:px-4 py-2 text-xs sm:text-sm whitespace-nowrap">
+                              {sale.payment_method}
+                            </td>
                           </tr>
                         ))
                       ) : (
                         <tr>
-                          <td colSpan={5} className="text-center py-3 sm:py-4 text-xs sm:text-sm">
+                          <td
+                            colSpan={5}
+                            className="text-center py-3 sm:py-4 text-xs sm:text-sm"
+                          >
                             No sales
                           </td>
                         </tr>

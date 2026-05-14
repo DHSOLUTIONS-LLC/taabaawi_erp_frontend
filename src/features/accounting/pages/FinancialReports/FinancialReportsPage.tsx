@@ -1209,13 +1209,13 @@ export default function FinancialReportsPage() {
               )}
             </div>
 
-            <button
+            {/* <button
               onClick={handlePrint}
               className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
               title="Print"
             >
               <img src={print_icon} alt="" className="w-4 h-4 sm:w-5 sm:h-5" />
-            </button>
+            </button> */}
           </div>
         </div>
 

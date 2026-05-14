@@ -1,21 +1,23 @@
-import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { X, Edit2 } from 'lucide-react';
-import { CustomerForm } from './CustomerForm';
-import { CustomerStatusBadge, TierBadge } from './CustomerStatusBadge';
-import { closeCustomerModal, openCustomerModal } from '../../../../features/crm/crmSlice';
-import { useGetCustomerByIdQuery } from '../../../../services/crmApi';
-import type { RootState } from '../../../../app/store';
+import React from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { X, Edit2 } from "lucide-react";
+import { CustomerForm } from "./CustomerForm";
+import { CustomerStatusBadge, TierBadge } from "./CustomerStatusBadge";
+import {
+  closeCustomerModal,
+  openCustomerModal,
+} from "../../../../features/crm/crmSlice";
+import { useGetCustomerByIdQuery } from "../../../../services/crmApi";
+import type { RootState } from "../../../../app/store";
 
 export const CustomerModal = () => {
   const dispatch = useDispatch();
-  const { isCustomerModalOpen, customerModalMode, selectedCustomer } = useSelector(
-    (s: RootState) => s.crm
-  );
+  const { isCustomerModalOpen, customerModalMode, selectedCustomer } =
+    useSelector((s: RootState) => s.crm);
 
   if (!isCustomerModalOpen) return null;
 
-  if (customerModalMode === 'create' || customerModalMode === 'edit') {
+  if (customerModalMode === "create" || customerModalMode === "edit") {
     return (
       <CustomerForm
         mode={customerModalMode}
@@ -31,12 +33,20 @@ export const CustomerModal = () => {
 const CustomerViewModal = () => {
   const dispatch = useDispatch();
   const { selectedCustomer: customer } = useSelector((s: RootState) => s.crm);
-  const { data } = useGetCustomerByIdQuery(customer?.id!, { skip: !customer?.id });
+  const { data } = useGetCustomerByIdQuery(customer?.id!, {
+    skip: !customer?.id,
+  });
   const c = data?.data ?? customer;
 
   if (!c) return null;
 
-  const Field = ({ label, value }: { label: string; value?: string | number | null }) =>
+  const Field = ({
+    label,
+    value,
+  }: {
+    label: string;
+    value?: string | number | null;
+  }) =>
     value ? (
       <div>
         <p className="text-xs text-gray-400">{label}</p>
@@ -50,18 +60,25 @@ const CustomerViewModal = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-100">
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="font-semibold text-gray-800 text-sm sm:text-base">{c.full_name}</h2>
+            <h2 className="font-semibold text-gray-800 text-sm sm:text-base">
+              {c.full_name}
+            </h2>
             <CustomerStatusBadge status={c.status} />
             <TierBadge tier={c.loyalty_tier} />
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => dispatch(openCustomerModal({ mode: 'edit', customer: c }))}
+              onClick={() =>
+                dispatch(openCustomerModal({ mode: "edit", customer: c }))
+              }
               className="flex items-center gap-1 px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50"
             >
               <Edit2 className="h-3.5 w-3.5" /> Edit
             </button>
-            <button onClick={() => dispatch(closeCustomerModal())} className="p-1 hover:bg-gray-100 rounded">
+            <button
+              onClick={() => dispatch(closeCustomerModal())}
+              className="p-1 hover:bg-gray-100 rounded"
+            >
               <X className="h-4 w-4" />
             </button>
           </div>
@@ -72,12 +89,20 @@ const CustomerViewModal = () => {
           {/* Stats row */}
           <div className="grid grid-cols-3 gap-2 sm:gap-3 text-center">
             {[
-              { label: 'Orders', value: c.total_orders },
-              { label: 'Total Spent', value: `$${c.total_spent?.toLocaleString() ?? 0}` },
-              { label: 'Avg Order', value: `$${c.average_order_value?.toLocaleString() ?? 0}` },
+              { label: "Orders", value: c.total_orders },
+              {
+                label: "Total Spent",
+                value: `$${c.total_spent?.toLocaleString() ?? 0}`,
+              },
+              {
+                label: "Avg Order",
+                value: `$${c.average_order_value?.toLocaleString() ?? 0}`,
+              },
             ].map(({ label, value }) => (
               <div key={label} className="bg-gray-50 rounded-lg p-2 sm:p-3">
-                <p className="text-sm sm:text-base font-semibold text-gray-800">{value}</p>
+                <p className="text-sm sm:text-base font-semibold text-gray-800">
+                  {value}
+                </p>
                 <p className="text-xs text-gray-400">{label}</p>
               </div>
             ))}
@@ -125,8 +150,14 @@ const CustomerViewModal = () => {
           {(c.preferred_contact_method || c.preferred_language) && (
             <Section title="Preferences">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                <Field label="Preferred Contact" value={c.preferred_contact_method} />
-                <Field label="Preferred Language" value={c.preferred_language} />
+                <Field
+                  label="Preferred Contact"
+                  value={c.preferred_contact_method}
+                />
+                <Field
+                  label="Preferred Language"
+                  value={c.preferred_language}
+                />
               </div>
             </Section>
           )}
@@ -141,8 +172,14 @@ const CustomerViewModal = () => {
           {/* Loyalty */}
           <Section title="Loyalty">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
-              <Field label="Points" value={c.loyalty_points?.toLocaleString()} />
-              <Field label="Lifetime Points" value={c.lifetime_points?.toLocaleString()} />
+              <Field
+                label="Points"
+                value={c.loyalty_points?.toLocaleString()}
+              />
+              <Field
+                label="Lifetime Points"
+                value={c.lifetime_points?.toLocaleString()}
+              />
               <Field label="Tier" value={c.loyalty_tier} />
               <Field label="Enrolled" value={c.loyalty_enrolled_date} />
             </div>
@@ -151,9 +188,19 @@ const CustomerViewModal = () => {
           {/* Meta */}
           <Section title="Account Info">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
-              <Field label="Created At" value={new Date(c.created_at).toLocaleDateString()} />
-              <Field label="Last Order" value={c.last_order_date ? new Date(c.last_order_date).toLocaleDateString() : undefined} />
-              <Field label="Verified" value={c.is_verified ? 'Yes' : 'No'} />
+              <Field
+                label="Created At"
+                value={new Date(c.created_at).toLocaleDateString()}
+              />
+              <Field
+                label="Last Order"
+                value={
+                  c.last_order_date
+                    ? new Date(c.last_order_date).toLocaleDateString()
+                    : undefined
+                }
+              />
+              <Field label="Verified" value={c.is_verified ? "Yes" : "No"} />
             </div>
           </Section>
         </div>
@@ -162,9 +209,17 @@ const CustomerViewModal = () => {
   );
 };
 
-const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
+const Section = ({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) => (
   <div>
-    <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">{title}</h3>
+    <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+      {title}
+    </h3>
     {children}
   </div>
 );

@@ -1,15 +1,15 @@
 // src/features/purchase/pages/PurchaseDashboard.tsx
-import { useNavigate } from 'react-router-dom';
-import { useAppSelector } from '../../../app/hooks';
-import type { RootState } from '../../../app/store';
-import DashboardLayout from '../../../layouts/DashboardLayout';
+import { useNavigate } from "react-router-dom";
+import { useAppSelector } from "../../../app/hooks";
+import type { RootState } from "../../../app/store";
+import DashboardLayout from "../../../layouts/DashboardLayout";
 import {
   useGetPurchaseOrderStatisticsQuery,
   useGetPurchaseOrdersQuery,
   useGetPendingApprovalsQuery,
-} from '../../../services/purchaseApi';
+} from "../../../services/purchaseApi";
 
-import add_icon from '../../../assets/icons/add.svg';
+import add_icon from "../../../assets/icons/add.svg";
 
 // ── Helpers ──────────────────────────────────────────────────────
 const num = (v: unknown) =>
@@ -26,50 +26,54 @@ function extractList(raw: unknown): any[] {
   // data itself is array
   if (Array.isArray(r)) return r;
   // If the response is wrapped in a data property
-  if (r?.data && typeof r.data === 'object' && !Array.isArray(r.data)) {
+  if (r?.data && typeof r.data === "object" && !Array.isArray(r.data)) {
     return [];
   }
   return [];
 }
 
 /** Normalize by_status: handles both array [{status,count}] and object {status: count} */
-function normalizeByStatus(raw: unknown): Array<{ label: string; count: number }> {
+function normalizeByStatus(
+  raw: unknown,
+): Array<{ label: string; count: number }> {
   if (!raw) return [];
 
   // Handle array format
   if (Array.isArray(raw)) {
     return (raw as any[]).map((item) => ({
-      label: String(item.status ?? item.order_status ?? ''),
+      label: String(item.status ?? item.order_status ?? ""),
       count: Number(item.count ?? 0),
     }));
   }
 
   // Handle object format
-  if (typeof raw === 'object') {
-    return Object.entries(raw as Record<string, unknown>).map(([label, count]) => ({
-      label,
-      count: Number(count),
-    }));
+  if (typeof raw === "object") {
+    return Object.entries(raw as Record<string, unknown>).map(
+      ([label, count]) => ({
+        label,
+        count: Number(count),
+      }),
+    );
   }
 
   return [];
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  Draft: 'bg-gray-100 text-gray-700',
-  'Pending Approval': 'bg-yellow-100 text-yellow-700',
-  Approved: 'bg-blue-100 text-blue-700',
-  Ordered: 'bg-purple-100 text-purple-700',
-  'Partially Received': 'bg-indigo-100 text-indigo-700',
-  Received: 'bg-green-100 text-green-700',
-  Cancelled: 'bg-red-100 text-red-700',
-  Returned: 'bg-orange-100 text-orange-700',
+  Draft: "bg-gray-100 text-gray-700",
+  "Pending Approval": "bg-yellow-100 text-yellow-700",
+  Approved: "bg-blue-100 text-blue-700",
+  Ordered: "bg-purple-100 text-purple-700",
+  "Partially Received": "bg-indigo-100 text-indigo-700",
+  Received: "bg-green-100 text-green-700",
+  Cancelled: "bg-red-100 text-red-700",
+  Returned: "bg-orange-100 text-orange-700",
 };
 
 const PAYMENT_COLORS: Record<string, string> = {
-  Unpaid: 'bg-red-100 text-red-700',
-  Partial: 'bg-yellow-100 text-yellow-700',
-  Paid: 'bg-green-100 text-green-700',
+  Unpaid: "bg-red-100 text-red-700",
+  Partial: "bg-yellow-100 text-yellow-700",
+  Paid: "bg-green-100 text-green-700",
 };
 
 // ── Sub-components ────────────────────────────────────────────────
@@ -98,8 +102,19 @@ const StatCard = ({
 
 const Spinner = () => (
   <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+    <circle
+      className="opacity-25"
+      cx="12"
+      cy="12"
+      r="10"
+      stroke="currentColor"
+      strokeWidth="4"
+    />
+    <path
+      className="opacity-75"
+      fill="currentColor"
+      d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+    />
   </svg>
 );
 
@@ -107,25 +122,20 @@ const Spinner = () => (
 export default function PurchaseDashboard() {
   const navigate = useNavigate();
   const { user } = useAppSelector((state: RootState) => state.auth);
-  const isSuperAdmin = user?.role?.role_name === 'Super Admin';
-  const basePath = isSuperAdmin ? '/admin' : '';
+  const isSuperAdmin = user?.role?.role_name === "Super Admin";
+  const basePath = isSuperAdmin ? "/admin" : "";
 
-  const {
-    data: statsData,
-    isLoading: statsLoading,
-  } = useGetPurchaseOrderStatisticsQuery({});
+  const { data: statsData, isLoading: statsLoading } =
+    useGetPurchaseOrderStatisticsQuery({});
 
-  const {
-    data: pendingData,
-    isLoading: pendingLoading,
-  } = useGetPendingApprovalsQuery({ per_page: 5 });
+  const { data: pendingData, isLoading: pendingLoading } =
+    useGetPendingApprovalsQuery({ per_page: 5 });
 
-  const {
-    data: recentData,
-    isLoading: recentLoading,
-  } = useGetPurchaseOrdersQuery({ per_page: 5, page: 1 });
+  const { data: recentData, isLoading: recentLoading } =
+    useGetPurchaseOrdersQuery({ per_page: 5, page: 1 });
 
   const stats = (statsData as any)?.data ?? (statsData as any);
+  console.log("stats:", stats);
   const pendingPOs = extractList(pendingData);
   const recentPOs = extractList(recentData);
   const statusItems = normalizeByStatus(stats?.by_status);
@@ -133,16 +143,19 @@ export default function PurchaseDashboard() {
   return (
     <DashboardLayout>
       <div className="space-y-4 sm:space-y-6 sm:p-0">
-
         {/* ── Header ── */}
         <div className="flex flex-col sm:flex-row md:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
           <div className="w-full sm:w-auto">
-            <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">Purchase Dashboard</h1>
-            <p className="text-xs sm:text-sm text-gray-500 mt-0.5">Overview of your purchasing activity</p>
+            <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">
+              Purchase Dashboard
+            </h1>
+            <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
+              Overview of your purchasing activity
+            </p>
           </div>
           <button
             onClick={() => navigate(`${basePath}/purchase/orders/create`)}
-            className="w-full sm:w-auto flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
+            className="w-full sm:w-auto flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 text-black hover:text-white cursor-pointer rounded-lg border-1 border-blue-700 hover:bg-blue-700 transition-colors text-sm sm:text-base"
           >
             <img src={add_icon} alt="" className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             Create PO
@@ -153,7 +166,10 @@ export default function PurchaseDashboard() {
         {statsLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="bg-white rounded-xl p-4 sm:p-6 animate-pulse">
+              <div
+                key={i}
+                className="bg-white rounded-xl p-4 sm:p-6 animate-pulse"
+              >
                 <div className="h-3 sm:h-4 bg-gray-200 rounded w-20 sm:w-24 mb-2 sm:mb-3" />
                 <div className="h-6 sm:h-8 bg-gray-200 rounded w-12 sm:w-16" />
               </div>
@@ -163,13 +179,24 @@ export default function PurchaseDashboard() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <StatCard
               title="Total Orders"
-              value={Number(stats?.total_purchase_orders ?? stats?.total_orders ?? 0)}
+              value={Number(
+                stats?.total_purchase_orders ?? stats?.total_orders ?? 0,
+              )}
               sub="All time"
               color="bg-blue-50"
               icon={
-                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                <svg
+                  className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                  />
                 </svg>
               }
             />
@@ -179,9 +206,18 @@ export default function PurchaseDashboard() {
               sub="All purchase orders"
               color="bg-green-50"
               icon={
-                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg
+                  className="w-4 h-4 sm:w-5 sm:h-5 text-green-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
               }
             />
@@ -191,9 +227,18 @@ export default function PurchaseDashboard() {
               sub="Awaiting review"
               color="bg-yellow-50"
               icon={
-                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg
+                  className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
               }
             />
@@ -203,9 +248,18 @@ export default function PurchaseDashboard() {
               sub={`KWD ${num(stats?.this_month_value ?? stats?.this_month_value_kwd ?? 0).toFixed(3)}`}
               color="bg-purple-50"
               icon={
-                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                <svg
+                  className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  />
                 </svg>
               }
             />
@@ -215,16 +269,21 @@ export default function PurchaseDashboard() {
         {/* ── Status Breakdown ── */}
         {statusItems.length > 0 && (
           <div className="bg-white rounded-xl p-4 sm:p-6">
-            <h2 className="text-base font-semibold text-gray-900 mb-3 sm:mb-4">Orders by Status</h2>
+            <h2 className="text-base font-semibold text-gray-900 mb-3 sm:mb-4">
+              Orders by Status
+            </h2>
             <div className="flex flex-wrap gap-2 sm:gap-3">
               {statusItems.map(({ label, count }) => (
                 <button
                   key={label}
                   onClick={() =>
-                    navigate(`${basePath}/purchase/orders?status=${encodeURIComponent(label)}`)
+                    navigate(
+                      `${basePath}/purchase/orders?status=${encodeURIComponent(label)}`,
+                    )
                   }
-                  className={`px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium flex items-center gap-1.5 sm:gap-2 hover:opacity-80 transition-opacity ${STATUS_COLORS[label] ?? 'bg-gray-100 text-gray-700'
-                    }`}
+                  className={`px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium flex items-center gap-1.5 sm:gap-2 hover:opacity-80 transition-opacity ${
+                    STATUS_COLORS[label] ?? "bg-gray-100 text-gray-700"
+                  }`}
                 >
                   <span>{label}</span>
                   <span className="font-bold">{count}</span>
@@ -239,9 +298,13 @@ export default function PurchaseDashboard() {
           {/* Pending Approvals */}
           <div className="bg-white rounded-xl p-4 sm:p-6">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <h2 className="text-base font-semibold text-gray-900">Pending Approvals</h2>
+              <h2 className="text-base font-semibold text-gray-900">
+                Pending Approvals
+              </h2>
               <button
-                onClick={() => navigate(`${basePath}/purchase/pending-approvals`)}
+                onClick={() =>
+                  navigate(`${basePath}/purchase/pending-approvals`)
+                }
                 className="text-xs sm:text-sm text-blue-600 hover:underline"
               >
                 View all
@@ -250,11 +313,15 @@ export default function PurchaseDashboard() {
             {pendingLoading ? (
               <div className="flex justify-center py-6 sm:py-8">
                 <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-2"></div>
-                <p className="mt-2 text-gray-600">Loading pending approvals...</p>
+                <p className="mt-2 text-gray-600">
+                  Loading pending approvals...
+                </p>
               </div>
             ) : pendingPOs.length === 0 ? (
               <div className="text-center py-6 sm:py-8">
-                <p className="text-gray-400 text-xs sm:text-sm">No pending approvals</p>
+                <p className="text-gray-400 text-xs sm:text-sm">
+                  No pending approvals
+                </p>
               </div>
             ) : (
               <div className="space-y-2 sm:space-y-3">
@@ -262,24 +329,27 @@ export default function PurchaseDashboard() {
                   <div
                     key={po.id}
                     className="flex flex-col sm:flex-row sm:items-center justify-between p-2.5 sm:p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors gap-2 sm:gap-0"
-                    onClick={() => navigate(`${basePath}/purchase/orders/${po.id}`)}
+                    onClick={() =>
+                      navigate(`${basePath}/purchase/orders/${po.id}`)
+                    }
                   >
                     <div>
                       <p className="text-xs sm:text-sm font-semibold text-blue-600 break-all">
-                        {String(po.po_number ?? '')}
+                        {String(po.po_number ?? "")}
                       </p>
                       <p className="text-xs text-gray-500 break-words">
-                        {String(po.supplier?.supplier_name ?? '')}
+                        {String(po.supplier?.supplier_name ?? "")}
                       </p>
                     </div>
                     <div className="text-left sm:text-right">
                       <p className="text-xs sm:text-sm font-semibold text-gray-900">
-                        {String(po.currency ?? 'KWD')} {num(po.total_amount).toFixed(3)}
+                        {String(po.currency ?? "KWD")}{" "}
+                        {num(po.total_amount).toFixed(3)}
                       </p>
                       <p className="text-xs text-gray-400">
                         {po.order_date
                           ? new Date(po.order_date).toLocaleDateString()
-                          : ''}
+                          : ""}
                       </p>
                     </div>
                   </div>
@@ -291,7 +361,9 @@ export default function PurchaseDashboard() {
           {/* Recent Orders */}
           <div className="bg-white rounded-xl p-4 sm:p-6">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <h2 className="text-base font-semibold text-gray-900">Recent Orders</h2>
+              <h2 className="text-base font-semibold text-gray-900">
+                Recent Orders
+              </h2>
               <button
                 onClick={() => navigate(`${basePath}/purchase/orders`)}
                 className="text-xs sm:text-sm text-blue-600 hover:underline"
@@ -306,7 +378,9 @@ export default function PurchaseDashboard() {
               </div>
             ) : recentPOs.length === 0 ? (
               <div className="text-center py-6 sm:py-8">
-                <p className="text-gray-400 text-xs sm:text-sm">No orders yet</p>
+                <p className="text-gray-400 text-xs sm:text-sm">
+                  No orders yet
+                </p>
               </div>
             ) : (
               <div className="space-y-2 sm:space-y-3">
@@ -314,26 +388,28 @@ export default function PurchaseDashboard() {
                   <div
                     key={po.id}
                     className="flex flex-col sm:flex-row sm:items-center justify-between p-2.5 sm:p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors gap-2 sm:gap-0"
-                    onClick={() => navigate(`${basePath}/purchase/orders/${po.id}`)}
+                    onClick={() =>
+                      navigate(`${basePath}/purchase/orders/${po.id}`)
+                    }
                   >
                     <div>
                       <p className="text-xs sm:text-sm font-semibold text-blue-600 break-all">
-                        {String(po.po_number ?? '')}
+                        {String(po.po_number ?? "")}
                       </p>
                       <p className="text-xs text-gray-500 break-words">
-                        {String(po.supplier?.supplier_name ?? '')}
+                        {String(po.supplier?.supplier_name ?? "")}
                       </p>
                     </div>
                     <div className="text-left sm:text-right">
                       <div className="flex flex-wrap gap-1 sm:gap-2 mb-1 sm:mb-2">
                         <span
-                          className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium ${STATUS_COLORS[po.status] ?? 'bg-gray-100 text-gray-700'}`}
+                          className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium ${STATUS_COLORS[po.status] ?? "bg-gray-100 text-gray-700"}`}
                         >
-                          {String(po.status ?? '')}
+                          {String(po.status ?? "")}
                         </span>
                         {po.payment_status && (
                           <span
-                            className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium ${PAYMENT_COLORS[po.payment_status] ?? 'bg-gray-100 text-gray-700'}`}
+                            className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium ${PAYMENT_COLORS[po.payment_status] ?? "bg-gray-100 text-gray-700"}`}
                           >
                             {String(po.payment_status)}
                           </span>
@@ -342,7 +418,7 @@ export default function PurchaseDashboard() {
                       <p className="text-xs text-gray-400">
                         {po.order_date
                           ? new Date(po.order_date).toLocaleDateString()
-                          : ''}
+                          : ""}
                       </p>
                     </div>
                   </div>
@@ -355,10 +431,22 @@ export default function PurchaseDashboard() {
         {/* ── Quick Links ── */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {[
-            { label: 'All Orders', path: `${basePath}/purchase/orders`, color: 'border-blue-200 hover:bg-blue-50' },
+            {
+              label: "All Orders",
+              path: `${basePath}/purchase/orders`,
+              color: "border-blue-200 hover:bg-blue-50",
+            },
             // { label: 'Pending   Approvals', path: `${basePath}/purchase/approvals`,  color: 'border-yellow-200 hover:bg-yellow-50' },
-            { label: 'Suppliers', path: `${basePath}/purchase/suppliers`, color: 'border-green-200 hover:bg-green-50' },
-            { label: 'Currencies', path: `${basePath}/purchase/currencies`, color: 'border-purple-200 hover:bg-purple-50' },
+            {
+              label: "Suppliers",
+              path: `${basePath}/purchase/suppliers`,
+              color: "border-green-200 hover:bg-green-50",
+            },
+            {
+              label: "Currencies",
+              path: `${basePath}/purchase/currencies`,
+              color: "border-purple-200 hover:bg-purple-50",
+            },
           ].map((item) => (
             <button
               key={item.label}
@@ -369,7 +457,6 @@ export default function PurchaseDashboard() {
             </button>
           ))}
         </div>
-
       </div>
     </DashboardLayout>
   );

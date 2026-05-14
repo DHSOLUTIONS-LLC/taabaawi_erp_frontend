@@ -62,8 +62,8 @@ export default function CloseRegisterPage({
 
       // Step 2 — Auto-generate shift report after close
       const reportResult = await generateShiftReport(register.id).unwrap();
-      const shiftrep= setShiftReport(reportResult?.data);
-      console.log('shift report:',shiftrep )
+      const shiftrep = setShiftReport(reportResult?.data);
+      console.log("shift report:", shiftrep);
       setStep("done");
     } catch (err: any) {
       setError(
@@ -175,12 +175,12 @@ export default function CloseRegisterPage({
                   <span className="font-medium text-gray-600">Cashier:</span>{" "}
                   {register.user?.name || "N/A"}
                 </p>
-                <p>
+                {/* <p>
                   <span className="font-medium text-gray-600">
                     Expected Balance:
                   </span>{" "}
                   KD {expectedBalance.toFixed(3)}
-                </p>
+                </p> */}
               </div>
 
               <div>

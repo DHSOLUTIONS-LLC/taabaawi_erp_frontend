@@ -10,6 +10,12 @@ import restock_icon from "../../../assets/icons/restock_icon.svg";
 import transfer_stock_icon from "../../../assets/icons/transfer_stock.svg";
 import view_products from "../../../assets/icons/view_inventory.svg";
 import low_inventory from "../../../assets/icons/low_stock.svg";
+import { useAppSelector } from "../../../app/hooks";
+import type { RootState } from "../../../app/store";
+
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL?.replace("/api", "") ||
+  "https://erp-backend.ttexpresskw.com";
 
 interface Product {
   id: number;
@@ -96,6 +102,9 @@ export default function ProductDetailsSidebar({
     sku?: string;
   } | null>(null);
 
+  const { user } = useAppSelector((state: RootState) => state.auth);
+  const isSuperAdmin = user?.role?.role_name === "Super Admin";
+
   if (!product) return null;
 
   // ============ PROCESS PRODUCT IMAGES ============
@@ -107,10 +116,7 @@ export default function ProductDetailsSidebar({
     ) {
       return [...product.images]
         .sort((a, b) => a.sort_order - b.sort_order)
-        .map(
-          (img) =>
-            `https://puristic-filmily-bula.ngrok-free.dev/storage/${img.image_path}`,
-        );
+        .map((img) => `${API_BASE_URL}/storage/${img.image_path}`);
     }
     return [
       product.image ||
@@ -282,7 +288,7 @@ export default function ProductDetailsSidebar({
       return (
         <div className="flex flex-col items-center">
           <img
-            src={`https://puristic-filmily-bula.ngrok-free.dev/storage/${barcodeImage}`}
+            src={`${API_BASE_URL}/storage/${barcodeImage}`}
             alt={`Barcode ${barcodeValue}`}
             className="h-8 w-auto object-contain"
             onError={(e) => {
@@ -429,7 +435,7 @@ export default function ProductDetailsSidebar({
                       {spec.label === "Barcode" && spec.image ? (
                         <div className="flex flex-col">
                           <img
-                            src={`https://puristic-filmily-bula.ngrok-free.dev/storage/${spec.image}`}
+                            src={`${API_BASE_URL}/storage/${spec.image}`}
                             alt="Barcode"
                             className="h-8 w-auto object-contain mb-1"
                           />
@@ -550,6 +556,7 @@ export default function ProductDetailsSidebar({
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 bg-white px-4 py-8 rounded-xl">
               <button
                 onClick={handleEditProductClick}
+                disabled={isSuperAdmin}
                 className="flex flex-col items-center justify-center px-4 py-10 cursor-pointer rounded-lg border border-[#0088FF] hover:bg-blue-50 transition-colors"
               >
                 <div className="w-14 h-14 bg-gray-200 rounded-xl flex items-center justify-center mb-2">

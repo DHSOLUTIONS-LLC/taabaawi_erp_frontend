@@ -129,6 +129,7 @@ export default function SuppliersPage() {
   </div>
 </div>
 
+
         {/* Table */}
         <div className="bg-white rounded-xl overflow-hidden shadow-sm">
           {isLoading ? (

@@ -1,5 +1,5 @@
 // src/features/sales/pages/OrderDetailPage.tsx
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import DashboardLayout from "../../../../layouts/DashboardLayout";
 import {
@@ -12,11 +12,14 @@ import {
   useCancelOrderMutation,
   useReturnOrderMutation,
   useMarkOrderAsPaidMutation,
-  //   useAssignOrderToStaffMutation,
   useGetOrderStatusHistoryQuery,
 } from "../../../../services/salesApi";
 
 import arrow_back_icon from "../../../../assets/icons/arrow_back_icon.svg";
+import print_icon from "../../../../assets/icons/print_svg.png";
+import export_pdf_icon from "../../../../assets/icons/export_pdf.svg";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 const STATUS_COLORS: Record<string, string> = {
   Pending: "bg-yellow-100 text-yellow-800",
@@ -42,6 +45,7 @@ export default function OrderDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const orderId = parseInt(id!);
+  const printRef = useRef<HTMLDivElement>(null);
 
   const [activeTab, setActiveTab] = useState<"details" | "items" | "history">(
     "details",
@@ -74,6 +78,8 @@ export default function OrderDetailPage() {
     useMarkOrderAsPaidMutation();
 
   const order = orderResponse?.data;
+  console.log('Order items:', order?.items);
+
   const history = historyResponse?.data || [];
 
   const handleAction = async (action: () => Promise<any>, errorMsg: string) => {
@@ -131,6 +137,349 @@ export default function OrderDetailPage() {
     }
   };
 
+const getProductImage = (item: any) => {
+  const primaryImage = item.product?.images?.find((img: any) => img.is_primary);
+  if (primaryImage?.image_path) {
+    const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 
+                   'https://puristic-filmily-bula.ngrok-free.dev';
+    return `${baseUrl}/storage/${primaryImage.image_path}`;
+  }
+  return 'https://via.placeholder.com/80?text=No+Image';
+};
+
+  const handlePrint = () => {
+    const printContent = printRef.current;
+    if (!printContent) return;
+
+    const originalTitle = document.title;
+    document.title = `Invoice_${order?.order_number || "order"}`;
+
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      alert("Please allow pop-ups to print");
+      return;
+    }
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Invoice ${order?.order_number || ""}</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              margin: 0;
+              padding: 20px;
+              color: #333;
+            }
+            .invoice-container {
+              max-width: 800px;
+              margin: 0 auto;
+              background: white;
+              padding: 20px;
+            }
+            .header {
+              text-align: center;
+              margin-bottom: 30px;
+              padding-bottom: 20px;
+              border-bottom: 2px solid #eee;
+            }
+            .header h1 {
+              margin: 0;
+              color: #1773CF;
+            }
+            .order-info {
+              margin-bottom: 20px;
+            }
+            .order-info table {
+              width: 100%;
+              border-collapse: collapse;
+            }
+            .order-info td {
+              padding: 5px;
+              vertical-align: top;
+            }
+            .order-info td:first-child {
+              font-weight: bold;
+              width: 120px;
+            }
+            .items-table {
+              width: 100%;
+              border-collapse: collapse;
+              margin: 20px 0;
+            }
+            .items-table th,
+            .items-table td {
+              border: 1px solid #ddd;
+              padding: 8px;
+              text-align: left;
+            }
+            .items-table th {
+              background-color: #f5f5f5;
+              font-weight: bold;
+            }
+            .totals {
+              margin-top: 20px;
+              text-align: right;
+            }
+            .totals table {
+              width: 300px;
+              margin-left: auto;
+              border-collapse: collapse;
+            }
+            .totals td {
+              padding: 5px;
+            }
+            .totals .grand-total {
+              font-weight: bold;
+              font-size: 16px;
+              color: #1773CF;
+            }
+            .footer {
+              margin-top: 40px;
+              text-align: center;
+              font-size: 12px;
+              color: #999;
+              border-top: 1px solid #eee;
+              padding-top: 20px;
+            }
+            @media print {
+              body {
+                margin: 0;
+                padding: 0;
+              }
+              .no-print {
+                display: none;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="invoice-container">
+            <div class="header">
+              <h1>ORDER INVOICE</h1>
+              <p>${order?.order_number || ""}</p>
+            </div>
+            
+            <div class="order-info">
+              <table>
+                <tr><td>Order Date:</td><td>${new Date(order?.created_at || new Date()).toLocaleDateString("en-GB", {
+                  day: "2-digit",
+                  month: "long",
+                  year: "numeric",
+                })}</td></tr>
+                <tr><td>Status:</td><td>${order?.order_status || ""}</td></tr>
+                <tr><td>Payment Status:</td><td>${order?.payment_status || ""}</td></tr>
+                <tr><td>Payment Method:</td><td>${order?.payment_method || ""}</td></tr>
+                <tr><td>Channel:</td><td>${order?.channel || ""}</td></tr>
+              </table>
+            </div>
+
+            <div class="order-info">
+              <h3>Customer Information</h3>
+              <table>
+                <tr><td>Name:</td><td>${order?.customer_name || ""}</td></tr>
+                <tr><td>Email:</td><td>${order?.customer_email || ""}</td></tr>
+                <tr><td>Phone:</td><td>${order?.customer_phone || ""}</td></tr>
+              </table>
+            </div>
+
+            <div class="order-info">
+              <h3>Shipping Information</h3>
+              <table>
+                <tr><td>Address:</td><td>${order?.shipping_address || ""}</td></tr>
+                <tr><td>City:</td><td>${order?.shipping_city || "—"}</td></tr>
+                <tr><td>Country:</td><td>${order?.shipping_country || ""}</td></tr>
+                <tr><td>Tracking:</td><td>${order?.tracking_number || "—"}</td></tr>
+              </table>
+            </div>
+
+            <h3>Order Items</h3>
+            <table class="items-table">
+              <thead>
+                <tr>
+                  <th>Image</th>
+                  <th>Product</th>
+                  <th>SKU</th>
+                  <th>Qty</th>
+                  <th>Unit Price</th>
+                  <th>Discount</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${(order?.items || []).map((item: any) => `
+                  <tr>
+                  <td class="border border-gray-300 p-2">
+  <div class="flex items-center gap-2">
+   <img src="${getProductImage(item)}" alt="${item.product_name}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;" onerror="this.src='fallback-image-url'" />
+  </div>
+</td>
+                    <td>${item.product_name}${item.variant_name ? ` (${item.variant_name})` : ""}</td>
+                    <td>${item.sku || "—"}</td>
+                    <td>${item.quantity}</td>
+                    <td>KD ${parseFloat(item.unit_price).toFixed(3)}</td>
+                    <td>KD ${parseFloat(item.discount_amount).toFixed(3)}</td>
+                    <td>KD ${parseFloat(item.total).toFixed(3)}</td>
+                  </tr>
+                `).join("") || ""}
+              </tbody>
+            </table>
+
+            <div class="totals">
+              <table>
+                <tr><td>Subtotal:</td><td>KD ${Number(order?.subtotal).toFixed(3)}</td></tr>
+                ${(order?.discount_amount || 0) > 0 ? `<tr><td>Discount:</td><td>-KD ${Number(order?.discount_amount).toFixed(3)}</td></tr>` : ""}
+                ${(order?.discount_amount || 0) > 0 ? `<tr><td>Coupon:</td><td>-KD ${Number(order?.coupon_discount).toFixed(3)}</td></tr>` : ""}
+                <tr><td>Tax:</td><td>KD ${Number(order?.tax_amount).toFixed(3)}</td></tr>
+                <tr><td>Shipping:</td><td>KD ${Number(order?.shipping_fee).toFixed(3)}</td></tr>
+                <tr class="grand-total"><td>Total:</td><td>KD ${Number(order?.total_amount).toFixed(3)}</td></tr>
+              </table>
+            </div>
+
+            <div class="footer">
+              <p>Thank you for your business!</p>
+              <p>Generated on ${new Date().toLocaleString()}</p>
+            </div>
+          </div>
+          <script>
+            window.onload = () => {
+              window.print();
+              setTimeout(() => window.close(), 500);
+            };
+          </script>
+        </body>
+      </html>
+    `);
+
+    printWindow.document.close();
+    document.title = originalTitle;
+  };
+
+const handleExportPDF = async () => {
+  try {
+    // Create a temporary div with the invoice content
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = `
+      <div style="padding: 40px; font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto;">
+        <!-- Header -->
+        <div style="text-align: center; border-bottom: 2px solid #eee; padding-bottom: 20px; margin-bottom: 30px;">
+          <h1 style="color: #1773CF; margin: 0;">ORDER INVOICE</h1>
+          <p style="color: #666;">${order?.order_number || ""}</p>
+        </div>
+
+        <!-- Order Info -->
+        <div style="margin-bottom: 20px;">
+          <table style="width: 100%; font-size: 14px;">
+            <tr><td style="font-weight: bold; width: 120px; padding: 4px;">Order Date:</td><td>${new Date(order?.created_at || new Date()).toLocaleDateString()}</td></tr>
+            <tr><td style="font-weight: bold; width: 120px; padding: 4px;">Status:</td><td>${order?.order_status || ""}</td></tr>
+            <tr><td style="font-weight: bold; width: 120px; padding: 4px;">Payment Status:</td><td>${order?.payment_status || ""}</td></tr>
+            <tr><td style="font-weight: bold; width: 120px; padding: 4px;">Payment Method:</td><td>${order?.payment_method || ""}</td></tr>
+          </table>
+        </div>
+
+        <!-- Customer Info -->
+        <div style="margin-bottom: 20px;">
+          <h3 style="margin: 0 0 10px 0;">Customer Information</h3>
+          <table style="width: 100%; font-size: 14px;">
+            <tr><td style="font-weight: bold; width: 120px;">Name:</td><td>${order?.customer_name || ""}</td></tr>
+            <tr><td style="font-weight: bold; width: 120px;">Email:</td><td>${order?.customer_email || ""}</td></tr>
+            <tr><td style="font-weight: bold; width: 120px;">Phone:</td><td>${order?.customer_phone || ""}</td></tr>
+          </table>
+        </div>
+
+        <!-- Shipping Info -->
+        <div style="margin-bottom: 20px;">
+          <h3 style="margin: 0 0 10px 0;">Shipping Information</h3>
+          <table style="width: 100%; font-size: 14px;">
+            <tr><td style="font-weight: bold; width: 120px;">Address:</td><td>${order?.shipping_address || ""}</td></tr>
+            <tr><td style="font-weight: bold; width: 120px;">City:</td><td>${order?.shipping_city || "—"}</td></tr>
+            <tr><td style="font-weight: bold; width: 120px;">Country:</td><td>${order?.shipping_country || ""}</td></tr>
+            <tr><td style="font-weight: bold; width: 120px;">Tracking #:</td><td>${order?.tracking_number || ""}</td></tr>
+            <tr><td style="font-weight: bold; width: 120px;">Provider:</td><td>${order?.shipping_provider || ""}</td></tr>
+          </table>
+        </div>
+
+        <!-- Items Table -->
+        <h3 style="margin: 20px 0 10px 0;">Order Items</h3>
+        <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+          <thead>
+            <tr style="background: #f5f5f5;">
+              <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Image</th>
+              <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Product</th>
+              <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">SKU</th>
+              <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Qty</th>
+              <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">Unit Price</th>
+              <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${order?.items?.map((item: any) => `
+              <tr>
+              <td style="border: 1px solid #ddd; padding: 8px;">
+  <div style="display: flex; align-items: center; gap: 8px;">
+    <img src="${getProductImage(item)}" alt="${item.product_name}" 
+     style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;" 
+     crossorigin="anonymous"
+     onerror="this.style.display='none'" />
+  </div>
+</td>
+                <td style="border: 1px solid #ddd; padding: 8px;">${item.product_name}${item.variant_name ? ` (${item.variant_name})` : ""}</td>
+                <td style="border: 1px solid #ddd; padding: 8px;">${item.sku || "—"}</td>
+                <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${item.quantity}</td>
+                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">KD ${parseFloat(item.unit_price).toFixed(3)}</td>
+                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">KD ${parseFloat(item.total).toFixed(3)}</td>
+              </tr>
+            `).join("") || ""}
+          </tbody>
+        </table>
+
+        <!-- Totals -->
+        <div style="text-align: right; margin-top: 20px;">
+          <table style="width: 250px; margin-left: auto;">
+            <tr><td style="padding: 4px;">Subtotal:</td><td style="text-align: right;">KD ${Number(order?.subtotal).toFixed(3)}</td></tr>
+            ${(order?.discount_amount || 0) > 0 ? `<tr><td style="padding: 4px;">Discount:</td><td style="text-align: right; color: red;">-KD ${Number(order?.discount_amount).toFixed(3)}</td></tr>` : ""}
+            ${(order?.discount_amount || 0) > 0 ? `<tr><td style="padding: 4px;">Coupon:</td><td style="text-align: right; color: red;">-KD ${Number(order?.coupon_discount).toFixed(3)}</td></tr>` : ""}
+            <tr><td style="padding: 4px;">Tax:</td><td style="text-align: right;">KD ${Number(order?.tax_amount).toFixed(3)}</td></tr>
+            <tr><td style="padding: 4px;">Shipping:</td><td style="text-align: right;">KD ${Number(order?.shipping_fee).toFixed(3)}</td></tr>
+            <tr style="font-weight: bold; color: #1773CF;"><td style="padding-top: 8px;">Total:</td><td style="text-align: right; padding-top: 8px;">KD ${Number(order?.total_amount).toFixed(3)}</td></tr>
+          </table>
+        </div>
+
+        <div style="text-align: center; font-size: 12px; color: #999; border-top: 1px solid #eee; margin-top: 40px; padding-top: 20px;">
+          <p>Thank you for your business!</p>
+          <p>Generated on ${new Date().toLocaleString()}</p>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(tempDiv);
+    
+   const canvas = await html2canvas(tempDiv, {
+  scale: 2,
+  backgroundColor: '#ffffff',
+  logging: false,
+  useCORS: true,
+  allowTaint: true,
+  imageTimeout: 15000
+});
+    
+    document.body.removeChild(tempDiv);
+    
+    const pdf = new jsPDF("p", "mm", "a4");
+    const imgData = canvas.toDataURL("image/png");
+    const imgWidth = 190;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    
+    pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+    pdf.save(`Invoice_${order?.order_number || "order"}.pdf`);
+    
+  } catch (error) {
+    console.error("PDF export failed:", error);
+    alert("Failed to export PDF. Please try again.");
+  }
+};
+
   if (isLoading)
     return (
       <DashboardLayout>
@@ -186,6 +535,20 @@ export default function OrderDetailPage() {
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <button
+              onClick={handlePrint}
+              className="flex items-center gap-1 px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-100 text-gray-700 rounded-lg text-xs sm:text-sm font-semibold hover:bg-gray-200 transition-colors"
+            >
+              <img src={print_icon} alt="" className="w-4 h-4" />
+              Print
+            </button>
+            <button
+              onClick={handleExportPDF}
+              className="flex items-center gap-1 px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-100 text-gray-700 rounded-lg text-xs sm:text-sm font-semibold hover:bg-gray-200 transition-colors"
+            >
+              <img src={export_pdf_icon} alt="" className="w-4 h-4" />
+              Export PDF
+            </button>
             <span className="text-xs sm:text-sm text-gray-600">Status:</span>
             <span
               className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-full ${STATUS_COLORS[status] || "bg-gray-100 text-gray-700"}`}
@@ -200,6 +563,9 @@ export default function OrderDetailPage() {
             </span>
           </div>
         </div>
+
+        {/* Hidden Print Template */}
+        <div ref={printRef} className="hidden" />
 
         {/* Action Buttons */}
         <div className="bg-white rounded-xl p-3 sm:p-4 flex flex-wrap gap-2 sm:gap-3">
@@ -306,10 +672,11 @@ export default function OrderDetailPage() {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${activeTab === tab
+                className={`px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+                  activeTab === tab
                     ? "border-[#1773CF] text-[#1773CF]"
                     : "border-transparent text-gray-500 hover:text-gray-700"
-                  }`}
+                }`}
               >
                 {tab === "history"
                   ? "Status History"
@@ -341,7 +708,7 @@ export default function OrderDetailPage() {
                       {label}
                     </span>
                     <span className="font-medium text-gray-900 text-xs sm:text-sm break-all">
-                      {value}
+                      {value || "—"}
                     </span>
                   </div>
                 ))}
@@ -369,7 +736,7 @@ export default function OrderDetailPage() {
                       {label}
                     </span>
                     <span className="font-medium text-gray-900 text-xs sm:text-sm text-left sm:text-right break-all sm:max-w-[200px]">
-                      {value}
+                      {value || "—"}
                     </span>
                   </div>
                 ))}
@@ -498,25 +865,25 @@ export default function OrderDetailPage() {
                                 {item.variant_name}
                               </div>
                             )}
-                          </td>
+                           </td>
                           <td className="px-3 sm:px-5 py-3 sm:py-4 text-xs sm:text-sm text-gray-600 whitespace-nowrap">
-                            {item.sku}
-                          </td>
+                            {item.sku || "—"}
+                           </td>
                           <td className="px-3 sm:px-5 py-3 sm:py-4 text-xs sm:text-sm text-gray-900">
                             {item.quantity}
-                          </td>
+                           </td>
                           <td className="px-3 sm:px-5 py-3 sm:py-4 text-xs sm:text-sm text-gray-900 whitespace-nowrap">
                             KD {parseFloat(item.unit_price).toFixed(3)}
-                          </td>
+                           </td>
                           <td className="px-3 sm:px-5 py-3 sm:py-4 text-xs sm:text-sm text-red-600 whitespace-nowrap">
                             KD {parseFloat(item.discount_amount).toFixed(3)}
-                          </td>
+                           </td>
                           <td className="px-3 sm:px-5 py-3 sm:py-4 text-xs sm:text-sm text-gray-600 whitespace-nowrap">
                             KD {parseFloat(item.tax_amount).toFixed(3)}
-                          </td>
+                           </td>
                           <td className="px-3 sm:px-5 py-3 sm:py-4 text-xs sm:text-sm font-semibold text-gray-900 whitespace-nowrap">
                             KD {parseFloat(item.total).toFixed(3)}
-                          </td>
+                           </td>
                         </tr>
                       ))}
                     </tbody>
@@ -527,13 +894,13 @@ export default function OrderDetailPage() {
                           className="px-3 sm:px-5 py-2 sm:py-3 font-bold text-gray-700 text-xs sm:text-sm"
                         >
                           Grand Total
-                        </td>
+                         </td>
                         <td className="px-3 sm:px-5 py-2 sm:py-3 font-bold text-[#1773CF] text-xs sm:text-sm whitespace-nowrap">
                           KD {Number(order.total_amount).toFixed(3)}
-                        </td>
+                         </td>
                       </tr>
                     </tfoot>
-                  </table>
+                   </table>
                 </div>
               </div>
             </div>
@@ -552,7 +919,9 @@ export default function OrderDetailPage() {
                   <div key={h.id} className="flex gap-3 sm:gap-4">
                     <div className="flex flex-col items-center">
                       <div
-                        className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full mt-1 ${i === 0 ? "bg-[#1773CF]" : "bg-gray-300"}`}
+                        className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full mt-1 ${
+                          i === 0 ? "bg-[#1773CF]" : "bg-gray-300"
+                        }`}
                       />
                       {i < history.length - 1 && (
                         <div className="w-0.5 flex-1 bg-gray-200 mt-1" />

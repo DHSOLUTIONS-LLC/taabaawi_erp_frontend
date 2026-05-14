@@ -1,6 +1,8 @@
 // src/features/purchase/pages/purchase-orders/PurchaseOrderDetailPage.tsx
 import { useParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 import DashboardLayout from "../../../../layouts/DashboardLayout";
 import { useAppSelector } from "../../../../app/hooks";
 import type { RootState } from "../../../../app/store";
@@ -24,6 +26,7 @@ import close_icon from "../../../../assets/icons/cross_icon.svg";
 import send_icon from "../../../../assets/icons/send_icon.png";
 import delete_icon from "../../../../assets/icons/delete-icon.png";
 import print_icon from "../../../../assets/icons/print_icon.png";
+import export_pdf_icon from "../../../../assets/icons/export_pdf.svg";
 
 const METHOD_COLORS: Record<string, string> = {
   Cash: "bg-green-100 text-green-700",
@@ -131,6 +134,435 @@ export default function PurchaseOrderDetailPage() {
   };
 
   const num = (v: any) => (typeof v === "number" ? v : parseFloat(v) || 0);
+
+  const handlePrint = () => {
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      alert("Please allow pop-ups to print");
+      return;
+    }
+
+    const getProductImage = (item: any) => {
+      const baseUrl =
+        import.meta.env.VITE_API_URL?.replace("/api", "") ||
+        "https://erp-backend.ttexpresskw.com";
+      if (item.product?.images && Array.isArray(item.product.images)) {
+        const primaryImage = item.product.images.find(
+          (img: any) => img.is_primary === true,
+        );
+        if (primaryImage?.image_path) {
+          return `${baseUrl}/storage/${primaryImage.image_path}`;
+        }
+      }
+      if (item.image_url) return item.image_url;
+      return "";
+    };
+
+    const itemsHtml = po?.items
+      ?.map((item: any) => {
+        const imageUrl = getProductImage(item);
+        const qty = item.quantity_ordered ?? item.quantity;
+        const unitPrice = parseFloat(item.unit_price);
+        const total = unitPrice * qty;
+        return `
+      <tr>
+        <td style="border: 1px solid #d1d5db; padding: 8px; text-align: center; vertical-align: middle;">
+          ${imageUrl ? `<img src="${imageUrl}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;" onerror="this.style.display='none'" />` : "—"}
+        </td>
+        <td style="border: 1px solid #d1d5db; padding: 8px; vertical-align: middle;">${item.product_name}${item.variant_name ? ` (${item.variant_name})` : ""}</td>
+        <td style="border: 1px solid #d1d5db; padding: 8px; text-align: center; vertical-align: middle;">${item.sku || "—"}</td>
+        <td style="border: 1px solid #d1d5db; padding: 8px; text-align: center; vertical-align: middle;">${qty}</td>
+        <td style="border: 1px solid #d1d5db; padding: 8px; text-align: right; vertical-align: middle;">${po.currency} ${unitPrice.toFixed(3)}</td>
+        <td style="border: 1px solid #d1d5db; padding: 8px; text-align: right; vertical-align: middle;">${po.currency} ${total.toFixed(3)}</td>
+      </tr>
+    `;
+      })
+      .join("");
+
+    printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>PO-${po?.po_number}</title>
+        <style>
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
+          body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: white;
+            padding: 20px;
+          }
+          .excel-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+          }
+          .header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #2563eb;
+          }
+          .header h1 {
+            color: #2563eb;
+            font-size: 24px;
+            margin-bottom: 5px;
+          }
+          .header p {
+            color: #6b7280;
+            font-size: 14px;
+          }
+          .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 25px;
+            background: #f9fafb;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+          }
+          .info-section h3 {
+            font-size: 14px;
+            font-weight: bold;
+            color: #374151;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #d1d5db;
+          }
+          .info-row {
+            display: flex;
+            margin-bottom: 6px;
+            font-size: 13px;
+          }
+          .info-label {
+            width: 120px;
+            font-weight: 600;
+            color: #6b7280;
+          }
+          .info-value {
+            flex: 1;
+            color: #111827;
+          }
+          .shipping-terms {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 20px;
+          }
+          .shipping-terms h3 {
+            font-size: 13px;
+            font-weight: bold;
+            color: #92400e;
+            margin-bottom: 8px;
+          }
+          .shipping-terms p {
+            font-size: 12px;
+            color: #78350f;
+            line-height: 1.4;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 13px;
+          }
+          th {
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            padding: 10px 8px;
+            font-weight: bold;
+            color: #374151;
+            text-align: center;
+          }
+          td {
+            border: 1px solid #d1d5db;
+            padding: 8px;
+          }
+          .totals-table {
+            width: 350px;
+            margin-left: auto;
+            margin-bottom: 20px;
+          }
+          .totals-table td {
+            border: none;
+            padding: 6px 8px;
+          }
+          .totals-table tr:last-child td {
+            border-top: 2px solid #d1d5db;
+            font-weight: bold;
+            font-size: 15px;
+            color: #2563eb;
+            padding-top: 10px;
+          }
+          .footer {
+            text-align: center;
+            font-size: 11px;
+            color: #9ca3af;
+            border-top: 1px solid #e5e7eb;
+            margin-top: 20px;
+            padding-top: 15px;
+          }
+          @media print {
+            body { padding: 0; margin: 0; }
+            .shipping-terms { break-inside: avoid; }
+            table { break-inside: avoid; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="excel-container">
+          <!-- Header -->
+          <div class="header">
+            <h1>PURCHASE ORDER</h1>
+            <p>${po?.po_number}</p>
+          </div>
+
+          <!-- Information Grid -->
+          <div class="info-grid">
+            <div class="info-section">
+              <h3>SUPPLIER INFORMATION</h3>
+              <div class="info-row"><div class="info-label">Supplier Name:</div><div class="info-value">${po.supplier?.supplier_name || "N/A"}</div></div>
+              <div class="info-row"><div class="info-label">Email:</div><div class="info-value">${po.supplier?.email || "—"}</div></div>
+              <div class="info-row"><div class="info-label">Phone:</div><div class="info-value">${po.supplier?.phone || "—"}</div></div>
+            </div>
+            <div class="info-section">
+              <h3>ORDER DETAILS</h3>
+              <div class="info-row"><div class="info-label">Order Date:</div><div class="info-value">${new Date(po.order_date).toLocaleDateString()}</div></div>
+              <div class="info-row"><div class="info-label">Expected Delivery:</div><div class="info-value">${po.expected_delivery_date ? new Date(po.expected_delivery_date).toLocaleDateString() : "—"}</div></div>
+              <div class="info-row"><div class="info-label">Status:</div><div class="info-value">${po.status}</div></div>
+              <div class="info-row"><div class="info-label">Currency:</div><div class="info-value">${po.currency}</div></div>
+            </div>
+          </div>
+
+          <!-- Shipping Terms -->
+          ${
+            po?.shipping_terms || po?.terms_and_conditions
+              ? `
+            <div class="shipping-terms">
+              <h3>📦 SHIPPING TERMS & CONDITIONS</h3>
+              <p>${po?.shipping_terms || po?.terms_and_conditions || "Standard shipping terms apply"}</p>
+            </div>
+          `
+              : ""
+          }
+
+          <!-- Products Table (Excel Style) -->
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 80px;">Image</th>
+                <th style="text-align: left;">Product Name</th>
+                <th style="width: 120px;">SKU</th>
+                <th style="width: 60px;">Qty</th>
+                <th style="width: 100px;">Unit Price</th>
+                <th style="width: 120px;">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${itemsHtml}
+              ${
+                po.items?.length === 0
+                  ? `
+                <tr><td colspan="6" style="text-align: center; padding: 40px;">No items found</td></tr>
+              `
+                  : ""
+              }
+            </tbody>
+          </table>
+
+          <!-- Totals Section -->
+          <table class="totals-table">
+            <tr><td style="text-align: right;">Subtotal:</td><td style="text-align: right; width: 120px;">${po.currency} ${(po.subtotal || 0).toFixed(3)}</td></tr>
+            <tr><td style="text-align: right;">Discount:</td><td style="text-align: right;">- ${po.currency} ${(po.discount_amount || 0).toFixed(3)}</td></tr>
+            <tr><td style="text-align: right;">Tax:</td><td style="text-align: right;">${po.currency} ${(po.tax_amount || 0).toFixed(3)}</td></tr>
+            <tr><td style="text-align: right;">Shipping Cost:</td><td style="text-align: right;">${po.currency} ${(po.shipping_cost || 0).toFixed(3)}</td></tr>
+            <tr><td style="text-align: right; font-size: 14px;">GRAND TOTAL:</td><td style="text-align: right; font-size: 14px; font-weight: bold; color: #2563eb;">${po.currency} ${(po.total_amount || 0).toFixed(3)}</td></tr>
+          </table>
+
+          <!-- Additional Notes -->
+          ${
+            po.notes
+              ? `
+            <div style="background: #f0fdf4; border: 1px solid #22c55e; border-radius: 8px; padding: 12px; margin-top: 15px;">
+              <h3 style="font-size: 12px; font-weight: bold; color: #166534; margin-bottom: 5px;">📝 NOTES</h3>
+              <p style="font-size: 12px; color: #14532d;">${po.notes}</p>
+            </div>
+          `
+              : ""
+          }
+
+          <!-- Footer -->
+          <div class="footer">
+            <p>Generated on ${new Date().toLocaleString()} | ERP System</p>
+            <p>This is a computer-generated document. No signature required.</p>
+          </div>
+        </div>
+        <script>
+          window.onload = () => {
+            window.print();
+            setTimeout(() => window.close(), 500);
+          };
+        </script>
+      </body>
+    </html>
+  `);
+
+    printWindow.document.close();
+  };
+  const handleExportPDF = async () => {
+    try {
+      const getProductImage = (item: any) => {
+        const baseUrl =
+          import.meta.env.VITE_API_URL?.replace("/api", "") ||
+          "https://erp-backend.ttexpresskw.com";
+        if (item.product?.images && Array.isArray(item.product.images)) {
+          const primaryImage = item.product.images.find(
+            (img: any) => img.is_primary === true,
+          );
+          if (primaryImage?.image_path) {
+            return `${baseUrl}/storage/${primaryImage.image_path}`;
+          }
+        }
+        if (item.image_url) return item.image_url;
+        return "";
+      };
+
+      // Convert images to base64 for PDF
+      const itemsWithImages = await Promise.all(
+        (po.items || []).map(async (item: any) => {
+          const imageUrl = getProductImage(item);
+          let base64Image = "";
+          if (imageUrl) {
+            try {
+              const img = new Image();
+              img.crossOrigin = "Anonymous";
+              await new Promise((resolve, reject) => {
+                img.onload = () => {
+                  const canvas = document.createElement("canvas");
+                  canvas.width = img.width;
+                  canvas.height = img.height;
+                  const ctx = canvas.getContext("2d");
+                  ctx?.drawImage(img, 0, 0);
+                  base64Image = canvas.toDataURL("image/png");
+                  resolve(base64Image);
+                };
+                img.onerror = reject;
+                img.src = imageUrl;
+              });
+            } catch {
+              base64Image = "";
+            }
+          }
+          return { ...item, base64Image };
+        }),
+      );
+
+      const itemsHtml = itemsWithImages
+        .map((item: any) => {
+          const qty = item.quantity_ordered ?? item.quantity;
+          const unitPrice = parseFloat(item.unit_price);
+          const total = unitPrice * qty;
+          return `
+        <tr>
+          <td style="border: 1px solid #d1d5db; padding: 8px; text-align: center;">${item.base64Image ? `<img src="${item.base64Image}" style="width: 50px; height: 50px; object-fit: cover;" />` : "—"}</td>
+          <td style="border: 1px solid #d1d5db; padding: 8px;">${item.product_name}${item.variant_name ? ` (${item.variant_name})` : ""}</td>
+          <td style="border: 1px solid #d1d5db; padding: 8px; text-align: center;">${item.sku || "—"}</td>
+          <td style="border: 1px solid #d1d5db; padding: 8px; text-align: center;">${qty}</td>
+          <td style="border: 1px solid #d1d5db; padding: 8px; text-align: right;">${po.currency} ${unitPrice.toFixed(3)}</td>
+          <td style="border: 1px solid #d1d5db; padding: 8px; text-align: right;">${po.currency} ${total.toFixed(3)}</td>
+        </tr>
+      `;
+        })
+        .join("");
+
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = `
+      <div style="padding: 40px; font-family: 'Segoe UI', Arial, sans-serif; max-width: 1200px; margin: 0 auto;">
+        <div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #2563eb;">
+          <h1 style="color: #2563eb; font-size: 24px; margin-bottom: 5px;">PURCHASE ORDER</h1>
+          <p style="color: #6b7280; font-size: 14px;">${po?.po_number}</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 25px; background: #f9fafb; padding: 15px; border-radius: 8px;">
+          <div>
+            <h3 style="font-size: 14px; font-weight: bold; margin-bottom: 10px;">SUPPLIER INFORMATION</h3>
+            <p style="margin: 4px 0;"><strong>Name:</strong> ${po?.supplier?.supplier_name || "N/A"}</p>
+            <p style="margin: 4px 0;"><strong>Email:</strong> ${po?.supplier?.email || "—"}</p>
+            <p style="margin: 4px 0;"><strong>Phone:</strong> ${po?.supplier?.phone || "—"}</p>
+          </div>
+          <div>
+            <h3 style="font-size: 14px; font-weight: bold; margin-bottom: 10px;">ORDER DETAILS</h3>
+            <p style="margin: 4px 0;"><strong>Order Date:</strong> ${new Date(po?.order_date).toLocaleDateString()}</p>
+            <p style="margin: 4px 0;"><strong>Expected Delivery:</strong> ${po?.expected_delivery_date ? new Date(po?.expected_delivery_date).toLocaleDateString() : "—"}</p>
+            <p style="margin: 4px 0;"><strong>Status:</strong> ${po?.status}</p>
+            <p style="margin: 4px 0;"><strong>Currency:</strong> ${po?.currency}</p>
+          </div>
+        </div>
+
+        ${
+          po?.shipping_terms || po?.terms_and_conditions
+            ? `
+          <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 12px; margin-bottom: 20px;">
+            <h3 style="font-size: 13px; font-weight: bold; color: #92400e;">📦 SHIPPING TERMS & CONDITIONS</h3>
+            <p style="font-size: 12px; color: #78350f;">${po?.shipping_terms || po?.terms_and_conditions}</p>
+          </div>
+        `
+            : ""
+        }
+
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+          <thead>
+            <tr style="background: #f3f4f6;">
+              <th style="border: 1px solid #d1d5db; padding: 8px; width: 80px;">Image</th>
+              <th style="border: 1px solid #d1d5db; padding: 8px; text-align: left;">Product Name</th>
+              <th style="border: 1px solid #d1d5db; padding: 8px; width: 100px;">SKU</th>
+              <th style="border: 1px solid #d1d5db; padding: 8px; width: 60px;">Qty</th>
+              <th style="border: 1px solid #d1d5db; padding: 8px; width: 100px;">Unit Price</th>
+              <th style="border: 1px solid #d1d5db; padding: 8px; width: 120px;">Total</th>
+            </tr>
+          </thead>
+          <tbody>${itemsHtml}</tbody>
+        </table>
+
+        <table style="width: 350px; margin-left: auto; margin-bottom: 20px;">
+          <tr><td style="text-align: right; padding: 4px;">Subtotal:</td><td style="text-align: right;">${po?.currency} ${(po?.subtotal || 0).toFixed(3)}</td></tr>
+          <tr><td style="text-align: right; padding: 4px;">Discount:</td><td style="text-align: right;">- ${po?.currency} ${(po?.discount_amount || 0).toFixed(3)}</td></tr>
+          <tr><td style="text-align: right; padding: 4px;">Tax:</td><td style="text-align: right;">${po?.currency} ${(po?.tax_amount || 0).toFixed(3)}</td></tr>
+          <tr><td style="text-align: right; padding: 4px;">Shipping:</td><td style="text-align: right;">${po?.currency} ${(po?.shipping_cost || 0).toFixed(3)}</td></tr>
+          <tr style="border-top: 2px solid #d1d5db;"><td style="text-align: right; padding-top: 8px; font-weight: bold;">GRAND TOTAL:</td><td style="text-align: right; padding-top: 8px; font-weight: bold; color: #2563eb;">${po.currency} ${(po.total_amount || 0).toFixed(3)}</td></tr>
+        </table>
+
+        ${po?.notes ? `<div style="background: #f0fdf4; border: 1px solid #22c55e; border-radius: 8px; padding: 12px;"><h3 style="font-size: 12px; font-weight: bold;">📝 NOTES</h3><p style="font-size: 12px;">${po.notes}</p></div>` : ""}
+
+        <div style="text-align: center; font-size: 11px; color: #9ca3af; border-top: 1px solid #e5e7eb; margin-top: 20px; padding-top: 15px;">
+          <p>Generated on ${new Date().toLocaleString()} | ERP System</p>
+        </div>
+      </div>
+    `;
+
+      document.body.appendChild(tempDiv);
+      const canvas = await html2canvas(tempDiv, {
+        scale: 2,
+        backgroundColor: "#ffffff",
+        logging: false,
+      });
+      document.body.removeChild(tempDiv);
+
+      const pdf = new jsPDF("p", "mm", "a4");
+      const imgData = canvas.toDataURL("image/png");
+      const imgWidth = 190;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+      pdf.save(`PO_${po.po_number}.pdf`);
+    } catch (error) {
+      console.error("PDF export failed:", error);
+      alert("Failed to export PDF. Please try again.");
+    }
+  };
 
   if (isLoading) {
     return (
@@ -310,6 +742,20 @@ export default function PurchaseOrderDetailPage() {
               </button>
             )}
 
+            <button
+              onClick={handlePrint}
+              className="flex items-center gap-2 px-3 py-2 md:px-4 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-sm md:text-base"
+            >
+              <img src={print_icon} alt="" className="w-4 h-4" /> Print
+            </button>
+
+            <button
+              onClick={handleExportPDF}
+              className="flex items-center gap-2 px-3 py-2 md:px-4 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-sm md:text-base"
+            >
+              <img src={export_pdf_icon} alt="" className="w-4 h-4" /> Export
+              PDF
+            </button>
             {/* <button
           onClick={handlePrintPR}
           className="flex items-center gap-2 px-3 py-2 md:px-4 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-sm md:text-base"

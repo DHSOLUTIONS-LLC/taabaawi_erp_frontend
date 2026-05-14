@@ -68,6 +68,7 @@ useEffect(() => {
   // Use useMemo to prevent recreating products on every render
   const products = useMemo(() => {
     const apiProducts = productsResponse?.data?.data || [];
+    
 
     // Check if user is Super Admin (no branch restriction)
     const isSuperAdmin = !branchId;
@@ -95,8 +96,10 @@ useEffect(() => {
         }
 
         const imagePath = product.primary_image?.image_path
-          ? `/storage/${product.primary_image.image_path}`
+          ? `https://puristic-filmily-bula.ngrok-free.dev/storage/${product.primary_image.image_path}`
           : "https://images.unsplash.com/photo-1541275055241-329bbdf9a191?w=500&auto=format&fit=crop&q=60";
+
+          console.log('imagePath', imagePath)
 
         return {
           id: product.id.toString(),

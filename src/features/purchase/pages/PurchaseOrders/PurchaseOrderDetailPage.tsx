@@ -325,16 +325,16 @@ export default function PurchaseOrderDetailPage() {
           <div class="info-grid">
             <div class="info-section">
               <h3>SUPPLIER INFORMATION</h3>
-              <div class="info-row"><div class="info-label">Supplier Name:</div><div class="info-value">${po.supplier?.supplier_name || "N/A"}</div></div>
-              <div class="info-row"><div class="info-label">Email:</div><div class="info-value">${po.supplier?.email || "—"}</div></div>
-              <div class="info-row"><div class="info-label">Phone:</div><div class="info-value">${po.supplier?.phone || "—"}</div></div>
+              <div class="info-row"><div class="info-label">Supplier Name:</div><div class="info-value">${po?.supplier?.supplier_name || "N/A"}</div></div>
+              <div class="info-row"><div class="info-label">Email:</div><div class="info-value">${po?.supplier?.email || "—"}</div></div>
+              <div class="info-row"><div class="info-label">Phone:</div><div class="info-value">${po?.supplier?.phone || "—"}</div></div>
             </div>
             <div class="info-section">
               <h3>ORDER DETAILS</h3>
-              <div class="info-row"><div class="info-label">Order Date:</div><div class="info-value">${new Date(po.order_date).toLocaleDateString()}</div></div>
-              <div class="info-row"><div class="info-label">Expected Delivery:</div><div class="info-value">${po.expected_delivery_date ? new Date(po.expected_delivery_date).toLocaleDateString() : "—"}</div></div>
-              <div class="info-row"><div class="info-label">Status:</div><div class="info-value">${po.status}</div></div>
-              <div class="info-row"><div class="info-label">Currency:</div><div class="info-value">${po.currency}</div></div>
+              <div class="info-row"><div class="info-label">Order Date:</div><div class="info-value">${new Date(po?.order_date).toLocaleDateString()}</div></div>
+              <div class="info-row"><div class="info-label">Expected Delivery:</div><div class="info-value">${po?.expected_delivery_date ? new Date(po?.expected_delivery_date).toLocaleDateString() : "—"}</div></div>
+              <div class="info-row"><div class="info-label">Status:</div><div class="info-value">${po?.status}</div></div>
+              <div class="info-row"><div class="info-label">Currency:</div><div class="info-value">${po?.currency}</div></div>
             </div>
           </div>
 
@@ -790,7 +790,7 @@ export default function PurchaseOrderDetailPage() {
             {canSubmit && (
               <button
                 onClick={handleSubmitForApproval}
-                className="flex items-center gap-2 px-3 py-2 md:px-4 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors text-sm md:text-base"
+                className="flex items-center gap-2 px-3 py-2 md:px-4 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors text-sm md:text-base cursor-pointer"
               >
                 <img src={send_icon} alt="" className="w-4 h-4" />
                 Submit for Approval
@@ -800,22 +800,22 @@ export default function PurchaseOrderDetailPage() {
               <>
                 <button
                   onClick={handleApprove}
-                  className="flex items-center gap-2 px-3 py-2 md:px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm md:text-base"
+                  className="flex items-center gap-2 px-3 py-2 md:px-4 border-1 border-green-600 text-green-600 rounded-lg hover:bg-green-700 hover:text-white transition-colors text-sm md:text-base cursor-pointer"
                 >
-                  <img src={check_icon} alt="" className="w-4 h-4" /> Approve
+                    Approve
                 </button>
                 <button
                   onClick={() => setShowRejectModal(true)}
-                  className="flex items-center gap-2 px-3 py-2 md:px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm md:text-base"
+                  className="flex items-center gap-2 px-3 py-2 md:px-4 border-1 border-red-600 text-red-600 rounded-lg hover:bg-red-700 hover:text-white transition-colors text-sm md:text-base cursor-pointer"
                 >
-                  <img src={close_icon} alt="" className="w-4 h-4" /> Reject
+                  Reject
                 </button>
               </>
             )}
             {canOrder && (
               <button
                 onClick={handleMarkOrdered}
-                className="flex items-center gap-2 px-3 py-2 md:px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm md:text-base"
+                className="flex items-center gap-2 px-3 py-2 md:px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm md:text-base cursor-pointer"
               >
                 Mark as Ordered
               </button>
@@ -823,7 +823,7 @@ export default function PurchaseOrderDetailPage() {
             {canCancel && (
               <button
                 onClick={() => setShowCancelModal(true)}
-                className="flex items-center gap-2 px-3 py-2 md:px-4 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm md:text-base"
+                className="flex items-center gap-2 px-3 py-2 md:px-4 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm md:text-base cursor-pointer"
               >
                 Cancel PO
               </button>

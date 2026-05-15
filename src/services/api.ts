@@ -57,7 +57,7 @@ export const api = createApi({
     'Budgets','Customers','CustomerStatistics','LoyaltyStatistics','CustomerDuplicates','CustomerMergeHistory','CustomerInteractions','Loyalty',
     'Reports','ReportExecutions','Dashboards','KpiMetrics','HelpFaqs','HelpArticles','HelpCategories','SystemSettings','PaymentMethods','Seo','Sitemap',
     'Blog','BlogCategories','AIStatistics', 'AILogs','SecurityStats','ActivityLogs','LoginHistory','SecurityAlerts','UserSessions','DeletedRecords',
-    'ActivityLogStatistics','ChangeHistory','DeletedRecordStatistics'
+    'ActivityLogStatistics','ChangeHistory','DeletedRecordStatistics','SupplierReports'
   ],
   endpoints: () => ({
     // Common endpoints will be injected by other API files

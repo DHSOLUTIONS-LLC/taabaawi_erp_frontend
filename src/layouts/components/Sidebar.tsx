@@ -136,6 +136,7 @@ export default function Sidebar({ onMenuSelect, mobileMenuOpen, closeMobileMenu 
       path: `${basePath}/purchase`,
       submenu: [
         { id: 'purchase-dashboard', label: 'Dashboard', path: `${basePath}/purchase` },
+        { id: 'purchase-suppliers-reports', label: 'Supplier Reports', path: `${basePath}/purchase/suppliers_reports` },
         { id: 'purchase-suppliers', label: 'Suppliers', path: `${basePath}/purchase/suppliers` },
         { id: 'purchase-currencies', label: 'Currencies', path: `${basePath}/purchase/currencies` },
         { id: 'purchase-orders', label: 'Purchase Orders', path: `${basePath}/purchase/orders` },

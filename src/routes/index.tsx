@@ -49,6 +49,7 @@ import OrderDetailPage from "../features/sales/pages/orders/Orderdetailpage";
 import CreateOrderPage from "../features/sales/pages/orders/CreateOrderPage";
 import AddOrderProducts from "../features/sales/pages/orders/AddOrderProducts";
 
+import SupplierReportsPage from "../features/purchase/pages/suppliers/SupplierReportsPage";
 import SuppliersPage from "../features/purchase/pages/suppliers/SuppliersPage";
 import SupplierDetailPage from "../features/purchase/pages/suppliers/SupplierDetailPage";
 import CurrenciesPage from "../features/purchase/pages/Currencies/CurrenciesPage";
@@ -481,6 +482,14 @@ export const router = createBrowserRouter([
             ),
           },
           // Suppliers
+          {
+            path: "suppliers_reports",
+            element: (
+              <PermissionRoute requiredPermissions={["view_purchase"]}>
+                <SupplierReportsPage />
+              </PermissionRoute>
+            ),
+          },
           {
             path: "suppliers",
             element: (
@@ -1353,6 +1362,7 @@ export const router = createBrowserRouter([
         path: "purchase",
         children: [
           { path: "", element: <PurchaseDashboardPage /> },
+          { path: "suppliers_reports", element: <SupplierReportsPage /> },
           { path: "suppliers", element: <SuppliersPage /> },
           { path: "suppliers/:id", element: <SupplierDetailPage /> },
           { path: "currencies", element: <CurrenciesPage /> },

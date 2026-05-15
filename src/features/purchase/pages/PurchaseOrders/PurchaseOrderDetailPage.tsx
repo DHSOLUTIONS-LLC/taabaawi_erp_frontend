@@ -802,7 +802,7 @@ export default function PurchaseOrderDetailPage() {
                   onClick={handleApprove}
                   className="flex items-center gap-2 px-3 py-2 md:px-4 border-1 border-green-600 text-green-600 rounded-lg hover:bg-green-700 hover:text-white transition-colors text-sm md:text-base cursor-pointer"
                 >
-                    Approve
+                  Approve
                 </button>
                 <button
                   onClick={() => setShowRejectModal(true)}

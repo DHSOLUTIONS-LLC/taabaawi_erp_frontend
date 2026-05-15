@@ -1,10 +1,16 @@
 // src/services/accountingApi.ts
-import { api } from './api';
+import { api } from "./api";
 
 /* ================= TYPES ================= */
 
 // Chart of Accounts Types
-export type AccountType = 'Asset' | 'Liability' | 'Equity' | 'Revenue' | 'Expense' | 'Cost of Goods Sold';
+export type AccountType =
+  | "Asset"
+  | "Liability"
+  | "Equity"
+  | "Revenue"
+  | "Expense"
+  | "Cost of Goods Sold";
 
 export interface ChartOfAccount {
   id: number;
@@ -27,7 +33,7 @@ export interface ChartOfAccount {
 }
 
 // Journal Entry Types
-export type JournalEntryStatus = 'Draft' | 'Posted' | 'Reversed';
+export type JournalEntryStatus = "Draft" | "Posted" | "Reversed";
 
 export interface JournalEntryLine {
   id: number;
@@ -88,13 +94,18 @@ export interface BankTransaction {
   transaction_number: string;
   bank_account_id: number;
   transaction_date: string;
-  transaction_type: 'Deposit' | 'Withdrawal' | 'Transfer' | 'Bank Charge' | 'Interest';
+  transaction_type:
+    | "Deposit"
+    | "Withdrawal"
+    | "Transfer"
+    | "Bank Charge"
+    | "Interest";
   amount: number;
   reference_number: string | null;
   reference_type: string | null;
   reference_id: number | null;
   description: string;
-  status: 'Pending' | 'Cleared' | 'Reconciled' | 'Void';
+  status: "Pending" | "Cleared" | "Reconciled" | "Void";
   cleared_date: string | null;
   created_by: number;
   created_at: string;
@@ -136,7 +147,7 @@ export interface AccountsPayable {
   paid_amount: number;
   outstanding_amount: number;
   currency: string;
-  status: 'Unpaid' | 'Partial' | 'Paid' | 'Overdue';
+  status: "Unpaid" | "Partial" | "Paid" | "Overdue";
   notes: string | null;
   created_at: string;
   updated_at: string;
@@ -148,9 +159,9 @@ export interface AccountsPayable {
 
 export interface APAgingReport {
   current: number;
-  '1_30_days': number;
-  '31_60_days': number;
-  '61_90_days': number;
+  "1_30_days": number;
+  "31_60_days": number;
+  "61_90_days": number;
   over_90_days: number;
   total_outstanding: number;
 }
@@ -168,7 +179,7 @@ export interface AccountsReceivable {
   received_amount: number;
   outstanding_amount: number;
   currency: string;
-  status: 'Unpaid' | 'Partial' | 'Paid' | 'Overdue';
+  status: "Unpaid" | "Partial" | "Paid" | "Overdue";
   notes: string | null;
   created_at: string;
   updated_at: string;
@@ -180,16 +191,16 @@ export interface AccountsReceivable {
 
 export interface ARAgingReport {
   current: number;
-  '1_30_days': number;
-  '31_60_days': number;
-  '61_90_days': number;
+  "1_30_days": number;
+  "31_60_days": number;
+  "61_90_days": number;
   over_90_days: number;
   total_outstanding: number;
 }
 
 // Budget Types
-export type BudgetPeriodType = 'Monthly' | 'Quarterly' | 'Yearly';
-export type BudgetStatus = 'Draft' | 'Active' | 'Closed';
+export type BudgetPeriodType = "Monthly" | "Quarterly" | "Yearly";
+export type BudgetStatus = "Draft" | "Active" | "Closed";
 
 export interface BudgetLine {
   id: number;
@@ -283,15 +294,30 @@ export interface BalanceSheet {
   report_name: string;
   as_of_date: string;
   assets: {
-    details: { account_code: string; account_name: string; account_sub_type: string; amount: number }[];
+    details: {
+      account_code: string;
+      account_name: string;
+      account_sub_type: string;
+      amount: number;
+    }[];
     total: number;
   };
   liabilities: {
-    details: { account_code: string; account_name: string; account_sub_type: string; amount: number }[];
+    details: {
+      account_code: string;
+      account_name: string;
+      account_sub_type: string;
+      amount: number;
+    }[];
     total: number;
   };
   equity: {
-    details: { account_code: string; account_name: string; account_sub_type: string; amount: number }[];
+    details: {
+      account_code: string;
+      account_name: string;
+      account_sub_type: string;
+      amount: number;
+    }[];
     total: number;
   };
   total_liabilities_and_equity: number;
@@ -321,229 +347,293 @@ export interface GeneralLedger {
 export const accountingApi = api.injectEndpoints({
   endpoints: (builder) => ({
     // ==================== CHART OF ACCOUNTS ====================
-   getChartOfAccounts: builder.query<{ data: ChartOfAccount[]; meta?: any }, {
-  account_type?: AccountType;
-  account_sub_type?: string;
-  is_active?: boolean;
-  parent_account_id?: number;
-  search?: string;
-  page?: number;
-  per_page?: number;
-}>({
-  query: (params) => ({ url: '/chart-of-accounts', params }),
-  providesTags: ['ChartOfAccounts'],
-  transformResponse: (response: any) => ({
-    data: response?.data?.data ?? [],
-    meta: {
-      current_page: response?.data?.current_page,
-      last_page:    response?.data?.last_page,
-      total:        response?.data?.total,
-      per_page:     response?.data?.per_page,
-      from:         response?.data?.from,
-      to:           response?.data?.to,
-    },
-  }),
-}),
+    getChartOfAccounts: builder.query<
+      { data: ChartOfAccount[]; meta?: any },
+      {
+        account_type?: AccountType;
+        account_sub_type?: string;
+        is_active?: boolean;
+        parent_account_id?: number;
+        search?: string;
+        page?: number;
+        per_page?: number;
+      }
+    >({
+      query: (params) => ({ url: "/chart-of-accounts", params }),
+      providesTags: ["ChartOfAccounts"],
+      transformResponse: (response: any) => ({
+        data: response?.data?.data ?? [],
+        meta: {
+          current_page: response?.data?.current_page,
+          last_page: response?.data?.last_page,
+          total: response?.data?.total,
+          per_page: response?.data?.per_page,
+          from: response?.data?.from,
+          to: response?.data?.to,
+        },
+      }),
+    }),
 
-    getAccountTree: builder.query<{ data: ChartOfAccount[] }, { account_type?: AccountType }>({
-      query: (params) => ({ url: '/chart-of-accounts/tree', params }),
-      providesTags: ['ChartOfAccounts'],
+    getAccountTree: builder.query<
+      { data: ChartOfAccount[] },
+      { account_type?: AccountType }
+    >({
+      query: (params) => ({ url: "/chart-of-accounts/tree", params }),
+      providesTags: ["ChartOfAccounts"],
     }),
 
     getAccountById: builder.query<{ data: ChartOfAccount }, number>({
       query: (id) => `/chart-of-accounts/${id}`,
-      providesTags: (_r, _e, id) => [{ type: 'ChartOfAccounts', id }],
+      providesTags: (_r, _e, id) => [{ type: "ChartOfAccounts", id }],
     }),
 
-    createAccount: builder.mutation<{ data: ChartOfAccount }, Partial<ChartOfAccount>>({
+    createAccount: builder.mutation<
+      { data: ChartOfAccount },
+      Partial<ChartOfAccount>
+    >({
       query: (body) => ({
-        url: '/chart-of-accounts',
-        method: 'POST',
+        url: "/chart-of-accounts",
+        method: "POST",
         body,
       }),
-      invalidatesTags: ['ChartOfAccounts'],
+      invalidatesTags: ["ChartOfAccounts"],
     }),
 
-    updateAccount: builder.mutation<{ data: ChartOfAccount }, { id: number; data: Partial<ChartOfAccount> }>({
+    updateAccount: builder.mutation<
+      { data: ChartOfAccount },
+      { id: number; data: Partial<ChartOfAccount> }
+    >({
       query: ({ id, data }) => ({
         url: `/chart-of-accounts/${id}`,
-        method: 'PUT',
+        method: "PUT",
         body: data,
       }),
-      invalidatesTags: (_r, _e, { id }) => [{ type: 'ChartOfAccounts', id }, 'ChartOfAccounts'],
+      invalidatesTags: (_r, _e, { id }) => [
+        { type: "ChartOfAccounts", id },
+        "ChartOfAccounts",
+      ],
     }),
 
     deleteAccount: builder.mutation<{ success: boolean }, number>({
       query: (id) => ({
         url: `/chart-of-accounts/${id}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
-      invalidatesTags: ['ChartOfAccounts'],
+      invalidatesTags: ["ChartOfAccounts"],
     }),
 
-    getAccountBalance: builder.query<{ data: any }, { id: number; start_date?: string; end_date?: string }>({
-      query: ({ id, ...params }) => ({ url: `/chart-of-accounts/${id}/balance`, params }),
-      providesTags: (_r, _e, { id }) => [{ type: 'ChartOfAccounts', id }],
+    getAccountBalance: builder.query<
+      { data: any },
+      { id: number; start_date?: string; end_date?: string }
+    >({
+      query: ({ id, ...params }) => ({
+        url: `/chart-of-accounts/${id}/balance`,
+        params,
+      }),
+      providesTags: (_r, _e, { id }) => [{ type: "ChartOfAccounts", id }],
     }),
 
     // ==================== JOURNAL ENTRIES ====================
-    getJournalEntries: builder.query<{ data: JournalEntry[]; meta?: any }, {
-      status?: JournalEntryStatus;
-      reference_type?: string;
-      start_date?: string;
-      end_date?: string;
-      search?: string;
-      page?: number;
-      per_page?: number;
-    }>({
-      query: (params) => ({ url: '/journal-entries', params }),
-      providesTags: ['JournalEntries'],
+    getJournalEntries: builder.query<
+      { data: JournalEntry[]; meta?: any },
+      {
+        status?: JournalEntryStatus;
+        reference_type?: string;
+        start_date?: string;
+        end_date?: string;
+        search?: string;
+        page?: number;
+        per_page?: number;
+      }
+    >({
+      query: (params) => ({ url: "/journal-entries", params }),
+      providesTags: ["JournalEntries"],
       transformResponse: (response: any) => {
         if (response?.data?.data) return response.data;
-        if (response?.data) return { data: Array.isArray(response.data) ? response.data : [] };
+        if (response?.data)
+          return { data: Array.isArray(response.data) ? response.data : [] };
         return { data: [] };
       },
     }),
 
     getJournalEntryById: builder.query<{ data: JournalEntry }, number>({
       query: (id) => `/journal-entries/${id}`,
-      providesTags: (_r, _e, id) => [{ type: 'JournalEntries', id }],
+      providesTags: (_r, _e, id) => [{ type: "JournalEntries", id }],
     }),
 
     createJournalEntry: builder.mutation<{ data: JournalEntry }, any>({
       query: (body) => ({
-        url: '/journal-entries',
-        method: 'POST',
+        url: "/journal-entries",
+        method: "POST",
         body,
       }),
-      invalidatesTags: ['JournalEntries', 'ChartOfAccounts'],
+      invalidatesTags: ["JournalEntries", "ChartOfAccounts"],
     }),
 
-    updateJournalEntry: builder.mutation<{ data: JournalEntry }, { id: number; data: any }>({
+    updateJournalEntry: builder.mutation<
+      { data: JournalEntry },
+      { id: number; data: any }
+    >({
       query: ({ id, data }) => ({
         url: `/journal-entries/${id}`,
-        method: 'PUT',
+        method: "PUT",
         body: data,
       }),
-      invalidatesTags: (_r, _e, { id }) => [{ type: 'JournalEntries', id }, 'JournalEntries'],
+      invalidatesTags: (_r, _e, { id }) => [
+        { type: "JournalEntries", id },
+        "JournalEntries",
+      ],
     }),
 
     deleteJournalEntry: builder.mutation<{ success: boolean }, number>({
       query: (id) => ({
         url: `/journal-entries/${id}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
-      invalidatesTags: ['JournalEntries'],
+      invalidatesTags: ["JournalEntries"],
     }),
 
     postJournalEntry: builder.mutation<{ data: JournalEntry }, number>({
       query: (id) => ({
         url: `/journal-entries/${id}/post`,
-        method: 'POST',
+        method: "POST",
       }),
-      invalidatesTags: (_r, _e, id) => [{ type: 'JournalEntries', id }, 'JournalEntries', 'ChartOfAccounts'],
+      invalidatesTags: (_r, _e, id) => [
+        { type: "JournalEntries", id },
+        "JournalEntries",
+        "ChartOfAccounts",
+      ],
     }),
 
-    reverseJournalEntry: builder.mutation<{ data: any }, { id: number; reversal_date: string; reason: string }>({
+    reverseJournalEntry: builder.mutation<
+      { data: any },
+      { id: number; reversal_date: string; reason: string }
+    >({
       query: ({ id, ...body }) => ({
         url: `/journal-entries/${id}/reverse`,
-        method: 'POST',
+        method: "POST",
         body,
       }),
-      invalidatesTags: (_r, _e, { id }) => [{ type: 'JournalEntries', id }, 'JournalEntries', 'ChartOfAccounts'],
+      invalidatesTags: (_r, _e, { id }) => [
+        { type: "JournalEntries", id },
+        "JournalEntries",
+        "ChartOfAccounts",
+      ],
     }),
 
     // ==================== BANK ACCOUNTS ====================
-    getBankAccounts: builder.query<{ data: BankAccount[]; meta?: any }, {
-      is_active?: boolean;
-      currency?: string;
-      search?: string;
-      page?: number;
-      per_page?: number;
-    }>({
-      query: (params) => ({ url: '/bank-accounts', params }),
-      providesTags: ['BankAccounts'],
+    getBankAccounts: builder.query<
+      { data: BankAccount[]; meta?: any },
+      {
+        is_active?: boolean;
+        currency?: string;
+        search?: string;
+        page?: number;
+        per_page?: number;
+      }
+    >({
+      query: (params) => ({ url: "/bank-accounts", params }),
+      providesTags: ["BankAccounts"],
       transformResponse: (response: any) => {
         if (response?.data?.data) return response.data;
-        if (response?.data) return { data: Array.isArray(response.data) ? response.data : [] };
+        if (response?.data)
+          return { data: Array.isArray(response.data) ? response.data : [] };
         return { data: [] };
       },
     }),
 
     getBankAccountById: builder.query<{ data: BankAccount }, number>({
       query: (id) => `/bank-accounts/${id}`,
-      providesTags: (_r, _e, id) => [{ type: 'BankAccounts', id }],
+      providesTags: (_r, _e, id) => [{ type: "BankAccounts", id }],
     }),
 
-    createBankAccount: builder.mutation<{ data: BankAccount }, Partial<BankAccount>>({
+    createBankAccount: builder.mutation<
+      { data: BankAccount },
+      Partial<BankAccount>
+    >({
       query: (body) => ({
-        url: '/bank-accounts',
-        method: 'POST',
+        url: "/bank-accounts",
+        method: "POST",
         body,
       }),
-      invalidatesTags: ['BankAccounts'],
+      invalidatesTags: ["BankAccounts"],
     }),
 
-    updateBankAccount: builder.mutation<{ data: BankAccount }, { id: number; data: Partial<BankAccount> }>({
+    updateBankAccount: builder.mutation<
+      { data: BankAccount },
+      { id: number; data: Partial<BankAccount> }
+    >({
       query: ({ id, data }) => ({
         url: `/bank-accounts/${id}`,
-        method: 'PUT',
+        method: "PUT",
         body: data,
       }),
-      invalidatesTags: (_r, _e, { id }) => [{ type: 'BankAccounts', id }, 'BankAccounts'],
+      invalidatesTags: (_r, _e, { id }) => [
+        { type: "BankAccounts", id },
+        "BankAccounts",
+      ],
     }),
 
     deleteBankAccount: builder.mutation<{ success: boolean }, number>({
       query: (id) => ({
         url: `/bank-accounts/${id}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
-      invalidatesTags: ['BankAccounts'],
+      invalidatesTags: ["BankAccounts"],
     }),
 
     createBankTransaction: builder.mutation<{ data: BankTransaction }, any>({
       query: (body) => ({
-        url: '/bank-accounts/transactions',
-        method: 'POST',
+        url: "/bank-accounts/transactions",
+        method: "POST",
         body,
       }),
-      invalidatesTags: ['BankAccounts'],
+      invalidatesTags: ["BankAccounts"],
     }),
 
-    getBankTransactions: builder.query<{ data: BankTransaction[]; meta?: any }, {
-      bank_account_id: number;
-      transaction_type?: string;
-      status?: string;
-      start_date?: string;
-      end_date?: string;
-      page?: number;
-      per_page?: number;
-    }>({
+    getBankTransactions: builder.query<
+      { data: BankTransaction[]; meta?: any },
+      {
+        bank_account_id: number;
+        transaction_type?: string;
+        status?: string;
+        start_date?: string;
+        end_date?: string;
+        page?: number;
+        per_page?: number;
+      }
+    >({
       query: ({ bank_account_id, ...params }) => ({
         url: `/bank-accounts/${bank_account_id}/transactions`,
         params,
       }),
-      providesTags: ['BankTransactions'],
+      providesTags: ["BankTransactions"],
     }),
 
-    reconcileBankTransactions: builder.mutation<{ success: boolean }, {
-      bank_account_id: number;
-      transaction_ids: number[];
-      cleared_date: string;
-    }>({
+    reconcileBankTransactions: builder.mutation<
+      { success: boolean },
+      {
+        bank_account_id: number;
+        transaction_ids: number[];
+        cleared_date: string;
+      }
+    >({
       query: ({ bank_account_id, ...body }) => ({
         url: `/bank-accounts/${bank_account_id}/reconcile`,
-        method: 'POST',
+        method: "POST",
         body,
       }),
-      invalidatesTags: ['BankAccounts', 'BankTransactions'],
+      invalidatesTags: ["BankAccounts", "BankTransactions"],
     }),
 
-    getBankStatement: builder.query<{ data: BankStatement }, {
-      bank_account_id: number;
-      start_date?: string;
-      end_date?: string;
-    }>({
+    getBankStatement: builder.query<
+      { data: BankStatement },
+      {
+        bank_account_id: number;
+        start_date?: string;
+        end_date?: string;
+      }
+    >({
       query: ({ bank_account_id, ...params }) => ({
         url: `/bank-accounts/${bank_account_id}/statement`,
         params,
@@ -551,183 +641,233 @@ export const accountingApi = api.injectEndpoints({
     }),
 
     // ==================== ACCOUNTS PAYABLE ====================
-    getAccountsPayable: builder.query<{ data: AccountsPayable[]; meta?: any }, {
-      supplier_id?: number;
-      status?: string;
-      overdue?: boolean;
-      start_date?: string;
-      end_date?: string;
-      search?: string;
-      page?: number;
-      per_page?: number;
-    }>({
-      query: (params) => ({ url: '/accounts-payable', params }),
-      providesTags: ['AccountsPayable'],
+    getAccountsPayable: builder.query<
+      { data: AccountsPayable[]; meta?: any },
+      {
+        supplier_id?: number;
+        status?: string;
+        overdue?: boolean;
+        start_date?: string;
+        end_date?: string;
+        search?: string;
+        page?: number;
+        per_page?: number;
+      }
+    >({
+      query: (params) => ({ url: "/accounts-payable", params }),
+      providesTags: ["AccountsPayable"],
       transformResponse: (response: any) => {
         if (response?.data?.data) return response.data;
-        if (response?.data) return { data: Array.isArray(response.data) ? response.data : [] };
+        if (response?.data)
+          return { data: Array.isArray(response.data) ? response.data : [] };
         return { data: [] };
       },
     }),
 
     getAPById: builder.query<{ data: AccountsPayable }, number>({
       query: (id) => `/accounts-payable/${id}`,
-      providesTags: (_r, _e, id) => [{ type: 'AccountsPayable', id }],
+      providesTags: (_r, _e, id) => [{ type: "AccountsPayable", id }],
     }),
 
-    createAP: builder.mutation<{ data: AccountsPayable }, Partial<AccountsPayable>>({
+    createAP: builder.mutation<
+      { data: AccountsPayable },
+      Partial<AccountsPayable>
+    >({
       query: (body) => ({
-        url: '/accounts-payable',
-        method: 'POST',
+        url: "/accounts-payable",
+        method: "POST",
         body,
       }),
-      invalidatesTags: ['AccountsPayable'],
+      invalidatesTags: ["AccountsPayable"],
     }),
 
-    recordAPPayment: builder.mutation<{ data: AccountsPayable }, { id: number; payment_amount: number }>({
+    recordAPPayment: builder.mutation<
+      { data: AccountsPayable },
+      { id: number; payment_amount: number }
+    >({
       query: ({ id, ...body }) => ({
         url: `/accounts-payable/${id}/record-payment`,
-        method: 'POST',
+        method: "POST",
         body,
       }),
-      invalidatesTags: (_r, _e, { id }) => [{ type: 'AccountsPayable', id }, 'AccountsPayable'],
+      invalidatesTags: (_r, _e, { id }) => [
+        { type: "AccountsPayable", id },
+        "AccountsPayable",
+      ],
     }),
 
-    getAPAgingReport: builder.query<{ data: APAgingReport }, { supplier_id?: number }>({
-      query: (params) => ({ url: '/accounts-payable/aging-report', params }),
+    getAPAgingReport: builder.query<
+      { data: APAgingReport },
+      { supplier_id?: number }
+    >({
+      query: (params) => ({ url: "/accounts-payable/aging-report", params }),
     }),
 
-    getAPStatistics: builder.query<{ data: any }, { start_date?: string; end_date?: string }>({
-      query: (params) => ({ url: '/accounts-payable/statistics', params }),
+    getAPStatistics: builder.query<
+      { data: any },
+      { start_date?: string; end_date?: string }
+    >({
+      query: (params) => ({ url: "/accounts-payable/statistics", params }),
     }),
 
     // ==================== ACCOUNTS RECEIVABLE ====================
-    getAccountsReceivable: builder.query<{ data: AccountsReceivable[]; meta?: any }, {
-      customer_id?: number;
-      status?: string;
-      overdue?: boolean;
-      start_date?: string;
-      end_date?: string;
-      search?: string;
-      page?: number;
-      per_page?: number;
-    }>({
-      query: (params) => ({ url: '/accounts-receivable', params }),
-      providesTags: ['AccountsReceivable'],
+    getAccountsReceivable: builder.query<
+      { data: AccountsReceivable[]; meta?: any },
+      {
+        customer_id?: number;
+        status?: string;
+        overdue?: boolean;
+        start_date?: string;
+        end_date?: string;
+        search?: string;
+        page?: number;
+        per_page?: number;
+      }
+    >({
+      query: (params) => ({ url: "/accounts-receivable", params }),
+      providesTags: ["AccountsReceivable"],
       transformResponse: (response: any) => {
         if (response?.data?.data) return response.data;
-        if (response?.data) return { data: Array.isArray(response.data) ? response.data : [] };
+        if (response?.data)
+          return { data: Array.isArray(response.data) ? response.data : [] };
         return { data: [] };
       },
     }),
 
     getARById: builder.query<{ data: AccountsReceivable }, number>({
       query: (id) => `/accounts-receivable/${id}`,
-      providesTags: (_r, _e, id) => [{ type: 'AccountsReceivable', id }],
+      providesTags: (_r, _e, id) => [{ type: "AccountsReceivable", id }],
     }),
 
-    createAR: builder.mutation<{ data: AccountsReceivable }, Partial<AccountsReceivable>>({
+    createAR: builder.mutation<
+      { data: AccountsReceivable },
+      Partial<AccountsReceivable>
+    >({
       query: (body) => ({
-        url: '/accounts-receivable',
-        method: 'POST',
+        url: "/accounts-receivable",
+        method: "POST",
         body,
       }),
-      invalidatesTags: ['AccountsReceivable'],
+      invalidatesTags: ["AccountsReceivable"],
     }),
 
-    recordARReceipt: builder.mutation<{ data: AccountsReceivable }, { id: number; receipt_amount: number }>({
+    recordARReceipt: builder.mutation<
+      { data: AccountsReceivable },
+      { id: number; receipt_amount: number }
+    >({
       query: ({ id, ...body }) => ({
         url: `/accounts-receivable/${id}/record-receipt`,
-        method: 'POST',
+        method: "POST",
         body,
       }),
-      invalidatesTags: (_r, _e, { id }) => [{ type: 'AccountsReceivable', id }, 'AccountsReceivable'],
+      invalidatesTags: (_r, _e, { id }) => [
+        { type: "AccountsReceivable", id },
+        "AccountsReceivable",
+      ],
     }),
 
-    getARAgingReport: builder.query<{ data: ARAgingReport }, { customer_id?: number }>({
-      query: (params) => ({ url: '/accounts-receivable/aging-report', params }),
+    getARAgingReport: builder.query<
+      { data: ARAgingReport },
+      { customer_id?: number }
+    >({
+      query: (params) => ({ url: "/accounts-receivable/aging-report", params }),
     }),
 
-    getARStatistics: builder.query<{ data: any }, { start_date?: string; end_date?: string }>({
-      query: (params) => ({ url: '/accounts-receivable/statistics', params }),
+    getARStatistics: builder.query<
+      { data: any },
+      { start_date?: string; end_date?: string }
+    >({
+      query: (params) => ({ url: "/accounts-receivable/statistics", params }),
     }),
 
     // ==================== BUDGETS ====================
-    getBudgets: builder.query<{ data: Budget[]; meta?: any }, {
-      fiscal_year?: number;
-      status?: BudgetStatus;
-      period_type?: BudgetPeriodType;
-      search?: string;
-      page?: number;
-      per_page?: number;
-    }>({
-      query: (params) => ({ url: '/budgets', params }),
-      providesTags: ['Budgets'],
+    getBudgets: builder.query<
+      { data: Budget[]; meta?: any },
+      {
+        fiscal_year?: number;
+        status?: BudgetStatus;
+        period_type?: BudgetPeriodType;
+        search?: string;
+        page?: number;
+        per_page?: number;
+      }
+    >({
+      query: (params) => ({ url: "/budgets", params }),
+      providesTags: ["Budgets"],
       transformResponse: (response: any) => {
         if (response?.data?.data) return response.data;
-        if (response?.data) return { data: Array.isArray(response.data) ? response.data : [] };
+        if (response?.data)
+          return { data: Array.isArray(response.data) ? response.data : [] };
         return { data: [] };
       },
     }),
 
     getBudgetById: builder.query<{ data: Budget }, number>({
       query: (id) => `/budgets/${id}`,
-      providesTags: (_r, _e, id) => [{ type: 'Budgets', id }],
+      providesTags: (_r, _e, id) => [{ type: "Budgets", id }],
     }),
 
     createBudget: builder.mutation<{ data: Budget }, any>({
       query: (body) => ({
-        url: '/budgets',
-        method: 'POST',
+        url: "/budgets",
+        method: "POST",
         body,
       }),
-      invalidatesTags: ['Budgets'],
+      invalidatesTags: ["Budgets"],
     }),
 
-    updateBudget: builder.mutation<{ data: Budget }, { id: number; data: Partial<Budget> }>({
+    updateBudget: builder.mutation<
+      { data: Budget },
+      { id: number; data: Partial<Budget> }
+    >({
       query: ({ id, data }) => ({
         url: `/budgets/${id}`,
-        method: 'PUT',
+        method: "PUT",
         body: data,
       }),
-      invalidatesTags: (_r, _e, { id }) => [{ type: 'Budgets', id }, 'Budgets'],
+      invalidatesTags: (_r, _e, { id }) => [{ type: "Budgets", id }, "Budgets"],
     }),
 
     deleteBudget: builder.mutation<{ success: boolean }, number>({
       query: (id) => ({
         url: `/budgets/${id}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
-      invalidatesTags: ['Budgets'],
+      invalidatesTags: ["Budgets"],
     }),
 
     activateBudget: builder.mutation<{ data: Budget }, number>({
       query: (id) => ({
         url: `/budgets/${id}/activate`,
-        method: 'POST',
+        method: "POST",
       }),
-      invalidatesTags: (_r, _e, id) => [{ type: 'Budgets', id }],
+      invalidatesTags: (_r, _e, id) => [{ type: "Budgets", id }],
     }),
 
     closeBudget: builder.mutation<{ data: Budget }, number>({
       query: (id) => ({
         url: `/budgets/${id}/close`,
-        method: 'POST',
+        method: "POST",
       }),
-      invalidatesTags: (_r, _e, id) => [{ type: 'Budgets', id }],
+      invalidatesTags: (_r, _e, id) => [{ type: "Budgets", id }],
     }),
 
-    updateBudgetLineActual: builder.mutation<{ data: BudgetLine }, {
-      budget_id: number;
-      line_id: number;
-      actual_amount: number;
-    }>({
+    updateBudgetLineActual: builder.mutation<
+      { data: BudgetLine },
+      {
+        budget_id: number;
+        line_id: number;
+        actual_amount: number;
+      }
+    >({
       query: ({ budget_id, line_id, ...body }) => ({
         url: `/budgets/${budget_id}/lines/${line_id}/actual`,
-        method: 'PUT',
+        method: "PUT",
         body,
       }),
-      invalidatesTags: (_r, _e, { budget_id }) => [{ type: 'Budgets', budget_id }],
+      invalidatesTags: (_r, _e, { budget_id }) => [
+        { type: "Budgets", budget_id },
+      ],
     }),
 
     getBudgetVsActual: builder.query<{ data: BudgetVsActualReport }, number>({
@@ -735,47 +875,67 @@ export const accountingApi = api.injectEndpoints({
     }),
 
     // ==================== FINANCIAL REPORTS ====================
-    getTrialBalance: builder.query<{ data: TrialBalance }, { as_of_date?: string }>({
-      query: (params) => ({ url: '/financial-reports/trial-balance', params }),
+    getTrialBalance: builder.query<
+      { data: TrialBalance },
+      { as_of_date?: string }
+    >({
+      query: (params) => ({ url: "/financial-reports/trial-balance", params }),
     }),
 
-    getProfitLoss: builder.query<{ data: ProfitLossStatement }, {
-      start_date?: string;
-      end_date?: string;
-    }>({
-      query: (params) => ({ url: '/financial-reports/profit-loss', params }),
+    getProfitLoss: builder.query<
+      { data: ProfitLossStatement },
+      {
+        start_date?: string;
+        end_date?: string;
+      }
+    >({
+      query: (params) => ({ url: "/financial-reports/profit-loss", params }),
     }),
 
-    getBalanceSheet: builder.query<{ data: BalanceSheet }, { as_of_date?: string }>({
-      query: (params) => ({ url: '/financial-reports/balance-sheet', params }),
+    getBalanceSheet: builder.query<
+      { data: BalanceSheet },
+      { as_of_date?: string }
+    >({
+      query: (params) => ({ url: "/financial-reports/balance-sheet", params }),
     }),
 
-    getGeneralLedger: builder.query<{ data: GeneralLedger }, {
-      account_id: number;
-      start_date?: string;
-      end_date?: string;
-    }>({
-      query: (params) => ({ url: '/financial-reports/general-ledger', params }),
+    getGeneralLedger: builder.query<
+      { data: GeneralLedger },
+      {
+        account_id: number;
+        start_date?: string;
+        end_date?: string;
+      }
+    >({
+      query: (params) => ({ url: "/financial-reports/general-ledger", params }),
     }),
 
-    getCashFlow: builder.query<{ data: any }, {
-      start_date?: string;
-      end_date?: string;
-    }>({
-      query: (params) => ({ url: '/financial-reports/cash-flow', params }),
+    getCashFlow: builder.query<
+      { data: any },
+      {
+        start_date?: string;
+        end_date?: string;
+      }
+    >({
+      query: (params) => ({ url: "/financial-reports/cash-flow", params }),
     }),
 
-
-    getCustomers: builder.query<any, { is_active?: boolean; per_page?: number }>({
-  query: (params) => ({ url: '/users', params: { ...params, role_id: 10 } }),
-  providesTags: ['Users'],
-}),
+    getCustomers: builder.query<
+      any,
+      { is_active?: boolean; per_page?: number }
+    >({
+      query: (params) => ({
+        url: "/users",
+        params: { ...params, role_id: 10 },
+      }),
+      providesTags: ["Users"],
+    }),
   }),
 });
 
 export const {
   // Chart of Accounts
-    useGetChartOfAccountsQuery,
+  useGetChartOfAccountsQuery,
   useGetAccountTreeQuery,
   useGetAccountByIdQuery,
   useCreateAccountMutation,

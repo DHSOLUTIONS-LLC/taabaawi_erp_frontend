@@ -78,7 +78,7 @@ export default function OrderDetailPage() {
     useMarkOrderAsPaidMutation();
 
   const order = orderResponse?.data;
-  console.log('Order items:', order?.items);
+  console.log("Order items:", order?.items);
 
   const history = historyResponse?.data || [];
 
@@ -137,15 +137,18 @@ export default function OrderDetailPage() {
     }
   };
 
-const getProductImage = (item: any) => {
-  const primaryImage = item.product?.images?.find((img: any) => img.is_primary);
-  if (primaryImage?.image_path) {
-    const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 
-                   'https://puristic-filmily-bula.ngrok-free.dev';
-    return `${baseUrl}/storage/${primaryImage.image_path}`;
-  }
-  return 'https://via.placeholder.com/80?text=No+Image';
-};
+  const getProductImage = (item: any) => {
+    const primaryImage = item.product?.images?.find(
+      (img: any) => img.is_primary,
+    );
+    if (primaryImage?.image_path) {
+      const baseUrl =
+        import.meta.env.VITE_API_URL?.replace("/api", "") ||
+        "https://puristic-filmily-bula.ngrok-free.dev";
+      return `${baseUrl}/storage/${primaryImage.image_path}`;
+    }
+    return "https://via.placeholder.com/80?text=No+Image";
+  };
 
   const handlePrint = () => {
     const printContent = printRef.current;
@@ -263,7 +266,9 @@ const getProductImage = (item: any) => {
             
             <div class="order-info">
               <table>
-                <tr><td>Order Date:</td><td>${new Date(order?.created_at || new Date()).toLocaleDateString("en-GB", {
+                <tr><td>Order Date:</td><td>${new Date(
+                  order?.created_at || new Date(),
+                ).toLocaleDateString("en-GB", {
                   day: "2-digit",
                   month: "long",
                   year: "numeric",
@@ -308,7 +313,10 @@ const getProductImage = (item: any) => {
                 </tr>
               </thead>
               <tbody>
-                ${(order?.items || []).map((item: any) => `
+                ${
+                  (order?.items || [])
+                    .map(
+                      (item: any) => `
                   <tr>
                   <td class="border border-gray-300 p-2">
   <div class="flex items-center gap-2">
@@ -322,7 +330,10 @@ const getProductImage = (item: any) => {
                     <td>KD ${parseFloat(item.discount_amount).toFixed(3)}</td>
                     <td>KD ${parseFloat(item.total).toFixed(3)}</td>
                   </tr>
-                `).join("") || ""}
+                `,
+                    )
+                    .join("") || ""
+                }
               </tbody>
             </table>
 
@@ -356,11 +367,11 @@ const getProductImage = (item: any) => {
     document.title = originalTitle;
   };
 
-const handleExportPDF = async () => {
-  try {
-    // Create a temporary div with the invoice content
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = `
+  const handleExportPDF = async () => {
+    try {
+      // Create a temporary div with the invoice content
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = `
       <div style="padding: 40px; font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto;">
         <!-- Header -->
         <div style="text-align: center; border-bottom: 2px solid #eee; padding-bottom: 20px; margin-bottom: 30px;">
@@ -414,7 +425,10 @@ const handleExportPDF = async () => {
             </tr>
           </thead>
           <tbody>
-            ${order?.items?.map((item: any) => `
+            ${
+              order?.items
+                ?.map(
+                  (item: any) => `
               <tr>
               <td style="border: 1px solid #ddd; padding: 8px;">
   <div style="display: flex; align-items: center; gap: 8px;">
@@ -430,7 +444,10 @@ const handleExportPDF = async () => {
                 <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">KD ${parseFloat(item.unit_price).toFixed(3)}</td>
                 <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">KD ${parseFloat(item.total).toFixed(3)}</td>
               </tr>
-            `).join("") || ""}
+            `,
+                )
+                .join("") || ""
+            }
           </tbody>
         </table>
 
@@ -453,32 +470,31 @@ const handleExportPDF = async () => {
       </div>
     `;
 
-    document.body.appendChild(tempDiv);
-    
-   const canvas = await html2canvas(tempDiv, {
-  scale: 2,
-  backgroundColor: '#ffffff',
-  logging: false,
-  useCORS: true,
-  allowTaint: true,
-  imageTimeout: 15000
-});
-    
-    document.body.removeChild(tempDiv);
-    
-    const pdf = new jsPDF("p", "mm", "a4");
-    const imgData = canvas.toDataURL("image/png");
-    const imgWidth = 190;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    
-    pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
-    pdf.save(`Invoice_${order?.order_number || "order"}.pdf`);
-    
-  } catch (error) {
-    console.error("PDF export failed:", error);
-    alert("Failed to export PDF. Please try again.");
-  }
-};
+      document.body.appendChild(tempDiv);
+
+      const canvas = await html2canvas(tempDiv, {
+        scale: 2,
+        backgroundColor: "#ffffff",
+        logging: false,
+        useCORS: true,
+        allowTaint: true,
+        imageTimeout: 15000,
+      });
+
+      document.body.removeChild(tempDiv);
+
+      const pdf = new jsPDF("p", "mm", "a4");
+      const imgData = canvas.toDataURL("image/png");
+      const imgWidth = 190;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+      pdf.save(`Invoice_${order?.order_number || "order"}.pdf`);
+    } catch (error) {
+      console.error("PDF export failed:", error);
+      alert("Failed to export PDF. Please try again.");
+    }
+  };
 
   if (isLoading)
     return (
@@ -865,25 +881,25 @@ const handleExportPDF = async () => {
                                 {item.variant_name}
                               </div>
                             )}
-                           </td>
+                          </td>
                           <td className="px-3 sm:px-5 py-3 sm:py-4 text-xs sm:text-sm text-gray-600 whitespace-nowrap">
                             {item.sku || "—"}
-                           </td>
+                          </td>
                           <td className="px-3 sm:px-5 py-3 sm:py-4 text-xs sm:text-sm text-gray-900">
                             {item.quantity}
-                           </td>
+                          </td>
                           <td className="px-3 sm:px-5 py-3 sm:py-4 text-xs sm:text-sm text-gray-900 whitespace-nowrap">
                             KD {parseFloat(item.unit_price).toFixed(3)}
-                           </td>
+                          </td>
                           <td className="px-3 sm:px-5 py-3 sm:py-4 text-xs sm:text-sm text-red-600 whitespace-nowrap">
                             KD {parseFloat(item.discount_amount).toFixed(3)}
-                           </td>
+                          </td>
                           <td className="px-3 sm:px-5 py-3 sm:py-4 text-xs sm:text-sm text-gray-600 whitespace-nowrap">
                             KD {parseFloat(item.tax_amount).toFixed(3)}
-                           </td>
+                          </td>
                           <td className="px-3 sm:px-5 py-3 sm:py-4 text-xs sm:text-sm font-semibold text-gray-900 whitespace-nowrap">
                             KD {parseFloat(item.total).toFixed(3)}
-                           </td>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -894,13 +910,13 @@ const handleExportPDF = async () => {
                           className="px-3 sm:px-5 py-2 sm:py-3 font-bold text-gray-700 text-xs sm:text-sm"
                         >
                           Grand Total
-                         </td>
+                        </td>
                         <td className="px-3 sm:px-5 py-2 sm:py-3 font-bold text-[#1773CF] text-xs sm:text-sm whitespace-nowrap">
                           KD {Number(order.total_amount).toFixed(3)}
-                         </td>
+                        </td>
                       </tr>
                     </tfoot>
-                   </table>
+                  </table>
                 </div>
               </div>
             </div>

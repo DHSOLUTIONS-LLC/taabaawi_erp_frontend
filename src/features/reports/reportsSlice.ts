@@ -1,9 +1,9 @@
-import { createSlice } from '@reduxjs/toolkit';
-import type { PayloadAction } from '@reduxjs/toolkit';
-import type { SavedReport, KpiMetric } from '../../services/reportsApi';
+import { createSlice } from "@reduxjs/toolkit";
+import type { PayloadAction } from "@reduxjs/toolkit";
+import type { SavedReport, KpiMetric } from "../../services/reportsApi";
 
 interface ReportsState {
-  activeTab: 'overview' | 'saved' | 'kpis';
+  activeTab: "overview" | "saved" | "kpis";
 
   reportFilters: {
     search: string;
@@ -27,11 +27,11 @@ interface ReportsState {
 
   // Modal state
   isReportModalOpen: boolean;
-  reportModalMode: 'create' | 'edit';
+  reportModalMode: "create" | "edit";
   selectedReport: SavedReport | null;
 
   isKpiModalOpen: boolean;
-  kpiModalMode: 'create' | 'edit';
+  kpiModalMode: "create" | "edit";
   selectedKpi: KpiMetric | null;
 
   // Report execution result (shown inline)
@@ -45,82 +45,102 @@ interface ReportsState {
 }
 
 const initialState: ReportsState = {
-  activeTab: 'overview',
+  activeTab: "overview",
 
   reportFilters: {
-    search:      '',
-    report_type: '',
-    visibility:  '',
-    page:        1,
-    per_page:    15,
+    search: "",
+    report_type: "",
+    visibility: "",
+    page: 1,
+    per_page: 15,
   },
 
   kpiFilters: {
-    kpi_category: '',
-    page:         1,
-    per_page:     15,
+    kpi_category: "",
+    page: 1,
+    per_page: 15,
   },
 
   preBuiltDates: {
-    start_date: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0],
-    end_date:   new Date().toISOString().split('T')[0],
+    start_date: new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+      .toISOString()
+      .split("T")[0],
+    end_date: new Date().toISOString().split("T")[0],
   },
 
   isReportModalOpen: false,
-  reportModalMode:   'create',
-  selectedReport:    null,
+  reportModalMode: "create",
+  selectedReport: null,
 
   isKpiModalOpen: false,
-  kpiModalMode:   'create',
-  selectedKpi:    null,
+  kpiModalMode: "create",
+  selectedKpi: null,
 
   executionResult: null,
 };
 
 const reportsSlice = createSlice({
-  name: 'reports',
+  name: "reports",
   initialState,
   reducers: {
-    setActiveTab: (state, action: PayloadAction<ReportsState['activeTab']>) => {
+    setActiveTab: (state, action: PayloadAction<ReportsState["activeTab"]>) => {
       state.activeTab = action.payload;
     },
 
-    setReportFilters: (state, action: PayloadAction<Partial<ReportsState['reportFilters']>>) => {
+    setReportFilters: (
+      state,
+      action: PayloadAction<Partial<ReportsState["reportFilters"]>>,
+    ) => {
       state.reportFilters = { ...state.reportFilters, ...action.payload };
     },
     resetReportFilters: (state) => {
       state.reportFilters = initialState.reportFilters;
     },
 
-    setKpiFilters: (state, action: PayloadAction<Partial<ReportsState['kpiFilters']>>) => {
+    setKpiFilters: (
+      state,
+      action: PayloadAction<Partial<ReportsState["kpiFilters"]>>,
+    ) => {
       state.kpiFilters = { ...state.kpiFilters, ...action.payload };
     },
 
-    setPreBuiltDates: (state, action: PayloadAction<Partial<ReportsState['preBuiltDates']>>) => {
+    setPreBuiltDates: (
+      state,
+      action: PayloadAction<Partial<ReportsState["preBuiltDates"]>>,
+    ) => {
       state.preBuiltDates = { ...state.preBuiltDates, ...action.payload };
     },
 
-    openReportModal: (state, action: PayloadAction<{ mode: 'create' | 'edit'; report?: SavedReport }>) => {
+    openReportModal: (
+      state,
+      action: PayloadAction<{ mode: "create" | "edit"; report?: SavedReport }>,
+    ) => {
       state.isReportModalOpen = true;
-      state.reportModalMode   = action.payload.mode;
-      state.selectedReport    = action.payload.report ?? null;
+      state.reportModalMode = action.payload.mode;
+      state.selectedReport = action.payload.report ?? null;
     },
     closeReportModal: (state) => {
       state.isReportModalOpen = false;
-      state.selectedReport    = null;
+      state.selectedReport = null;
     },
 
-    openKpiModal: (state, action: PayloadAction<{ mode: 'create' | 'edit'; kpi?: KpiMetric }>) => {
+    openKpiModal: (
+      state,
+      action: PayloadAction<{ mode: "create" | "edit"; kpi?: KpiMetric }>,
+    ) => {
       state.isKpiModalOpen = true;
-      state.kpiModalMode   = action.payload.mode;
-      state.selectedKpi    = action.payload.kpi ?? null;
+      state.kpiModalMode = action.payload.mode;
+      state.selectedKpi = action.payload.kpi ?? null;
     },
     closeKpiModal: (state) => {
       state.isKpiModalOpen = false;
-      state.selectedKpi    = null;
+      state.selectedKpi = null;
     },
 
-    setExecutionResult: (state, action: PayloadAction<ReportsState['executionResult']>) => {
+    setExecutionResult: (
+      state,
+      action: PayloadAction<ReportsState["executionResult"]>,
+    ) => {
       state.executionResult = action.payload;
     },
     clearExecutionResult: (state) => {
@@ -131,12 +151,16 @@ const reportsSlice = createSlice({
 
 export const {
   setActiveTab,
-  setReportFilters, resetReportFilters,
+  setReportFilters,
+  resetReportFilters,
   setKpiFilters,
   setPreBuiltDates,
-  openReportModal, closeReportModal,
-  openKpiModal, closeKpiModal,
-  setExecutionResult, clearExecutionResult,
+  openReportModal,
+  closeReportModal,
+  openKpiModal,
+  closeKpiModal,
+  setExecutionResult,
+  clearExecutionResult,
 } = reportsSlice.actions;
 
 export default reportsSlice.reducer;

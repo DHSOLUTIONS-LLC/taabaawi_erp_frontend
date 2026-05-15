@@ -28,13 +28,13 @@ interface ProductGridProps {
   searchQuery: string;
   selectedCategory: string;
   onAddToCart: (product: Product) => void;
-   branchId?: number; 
+  branchId?: number;
 }
 
 export default function ProductGrid({
   searchQuery,
   onAddToCart,
-   branchId, 
+  branchId,
 }: ProductGridProps) {
   const [selectedCategory, setSelectedCategory] = useState("All Items");
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
@@ -52,41 +52,42 @@ export default function ProductGrid({
 
   // Use useMemo to prevent recreating products on every render
   const products = useMemo(() => {
-  const apiProducts = productsResponse?.data?.data || [];
-  console.log('products on pos page:', apiProducts)
-  return apiProducts
-    .map((product: any) => {
-      // Find inventory for this specific branch
-      const branchInventory = branchId
-        ? product.inventory?.find((inv: any) => inv.branch_id === branchId)
-        : null;
+    const apiProducts = productsResponse?.data?.data || [];
+    console.log("products on pos page:", apiProducts);
+    return apiProducts
+      .map((product: any) => {
+        // Find inventory for this specific branch
+        const branchInventory = branchId
+          ? product.inventory?.find((inv: any) => inv.branch_id === branchId)
+          : null;
 
-      // If branchId is set and product has NO inventory record for this branch → exclude
-      if (branchId && !branchInventory) return null;
+        // If branchId is set and product has NO inventory record for this branch → exclude
+        if (branchId && !branchInventory) return null;
 
-      const branchStock = branchInventory?.available_quantity ?? branchInventory?.quantity ?? 0;
-const imagePath = product.primary_image?.image_path 
-  ? `/storage/${product.primary_image.image_path}` 
-  : 'https://images.unsplash.com/photo-1541275055241-329bbdf9a191?w=500&auto=format&fit=crop&q=60';
+        const branchStock =
+          branchInventory?.available_quantity ?? branchInventory?.quantity ?? 0;
+        const imagePath = product.primary_image?.image_path
+          ? `/storage/${product.primary_image.image_path}`
+          : "https://images.unsplash.com/photo-1541275055241-329bbdf9a191?w=500&auto=format&fit=crop&q=60";
 
-      return {
-        id: product.id.toString(),
-        product_id: product.id,           // ← needed for sale creation
-        name: product.product_name || '',
-        sku: product.sku || '',
-        price: typeof product.selling_price === 'string'
-          ? parseFloat(product.selling_price)
-          : product.selling_price || 0,
-        stock: branchStock,               // ← branch-specific stock
-        outOfStock: branchStock <= 0,     // ← flag for UI
-        image: imagePath,
-        image_url: imagePath,
-        category:
-          product.category?.category_name || 'All Items',
-      };
-    })
-    .filter(Boolean); // remove nulls (products not in this branch)
-}, [productsResponse, branchId]);
+        return {
+          id: product.id.toString(),
+          product_id: product.id, // ← needed for sale creation
+          name: product.product_name || "",
+          sku: product.sku || "",
+          price:
+            typeof product.selling_price === "string"
+              ? parseFloat(product.selling_price)
+              : product.selling_price || 0,
+          stock: branchStock, // ← branch-specific stock
+          outOfStock: branchStock <= 0, // ← flag for UI
+          image: imagePath,
+          image_url: imagePath,
+          category: product.category?.category_name || "All Items",
+        };
+      })
+      .filter(Boolean); // remove nulls (products not in this branch)
+  }, [productsResponse, branchId]);
 
   // Filter products when search, category, or products change
   useEffect(() => {

@@ -1,9 +1,5 @@
-
-
 const SupplierContactsModal = () => {
-  return (
-    <div>SupplierContactsModal</div>
-  )
-}
+  return <div>SupplierContactsModal</div>;
+};
 
-export default SupplierContactsModal
+export default SupplierContactsModal;

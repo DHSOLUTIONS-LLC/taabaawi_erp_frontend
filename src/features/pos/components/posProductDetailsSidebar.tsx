@@ -398,63 +398,73 @@ export default function CartSidebar({
                             </div>
                           </div>
 
-                        {/* Discount */}
-<div className="mt-2">
-  {editingDiscountId === item.id ? (
-    <div className="flex flex-col gap-1">
-      <div className="flex items-center gap-1">
-        <input
-          type="number"
-          min="0"
-          max="100"
-          step="0.01"
-          defaultValue={discPct}
-          autoFocus
-          onBlur={(e) => {
-            let value = parseFloat(e.target.value) || 0;
-            if (value > 100) value = 100;
-            if (value < 0) value = 0;
-            
-            handleSetItemDiscount(item.id, value);
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              let value = parseFloat((e.target as HTMLInputElement).value) || 0;
-              if (value > 100) value = 100;
-              if (value < 0) value = 0;
-              
-              handleSetItemDiscount(item.id, value);
-            }
-          }}
-          onInput={(e) => {
-            const input = e.target as HTMLInputElement;
-            let value = parseFloat(input.value);
-            
-            if (value > 100) {
-              input.value = "100";
-            }
-          }}
-          className="w-16 px-2 py-0.5 border rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
-          placeholder="%"
-        />
-        <span className="text-xs text-gray-500">% off</span>
-      </div>
-      
-      {discountError[item.id] && (
-        <p className="text-xs text-red-500">{discountError[item.id]}</p>
-      )}
-    </div>
-  ) : (
-    <button
-      onClick={() => setEditingDiscountId(item.id)}
-      className="text-xs text-[#1773CF] hover:underline"
-    >
-      {discPct > 0
-        ? `${discPct}% discount applied`
-        : "+ Add discount"}
-    </button>
-  )}
-</div>
+                          {/* Discount */}
+                          <div className="mt-2">
+                            {editingDiscountId === item.id ? (
+                              <div className="flex flex-col gap-1">
+                                <div className="flex items-center gap-1">
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    max="100"
+                                    step="0.01"
+                                    defaultValue={discPct}
+                                    autoFocus
+                                    onBlur={(e) => {
+                                      let value =
+                                        parseFloat(e.target.value) || 0;
+                                      if (value > 100) value = 100;
+                                      if (value < 0) value = 0;
+
+                                      handleSetItemDiscount(item.id, value);
+                                    }}
+                                    onKeyDown={(e) => {
+                                      if (e.key === "Enter") {
+                                        let value =
+                                          parseFloat(
+                                            (e.target as HTMLInputElement)
+                                              .value,
+                                          ) || 0;
+                                        if (value > 100) value = 100;
+                                        if (value < 0) value = 0;
+
+                                        handleSetItemDiscount(item.id, value);
+                                      }
+                                    }}
+                                    onInput={(e) => {
+                                      const input =
+                                        e.target as HTMLInputElement;
+                                      let value = parseFloat(input.value);
+
+                                      if (value > 100) {
+                                        input.value = "100";
+                                      }
+                                    }}
+                                    className="w-16 px-2 py-0.5 border rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                    placeholder="%"
+                                  />
+                                  <span className="text-xs text-gray-500">
+                                    % off
+                                  </span>
+                                </div>
+
+                                {discountError[item.id] && (
+                                  <p className="text-xs text-red-500">
+                                    {discountError[item.id]}
+                                  </p>
+                                )}
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => setEditingDiscountId(item.id)}
+                                className="text-xs text-[#1773CF] hover:underline"
+                              >
+                                {discPct > 0
+                                  ? `${discPct}% discount applied`
+                                  : "+ Add discount"}
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -577,25 +587,29 @@ export default function CartSidebar({
               </div>
 
               {/* Pay Button */}
-             <button
-  onClick={() => {
-    // Add validation before opening payment modal
-    if (!branchId || branchId === 0) {
-      alert('No active branch found. Please reopen the POS session.');
-      console.error('Invalid branchId:', branchId);
-      return;
-    }
-    if (!registerId || registerId === 0) {
-      alert('No active register found. Please reopen the POS session.');
-      console.error('Invalid registerId:', registerId);
-      return;
-    }
-    setShowPayment(true);
-  }}
-  className="w-full py-3.5 bg-[#1773CF] hover:bg-blue-700 text-white rounded-xl font-bold text-base transition-colors flex items-center justify-center gap-2"
->
-  Charge KD {total.toFixed(3)}
-</button>
+              <button
+                onClick={() => {
+                  // Add validation before opening payment modal
+                  if (!branchId || branchId === 0) {
+                    alert(
+                      "No active branch found. Please reopen the POS session.",
+                    );
+                    console.error("Invalid branchId:", branchId);
+                    return;
+                  }
+                  if (!registerId || registerId === 0) {
+                    alert(
+                      "No active register found. Please reopen the POS session.",
+                    );
+                    console.error("Invalid registerId:", registerId);
+                    return;
+                  }
+                  setShowPayment(true);
+                }}
+                className="w-full py-3.5 bg-[#1773CF] hover:bg-blue-700 text-white rounded-xl font-bold text-base transition-colors flex items-center justify-center gap-2"
+              >
+                Charge KD {total.toFixed(3)}
+              </button>
             </div>
           )}
         </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown } from "lucide-react";
 import ProductCard from "../components/Productcard";
 import {
   useGetProductsQuery,
@@ -44,18 +44,20 @@ export default function ProductGrid({
   const { data: categoriesResponse } = useGetCategoriesQuery();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-const dropdownRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-
-useEffect(() => {
-  const handleClickOutside = (event: MouseEvent) => {
-    if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-      setIsDropdownOpen(false);
-    }
-  };
-  document.addEventListener('mousedown', handleClickOutside);
-  return () => document.removeEventListener('mousedown', handleClickOutside);
-}, []);
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const categoriesData = categoriesResponse?.data?.data || [];
   const categories = [
@@ -68,7 +70,6 @@ useEffect(() => {
   // Use useMemo to prevent recreating products on every render
   const products = useMemo(() => {
     const apiProducts = productsResponse?.data?.data || [];
-    
 
     // Check if user is Super Admin (no branch restriction)
     const isSuperAdmin = !branchId;
@@ -99,7 +100,7 @@ useEffect(() => {
           ? `https://puristic-filmily-bula.ngrok-free.dev/storage/${product.primary_image.image_path}`
           : "https://images.unsplash.com/photo-1541275055241-329bbdf9a191?w=500&auto=format&fit=crop&q=60";
 
-          console.log('imagePath', imagePath)
+        console.log("imagePath", imagePath);
 
         return {
           id: product.id.toString(),
@@ -196,64 +197,63 @@ useEffect(() => {
 
   return (
     <div className="max-w-480 mx-auto px-4 sm:px-6 bg-white rounded-lg">
-       <div className="relative md:hidden mt-4">
-      <button
-        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-        className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-      >
-        <span className="text-gray-700">
-          {selectedCategory || 'Select Category'}
-        </span>
-        <ChevronDown 
-          className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${
-            isDropdownOpen ? 'rotate-180' : ''
-          }`} 
-        />
-      </button>
-
-      {/* Dropdown Menu */}
-      {isDropdownOpen && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
-          <div className="py-1">
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => {
-                  setSelectedCategory(category);
-                  setIsDropdownOpen(false);
-                }}
-                className={`w-full text-left px-4 py-2.5 text-sm transition-colors duration-150 ${
-                  selectedCategory === category
-                    ? 'bg-blue-50 text-blue-700 font-medium'
-                    : 'text-gray-700 hover:bg-gray-50'
-                }`}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-
-    {/* Button View - visible only on md screens and above */}
-    <div className="hidden md:flex flex-wrap gap-3 mt-4 py-6">
-      {categories.map((category) => (
+      <div className="relative md:hidden mt-4">
         <button
-          key={category}
-          onClick={() => setSelectedCategory(category)}
-          className={`px-3 py-1.5 rounded-md font-medium text-sm whitespace-nowrap transition-all duration-200 cursor-pointer ${
-            selectedCategory === category
-              ? "border border-[#1773CF] text-black shadow-md shadow-blue-200 bg-white"
-              : "bg-white text-gray-700 border border-gray-200 hover:border-blue-300 hover:text-blue-600"
-          }`}
+          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+          className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         >
-          {category}
+          <span className="text-gray-700">
+            {selectedCategory || "Select Category"}
+          </span>
+          <ChevronDown
+            className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${
+              isDropdownOpen ? "rotate-180" : ""
+            }`}
+          />
         </button>
-      ))}
-    </div>
 
-    
+        {/* Dropdown Menu */}
+        {isDropdownOpen && (
+          <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
+            <div className="py-1">
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => {
+                    setSelectedCategory(category);
+                    setIsDropdownOpen(false);
+                  }}
+                  className={`w-full text-left px-4 py-2.5 text-sm transition-colors duration-150 ${
+                    selectedCategory === category
+                      ? "bg-blue-50 text-blue-700 font-medium"
+                      : "text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Button View - visible only on md screens and above */}
+      <div className="hidden md:flex flex-wrap gap-3 mt-4 py-6">
+        {categories.map((category) => (
+          <button
+            key={category}
+            onClick={() => setSelectedCategory(category)}
+            className={`px-3 py-1.5 rounded-md font-medium text-sm whitespace-nowrap transition-all duration-200 cursor-pointer ${
+              selectedCategory === category
+                ? "border border-[#1773CF] text-black shadow-md shadow-blue-200 bg-white"
+                : "bg-white text-gray-700 border border-gray-200 hover:border-blue-300 hover:text-blue-600"
+            }`}
+          >
+            {category}
+          </button>
+        ))}
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
         {filteredProducts.map((product) => (
           <ProductCard

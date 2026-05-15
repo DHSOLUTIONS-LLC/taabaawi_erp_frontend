@@ -1,24 +1,24 @@
 // src/layouts/components/Sidebar.tsx
-import { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useAppSelector } from '../../app/hooks';
-import erp_logo from '../../assets/icons/erp_logo.png'
-import dashboard from '../../assets/icons/dashboard.png'
-import inventory from '../../assets/icons/inventory.png'
-import pos from '../../assets/icons/pos_.svg'
-import reports from '../../assets/icons/reports_.svg'
-import purchases from '../../assets/icons/purchases.png'
-import sales from '../../assets/icons/sales.png'
-import crm from '../../assets/icons/crm_.svg'
-import systems from '../../assets/icons/systems_.png'
-import blog from '../../assets/icons/blog_.png'
-import help from '../../assets/icons/help__.png'
-import ai_content from '../../assets/icons/ai-content.png'
-import security_center from '../../assets/icons/security_center_.png'
-import accounting from '../../assets/icons/accounting.png'
-import hr_users from '../../assets/icons/hr_users_.png'
-import branches from '../../assets/icons/branches.png'
-import type { RootState } from '../../app/store';
+import { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useAppSelector } from "../../app/hooks";
+import erp_logo from "../../assets/icons/erp_logo.png";
+import dashboard from "../../assets/icons/dashboard.png";
+import inventory from "../../assets/icons/inventory.png";
+import pos from "../../assets/icons/pos_.svg";
+import reports from "../../assets/icons/reports_.svg";
+import purchases from "../../assets/icons/purchases.png";
+import sales from "../../assets/icons/sales.png";
+import crm from "../../assets/icons/crm_.svg";
+import systems from "../../assets/icons/systems_.png";
+import blog from "../../assets/icons/blog_.png";
+import help from "../../assets/icons/help__.png";
+import ai_content from "../../assets/icons/ai-content.png";
+import security_center from "../../assets/icons/security_center_.png";
+import accounting from "../../assets/icons/accounting.png";
+import hr_users from "../../assets/icons/hr_users_.png";
+import branches from "../../assets/icons/branches.png";
+import type { RootState } from "../../app/store";
 
 interface SidebarProps {
   onMenuSelect?: (pageTitle: string) => void;
@@ -40,7 +40,11 @@ interface SubMenuItem {
   path: string;
 }
 
-export default function Sidebar({ onMenuSelect, mobileMenuOpen, closeMobileMenu }: SidebarProps) {
+export default function Sidebar({
+  onMenuSelect,
+  mobileMenuOpen,
+  closeMobileMenu,
+}: SidebarProps) {
   const { user } = useAppSelector((state: RootState) => state.auth);
   const navigate = useNavigate();
   const location = useLocation();
@@ -65,146 +69,284 @@ export default function Sidebar({ onMenuSelect, mobileMenuOpen, closeMobileMenu 
       setIsMobile(window.innerWidth < 768);
     };
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  const isSuperAdmin = user?.role?.role_name === 'Super Admin';
-  const basePath = isSuperAdmin ? '/admin' : '';
+  const isSuperAdmin = user?.role?.role_name === "Super Admin";
+  const basePath = isSuperAdmin ? "/admin" : "";
 
   const hasPermission = (permissionName: string) => {
     if (!user || !user.role || !user.role.permissions) return false;
     if (isSuperAdmin) return true;
     return user.role.permissions.some(
-      (permission: any) => permission.permission_name === permissionName
+      (permission: any) => permission.permission_name === permissionName,
     );
   };
 
   const hasAnyPermission = (permissions: string[]) => {
     if (isSuperAdmin) return true;
-    return permissions.some(permission => hasPermission(permission));
+    return permissions.some((permission) => hasPermission(permission));
   };
 
-  const menuItems: MenuItem[] = isSuperAdmin ? [
-    {
-      id: 'dashboard',
-      label: 'Dashboard',
-      icon: dashboard,
-      path: `${basePath}/dashboard`
-    },
-  ] : [];
+  const menuItems: MenuItem[] = isSuperAdmin
+    ? [
+        {
+          id: "dashboard",
+          label: "Dashboard",
+          icon: dashboard,
+          path: `${basePath}/dashboard`,
+        },
+      ]
+    : [];
 
   const posSubmenus: SubMenuItem[] = [
-    hasPermission('access_pos') && { id: 'pos-terminal', label: 'Open Terminal', path: `${basePath}/pos/terminal` },
-    hasPermission('access_pos') && { id: 'pos-open', label: 'Open POS', path: `${basePath}/pos` },
-    hasPermission('access_pos') && { id: 'pos-orders', label: 'POS Orders', path: `${basePath}/pos/orders` },
-    hasPermission('access_pos') && { id: 'pos-cashbox', label: 'Cash Box', path: `${basePath}/pos/cashbox` },
-    hasPermission('access_pos') && { id: 'pos-shift-reports', label: 'Shift Reports', path: `${basePath}/pos/shift_reports` },
-    hasPermission('access_pos') && { id: 'pos-returns', label: 'Returns', path: `${basePath}/pos/returns` },
-    hasPermission('access_pos') && { id: 'pos-coupons', label: 'Coupons', path: `${basePath}/pos/coupon` },
+    hasPermission("access_pos") && {
+      id: "pos-terminal",
+      label: "Open Terminal",
+      path: `${basePath}/pos/terminal`,
+    },
+    hasPermission("access_pos") && {
+      id: "pos-open",
+      label: "Open POS",
+      path: `${basePath}/pos`,
+    },
+    hasPermission("access_pos") && {
+      id: "pos-orders",
+      label: "POS Orders",
+      path: `${basePath}/pos/orders`,
+    },
+    hasPermission("access_pos") && {
+      id: "pos-cashbox",
+      label: "Cash Box",
+      path: `${basePath}/pos/cashbox`,
+    },
+    hasPermission("access_pos") && {
+      id: "pos-shift-reports",
+      label: "Shift Reports",
+      path: `${basePath}/pos/shift_reports`,
+    },
+    hasPermission("access_pos") && {
+      id: "pos-returns",
+      label: "Returns",
+      path: `${basePath}/pos/returns`,
+    },
+    hasPermission("access_pos") && {
+      id: "pos-coupons",
+      label: "Coupons",
+      path: `${basePath}/pos/coupon`,
+    },
   ].filter(Boolean) as SubMenuItem[];
 
   const operationMenus: MenuItem[] = [
-    hasPermission('view_products') && {
-      id: 'inventory',
-      label: 'Inventory',
+    hasPermission("view_products") && {
+      id: "inventory",
+      label: "Inventory",
       icon: inventory,
-      path: `${basePath}/inventory`
+      path: `${basePath}/inventory`,
     },
-    hasAnyPermission(['access_pos', 'open_pos', 'close_pos']) && {
-      id: 'pos',
-      label: 'POS',
+    hasAnyPermission(["access_pos", "open_pos", "close_pos"]) && {
+      id: "pos",
+      label: "POS",
       icon: pos,
       path: `${basePath}/pos`,
-      submenu: posSubmenus
+      submenu: posSubmenus,
     },
-    hasAnyPermission(['process_sale', 'create_invoice']) && {
-      id: 'sales',
-      label: 'Sales',
+    hasAnyPermission(["process_sale", "create_invoice"]) && {
+      id: "sales",
+      label: "Sales",
       icon: sales,
       path: `${basePath}/sales`,
       submenu: [
-        { id: 'sales-dashboard', label: 'Sales Dashboard', path: `${basePath}/sales` },
-        { id: 'sales-orders', label: 'Orders', path: `${basePath}/sales/orders` },
-        { id: 'sales-shipping', label: 'Shipping Methods', path: `${basePath}/sales/shipping-methods` },
-        { id: 'sales-invoices', label: 'Invoices', path: `${basePath}/sales/invoices` },
+        {
+          id: "sales-dashboard",
+          label: "Sales Dashboard",
+          path: `${basePath}/sales`,
+        },
+        {
+          id: "sales-orders",
+          label: "Orders",
+          path: `${basePath}/sales/orders`,
+        },
+        {
+          id: "sales-shipping",
+          label: "Shipping Methods",
+          path: `${basePath}/sales/shipping-methods`,
+        },
+        {
+          id: "sales-invoices",
+          label: "Invoices",
+          path: `${basePath}/sales/invoices`,
+        },
       ],
     },
-    hasPermission('view_purchase') && {
-      id: 'purchase',
-      label: 'Purchase',
+    hasPermission("view_purchase") && {
+      id: "purchase",
+      label: "Purchase",
       icon: purchases,
       path: `${basePath}/purchase`,
       submenu: [
-        { id: 'purchase-dashboard', label: 'Dashboard', path: `${basePath}/purchase` },
-        { id: 'purchase-suppliers', label: 'Suppliers', path: `${basePath}/purchase/suppliers` },
-        { id: 'purchase-currencies', label: 'Currencies', path: `${basePath}/purchase/currencies` },
-        { id: 'purchase-orders', label: 'Purchase Orders', path: `${basePath}/purchase/orders` },
-        { id: 'purchase-pending-approvals', label: 'Pending Approvals', path: `${basePath}/purchase/pending-approvals` },
-        { id: 'purchase-goods-receipts', label: 'Goods Receipts', path: `${basePath}/purchase/goods-receipts` },
-        { id: 'purchase-returns', label: 'Purchase Returns', path: `${basePath}/purchase/returns` },
-        { id: 'purchase-payments', label: 'Supplier Payments', path: `${basePath}/purchase/payments` },
-        { id: 'purchase-suppliers-reports', label: 'Supplier Reports', path: `${basePath}/purchase/suppliers_reports` },
-
+        {
+          id: "purchase-dashboard",
+          label: "Dashboard",
+          path: `${basePath}/purchase`,
+        },
+        {
+          id: "purchase-suppliers",
+          label: "Suppliers",
+          path: `${basePath}/purchase/suppliers`,
+        },
+        {
+          id: "purchase-currencies",
+          label: "Currencies",
+          path: `${basePath}/purchase/currencies`,
+        },
+        {
+          id: "purchase-orders",
+          label: "Purchase Orders",
+          path: `${basePath}/purchase/orders`,
+        },
+        {
+          id: "purchase-pending-approvals",
+          label: "Pending Approvals",
+          path: `${basePath}/purchase/pending-approvals`,
+        },
+        {
+          id: "purchase-goods-receipts",
+          label: "Goods Receipts",
+          path: `${basePath}/purchase/goods-receipts`,
+        },
+        {
+          id: "purchase-returns",
+          label: "Purchase Returns",
+          path: `${basePath}/purchase/returns`,
+        },
+        {
+          id: "purchase-payments",
+          label: "Supplier Payments",
+          path: `${basePath}/purchase/payments`,
+        },
+        {
+          id: "purchase-suppliers-reports",
+          label: "Supplier Reports",
+          path: `${basePath}/purchase/suppliers_reports`,
+        },
       ],
     },
   ].filter(Boolean) as MenuItem[];
 
   const financeMenus: MenuItem[] = [
-    hasPermission('view_accounting') && {
-      id: 'accounting',
-      label: 'Accounting',
+    hasPermission("view_accounting") && {
+      id: "accounting",
+      label: "Accounting",
       icon: accounting,
       path: `${basePath}/accounting`,
       submenu: [
-        { id: 'accounting-dashboard', label: 'Dashboard', path: `${basePath}/accounting` },
-        { id: 'chart-of-accounts', label: 'Chart of Accounts', path: `${basePath}/accounting/chart-of-accounts` },
-        { id: 'journal-entries', label: 'Journal Entries', path: `${basePath}/accounting/journal-entries` },
-        { id: 'bank-accounts', label: 'Bank Accounts', path: `${basePath}/accounting/bank-accounts` },
-        { id: 'accounts-payable', label: 'Accounts Payable', path: `${basePath}/accounting/accounts-payable` },
-        { id: 'accounts-receivable', label: 'Accounts Receivable', path: `${basePath}/accounting/accounts-receivable` },
-        { id: 'budgets', label: 'Budgets', path: `${basePath}/accounting/budgets` },
-        { id: 'financial-reports', label: 'Financial Reports', path: `${basePath}/accounting/financial-reports` },
+        {
+          id: "accounting-dashboard",
+          label: "Dashboard",
+          path: `${basePath}/accounting`,
+        },
+        {
+          id: "chart-of-accounts",
+          label: "Chart of Accounts",
+          path: `${basePath}/accounting/chart-of-accounts`,
+        },
+        {
+          id: "journal-entries",
+          label: "Journal Entries",
+          path: `${basePath}/accounting/journal-entries`,
+        },
+        {
+          id: "bank-accounts",
+          label: "Bank Accounts",
+          path: `${basePath}/accounting/bank-accounts`,
+        },
+        {
+          id: "accounts-payable",
+          label: "Accounts Payable",
+          path: `${basePath}/accounting/accounts-payable`,
+        },
+        {
+          id: "accounts-receivable",
+          label: "Accounts Receivable",
+          path: `${basePath}/accounting/accounts-receivable`,
+        },
+        {
+          id: "budgets",
+          label: "Budgets",
+          path: `${basePath}/accounting/budgets`,
+        },
+        {
+          id: "financial-reports",
+          label: "Financial Reports",
+          path: `${basePath}/accounting/financial-reports`,
+        },
       ],
     },
-    hasPermission('') && {
-      id: 'system',
-      label: 'System',
+    hasPermission("") && {
+      id: "system",
+      label: "System",
       icon: systems,
       submenu: [
-        { id: 'system-settings', label: 'Settings', path: `${basePath}/system/settings` },
-        { id: 'payment-methods', label: 'Payment Methods', path: `${basePath}/system/payment-methods` },
-      ]
+        {
+          id: "system-settings",
+          label: "Settings",
+          path: `${basePath}/system/settings`,
+        },
+        {
+          id: "payment-methods",
+          label: "Payment Methods",
+          path: `${basePath}/system/payment-methods`,
+        },
+      ],
     },
-    hasPermission('') && {
-      id: 'blog',
-      label: 'Blog',
+    hasPermission("") && {
+      id: "blog",
+      label: "Blog",
       icon: blog,
       submenu: [
-        { id: 'blog-all', label: 'All Posts', path: `${basePath}/blog` },
-        { id: 'blog-create', label: 'Create Post', path: `${basePath}/blog/create` },
-        { id: 'blog-categories', label: 'Categories', path: `${basePath}/blog/categories` },
-      ]
+        { id: "blog-all", label: "All Posts", path: `${basePath}/blog` },
+        {
+          id: "blog-create",
+          label: "Create Post",
+          path: `${basePath}/blog/create`,
+        },
+        {
+          id: "blog-categories",
+          label: "Categories",
+          path: `${basePath}/blog/categories`,
+        },
+      ],
     },
-    hasPermission('view_reports') && {
-      id: 'reports',
-      label: 'Reports',
+    hasPermission("view_reports") && {
+      id: "reports",
+      label: "Reports",
       icon: reports,
-      path: `${basePath}/reports`
+      path: `${basePath}/reports`,
     },
-    hasPermission('view_crm') && {
-      id: 'crm',
-      label: 'CRM',
+    hasPermission("view_crm") && {
+      id: "crm",
+      label: "CRM",
       icon: crm,
       path: `${basePath}/crm`,
       submenu: [
-        { id: 'crm-dashboard', label: 'Dashboard', path: `${basePath}/crm` },
-        { id: 'crm-customers', label: 'Customers', path: `${basePath}/crm/customers` },
+        { id: "crm-dashboard", label: "Dashboard", path: `${basePath}/crm` },
+        {
+          id: "crm-customers",
+          label: "Customers",
+          path: `${basePath}/crm/customers`,
+        },
       ],
     },
-    hasAnyPermission(['view_users', 'create_user', 'edit_user', 'delete_user']) && {
-      id: 'hr',
-      label: 'HR & Users',
+    hasAnyPermission([
+      "view_users",
+      "create_user",
+      "edit_user",
+      "delete_user",
+    ]) && {
+      id: "hr",
+      label: "HR & Users",
       icon: hr_users,
       path: `${basePath}/hr`,
       // submenu: [
@@ -217,9 +359,14 @@ export default function Sidebar({ onMenuSelect, mobileMenuOpen, closeMobileMenu 
       //   { id: 'hr-payroll', label: 'Payroll', path: `${basePath}/hr/payroll` },
       // ],
     },
-    hasAnyPermission(['view_users', 'create_user', 'edit_user', 'delete_user']) && {
-      id: 'help',
-      label: 'Help',
+    hasAnyPermission([
+      "view_users",
+      "create_user",
+      "edit_user",
+      "delete_user",
+    ]) && {
+      id: "help",
+      label: "Help",
       icon: help,
       path: `${basePath}/help`,
       // submenu: [
@@ -230,8 +377,8 @@ export default function Sidebar({ onMenuSelect, mobileMenuOpen, closeMobileMenu 
       // ],
     },
     {
-      id: 'ai-content',
-      label: 'AI Content',
+      id: "ai-content",
+      label: "AI Content",
       icon: ai_content,
       path: `${basePath}/ai-content`,
       // submenu: [
@@ -242,8 +389,8 @@ export default function Sidebar({ onMenuSelect, mobileMenuOpen, closeMobileMenu 
       // ],
     },
     {
-      id: 'branches',
-      label: 'Branches',
+      id: "branches",
+      label: "Branches",
       icon: branches,
       path: `${basePath}/branches`,
       // submenu: [
@@ -252,15 +399,25 @@ export default function Sidebar({ onMenuSelect, mobileMenuOpen, closeMobileMenu 
       //   { id: 'branches-departments', label: 'Departments', path: `${basePath}/branches/departments` },
       // ],
     },
-    hasAnyPermission(['view_users', 'create_user', 'edit_user', 'delete_user']) && {
-      id: 'System',
-      label: 'Settings',
+    hasAnyPermission([
+      "view_users",
+      "create_user",
+      "edit_user",
+      "delete_user",
+    ]) && {
+      id: "System",
+      label: "Settings",
       icon: crm,
-      path: `${basePath}/system/settings`
+      path: `${basePath}/system/settings`,
     },
-    hasAnyPermission(['view_users', 'create_user', 'edit_user', 'delete_user']) && {
-      id: 'security',
-      label: 'Security Center',
+    hasAnyPermission([
+      "view_users",
+      "create_user",
+      "edit_user",
+      "delete_user",
+    ]) && {
+      id: "security",
+      label: "Security Center",
       icon: security_center,
       path: `${basePath}/security`,
       // submenu: [
@@ -272,39 +429,60 @@ export default function Sidebar({ onMenuSelect, mobileMenuOpen, closeMobileMenu 
     },
   ].filter(Boolean) as MenuItem[];
 
-  const filteredOperationMenus = operationMenus.filter(menu => {
-    if (menu.id === 'pos') return hasPermission('access_pos') || isSuperAdmin;
-    if (menu.id === 'inventory') return hasPermission('view_products') || isSuperAdmin;
-    if (menu.id === 'sales') return hasPermission('process_sale') || isSuperAdmin;
-    if (menu.id === 'purchase') return hasPermission('view_purchases') || isSuperAdmin;
+  const filteredOperationMenus = operationMenus.filter((menu) => {
+    if (menu.id === "pos") return hasPermission("access_pos") || isSuperAdmin;
+    if (menu.id === "inventory")
+      return hasPermission("view_products") || isSuperAdmin;
+    if (menu.id === "sales")
+      return hasPermission("process_sale") || isSuperAdmin;
+    if (menu.id === "purchase")
+      return hasPermission("view_purchases") || isSuperAdmin;
     return false;
   });
 
-  const filteredFinanceMenus = financeMenus.filter(menu => {
-    if (menu.id === 'accounting') return hasPermission('view_accounting') || isSuperAdmin;
-    if (menu.id === 'reports') return hasPermission('view_reports') || isSuperAdmin;
-    if (menu.id === 'crm') return hasPermission('view_crm') || isSuperAdmin;
-    if (menu.id === 'hr') return hasPermission('view_users') || isSuperAdmin;
-    if (menu.id === 'help') return hasPermission('view_users') || isSuperAdmin;
-    if (menu.id === 'system') return hasPermission('view_users') || isSuperAdmin;
-    if (menu.id === 'blog') return hasPermission('view_users') || isSuperAdmin;
-    if (menu.id === 'ai-content') return hasPermission('view_users') || isSuperAdmin;
-    if (menu.id === 'security') return hasPermission('view_users') || isSuperAdmin;
-    if (menu.id === 'branches') return hasPermission('view_users') || isSuperAdmin;
+  const filteredFinanceMenus = financeMenus.filter((menu) => {
+    if (menu.id === "accounting")
+      return hasPermission("view_accounting") || isSuperAdmin;
+    if (menu.id === "reports")
+      return hasPermission("view_reports") || isSuperAdmin;
+    if (menu.id === "crm") return hasPermission("view_crm") || isSuperAdmin;
+    if (menu.id === "hr") return hasPermission("view_users") || isSuperAdmin;
+    if (menu.id === "help") return hasPermission("view_users") || isSuperAdmin;
+    if (menu.id === "system")
+      return hasPermission("view_users") || isSuperAdmin;
+    if (menu.id === "blog") return hasPermission("view_users") || isSuperAdmin;
+    if (menu.id === "ai-content")
+      return hasPermission("view_users") || isSuperAdmin;
+    if (menu.id === "security")
+      return hasPermission("view_users") || isSuperAdmin;
+    if (menu.id === "branches")
+      return hasPermission("view_users") || isSuperAdmin;
     return false;
   });
 
   const isPosPathActive = location.pathname.startsWith(`${basePath}/pos`);
-  const isPurchasePathActive = location.pathname.startsWith(`${basePath}/purchase`);
-  const isAccountingPathActive = location.pathname.startsWith(`${basePath}/accounting`);
-  const isReportsPathActive = location.pathname.startsWith(`${basePath}/reports`);
+  const isPurchasePathActive = location.pathname.startsWith(
+    `${basePath}/purchase`,
+  );
+  const isAccountingPathActive = location.pathname.startsWith(
+    `${basePath}/accounting`,
+  );
+  const isReportsPathActive = location.pathname.startsWith(
+    `${basePath}/reports`,
+  );
   const isSalesPathActive = location.pathname.startsWith(`${basePath}/sales`);
   const isCrmPathActive = location.pathname.startsWith(`${basePath}/crm`);
   const isHrPathActive = location.pathname.startsWith(`${basePath}/hr`);
   const isHelpPathActive = location.pathname.startsWith(`${basePath}/help`);
-  const isAiContentPathActive = location.pathname.startsWith(`${basePath}/ai-content`);
-  const isSecurityPathActive = location.pathname.startsWith(`${basePath}/security`);
-  const isBranchesPathActive = location.pathname.startsWith(`${basePath}/branches`);
+  const isAiContentPathActive = location.pathname.startsWith(
+    `${basePath}/ai-content`,
+  );
+  const isSecurityPathActive = location.pathname.startsWith(
+    `${basePath}/security`,
+  );
+  const isBranchesPathActive = location.pathname.startsWith(
+    `${basePath}/branches`,
+  );
   const isSystemPathActive = location.pathname.startsWith(`${basePath}/system`);
   const isBlogPathActive = location.pathname.startsWith(`${basePath}/blog`);
 
@@ -362,19 +540,19 @@ export default function Sidebar({ onMenuSelect, mobileMenuOpen, closeMobileMenu 
 
   const handleMenuClick = (menu: MenuItem) => {
     if (menu.submenu) {
-      if (menu.id === 'pos') setIsPosOpen(prev => !prev);
-      else if (menu.id === 'sales') setIsSalesOpen(prev => !prev);
-      else if (menu.id === 'purchase') setIsPurchaseOpen(prev => !prev);
-      else if (menu.id === 'accounting') setIsAccountingOpen(prev => !prev);
-      else if (menu.id === 'reports') setIsReportsOpen(prev => !prev);
-      else if (menu.id === 'blog') setIsBlogOpen(prev => !prev);
-      else if (menu.id === 'system') setIsSystemOpen(prev => !prev);
-      else if (menu.id === 'crm') setIsCrmOpen(prev => !prev);
-      else if (menu.id === 'hr') setIsHrOpen(prev => !prev);
-      else if (menu.id === 'help') setIsHelpOpen(prev => !prev);
-      else if (menu.id === 'ai-content') setIsAiContentOpen(prev => !prev);
-      else if (menu.id === 'security') setIsSecurityOpen(prev => !prev);
-      else if (menu.id === 'branches') setIsBranchesOpen(prev => !prev);
+      if (menu.id === "pos") setIsPosOpen((prev) => !prev);
+      else if (menu.id === "sales") setIsSalesOpen((prev) => !prev);
+      else if (menu.id === "purchase") setIsPurchaseOpen((prev) => !prev);
+      else if (menu.id === "accounting") setIsAccountingOpen((prev) => !prev);
+      else if (menu.id === "reports") setIsReportsOpen((prev) => !prev);
+      else if (menu.id === "blog") setIsBlogOpen((prev) => !prev);
+      else if (menu.id === "system") setIsSystemOpen((prev) => !prev);
+      else if (menu.id === "crm") setIsCrmOpen((prev) => !prev);
+      else if (menu.id === "hr") setIsHrOpen((prev) => !prev);
+      else if (menu.id === "help") setIsHelpOpen((prev) => !prev);
+      else if (menu.id === "ai-content") setIsAiContentOpen((prev) => !prev);
+      else if (menu.id === "security") setIsSecurityOpen((prev) => !prev);
+      else if (menu.id === "branches") setIsBranchesOpen((prev) => !prev);
       return;
     }
 
@@ -393,19 +571,23 @@ export default function Sidebar({ onMenuSelect, mobileMenuOpen, closeMobileMenu 
     const currentPath = location.pathname;
     for (const menu of operationMenus) {
       if (menu.submenu) {
-        const activeSubmenu = menu.submenu.find(sub => sub.path === currentPath);
+        const activeSubmenu = menu.submenu.find(
+          (sub) => sub.path === currentPath,
+        );
         if (activeSubmenu) return activeSubmenu.label;
       }
     }
     for (const menu of financeMenus) {
       if (menu.submenu) {
-        const activeSubmenu = menu.submenu.find(sub => sub.path === currentPath);
+        const activeSubmenu = menu.submenu.find(
+          (sub) => sub.path === currentPath,
+        );
         if (activeSubmenu) return activeSubmenu.label;
       }
     }
     const allMenus = [...menuItems, ...operationMenus, ...financeMenus];
-    const activeMenu = allMenus.find(menu => menu.path === currentPath);
-    return activeMenu?.label || 'Dashboard Overview';
+    const activeMenu = allMenus.find((menu) => menu.path === currentPath);
+    return activeMenu?.label || "Dashboard Overview";
   };
 
   useEffect(() => {
@@ -427,42 +609,58 @@ export default function Sidebar({ onMenuSelect, mobileMenuOpen, closeMobileMenu 
           const isActive = location.pathname === menu.path;
           const hasSubmenu = menu.submenu && menu.submenu.length > 0;
           const isSubmenuOpen =
-            (menu.id === 'pos' && isPosOpen) ||
-            (menu.id === 'sales' && isSalesOpen) ||
-            (menu.id === 'purchase' && isPurchaseOpen) ||
-            (menu.id === 'accounting' && isAccountingOpen) ||
-            (menu.id === 'reports' && isReportsOpen) ||
-            (menu.id === 'blog' && isBlogOpen) ||
-            (menu.id === 'system' && isSystemOpen) ||
-            (menu.id === 'crm' && isCrmOpen) ||
-            (menu.id === 'hr' && isHrOpen) ||
-            (menu.id === 'help' && isHelpOpen) ||
-            (menu.id === 'ai-content' && isAiContentOpen) ||
-            (menu.id === 'security' && isSecurityOpen) ||
-            (menu.id === 'branches' && isBranchesOpen);
-          const isParentActive = menu.submenu?.some(sub => sub.path === location.pathname);
+            (menu.id === "pos" && isPosOpen) ||
+            (menu.id === "sales" && isSalesOpen) ||
+            (menu.id === "purchase" && isPurchaseOpen) ||
+            (menu.id === "accounting" && isAccountingOpen) ||
+            (menu.id === "reports" && isReportsOpen) ||
+            (menu.id === "blog" && isBlogOpen) ||
+            (menu.id === "system" && isSystemOpen) ||
+            (menu.id === "crm" && isCrmOpen) ||
+            (menu.id === "hr" && isHrOpen) ||
+            (menu.id === "help" && isHelpOpen) ||
+            (menu.id === "ai-content" && isAiContentOpen) ||
+            (menu.id === "security" && isSecurityOpen) ||
+            (menu.id === "branches" && isBranchesOpen);
+          const isParentActive = menu.submenu?.some(
+            (sub) => sub.path === location.pathname,
+          );
 
           return (
             <div key={menu.id}>
               <button
                 onClick={() => handleMenuClick(menu)}
-                className={`w-full flex items-center rounded-lg transition-all duration-200 cursor-pointer px-4 py-3 space-x-3 ${isActive || isParentActive
-                  ? 'bg-gray-200 text-blue-600'
-                  : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'
-                  }`}
+                className={`w-full flex items-center rounded-lg transition-all duration-200 cursor-pointer px-4 py-3 space-x-3 ${
+                  isActive || isParentActive
+                    ? "bg-gray-200 text-blue-600"
+                    : "text-gray-700 hover:bg-gray-100 hover:text-blue-600"
+                }`}
               >
-                <div className={`shrink-0 ${isActive || isParentActive ? 'text-blue-500' : 'text-gray-500'}`}>
-                  <img src={menu.icon} alt={menu.label} className="w-5 h-5 object-contain" />
+                <div
+                  className={`shrink-0 ${isActive || isParentActive ? "text-blue-500" : "text-gray-500"}`}
+                >
+                  <img
+                    src={menu.icon}
+                    alt={menu.label}
+                    className="w-5 h-5 object-contain"
+                  />
                 </div>
-                <span className="text-lg font-medium truncate flex-1 text-left">{menu.label}</span>
+                <span className="text-lg font-medium truncate flex-1 text-left">
+                  {menu.label}
+                </span>
                 {hasSubmenu && (
                   <svg
-                    className={`w-4 h-4 transition-transform duration-200 ${isSubmenuOpen ? 'rotate-180' : ''}`}
+                    className={`w-4 h-4 transition-transform duration-200 ${isSubmenuOpen ? "rotate-180" : ""}`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M19 9l-7 7-7-7"
+                    />
                   </svg>
                 )}
               </button>
@@ -475,12 +673,15 @@ export default function Sidebar({ onMenuSelect, mobileMenuOpen, closeMobileMenu 
                       <button
                         key={submenu.id}
                         onClick={() => handleSubmenuClick(submenu, menu.label)}
-                        className={`w-full flex items-center rounded-lg transition-all duration-200 px-4 py-2.5 cursor-pointer ${isSubmenuActive
-                          ? 'bg-blue-50 text-blue-600 font-medium'
-                          : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600'
-                          }`}
+                        className={`w-full flex items-center rounded-lg transition-all duration-200 px-4 py-2.5 cursor-pointer ${
+                          isSubmenuActive
+                            ? "bg-blue-50 text-blue-600 font-medium"
+                            : "text-gray-600 hover:bg-gray-50 hover:text-blue-600"
+                        }`}
                       >
-                        <span className="text-base truncate">{submenu.label}</span>
+                        <span className="text-base truncate">
+                          {submenu.label}
+                        </span>
                       </button>
                     );
                   })}
@@ -507,11 +708,11 @@ export default function Sidebar({ onMenuSelect, mobileMenuOpen, closeMobileMenu 
         className={`
           fixed left-0 top-0 bottom-0 bg-white border-r border-gray-200
           overflow-y-auto transition-transform duration-300 z-50
-          ${isMobile ? 'w-full' : 'w-80'}
-          ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
+          ${isMobile ? "w-full" : "w-80"}
+          ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full"}
           lg:translate-x-0 lg:w-80 lg:z-0
         `}
-        style={{ height: '100vh' }}
+        style={{ height: "100vh" }}
       >
         {/* Header */}
         <div className="py-3 h-18 border-b border-gray-200 px-6">
@@ -532,8 +733,18 @@ export default function Sidebar({ onMenuSelect, mobileMenuOpen, closeMobileMenu 
               className="p-2 rounded-lg hover:bg-gray-100 transition-colors lg:hidden"
               aria-label="Close sidebar"
             >
-              <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="w-5 h-5 text-gray-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
@@ -549,13 +760,20 @@ export default function Sidebar({ onMenuSelect, mobileMenuOpen, closeMobileMenu 
                   <button
                     key={menu.id}
                     onClick={() => handleMenuClick(menu)}
-                    className={`w-full flex items-center rounded-lg transition-all duration-200 px-4 py-3 space-x-3 ${isActive
-                      ? 'bg-gray-200 text-blue-600 font-bold'
-                      : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'
-                      }`}
+                    className={`w-full flex items-center rounded-lg transition-all duration-200 px-4 py-3 space-x-3 ${
+                      isActive
+                        ? "bg-gray-200 text-blue-600 font-bold"
+                        : "text-gray-700 hover:bg-gray-100 hover:text-blue-600"
+                    }`}
                   >
-                    <div className={`shrink-0 ${isActive ? 'text-blue-500' : 'text-gray-500'}`}>
-                      <img src={menu.icon} alt={menu.label} className="w-6 h-6 object-contain" />
+                    <div
+                      className={`shrink-0 ${isActive ? "text-blue-500" : "text-gray-500"}`}
+                    >
+                      <img
+                        src={menu.icon}
+                        alt={menu.label}
+                        className="w-6 h-6 object-contain"
+                      />
                     </div>
                     <span className="text-lg font-medium">{menu.label}</span>
                   </button>
@@ -564,8 +782,10 @@ export default function Sidebar({ onMenuSelect, mobileMenuOpen, closeMobileMenu 
             </div>
           )}
 
-          {filteredOperationMenus.length > 0 && renderMenuSection('Operations', filteredOperationMenus)}
-          {filteredFinanceMenus.length > 0 && renderMenuSection('Finance & HR', filteredFinanceMenus)}
+          {filteredOperationMenus.length > 0 &&
+            renderMenuSection("Operations", filteredOperationMenus)}
+          {filteredFinanceMenus.length > 0 &&
+            renderMenuSection("Finance & HR", filteredFinanceMenus)}
         </div>
       </aside>
     </>

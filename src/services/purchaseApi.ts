@@ -745,43 +745,54 @@ export const purchaseApi = api.injectEndpoints({
       providesTags: ["SupplierPayments"],
     }),
 
-
     // Supplier Reports (Add these to purchaseApi.ts)
-getSupplierPerformance: builder.query<any, {
-  supplier_id?: number;
-  start_date?: string;
-  end_date?: string;
-}>({
-  query: (params) => ({ url: '/reports/supplier-performance', params }),
-  providesTags: ['SupplierReports'],
-}),
+    getSupplierPerformance: builder.query<
+      any,
+      {
+        supplier_id?: number;
+        start_date?: string;
+        end_date?: string;
+      }
+    >({
+      query: (params) => ({ url: "/reports/supplier-performance", params }),
+      providesTags: ["SupplierReports"],
+    }),
 
-getSupplierPurchases: builder.query<any, {
-  supplier_id?: number;
-  start_date?: string;
-  end_date?: string;
-  group_by?: 'supplier' | 'month' | 'quarter' | 'year';
-}>({
-  query: (params) => ({ url: '/reports/supplier-purchases', params }),
-  providesTags: ['SupplierReports'],
-}),
+    getSupplierPurchases: builder.query<
+      any,
+      {
+        supplier_id?: number;
+        start_date?: string;
+        end_date?: string;
+        group_by?: "supplier" | "month" | "quarter" | "year";
+      }
+    >({
+      query: (params) => ({ url: "/reports/supplier-purchases", params }),
+      providesTags: ["SupplierReports"],
+    }),
 
-getSupplierAging: builder.query<any, {
-  as_of_date?: string;
-  supplier_id?: number;
-}>({
-  query: (params) => ({ url: '/reports/supplier-aging', params }),
-  providesTags: ['SupplierReports'],
-}),
+    getSupplierAging: builder.query<
+      any,
+      {
+        as_of_date?: string;
+        supplier_id?: number;
+      }
+    >({
+      query: (params) => ({ url: "/reports/supplier-aging", params }),
+      providesTags: ["SupplierReports"],
+    }),
 
-getSupplierProducts: builder.query<any, {
-  supplier_id: number;  // required
-  start_date?: string;
-  end_date?: string;
-}>({
-  query: (params) => ({ url: '/reports/supplier-products', params }),
-  providesTags: ['SupplierReports'],
-}),
+    getSupplierProducts: builder.query<
+      any,
+      {
+        supplier_id: number; // required
+        start_date?: string;
+        end_date?: string;
+      }
+    >({
+      query: (params) => ({ url: "/reports/supplier-products", params }),
+      providesTags: ["SupplierReports"],
+    }),
   }),
 });
 
@@ -839,7 +850,7 @@ export const {
   useDeleteSupplierPaymentMutation,
   useGetSupplierPaymentStatisticsQuery,
 
-    useGetSupplierPerformanceQuery,
+  useGetSupplierPerformanceQuery,
   useGetSupplierPurchasesQuery,
   useGetSupplierAgingQuery,
   useGetSupplierProductsQuery,

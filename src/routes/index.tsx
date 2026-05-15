@@ -137,6 +137,7 @@ import AIContentDashboard from "../features/ai/pages/AIContentDashboard";
 import SecurityCenterPage from "../features/security/pages/SecurityCenterPage";
 import CreateNewBranch from "../features/branch/pages/CreateNewBranch";
 import BranchesDashboard from "../features/branch/pages/BranchesDashboard";
+import CouponsPage from "../features/pos/pages/CouponsPage";
 
 // ---------------------------
 // Helper functions
@@ -1012,6 +1013,14 @@ export const router = createBrowserRouter([
               </PermissionRoute>
             ),
           },
+          {
+            path: "coupon",
+            element: (
+              <PermissionRoute requiredPermissions={["process_sale"]}>
+                <CouponsPage />
+              </PermissionRoute>
+            ),
+          },
         ],
       },
 
@@ -1329,6 +1338,8 @@ export const router = createBrowserRouter([
         element: <SecurityCenterPage />,
       },
 
+      
+
       {
         path: "branches",
         children: [
@@ -1487,6 +1498,7 @@ export const router = createBrowserRouter([
           { path: "orders", element: <POSOrders /> },
           { path: "shift_reports", element: <POSShiftReports /> },
           { path: "returns", element: <ReturnsPage /> },
+          { path: "coupon", element: <CouponsPage /> },
         ],
       },
 

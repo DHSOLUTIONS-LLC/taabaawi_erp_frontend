@@ -101,6 +101,7 @@ export default function Sidebar({ onMenuSelect, mobileMenuOpen, closeMobileMenu 
     hasPermission('access_pos') && { id: 'pos-cashbox', label: 'Cash Box', path: `${basePath}/pos/cashbox` },
     hasPermission('access_pos') && { id: 'pos-shift-reports', label: 'Shift Reports', path: `${basePath}/pos/shift_reports` },
     hasPermission('access_pos') && { id: 'pos-returns', label: 'Returns', path: `${basePath}/pos/returns` },
+    hasPermission('access_pos') && { id: 'pos-coupons', label: 'Coupons', path: `${basePath}/pos/coupon` },
   ].filter(Boolean) as SubMenuItem[];
 
   const operationMenus: MenuItem[] = [
@@ -136,7 +137,6 @@ export default function Sidebar({ onMenuSelect, mobileMenuOpen, closeMobileMenu 
       path: `${basePath}/purchase`,
       submenu: [
         { id: 'purchase-dashboard', label: 'Dashboard', path: `${basePath}/purchase` },
-        { id: 'purchase-suppliers-reports', label: 'Supplier Reports', path: `${basePath}/purchase/suppliers_reports` },
         { id: 'purchase-suppliers', label: 'Suppliers', path: `${basePath}/purchase/suppliers` },
         { id: 'purchase-currencies', label: 'Currencies', path: `${basePath}/purchase/currencies` },
         { id: 'purchase-orders', label: 'Purchase Orders', path: `${basePath}/purchase/orders` },
@@ -144,6 +144,8 @@ export default function Sidebar({ onMenuSelect, mobileMenuOpen, closeMobileMenu 
         { id: 'purchase-goods-receipts', label: 'Goods Receipts', path: `${basePath}/purchase/goods-receipts` },
         { id: 'purchase-returns', label: 'Purchase Returns', path: `${basePath}/purchase/returns` },
         { id: 'purchase-payments', label: 'Supplier Payments', path: `${basePath}/purchase/payments` },
+        { id: 'purchase-suppliers-reports', label: 'Supplier Reports', path: `${basePath}/purchase/suppliers_reports` },
+
       ],
     },
   ].filter(Boolean) as MenuItem[];

@@ -385,11 +385,11 @@ export default function PurchaseOrderDetailPage() {
 
           <!-- Additional Notes -->
           ${
-            po.notes
+            po?.notes
               ? `
             <div style="background: #f0fdf4; border: 1px solid #22c55e; border-radius: 8px; padding: 12px; margin-top: 15px;">
               <h3 style="font-size: 12px; font-weight: bold; color: #166534; margin-bottom: 5px;">📝 NOTES</h3>
-              <p style="font-size: 12px; color: #14532d;">${po.notes}</p>
+              <p style="font-size: 12px; color: #14532d;">${po?.notes}</p>
             </div>
           `
               : ""

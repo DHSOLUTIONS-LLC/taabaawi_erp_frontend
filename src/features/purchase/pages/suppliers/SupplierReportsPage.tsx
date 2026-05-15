@@ -36,40 +36,48 @@ export default function SupplierReportsPage() {
   const [startDate, setStartDate] = useState(
     new Date(new Date().setMonth(new Date().getMonth() - 6))
       .toISOString()
-      .split("T")[0]
+      .split("T")[0],
   );
-  const [endDate, setEndDate] = useState(new Date().toISOString().split("T")[0]);
-  const [asOfDate, setAsOfDate] = useState(new Date().toISOString().split("T")[0]);
+  const [endDate, setEndDate] = useState(
+    new Date().toISOString().split("T")[0],
+  );
+  const [asOfDate, setAsOfDate] = useState(
+    new Date().toISOString().split("T")[0],
+  );
 
   // Fetch suppliers for dropdown
-  const { data: suppliersResponse, isLoading: suppliersLoading } = useGetSuppliersQuery({
-    is_active: 1,
-    per_page: 100,
-  });
-  
+  const { data: suppliersResponse, isLoading: suppliersLoading } =
+    useGetSuppliersQuery({
+      is_active: 1 as any,
+      per_page: 100,
+    });
+
   // Fix: Extract suppliers from the correct nested structure
-  const suppliers = (suppliersResponse as any)?.data?.data || (suppliersResponse as any)?.data || [];
+  const suppliers =
+    (suppliersResponse as any)?.data?.data ||
+    (suppliersResponse as any)?.data ||
+    [];
 
   // Fetch reports based on active tab
-  const { 
-    data: performanceData, 
-    isLoading: performanceLoading, 
+  const {
+    data: performanceData,
+    isLoading: performanceLoading,
     refetch: refetchPerformance,
-    error: performanceError 
+    error: performanceError,
   } = useGetSupplierPerformanceQuery(
     {
       supplier_id: selectedSupplier ? parseInt(selectedSupplier) : undefined,
       start_date: startDate,
       end_date: endDate,
     },
-    { skip: activeTab !== "performance" }
+    { skip: activeTab !== "performance" },
   );
 
-  const { 
-    data: purchasesData, 
-    isLoading: purchasesLoading, 
+  const {
+    data: purchasesData,
+    isLoading: purchasesLoading,
     refetch: refetchPurchases,
-    error: purchasesError 
+    error: purchasesError,
   } = useGetSupplierPurchasesQuery(
     {
       supplier_id: selectedSupplier ? parseInt(selectedSupplier) : undefined,
@@ -77,34 +85,34 @@ export default function SupplierReportsPage() {
       end_date: endDate,
       group_by: "month",
     },
-    { skip: activeTab !== "purchases" }
+    { skip: activeTab !== "purchases" },
   );
 
-  const { 
-    data: agingData, 
-    isLoading: agingLoading, 
+  const {
+    data: agingData,
+    isLoading: agingLoading,
     refetch: refetchAging,
-    error: agingError 
+    error: agingError,
   } = useGetSupplierAgingQuery(
     {
       as_of_date: asOfDate,
       supplier_id: selectedSupplier ? parseInt(selectedSupplier) : undefined,
     },
-    { skip: activeTab !== "aging" }
+    { skip: activeTab !== "aging" },
   );
 
-  const { 
-    data: productsData, 
-    isLoading: productsLoading, 
+  const {
+    data: productsData,
+    isLoading: productsLoading,
     refetch: refetchProducts,
-    error: productsError 
+    error: productsError,
   } = useGetSupplierProductsQuery(
     {
       supplier_id: selectedSupplier ? parseInt(selectedSupplier) : 0,
       start_date: startDate,
       end_date: endDate,
     },
-    { skip: activeTab !== "products" || !selectedSupplier }
+    { skip: activeTab !== "products" || !selectedSupplier },
   );
 
   const performance = performanceData?.data;
@@ -190,7 +198,9 @@ export default function SupplierReportsPage() {
             className="w-full px-4 py-2 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 text-sm"
             disabled={suppliersLoading}
           >
-            <option value="" className="w-auto">All Suppliers</option>
+            <option value="" className="w-auto">
+              All Suppliers
+            </option>
             {suppliers.map((supplier: any) => (
               <option key={supplier.id} value={supplier.id}>
                 {supplier.supplier_name}
@@ -208,7 +218,6 @@ export default function SupplierReportsPage() {
             onChange={(e) => setStartDate(e.target.value)}
             className="w-full sm:w-auto pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
           />
-          
         </div>
         <span className="text-gray-500">to</span>
         <div className="relative w-full sm:w-auto">
@@ -219,13 +228,21 @@ export default function SupplierReportsPage() {
             min={startDate}
             className="w-full sm:w-auto pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
           />
-          
         </div>
-        {(selectedSupplier || startDate !== new Date(new Date().setMonth(new Date().getMonth() - 6)).toISOString().split("T")[0] || endDate !== new Date().toISOString().split("T")[0]) && (
+        {(selectedSupplier ||
+          startDate !==
+            new Date(new Date().setMonth(new Date().getMonth() - 6))
+              .toISOString()
+              .split("T")[0] ||
+          endDate !== new Date().toISOString().split("T")[0]) && (
           <button
             onClick={() => {
               setSelectedSupplier("");
-              setStartDate(new Date(new Date().setMonth(new Date().getMonth() - 6)).toISOString().split("T")[0]);
+              setStartDate(
+                new Date(new Date().setMonth(new Date().getMonth() - 6))
+                  .toISOString()
+                  .split("T")[0],
+              );
               setEndDate(new Date().toISOString().split("T")[0]);
             }}
             className="px-4 py-2 text-sm text-red-600 border border-red-300 rounded-lg hover:bg-red-50 transition-colors"
@@ -245,7 +262,9 @@ export default function SupplierReportsPage() {
     if (!summary && !isLoading()) {
       return (
         <div className="text-center py-12">
-          <p className="text-gray-500">No data available for selected filters</p>
+          <p className="text-gray-500">
+            No data available for selected filters
+          </p>
         </div>
       );
     }
@@ -296,49 +315,68 @@ export default function SupplierReportsPage() {
         {purchaseOrders.length > 0 && (
           <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-base font-semibold text-gray-900">Purchase Orders</h3>
+              <h3 className="text-base font-semibold text-gray-900">
+                Purchase Orders
+              </h3>
             </div>
-             <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
-<div className="xl:col-span-4 overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">PO Number</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Order Date</th>
-                    <th className="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Amount</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Payment Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {purchaseOrders.map((po: any) => (
-                    <tr key={po.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-3 text-sm font-medium text-blue-600">{po.po_number}</td>
-                      <td className="px-6 py-3 text-sm text-gray-600">{po.order_date}</td>
-                      <td className="px-6 py-3 text-right text-sm font-semibold text-gray-900">
-                        {po.currency || "KWD"} {num(po.total_amount).toFixed(3)}
-                      </td>
-                      <td className="px-6 py-3">
-                        <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-700">
-                          {po.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-3">
-                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                          po.payment_status === "Paid" 
-                            ? "bg-green-100 text-green-700"
-                            : po.payment_status === "Partially Paid"
-                            ? "bg-yellow-100 text-yellow-700"
-                            : "bg-red-100 text-red-700"
-                        }`}>
-                          {po.payment_status}
-                        </span>
-                      </td>
+            <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+              <div className="xl:col-span-4 overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                        PO Number
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                        Order Date
+                      </th>
+                      <th className="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase">
+                        Amount
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                        Status
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                        Payment Status
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {purchaseOrders.map((po: any) => (
+                      <tr key={po.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-3 text-sm font-medium text-blue-600">
+                          {po.po_number}
+                        </td>
+                        <td className="px-6 py-3 text-sm text-gray-600">
+                          {po.order_date}
+                        </td>
+                        <td className="px-6 py-3 text-right text-sm font-semibold text-gray-900">
+                          {po.currency || "KWD"}{" "}
+                          {num(po.total_amount).toFixed(3)}
+                        </td>
+                        <td className="px-6 py-3">
+                          <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-700">
+                            {po.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-3">
+                          <span
+                            className={`px-2 py-1 text-xs font-medium rounded-full ${
+                              po.payment_status === "Paid"
+                                ? "bg-green-100 text-green-700"
+                                : po.payment_status === "Partially Paid"
+                                  ? "bg-yellow-100 text-yellow-700"
+                                  : "bg-red-100 text-red-700"
+                            }`}
+                          >
+                            {po.payment_status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}
@@ -347,33 +385,49 @@ export default function SupplierReportsPage() {
         {payments.length > 0 && (
           <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-base font-semibold text-gray-900">Payment History</h3>
+              <h3 className="text-base font-semibold text-gray-900">
+                Payment History
+              </h3>
             </div>
-             <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
-<div className="xl:col-span-4 overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Payment #</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Payment Date</th>
-                    <th className="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Amount</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Method</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {payments.map((payment: any) => (
-                    <tr key={payment.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-3 text-sm font-medium text-blue-600">{payment.payment_number}</td>
-                      <td className="px-6 py-3 text-sm text-gray-600">{payment.payment_date}</td>
-                      <td className="px-6 py-3 text-right text-sm font-semibold text-green-600">
-                        KWD {num(payment.amount).toFixed(3)}
-                      </td>
-                      <td className="px-6 py-3 text-sm text-gray-600">{payment.payment_method}</td>
+            <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+              <div className="xl:col-span-4 overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                        Payment #
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                        Payment Date
+                      </th>
+                      <th className="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase">
+                        Amount
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                        Method
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {payments.map((payment: any) => (
+                      <tr key={payment.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-3 text-sm font-medium text-blue-600">
+                          {payment.payment_number}
+                        </td>
+                        <td className="px-6 py-3 text-sm text-gray-600">
+                          {payment.payment_date}
+                        </td>
+                        <td className="px-6 py-3 text-right text-sm font-semibold text-green-600">
+                          KWD {num(payment.amount).toFixed(3)}
+                        </td>
+                        <td className="px-6 py-3 text-sm text-gray-600">
+                          {payment.payment_method}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}
@@ -389,7 +443,9 @@ export default function SupplierReportsPage() {
     if (!data && !isLoading()) {
       return (
         <div className="text-center py-12">
-          <p className="text-gray-500">No data available for selected filters</p>
+          <p className="text-gray-500">
+            No data available for selected filters
+          </p>
         </div>
       );
     }
@@ -406,7 +462,9 @@ export default function SupplierReportsPage() {
           </div>
           <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
             <p className="text-sm text-gray-500">Total Suppliers</p>
-            <p className="text-2xl font-bold text-gray-900 mt-1">{data?.total_suppliers || 0}</p>
+            <p className="text-2xl font-bold text-gray-900 mt-1">
+              {data?.total_suppliers || 0}
+            </p>
           </div>
         </div>
 
@@ -414,33 +472,52 @@ export default function SupplierReportsPage() {
         {topSuppliers.length > 0 && (
           <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-base font-semibold text-gray-900">Top Suppliers</h3>
+              <h3 className="text-base font-semibold text-gray-900">
+                Top Suppliers
+              </h3>
             </div>
-             <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
-<div className="xl:col-span-4 overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Supplier</th>
-                    <th className="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Total Purchases</th>
-                    <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Orders</th>
-                    <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">% of Total</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {topSuppliers.map((supplier: any, idx: number) => (
-                    <tr key={supplier.supplier_id || idx} className="hover:bg-gray-50">
-                      <td className="px-6 py-3 text-sm font-medium text-gray-900">{supplier.supplier_name}</td>
-                      <td className="px-6 py-3 text-right text-sm font-semibold text-blue-600">
-                        KWD {num(supplier.total_purchases).toFixed(3)}
-                      </td>
-                      <td className="px-6 py-3 text-center text-sm text-gray-600">{supplier.orders_count}</td>
-                      <td className="px-6 py-3 text-center text-sm font-medium text-gray-700">{supplier.percentage}%</td>
+            <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+              <div className="xl:col-span-4 overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                        Supplier
+                      </th>
+                      <th className="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase">
+                        Total Purchases
+                      </th>
+                      <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">
+                        Orders
+                      </th>
+                      <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">
+                        % of Total
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {topSuppliers.map((supplier: any, idx: number) => (
+                      <tr
+                        key={supplier.supplier_id || idx}
+                        className="hover:bg-gray-50"
+                      >
+                        <td className="px-6 py-3 text-sm font-medium text-gray-900">
+                          {supplier.supplier_name}
+                        </td>
+                        <td className="px-6 py-3 text-right text-sm font-semibold text-blue-600">
+                          KWD {num(supplier.total_purchases).toFixed(3)}
+                        </td>
+                        <td className="px-6 py-3 text-center text-sm text-gray-600">
+                          {supplier.orders_count}
+                        </td>
+                        <td className="px-6 py-3 text-center text-sm font-medium text-gray-700">
+                          {supplier.percentage}%
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}
@@ -449,31 +526,43 @@ export default function SupplierReportsPage() {
         {purchasesByPeriod.length > 0 && (
           <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-base font-semibold text-gray-900">Purchases by Period</h3>
+              <h3 className="text-base font-semibold text-gray-900">
+                Purchases by Period
+              </h3>
             </div>
-             <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
-<div className="xl:col-span-4 overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Period</th>
-                    <th className="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Amount</th>
-                    <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Orders</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {purchasesByPeriod.map((period: any, idx: number) => (
-                    <tr key={idx} className="hover:bg-gray-50">
-                      <td className="px-6 py-3 text-sm text-gray-600">{period.period}</td>
-                      <td className="px-6 py-3 text-right text-sm font-semibold text-blue-600">
-                        KWD {num(period.amount).toFixed(3)}
-                      </td>
-                      <td className="px-6 py-3 text-center text-sm text-gray-600">{period.orders_count}</td>
+            <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+              <div className="xl:col-span-4 overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                        Period
+                      </th>
+                      <th className="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase">
+                        Amount
+                      </th>
+                      <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">
+                        Orders
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {purchasesByPeriod.map((period: any, idx: number) => (
+                      <tr key={idx} className="hover:bg-gray-50">
+                        <td className="px-6 py-3 text-sm text-gray-600">
+                          {period.period}
+                        </td>
+                        <td className="px-6 py-3 text-right text-sm font-semibold text-blue-600">
+                          KWD {num(period.amount).toFixed(3)}
+                        </td>
+                        <td className="px-6 py-3 text-center text-sm text-gray-600">
+                          {period.orders_count}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}
@@ -489,7 +578,9 @@ export default function SupplierReportsPage() {
     if (!data && !isLoading()) {
       return (
         <div className="text-center py-12">
-          <p className="text-gray-500">No data available for selected filters</p>
+          <p className="text-gray-500">
+            No data available for selected filters
+          </p>
         </div>
       );
     }
@@ -500,30 +591,42 @@ export default function SupplierReportsPage() {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
           <div className="bg-white rounded-xl p-4 border border-gray-200 text-center">
             <p className="text-xs text-gray-500">Current</p>
-            <p className="text-lg font-bold text-gray-900">KWD {num(agingSummary.current).toFixed(3)}</p>
+            <p className="text-lg font-bold text-gray-900">
+              KWD {num(agingSummary.current).toFixed(3)}
+            </p>
           </div>
           <div className="bg-yellow-50 rounded-xl p-4 border border-yellow-200 text-center">
             <p className="text-xs text-yellow-600">1-30 Days</p>
-            <p className="text-lg font-bold text-yellow-700">KWD {num(agingSummary["1_30_days"]).toFixed(3)}</p>
+            <p className="text-lg font-bold text-yellow-700">
+              KWD {num(agingSummary["1_30_days"]).toFixed(3)}
+            </p>
           </div>
           <div className="bg-orange-50 rounded-xl p-4 border border-orange-200 text-center">
             <p className="text-xs text-orange-600">31-60 Days</p>
-            <p className="text-lg font-bold text-orange-700">KWD {num(agingSummary["31_60_days"]).toFixed(3)}</p>
+            <p className="text-lg font-bold text-orange-700">
+              KWD {num(agingSummary["31_60_days"]).toFixed(3)}
+            </p>
           </div>
           <div className="bg-red-50 rounded-xl p-4 border border-red-200 text-center">
             <p className="text-xs text-red-600">61-90 Days</p>
-            <p className="text-lg font-bold text-red-700">KWD {num(agingSummary["61_90_days"]).toFixed(3)}</p>
+            <p className="text-lg font-bold text-red-700">
+              KWD {num(agingSummary["61_90_days"]).toFixed(3)}
+            </p>
           </div>
           <div className="bg-purple-50 rounded-xl p-4 border border-purple-200 text-center">
             <p className="text-xs text-purple-600">Over 90 Days</p>
-            <p className="text-lg font-bold text-purple-700">KWD {num(agingSummary["over_90_days"]).toFixed(3)}</p>
+            <p className="text-lg font-bold text-purple-700">
+              KWD {num(agingSummary["over_90_days"]).toFixed(3)}
+            </p>
           </div>
         </div>
 
         {/* Total Outstanding */}
         <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
           <div className="flex justify-between items-center">
-            <span className="text-sm font-semibold text-blue-800">Total Outstanding</span>
+            <span className="text-sm font-semibold text-blue-800">
+              Total Outstanding
+            </span>
             <span className="text-2xl font-bold text-blue-600">
               KWD {num(agingSummary.total_outstanding).toFixed(3)}
             </span>
@@ -534,37 +637,70 @@ export default function SupplierReportsPage() {
         {suppliersList.length > 0 && (
           <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-base font-semibold text-gray-900">Suppliers Aging Breakdown</h3>
+              <h3 className="text-base font-semibold text-gray-900">
+                Suppliers Aging Breakdown
+              </h3>
             </div>
             <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
-<div className="xl:col-span-4 overflow-x-auto">
-              <table className="w-full min-w-[700px]">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Supplier</th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Current</th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">1-30 Days</th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">31-60 Days</th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">61-90 Days</th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Over 90</th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Total</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {suppliersList.map((supplier: any, idx: number) => (
-                    <tr key={supplier.supplier_id || idx} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm font-medium text-gray-900">{supplier.supplier_name}</td>
-                      <td className="px-4 py-3 text-right text-sm text-gray-600">KWD {num(supplier.current).toFixed(3)}</td>
-                      <td className="px-4 py-3 text-right text-sm text-yellow-600">KWD {num(supplier["1_30_days"]).toFixed(3)}</td>
-                      <td className="px-4 py-3 text-right text-sm text-orange-600">KWD {num(supplier["31_60_days"]).toFixed(3)}</td>
-                      <td className="px-4 py-3 text-right text-sm text-red-600">KWD {num(supplier["61_90_days"]).toFixed(3)}</td>
-                      <td className="px-4 py-3 text-right text-sm text-purple-600">KWD {num(supplier["over_90_days"]).toFixed(3)}</td>
-                      <td className="px-4 py-3 text-right text-sm font-bold text-blue-600">KWD {num(supplier.total).toFixed(3)}</td>
+              <div className="xl:col-span-4 overflow-x-auto">
+                <table className="w-full min-w-[700px]">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                        Supplier
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">
+                        Current
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">
+                        1-30 Days
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">
+                        31-60 Days
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">
+                        61-90 Days
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">
+                        Over 90
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">
+                        Total
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {suppliersList.map((supplier: any, idx: number) => (
+                      <tr
+                        key={supplier.supplier_id || idx}
+                        className="hover:bg-gray-50"
+                      >
+                        <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                          {supplier.supplier_name}
+                        </td>
+                        <td className="px-4 py-3 text-right text-sm text-gray-600">
+                          KWD {num(supplier.current).toFixed(3)}
+                        </td>
+                        <td className="px-4 py-3 text-right text-sm text-yellow-600">
+                          KWD {num(supplier["1_30_days"]).toFixed(3)}
+                        </td>
+                        <td className="px-4 py-3 text-right text-sm text-orange-600">
+                          KWD {num(supplier["31_60_days"]).toFixed(3)}
+                        </td>
+                        <td className="px-4 py-3 text-right text-sm text-red-600">
+                          KWD {num(supplier["61_90_days"]).toFixed(3)}
+                        </td>
+                        <td className="px-4 py-3 text-right text-sm text-purple-600">
+                          KWD {num(supplier["over_90_days"]).toFixed(3)}
+                        </td>
+                        <td className="px-4 py-3 text-right text-sm font-bold text-blue-600">
+                          KWD {num(supplier.total).toFixed(3)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}
@@ -579,7 +715,9 @@ export default function SupplierReportsPage() {
     if (!selectedSupplier) {
       return (
         <div className="text-center py-12">
-          <p className="text-gray-500">Please select a supplier to view products</p>
+          <p className="text-gray-500">
+            Please select a supplier to view products
+          </p>
         </div>
       );
     }
@@ -587,7 +725,9 @@ export default function SupplierReportsPage() {
     if (!data && !isLoading()) {
       return (
         <div className="text-center py-12">
-          <p className="text-gray-500">No products found for this supplier in the selected period</p>
+          <p className="text-gray-500">
+            No products found for this supplier in the selected period
+          </p>
         </div>
       );
     }
@@ -596,7 +736,9 @@ export default function SupplierReportsPage() {
       <div className="space-y-4">
         <div className="bg-white rounded-xl p-4 border border-gray-200">
           <p className="text-sm text-gray-500">Supplier</p>
-          <p className="text-lg font-bold text-gray-900">{data?.supplier_name}</p>
+          <p className="text-lg font-bold text-gray-900">
+            {data?.supplier_name}
+          </p>
           <p className="text-xs text-gray-400 mt-1">
             Period: {data?.period?.start_date} to {data?.period?.end_date}
           </p>
@@ -604,32 +746,53 @@ export default function SupplierReportsPage() {
 
         <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200">
           <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
-<div className="xl:col-span-4 overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Product</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">SKU</th>
-                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Quantity</th>
-                  <th className="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Total Amount</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Last Purchase</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {productList.map((product: any, idx: number) => (
-                  <tr key={product.product_id || idx} className="hover:bg-gray-50">
-                    <td className="px-6 py-3 text-sm font-medium text-gray-900">{product.product_name}</td>
-                    <td className="px-6 py-3 text-sm text-gray-500 font-mono">{product.sku || "—"}</td>
-                    <td className="px-6 py-3 text-center text-sm text-gray-600">{product.total_quantity}</td>
-                    <td className="px-6 py-3 text-right text-sm font-semibold text-blue-600">
-                      KWD {num(product.total_amount).toFixed(3)}
-                    </td>
-                    <td className="px-6 py-3 text-sm text-gray-500">{product.last_purchase_date || "—"}</td>
+            <div className="xl:col-span-4 overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                      Product
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                      SKU
+                    </th>
+                    <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">
+                      Quantity
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase">
+                      Total Amount
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                      Last Purchase
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {productList.map((product: any, idx: number) => (
+                    <tr
+                      key={product.product_id || idx}
+                      className="hover:bg-gray-50"
+                    >
+                      <td className="px-6 py-3 text-sm font-medium text-gray-900">
+                        {product.product_name}
+                      </td>
+                      <td className="px-6 py-3 text-sm text-gray-500 font-mono">
+                        {product.sku || "—"}
+                      </td>
+                      <td className="px-6 py-3 text-center text-sm text-gray-600">
+                        {product.total_quantity}
+                      </td>
+                      <td className="px-6 py-3 text-right text-sm font-semibold text-blue-600">
+                        KWD {num(product.total_amount).toFixed(3)}
+                      </td>
+                      <td className="px-6 py-3 text-sm text-gray-500">
+                        {product.last_purchase_date || "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
@@ -638,12 +801,12 @@ export default function SupplierReportsPage() {
 
   const renderContent = () => {
     const error = getError();
-    
+
     if (error) {
       return (
         <div className="text-center py-12">
           <p className="text-red-500">Failed to load data. Please try again.</p>
-          <button 
+          <button
             onClick={handleRefresh}
             className="mt-4 px-4 py-2 text-blue-600 border border-blue-300 rounded-lg hover:bg-blue-50"
           >
@@ -681,7 +844,9 @@ export default function SupplierReportsPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-xl md:text-2xl font-bold text-gray-900">Supplier Reports</h1>
+            <h1 className="text-xl md:text-2xl font-bold text-gray-900">
+              Supplier Reports
+            </h1>
             <p className="text-xs md:text-sm text-gray-500 mt-1">
               Track supplier performance, purchases, aging, and product history
             </p>
@@ -692,7 +857,11 @@ export default function SupplierReportsPage() {
               className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
               title="Refresh"
             >
-              <img src={refresh_icon} alt="" className="w-4 h-4 md:w-5 md:h-5" />
+              <img
+                src={refresh_icon}
+                alt=""
+                className="w-4 h-4 md:w-5 md:h-5"
+              />
             </button>
           </div>
         </div>

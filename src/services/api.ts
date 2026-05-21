@@ -122,6 +122,7 @@ export const api = createApi({
     "SupplierReports",
     "Inventory",
     "TransferRequests",
+    "EmployeeDocuments"
   ],
   endpoints: () => ({
     // Common endpoints will be injected by other API files

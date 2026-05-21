@@ -807,6 +807,13 @@ export default function EmployeeDashboardPage() {
                             </button>
                         </Link>
 
+                        <Link to={`${basePath}/hr/documents`} className="flex-1 lg:flex-none">
+                            <button className="w-full lg:w-24 xl:w-28 h-full lg:h-36 xl:h-40 bg-white border border-gray-100 rounded-full hover:bg-gray-50 transition-colors shadow-sm hover:shadow-lg relative flex items-center justify-center group cursor-pointer overflow-hidden">
+                                <img src={back_icon} alt="" className="bg-[#CFF6FF] p-3 sm:p-4 rounded-full transition-transform duration-300 group-hover:-translate-y-8 w-10 h-10 sm:w-12 sm:h-12" />
+                                <span className="absolute bottom-2 sm:bottom-4 text-xs sm:text-sm text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-center w-full px-1">Documents</span>
+                            </button>
+                        </Link>
+
                         <Link to={`${basePath}/hr/add_bonuses`} className="flex-1 lg:flex-none">
                             <button className="w-full lg:w-24 xl:w-28 h-full lg:h-36 xl:h-40 bg-white border border-gray-100 rounded-full hover:bg-gray-50 transition-colors shadow-sm hover:shadow-lg relative flex items-center justify-center group cursor-pointer overflow-hidden">
                                 <img src={bonuses_icon} alt="" className="w-10 h-10 sm:w-12 sm:h-12 bg-[#CFF6FF] p-3 sm:p-4 rounded-full transition-transform duration-300 group-hover:-translate-y-8" />

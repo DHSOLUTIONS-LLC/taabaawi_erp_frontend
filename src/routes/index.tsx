@@ -10,6 +10,7 @@ import ProfilePage from "../features/pages/ProfilePage";
 import MyLeavesPage from "../features/pages/MyLeavesPage";
 import LeaveRequestFormPage from "../features/pages/LeaveRequestFormPage";
 import ReturnsPage from "../features/pos/pages/ReturnsPage";
+import DocumentManagementPage from '../features/hr/pages/DocumentManagement';
 
 // Inventory
 import InventoryDashboardPage from "../features/inventory/pages/InventoryDashboardPage";
@@ -1124,6 +1125,14 @@ export const router = createBrowserRouter([
               </PermissionRoute>
             ),
           },
+          {
+            path: "documents",
+            element: (
+              <PermissionRoute requiredPermissions={["view_users"]}>
+                <DocumentManagementPage />
+              </PermissionRoute>
+            ),
+          },
         ],
       },
 
@@ -1516,11 +1525,9 @@ export const router = createBrowserRouter([
           { path: "create_role", element: <CreateNewRole /> },
           { path: "payrolls", element: <PayrollListPage /> },
           { path: "payrolls/generate", element: <GeneratePayrollPage /> },
-          {
-            path: "payrolls/generate-bulk",
-            element: <BulkGeneratePayrollPage />,
-          },
+          { path: "payrolls/generate-bulk", element: <BulkGeneratePayrollPage /> },
           { path: "payrolls/:id", element: <PayrollDetailsPage /> },
+          { path: "documents", element: <DocumentManagementPage  /> },
         ],
       },
 

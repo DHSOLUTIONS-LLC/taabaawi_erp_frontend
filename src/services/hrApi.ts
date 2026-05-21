@@ -186,6 +186,18 @@ export const hrApi = api.injectEndpoints({
       }),
     }),
 
+    // Get expiring documents (within 30 days)
+    getExpiringDocuments: builder.query<any, void>({
+      query: () => "/employee-documents/expiring",
+      providesTags: ["EmployeeDocuments"],
+    }),
+
+    // Get expired documents
+    getExpiredDocuments: builder.query<any, void>({
+      query: () => "/employee-documents/expired",
+      providesTags: ["EmployeeDocuments"],
+    }),
+
     // Get employee documents
     getEmployeeDocuments: builder.query<any, number>({
       query: (employeeId) => `/employees/${employeeId}/documents`,
@@ -409,4 +421,6 @@ export const {
   useApprovePayrollMutation,
   useMarkPayrollAsPaidMutation,
   useDeletePayrollMutation,
+   useGetExpiringDocumentsQuery,
+  useGetExpiredDocumentsQuery,
 } = hrApi;

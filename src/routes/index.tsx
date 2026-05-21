@@ -10,7 +10,7 @@ import ProfilePage from "../features/pages/ProfilePage";
 import MyLeavesPage from "../features/pages/MyLeavesPage";
 import LeaveRequestFormPage from "../features/pages/LeaveRequestFormPage";
 import ReturnsPage from "../features/pos/pages/ReturnsPage";
-import DocumentManagementPage from '../features/hr/pages/DocumentManagement';
+import DocumentManagementPage from "../features/hr/pages/DocumentManagement";
 
 // Inventory
 import InventoryDashboardPage from "../features/inventory/pages/InventoryDashboardPage";
@@ -72,6 +72,7 @@ import PurchaseDashboardPage from "../features/purchase/pages/PurchaseDashboard"
 import AddPurchaseOrderProducts from "../features/purchase/pages/PurchaseOrders/EditPurchaseOrderPage";
 
 // Accounting
+import ExpensesPage from "../features/accounting/pages/expenses/ExpensesPage";
 import AccountingDashboardPage from "../features/accounting/pages/AccountingDashboard";
 import ChartOfAccountsPage from "../features/accounting/pages/ChartsOfAccounts/ChartOfAccountsPage";
 import AccountTreePage from "../features/accounting/pages/ChartsOfAccounts/AccountTreePage";
@@ -879,6 +880,16 @@ export const router = createBrowserRouter([
               </PermissionRoute>
             ),
           },
+         
+          {
+            path: "expenses",
+            element: (
+              <PermissionRoute requiredPermissions={["view_reports"]}>
+                <ExpensesPage />
+              </PermissionRoute>
+            ),
+          },
+         
 
           // {
           //   path: 'financial-reports/trial-balance',
@@ -1347,8 +1358,6 @@ export const router = createBrowserRouter([
         element: <SecurityCenterPage />,
       },
 
-      
-
       {
         path: "branches",
         children: [
@@ -1477,6 +1486,12 @@ export const router = createBrowserRouter([
             path: "budgets/:id/budget-vs-actual",
             element: <BudgetVsActualPage />,
           },
+
+          {
+            path: "expenses",
+            element: <ExpensesPage />,
+          },
+         
           // Financial Reports
           { path: "financial-reports", element: <FinancialReportsPage /> },
           // { path: 'financial-reports/profit-loss', element: <ProfitLossPage /> },
@@ -1525,9 +1540,12 @@ export const router = createBrowserRouter([
           { path: "create_role", element: <CreateNewRole /> },
           { path: "payrolls", element: <PayrollListPage /> },
           { path: "payrolls/generate", element: <GeneratePayrollPage /> },
-          { path: "payrolls/generate-bulk", element: <BulkGeneratePayrollPage /> },
+          {
+            path: "payrolls/generate-bulk",
+            element: <BulkGeneratePayrollPage />,
+          },
           { path: "payrolls/:id", element: <PayrollDetailsPage /> },
-          { path: "documents", element: <DocumentManagementPage  /> },
+          { path: "documents", element: <DocumentManagementPage /> },
         ],
       },
 

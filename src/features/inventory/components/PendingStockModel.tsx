@@ -215,7 +215,7 @@ export default function StockRequestsModal({
                 return (
                   <div
                     key={request.id}
-                    className="border rounded-xl p-5 bg-white shadow-sm"
+                    className="border border-gray-200 rounded-xl p-5 bg-white shadow-sm"
                   >
                     <div className="flex justify-between items-start mb-3">
                       <div>
@@ -263,7 +263,7 @@ export default function StockRequestsModal({
                       </span>
                     </div>
 
-                    <div className="border-t pt-3">
+                    <div className="border-t border-gray-200 pt-3">
                       <table className="w-full text-sm">
                         <thead className="bg-gray-50">
                           <tr>
@@ -278,7 +278,7 @@ export default function StockRequestsModal({
                         </thead>
                         <tbody>
                           {request.items?.map((item: any, idx: number) => (
-                            <tr key={idx} className="border-b">
+                            <tr key={idx} className="border-b  border-gray-200">
                               <td className="px-3 py-2">
                                 {item.product?.product_name || item.product_id}
                                 {item.variant && (

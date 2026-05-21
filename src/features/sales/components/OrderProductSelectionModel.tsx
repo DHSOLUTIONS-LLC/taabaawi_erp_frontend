@@ -1,5 +1,5 @@
 // src/features/sales/components/ProductSelectionModal.tsx
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import {
   useGetProductsQuery,
   useGetCategoriesQuery,
@@ -10,13 +10,11 @@ import ProductCard from "./Productcard";
 import ProductPopup from "./Productpopup";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import search_icon from "../../../assets/icons/search_icon.svg";
-import barcode_icon from "../../../assets/icons/barcode_icon.svg";
+// import barcode_icon from "../../../assets/icons/barcode_icon.svg";
 
-const API_BASE_URL =" https://puristic-filmily-bula.ngrok-free.dev"
-
-// const API_BASE_URL =
-//   import.meta.env.VITE_API_URL?.replace("/api", "") ||
-//   "https://puristic-filmily-bula.ngrok-free.dev";
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL?.replace("/api", "") ||
+  "https://erp-backend.ttexpresskw.com";
 
 interface ProductSelectionModalProps {
   isOpen: boolean;
@@ -42,11 +40,15 @@ export default function ProductSelectionModal({
 }: ProductSelectionModalProps) {
   const dispatch = useAppDispatch();
   const [searchQuery, setSearchQuery] = useState("");
+  const [barcodeInput, setBarcodeInput] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All Items");
   const [isProductPopupOpen, setIsProductPopupOpen] = useState(false);
   const [currentProduct, setCurrentProduct] = useState<MappedProduct | null>(
     null,
   );
+  // const [isBarcodeScanning, setIsBarcodeScanning] = useState(false);
+  // const [barcodeError, setBarcodeError] = useState("");
+  const barcodeInputRef = useRef<HTMLInputElement>(null);
 
   // ─── Real API ─────────────────────────────────────────────────
   const { data: productsResponse, isLoading, error } = useGetProductsQuery();
@@ -115,6 +117,58 @@ export default function ProductSelectionModal({
     setFilteredProducts(filtered);
   }, [searchQuery, selectedCategory, products]);
 
+  // Handle barcode scan
+  // const handleBarcodeScan = async () => {
+  //   if (!barcodeInput.trim()) {
+  //     setBarcodeError("Please enter or scan a barcode");
+  //     return;
+  //   }
+
+  //   setIsBarcodeScanning(true);
+  //   setBarcodeError("");
+
+  //   try {
+  //     // First try to find product by barcode in the products list
+  //     const foundProduct = products.find(
+  //       (p) => p.sku.toLowerCase() === barcodeInput.trim().toLowerCase(),
+  //     );
+
+  //     if (foundProduct) {
+  //       // Add product directly to order
+  //       const uniqueId = `${foundProduct.product_id}-default-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+  //       dispatch(
+  //         addOrderProduct({
+  //           id: uniqueId,
+  //           product_id: foundProduct.product_id,
+  //           name: foundProduct.name,
+  //           sku: foundProduct.sku,
+  //           price: foundProduct.price,
+  //           size: "Default",
+  //           variant_id: null,
+  //           quantity: 1,
+  //           image: foundProduct.image,
+  //           image_url: foundProduct.image_url,
+  //         }),
+  //       );
+
+  //       setBarcodeInput("");
+  //       // Optional: show success toast
+  //       console.log("Product added via barcode:", foundProduct.name);
+  //     } else {
+  //       setBarcodeError(`Product with barcode "${barcodeInput}" not found`);
+  //     }
+  //   } catch (err) {
+  //     setBarcodeError("Failed to find product");
+  //   } finally {
+  //     setIsBarcodeScanning(false);
+  //     // Refocus barcode input for next scan
+  //     setTimeout(() => {
+  //       barcodeInputRef.current?.focus();
+  //     }, 100);
+  //   }
+  // };
+
   const handleProductClick = (product: MappedProduct) => {
     setCurrentProduct(product);
     setIsProductPopupOpen(true);
@@ -166,6 +220,46 @@ export default function ProductSelectionModal({
 
         {/* Content */}
         <div className="p-3 sm:p-4 md:p-6">
+          {/* Barcode Scanner Row */}
+          {/* <div className="mb-4 p-3 bg-gray-50 rounded-xl border border-gray-200">
+            <div className="flex items-center gap-2 mb-2">
+              <img src={barcode_icon} alt="" className="w-5 h-5 text-gray-500" />
+              <span className="text-sm font-medium text-gray-700">Quick Add by Barcode</span>
+            </div>
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <input
+                  ref={barcodeInputRef}
+                  type="text"
+                  value={barcodeInput}
+                  onChange={(e) => setBarcodeInput(e.target.value)}
+                  onKeyDown={handleBarcodeKeyDown}
+                  placeholder="Scan or enter barcode..."
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                  disabled={isBarcodeScanning}
+                  autoFocus
+                />
+              </div>
+              <button
+                onClick={handleBarcodeScan}
+                disabled={isBarcodeScanning || !barcodeInput.trim()}
+                className="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors whitespace-nowrap"
+              >
+                {isBarcodeScanning ? (
+                  <div className="flex items-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+                    <span>Adding...</span>
+                  </div>
+                ) : (
+                  'Add to Order'
+                )}
+              </button>
+            </div>
+            {barcodeError && (
+              <p className="text-red-500 text-sm mt-2">{barcodeError}</p>
+            )}
+          </div> */}
+
           {/* Search Bar */}
           <div className="relative mb-4 sm:mb-6">
             <div className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-400">
@@ -178,16 +272,6 @@ export default function ProductSelectionModal({
               placeholder="Search by product name, SKU, or barcode"
               className="w-full pl-9 sm:pl-12 pr-12 sm:pr-16 py-2.5 sm:py-3.5 bg-white border border-gray-300 rounded-lg sm:rounded-xl text-gray-900 placeholder-gray-400 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 shadow-sm"
             />
-            <button
-              className="absolute right-1.5 sm:right-2 top-1/2 -translate-y-1/2 p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              title="Scan Barcode"
-            >
-              <img
-                src={barcode_icon}
-                alt=""
-                className="w-4 h-4 sm:w-5 sm:h-5"
-              />
-            </button>
           </div>
 
           {/* Category Tabs - Horizontal Scroll on Mobile */}

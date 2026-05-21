@@ -3,6 +3,7 @@ import { useState } from "react";
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import ProductGrid from "../components/Productgrid";
 import CartSidebar from "../components/posProductDetailsSidebar";
+import BarcodeScannerPopup from "../components/BarcodeScanner";
 
 import barcode_icon from "../../../assets/icons/barcode_icon.svg";
 import search_icon from "../../../assets/icons/search_icon.svg";
@@ -14,6 +15,8 @@ export interface CartItem {
   quantity: number;
   image: string;
   sku: string;
+  product_id?: number;
+  variant_id?: number;
 }
 
 export default function POSPage() {
@@ -21,23 +24,50 @@ export default function POSPage() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, _setSelectedCategory] = useState("All Items");
+  const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
+  const [barcodeInput, setBarcodeInput] = useState("");
 
   const session = JSON.parse(localStorage.getItem("pos_session") || "{}");
   console.log("POSPage session:", session);
 
+  // Add to cart function - used by both product grid and barcode scanner
   const handleAddToCart = (product: any) => {
-    const existingItem = cartItems.find((item) => item.id === product.id);
+    console.log("Adding to cart:", product);
+
+    // Handle product from barcode scanner (different structure)
+    const productId = product.product_id || product.id;
+    const productName = product.product_name || product.name;
+    const productPrice = parseFloat(
+      product.selling_price || product.sale_price || product.price || 0,
+    );
+    const productSku = product.sku || "";
+    const productImage = product.image_url || product.image || "";
+    const variantId = product.variant_id || null;
+
+    const existingItem = cartItems.find(
+      (item) => item.product_id === productId && item.variant_id === variantId,
+    );
 
     if (existingItem) {
       setCartItems(
         cartItems.map((item) =>
-          item.id === product.id
+          item.product_id === productId && item.variant_id === variantId
             ? { ...item, quantity: item.quantity + 1 }
             : item,
         ),
       );
     } else {
-      setCartItems([...cartItems, { ...product, quantity: 1 }]);
+      const newItem: CartItem = {
+        id: `${productId}-${variantId || "default"}-${Date.now()}`,
+        product_id: productId,
+        variant_id: variantId,
+        name: productName,
+        sku: productSku,
+        price: productPrice,
+        quantity: 1,
+        image: productImage,
+      };
+      setCartItems([...cartItems, newItem]);
     }
 
     setIsCartOpen(true);
@@ -63,16 +93,12 @@ export default function POSPage() {
     setCartItems([]);
   };
 
-  const handleScanBarcode = () => {
-    alert("Barcode scanner activated");
-  };
-
   return (
     <DashboardLayout>
-      <div className="relative ">
+      <div className="relative">
         {/* Header with Search */}
-        <div className="sticky  backdrop-blur-lg ">
-          <div className="max-w-[1920px]  px-2 py-2">
+        <div className="sticky backdrop-blur-lg">
+          <div className="max-w-[1920px] px-2 py-2">
             {/* Search Bar */}
             <div className="relative">
               <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
@@ -86,7 +112,7 @@ export default function POSPage() {
                 className="w-full pl-12 pr-16 py-3.5 bg-white border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 shadow-sm"
               />
               <button
-                onClick={handleScanBarcode}
+                onClick={() => setShowBarcodeScanner(true)}
                 className="absolute right-2 top-1/2 -translate-y-1/2 p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
                 title="Scan Barcode"
               >
@@ -97,7 +123,7 @@ export default function POSPage() {
         </div>
 
         {/* Product Grid */}
-        <div className={`transition-all duration-300 `}>
+        <div className={`transition-all duration-300`}>
           <ProductGrid
             searchQuery={searchQuery}
             selectedCategory={selectedCategory}
@@ -106,34 +132,27 @@ export default function POSPage() {
           />
         </div>
 
-        {/* Cart Sidebar */}
+        {/* Cart Sidebar - Now passing onAddToCart */}
         <CartSidebar
           isOpen={isCartOpen}
           onClose={() => setIsCartOpen(false)}
           cartItems={cartItems}
+          onAddToCart={handleAddToCart} // ← IMPORTANT: Pass this prop
           onUpdateQuantity={handleUpdateQuantity}
           onRemoveItem={handleRemoveItem}
           onClearCart={handleClearCart}
-          registerId={session.registerId} // ← this
-          branchId={session.branchId} // ← this
+          registerId={session.registerId}
+          branchId={session.branchId}
         />
 
-        {/* Floating Cart Button - Only show when cart is closed and has items */}
-        {/* {!isCartOpen && cartItems.length > 0 && (
-          <button
-            onClick={() => setIsCartOpen(true)}
-            className="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-2xl hover:bg-blue-700 transition-all duration-200 z-40 hover:scale-110 active:scale-95"
-          >
-            <div className="relative">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                {cartItems.reduce((sum, item) => sum + item.quantity, 0)}
-              </span>
-            </div>
-          </button>
-        )} */}
+        {/* Barcode Scanner Modal */}
+        {showBarcodeScanner && (
+          <BarcodeScannerPopup
+            onClose={() => setShowBarcodeScanner(false)}
+            onProductFound={handleAddToCart}
+            branchId={session.branchId}
+          />
+        )}
       </div>
     </DashboardLayout>
   );

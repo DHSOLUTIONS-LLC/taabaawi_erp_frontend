@@ -425,6 +425,28 @@ export const posApi = api.injectEndpoints({
       query: (params) => ({ url: "/shift-reports/daily-summary", params }),
       providesTags: ["ShiftReports"],
     }),
+
+    scanBarcode: builder.mutation<
+      any,
+      {
+        barcode: string;
+        branch_id: number;
+      }
+    >({
+      query: (data) => ({
+        url: "/barcodes/scan/pos",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Sales"],
+    }),
+
+    searchByBarcode: builder.query<any, { barcode: string }>({
+      query: (params) => ({
+        url: "/barcodes/search",
+        params,
+      }),
+    }),
   }),
 });
 
@@ -468,4 +490,7 @@ export const {
   useGetShiftReportByIdQuery,
   useExportShiftReportQuery,
   useGetDailyShiftSummaryQuery,
+
+  useScanBarcodeMutation,
+  useSearchByBarcodeQuery,
 } = posApi;

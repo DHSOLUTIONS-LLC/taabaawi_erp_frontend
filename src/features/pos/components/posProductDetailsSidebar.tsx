@@ -8,6 +8,7 @@ import PaymentModal from "./PaymentModal";
 import ReceiptModal from "./ReceiptModal";
 import { useAppSelector } from "../../../app/hooks";
 import type { RootState } from "../../../app/store";
+// import BarcodeScanner from './BarcodeScanner';
 
 interface CartItem {
   id: string;
@@ -27,6 +28,7 @@ interface CartSidebarProps {
   cartItems: CartItem[];
   onUpdateQuantity: (itemId: string, quantity: number) => void;
   onRemoveItem: (itemId: string) => void;
+  onAddToCart?: (item: CartItem) => void;
   onClearCart: () => void;
   registerId?: number;
   branchId?: number;
@@ -204,6 +206,46 @@ export default function CartSidebar({
     discount_percentage: itemDiscounts[item.id] || 0,
   }));
 
+  const handleBarcodeProductFound = (product: any) => {
+    console.log("✅ Barcode Product Received:", product);
+
+    const existingItem = cartItems.find(
+      (item) =>
+        item.product_id === product.product_id &&
+        (item.variant_id || null) === (product.variant_id || null),
+    );
+
+    if (existingItem) {
+      // Increase quantity if already in cart
+      onUpdateQuantity(existingItem.id, existingItem.quantity + 1);
+    } else {
+      const newItem: CartItem = {
+        id: `${product.product_id}-${product.variant_id || "default"}-${Date.now()}`,
+        product_id: product.product_id,
+        variant_id: product.variant_id,
+        name: product.product_name || product.name || "Unknown Product",
+        sku: product.sku || "",
+        price: parseFloat(
+          product.selling_price || product.sale_price || product.price || "0",
+        ),
+        quantity: 1,
+        image: product.image_url || "",
+      };
+
+      // ACTUALLY ADD TO CART - Use the onAddToCart prop
+      if (onAddToCart) {
+        onAddToCart(newItem);
+      } else {
+        // Fallback: Try to use a custom event or direct modification
+        console.error(
+          "onAddToCart prop is missing! Please pass it from parent component.",
+        );
+
+        // Temporary workaround: If you have access to the parent's cart state setter
+        // You'll need to pass a function from parent
+      }
+    }
+  };
   return (
     <>
       {/* Overlay */}
@@ -643,3 +685,6 @@ export default function CartSidebar({
     </>
   );
 }
+// function onAddToCart(newItem: CartItem) {
+//   throw new Error("Function not implemented.");
+// }

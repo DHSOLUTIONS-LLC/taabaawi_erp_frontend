@@ -120,6 +120,8 @@ export const api = createApi({
     "ChangeHistory",
     "DeletedRecordStatistics",
     "SupplierReports",
+    "Inventory",
+    "TransferRequests",
   ],
   endpoints: () => ({
     // Common endpoints will be injected by other API files

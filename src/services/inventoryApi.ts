@@ -49,12 +49,27 @@ export const inventoryApi = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: import.meta.env.VITE_API_URL, // same as your other apis
     prepareHeaders: (headers) => {
-      const auth = localStorage.getItem("erp_auth");
+      let auth = localStorage.getItem("employee_auth");
+      let token = null;
 
       if (auth) {
-        const token = JSON.parse(auth)?.token;
-        if (token) headers.set("authorization", `Bearer ${token}`);
+        token = JSON.parse(auth)?.token;
       }
+
+      // If not found, try erp_auth (admin/super admin)
+      if (!token) {
+        auth = localStorage.getItem("erp_auth");
+        if (auth) {
+          token = JSON.parse(auth)?.token;
+        }
+      }
+
+      if (token) {
+        headers.set("authorization", `Bearer ${token}`);
+      }
+
+      // Always add ngrok header
+      headers.set("ngrok-skip-browser-warning", "true");
 
       return headers;
     },
@@ -325,6 +340,118 @@ export const inventoryApi = createApi({
       }),
       invalidatesTags: ["Products"],
     }),
+
+    createStockRequest: builder.mutation<
+      any,
+      {
+        requesting_branch_id: number;
+        priority: "Low" | "Normal" | "High" | "Urgent";
+        required_date?: string;
+        notes?: string;
+        items: Array<{
+          product_id: number;
+          variant_id?: number | null;
+          requested_quantity: number;
+          notes?: string;
+        }>;
+      }
+    >({
+      query: (data) => ({
+        url: "/branch-stock-requests",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Products"],
+    }),
+
+    getStockRequests: builder.query<
+      any,
+      {
+        status?: string;
+        requesting_branch_id?: number;
+        warehouse_id?: number;
+        priority?: string;
+        page?: number;
+        per_page?: number;
+      }
+    >({
+      query: (params) => ({
+        url: "/branch-stock-requests",
+        params,
+        headers: {
+          "ngrok-skip-browser-warning": "true", // ← ADD THIS LINE
+        },
+      }),
+      providesTags: ["Products"],
+    }),
+
+    getStockRequestById: builder.query<any, number>({
+      query: (id) => `/branch-stock-requests/${id}`,
+      providesTags: (_r, _e, id) => [{ type: "Products", id }],
+    }),
+
+    approveStockRequest: builder.mutation<
+      any,
+      {
+        id: number;
+        items: Array<{
+          item_id: number;
+          approved_quantity: number;
+        }>;
+        approval_notes?: string;
+      }
+    >({
+      query: ({ id, ...data }) => ({
+        url: `/${id}/approve`,
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Products"],
+    }),
+
+    rejectStockRequest: builder.mutation<
+      any,
+      {
+        id: number;
+        approval_notes: string;
+      }
+    >({
+      query: ({ id, ...data }) => ({
+        url: `/${id}/reject`,
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Products"],
+    }),
+
+    cancelStockRequest: builder.mutation<any, number>({
+      query: (id) => ({
+        url: `/${id}/cancel`,
+        method: "POST",
+      }),
+      invalidatesTags: ["Products"],
+    }),
+
+    checkStockAvailability: builder.mutation<any, number>({
+      query: (id) => ({
+        url: `/branch-stock-requests/${id}/check-availability`,
+        method: "POST",
+      }),
+    }),
+
+    getStockRequestStatistics: builder.query<
+      any,
+      {
+        requesting_branch_id?: number;
+        warehouse_id?: number;
+      }
+    >({
+      query: (params) => ({
+        url: "/branch-stock-requests/statistics",
+        params,
+      }),
+      providesTags: ["Products"],
+    }),
   }),
 });
 
@@ -345,4 +472,8 @@ export const {
   useReportDamagedItemMutation,
   useGenerateDiscountTemplateMutation,
   useImportBulkDiscountMutation,
+  useCreateStockRequestMutation,
+  useApproveStockRequestMutation,
+  useGetStockRequestsQuery,
+  useRejectStockRequestMutation,
 } = inventoryApi;

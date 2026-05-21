@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
 import ProductDetailsSidebar from "../components/ProductDetailSidebar";
 import EditProductModal from "../components/Editproductmodal";
+import PendingStockModel from "../components/PendingStockModel";
 import BulkTransferModal from "../components/BulkTransferModal";
 import BulkDiscountModal from "../components/BulkDiscountModal";
 
@@ -227,6 +228,7 @@ export default function DashboardPage() {
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
   const [currentPage, setCurrentPage] = useState(1);
   const [productsPerPage] = useState(10);
+  const [showStockRequestsModal, setShowStockRequestsModal] = useState(false);
 
   const datePickerRef = useRef<HTMLDivElement>(null);
 
@@ -343,6 +345,20 @@ export default function DashboardPage() {
 
     return matchesDateRange;
   });
+
+  const getCurrentBranch = () => {
+    const posSession = localStorage.getItem("pos_session");
+    if (posSession) {
+      const session = JSON.parse(posSession);
+      return {
+        id: session.branchId,
+        name: session.branchName,
+      };
+    }
+    return null;
+  };
+
+  const currentBranch = getCurrentBranch();
 
   const sortProducts = (products: Product[]) => {
     return [...products].sort((a, b) => {
@@ -588,6 +604,7 @@ export default function DashboardPage() {
       value: String(totalProductCount),
       icon: icon_3,
       sub: `${totalProductCount} products in catalog`,
+      onClick: null,
     },
     {
       label: "Total Stock Units",
@@ -596,6 +613,7 @@ export default function DashboardPage() {
         : statistics.totalStockUnits.toLocaleString(),
       icon: icon_4,
       sub: `Across all branches`,
+      onClick: null,
     },
     {
       label: "Low Stock Products",
@@ -605,12 +623,14 @@ export default function DashboardPage() {
         statistics.lowStockCount > 0
           ? `${statistics.lowStockCount} items need restock`
           : "All stock levels good",
+      onClick: null,
     },
     {
       label: "Pending Transfers",
       value: "0",
       icon: icon_2,
-      sub: "No pending transfers",
+      sub: "Click to view pending transfers",
+      onClick: () => setShowStockRequestsModal(true),
     },
   ];
 
@@ -623,7 +643,8 @@ export default function DashboardPage() {
             {statCards.map((card) => (
               <div
                 key={card.label}
-                className="bg-white rounded-lg p-4 md:p-5 xl:p-6 min-w-0"
+                {...(card.onClick ? { onClick: card.onClick } : {})}
+                className="bg-white rounded-lg p-4 md:p-5 xl:p-6 min-w-0 cursor-pointer"
               >
                 <div className="flex justify-between items-start">
                   <div className="min-w-0 flex-1 pr-2">
@@ -666,7 +687,11 @@ export default function DashboardPage() {
                     className="flex items-center gap-4 bg-white rounded-2xl p-5 border-2 border-[#0088FF] hover:border-blue-700 hover:shadow-md transition-all w-full group"
                   >
                     <div className="w-12 h-12 rounded-2xl bg-[#ECF0F4] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                      <img src={addIcon} alt="Add Product" className="w-6 h-6" />
+                      <img
+                        src={addIcon}
+                        alt="Add Product"
+                        className="w-6 h-6"
+                      />
                     </div>
                     <div className="text-left">
                       <span className="text-lg font-medium text-gray-900">
@@ -677,8 +702,9 @@ export default function DashboardPage() {
 
                   <button
                     onClick={() => setShowBulkTransfer(!showBulkTransfer)}
-                    className={`flex items-center gap-4 bg-white rounded-2xl p-5 border-2 border-[#0088FF] hover:border-blue-700 hover:shadow-md transition-all w-full group ${showBulkTransfer ? "border-blue-700 bg-blue-50" : ""
-                      }`}
+                    className={`flex items-center gap-4 bg-white rounded-2xl p-5 border-2 border-[#0088FF] hover:border-blue-700 hover:shadow-md transition-all w-full group ${
+                      showBulkTransfer ? "border-blue-700 bg-blue-50" : ""
+                    }`}
                   >
                     <div className="w-12 h-12 rounded-2xl bg-[#ECF0F4] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                       <img
@@ -752,10 +778,11 @@ export default function DashboardPage() {
                   setCurrentPage(1);
                   setBranchId(null);
                 }}
-                className={`px-6 py-3 text-base font-medium transition-all relative ${activeTab === "products"
-                  ? "text-blue-600 border-b-2 border-blue-600 font-semibold"
-                  : "text-gray-500 hover:text-gray-700"
-                  }`}
+                className={`px-6 py-3 text-base font-medium transition-all relative ${
+                  activeTab === "products"
+                    ? "text-blue-600 border-b-2 border-blue-600 font-semibold"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
               >
                 Products
               </button>
@@ -765,10 +792,11 @@ export default function DashboardPage() {
                   setShowBulkTransfer(false);
                   setCurrentPage(1);
                 }}
-                className={`px-6 py-3 text-base font-medium transition-all relative ${activeTab === "inventory"
-                  ? "text-blue-600 border-b-2 border-blue-600 font-semibold"
-                  : "text-gray-500 hover:text-gray-700"
-                  }`}
+                className={`px-6 py-3 text-base font-medium transition-all relative ${
+                  activeTab === "inventory"
+                    ? "text-blue-600 border-b-2 border-blue-600 font-semibold"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
               >
                 Inventory Details
               </button>
@@ -983,7 +1011,7 @@ export default function DashboardPage() {
                           type="checkbox"
                           checked={
                             selectedProductIds.length ===
-                            productsToDisplay.length &&
+                              productsToDisplay.length &&
                             productsToDisplay.length > 0
                           }
                           onChange={handleSelectAll}
@@ -1138,14 +1166,14 @@ export default function DashboardPage() {
                               {typeof product.cost_price === "string"
                                 ? parseFloat(product.cost_price).toFixed(3)
                                 : (product.cost_price as number)?.toFixed(3) ||
-                                "0.000"}
+                                  "0.000"}
                             </td>
                             <td className="px-4 md:px-5 py-3 md:py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
                               {typeof product.selling_price === "string"
                                 ? parseFloat(product.selling_price).toFixed(3)
                                 : (product.selling_price as number)?.toFixed(
-                                  3,
-                                ) || "0.000"}
+                                    3,
+                                  ) || "0.000"}
                             </td>
                           </>
                         ) : (
@@ -1310,6 +1338,8 @@ export default function DashboardPage() {
         isOpen={showProductDetails}
         product={selectedProduct}
         onClose={() => setShowProductDetails(false)}
+        currentBranchId={currentBranch?.id}
+        currentBranchName={currentBranch?.name}
       />
       <BulkTransferModal
         isOpen={showBulkTransferModal}
@@ -1325,6 +1355,11 @@ export default function DashboardPage() {
         onClose={() => setShowAddProductModal(false)}
         mode="add"
         product={null}
+      />
+
+      <PendingStockModel
+        isOpen={showStockRequestsModal}
+        onClose={() => setShowStockRequestsModal(false)}
       />
     </DashboardLayout>
   );

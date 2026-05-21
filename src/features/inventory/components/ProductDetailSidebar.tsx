@@ -12,6 +12,7 @@ import view_products from "../../../assets/icons/view_inventory.svg";
 import low_inventory from "../../../assets/icons/low_stock.svg";
 import { useAppSelector } from "../../../app/hooks";
 import type { RootState } from "../../../app/store";
+import RequestStockModal from "./RequestStockModal";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL?.replace("/api", "") ||
@@ -80,18 +81,23 @@ interface ProductDetailsSidebarProps {
   isOpen: boolean;
   product: Product | null;
   onClose: () => void;
+  currentBranchId?: number;
+  currentBranchName?: string;
 }
 
 export default function ProductDetailsSidebar({
   isOpen,
   product,
   onClose,
+  currentBranchId,
+  currentBranchName,
 }: ProductDetailsSidebarProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [showTransferModal, setShowTransferModal] = useState(false);
   const [showDamageModal, setShowDamageModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showInventoryModal, setShowInventoryModal] = useState(false);
+  const [showRequestStockModal, setShowRequestStockModal] = useState(false);
   const [showAddStockModal, setShowAddStockModal] = useState(false);
   const [selectedProductForDamage, setSelectedProductForDamage] = useState<{
     id: number;
@@ -240,6 +246,10 @@ export default function ProductDetailsSidebar({
 
   const handleCloseTransferModal = () => {
     setShowTransferModal(false);
+  };
+
+  const handleRequestStockClick = () => {
+    setShowRequestStockModal(true);
   };
 
   const handleReportDamageClick = () => {
@@ -553,11 +563,17 @@ export default function ProductDetailsSidebar({
             </div>
 
             {/* Action Buttons */}
+            {/* Action Buttons */}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 bg-white px-4 py-8 rounded-xl">
+              {/* Edit Product - Admin Only */}
               <button
                 onClick={handleEditProductClick}
-                disabled={isSuperAdmin}
-                className="flex flex-col items-center justify-center px-4 py-10 cursor-pointer rounded-lg border border-[#0088FF] hover:bg-blue-50 transition-colors"
+                disabled={!isSuperAdmin}
+                className={`flex flex-col items-center justify-center px-4 py-10 rounded-lg border transition-colors ${
+                  isSuperAdmin
+                    ? "border-[#0088FF] hover:bg-blue-50 cursor-pointer"
+                    : "border-gray-300 opacity-50 cursor-not-allowed"
+                }`}
               >
                 <div className="w-14 h-14 bg-gray-200 rounded-xl flex items-center justify-center mb-2">
                   <img src={edit_icon} alt="Edit" />
@@ -568,21 +584,48 @@ export default function ProductDetailsSidebar({
                 <span className="text-md text-gray-500">Admin Only</span>
               </button>
 
-              <button
-                onClick={handleRestockClick}
-                className="flex flex-col items-center justify-center px-4 py-8 cursor-pointer rounded-lg border border-[#0088FF] hover:bg-blue-50 transition-colors"
-              >
-                <div className="w-14 h-14 bg-gray-200 rounded-xl flex items-center justify-center mb-2">
-                  <img src={restock_icon} alt="Restock" />
-                </div>
-                <span className="text-md font-medium text-gray-700 text-center">
-                  Add/Restock
-                </span>
-              </button>
+              {/* Add/Restock - Super Admin only (Direct) */}
+              {isSuperAdmin && (
+                <button
+                  onClick={handleRestockClick}
+                  className="flex flex-col items-center justify-center px-4 py-8 rounded-lg border border-[#0088FF] hover:bg-blue-50 transition-colors cursor-pointer"
+                >
+                  <div className="w-14 h-14 bg-gray-200 rounded-xl flex items-center justify-center mb-2">
+                    <img src={restock_icon} alt="Restock" />
+                  </div>
+                  <span className="text-md font-medium text-gray-700 text-center">
+                    Add/Restock
+                  </span>
+                </button>
+              )}
 
+              {/* Request Stock - Non-Admin users (Requires Approval) */}
+              {!isSuperAdmin && (
+                <button
+                  onClick={handleRequestStockClick}
+                  className="flex flex-col items-center justify-center px-4 py-8 rounded-lg border border-yellow-500 bg-yellow-50 hover:bg-yellow-100 transition-colors cursor-pointer"
+                >
+                  <div className="w-14 h-14 bg-yellow-100 rounded-xl flex items-center justify-center mb-2">
+                    <img src={restock_icon} alt="Request" />
+                  </div>
+                  <span className="text-md font-medium text-yellow-700 text-center">
+                    Request Stock
+                  </span>
+                  <span className="text-xs text-yellow-500">
+                    Needs Approval
+                  </span>
+                </button>
+              )}
+
+              {/* Transfer Stock - Same for all (but may need approval for non-admin) */}
               <button
                 onClick={handleTransferStockClick}
-                className="flex flex-col items-center justify-center px-4 py-8 cursor-pointer rounded-lg border border-[#0088FF] hover:bg-blue-50 transition-colors"
+                disabled={!isSuperAdmin}
+                className={`flex flex-col items-center justify-center px-4 py-10 rounded-lg border transition-colors ${
+                  isSuperAdmin
+                    ? "border-[#0088FF] hover:bg-blue-50 cursor-pointer"
+                    : "border-gray-300 opacity-50 cursor-not-allowed"
+                }`}
               >
                 <div className="w-14 h-14 bg-gray-200 rounded-xl flex items-center justify-center mb-2">
                   <img src={transfer_stock_icon} alt="Transfer" />
@@ -590,11 +633,17 @@ export default function ProductDetailsSidebar({
                 <span className="text-md font-medium text-gray-700 text-center">
                   Transfer Stock
                 </span>
+                {!isSuperAdmin && (
+                  <span className="text-xs text-yellow-500">
+                    Needs Approval
+                  </span>
+                )}
               </button>
 
+              {/* View Inventory - All users */}
               <button
                 onClick={handleInventoryMovementClick}
-                className="flex flex-col items-center justify-center px-4 py-8 cursor-pointer rounded-lg border border-[#0088FF] hover:bg-blue-50 transition-colors"
+                className="flex flex-col items-center justify-center px-4 py-8 rounded-lg border border-[#0088FF] hover:bg-blue-50 transition-colors cursor-pointer"
               >
                 <div className="w-14 h-14 bg-gray-200 rounded-xl flex items-center justify-center mb-2">
                   <img src={view_products} alt="View Inventory" />
@@ -604,9 +653,10 @@ export default function ProductDetailsSidebar({
                 </span>
               </button>
 
+              {/* Report Damage - All users */}
               <button
                 onClick={handleReportDamageClick}
-                className="flex flex-col items-center justify-center px-4 py-8 cursor-pointer rounded-lg border border-[#0088FF] hover:bg-blue-50 transition-colors"
+                className="flex flex-col items-center justify-center px-4 py-8 rounded-lg border border-[#0088FF] hover:bg-blue-50 transition-colors cursor-pointer"
               >
                 <div className="w-14 h-14 bg-gray-200 rounded-xl flex items-center justify-center mb-2">
                   <img src={low_inventory} alt="Report Damage" />
@@ -884,6 +934,16 @@ export default function ProductDetailsSidebar({
             : null
         }
       />
+
+      {showRequestStockModal && (
+        <RequestStockModal
+          isOpen={showRequestStockModal}
+          onClose={() => setShowRequestStockModal(false)}
+          product={product}
+          currentBranchId={currentBranchId}
+          currentBranchName={currentBranchName}
+        />
+      )}
     </>
   );
 }

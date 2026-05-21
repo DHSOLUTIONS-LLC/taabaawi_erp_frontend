@@ -1,66 +1,80 @@
 // src/features/pos/POSTerminalPage.tsx
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import DashboardLayout from '../../../layouts/DashboardLayout';
-import { useAppSelector} from '../../../app/hooks';
-import type { RootState } from '../../../app/store';
-import { useGetBranchesQuery } from '../../../services/superAdminApi';
-import { 
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import DashboardLayout from "../../../layouts/DashboardLayout";
+import { useAppSelector } from "../../../app/hooks";
+import type { RootState } from "../../../app/store";
+import { useGetBranchesQuery } from "../../../services/superAdminApi";
+import {
   useOpenPOSMutation,
   useGetCurrentPOSQuery,
-  useGetPOSsQuery 
-} from '../../../services/posApi';
-import { canSwitchBranch } from '../../../utils/roleHelpers';
+  useGetPOSsQuery,
+} from "../../../services/posApi";
+import { canSwitchBranch } from "../../../utils/roleHelpers";
 
-import desktop_icon from '../../../assets/icons/desktop_icon.svg';
-import market_icon from '../../../assets/icons/market_icon.svg';
-import dropdown_arrow_icon from '../../../assets/icons/dropdown_arrow_icon.svg';
+import desktop_icon from "../../../assets/icons/desktop_icon.svg";
+import market_icon from "../../../assets/icons/market_icon.svg";
+import dropdown_arrow_icon from "../../../assets/icons/dropdown_arrow_icon.svg";
 
 export default function POSTerminalPage() {
   const navigate = useNavigate();
   const { user } = useAppSelector((state: RootState) => state.auth);
-  
-  const [selectedTerminal, setSelectedTerminal] = useState('POS-01 (Front Desk)');
-  const [selectedBranch, setSelectedBranch] = useState<string>('');
-  const [openingCash, setOpeningCash] = useState('');
+
+  const [selectedTerminal, setSelectedTerminal] = useState(
+    "POS-01 (Front Desk)",
+  );
+  const [selectedBranch, setSelectedBranch] = useState<string>("");
+  const [openingCash, setOpeningCash] = useState("");
   const [selectedBranchId, setSelectedBranchId] = useState<number | null>(null);
   const [showBranchDropdown, setShowBranchDropdown] = useState(false);
 
-  const isSuperAdmin = user?.role?.role_name === 'Super Admin';
+  const isSuperAdmin = user?.role?.role_name === "Super Admin";
   const isEmp = user?.role?.role_name;
-  const basePath = isSuperAdmin ? '/admin' : isEmp ? '/' : '';
+  const basePath = isSuperAdmin ? "/admin" : isEmp ? "/" : "";
 
   // Check if user already has an open register
-  const { data: currentRegisterResponse, isLoading: checkingRegister, refetch: refetchCurrent } = useGetCurrentPOSQuery(undefined, {
+  const {
+    data: currentRegisterResponse,
+    isLoading: checkingRegister,
+    refetch: refetchCurrent,
+  } = useGetCurrentPOSQuery(undefined, {
     skip: !user?.id,
     pollingInterval: 30000, // Poll every 30 seconds to keep session info fresh
   });
 
   const { data: branchRegistersResponse } = useGetPOSsQuery(
-    { branch_id: selectedBranchId || undefined, status: 'Open' },
-    { skip: !selectedBranchId }
+    { branch_id: selectedBranchId || undefined, status: "Open" },
+    { skip: !selectedBranchId },
   );
 
-  const { data: branchesData, isLoading: branchesLoading, error: branchesError } = useGetBranchesQuery();
+  const {
+    data: branchesData,
+    isLoading: branchesLoading,
+    error: branchesError,
+  } = useGetBranchesQuery();
   const [openCashRegister, { isLoading: isOpening }] = useOpenPOSMutation();
 
   const branches = Array.isArray(branchesData) ? branchesData : [];
   const userCanSwitchBranch = canSwitchBranch(user?.role?.role_name);
 
-  const hasActiveSession = currentRegisterResponse?.success === true && currentRegisterResponse?.data;
+  const hasActiveSession =
+    currentRegisterResponse?.success === true && currentRegisterResponse?.data;
   const currentRegister = currentRegisterResponse?.data;
 
   // Update localStorage whenever API returns active session
   useEffect(() => {
     if (hasActiveSession && currentRegister) {
-      localStorage.setItem('pos_session', JSON.stringify({
-        registerId: currentRegister.id,
-        branchId: currentRegister.branch_id,
-        branchName: currentRegister.branch?.branch_name,
-        terminal: selectedTerminal,
-        openingBalance: currentRegister.opening_balance,
-        openedAt: currentRegister.opened_at
-      }));
+      localStorage.setItem(
+        "pos_session",
+        JSON.stringify({
+          registerId: currentRegister.id,
+          branchId: currentRegister.branch_id,
+          branchName: currentRegister.branch?.branch_name,
+          terminal: selectedTerminal,
+          openingBalance: currentRegister.opening_balance,
+          openedAt: currentRegister.opened_at,
+        }),
+      );
     }
   }, [hasActiveSession, currentRegister, selectedTerminal]);
 
@@ -69,26 +83,27 @@ export default function POSTerminalPage() {
       if (userCanSwitchBranch) {
         const defaultBranchId = branches[0]?.id || null;
         setSelectedBranchId(defaultBranchId);
-        setSelectedBranch(branches[0]?.branch_name || '');
+        setSelectedBranch(branches[0]?.branch_name || "");
       } else if (user?.branch_id) {
-        const userBranch = branches.find(b => b.id === user.branch_id);
+        const userBranch = branches.find((b) => b.id === user.branch_id);
         setSelectedBranchId(user.branch_id);
-        setSelectedBranch(userBranch?.branch_name || '');
+        setSelectedBranch(userBranch?.branch_name || "");
       }
     }
   }, [branches, userCanSwitchBranch, user?.branch_id]);
 
   const getCurrentBranchDisplay = () => {
     if (userCanSwitchBranch) {
-      if (selectedBranchId === null || selectedBranchId === undefined) return 'All Branches';
-      const branch = branches.find(b => b.id === selectedBranchId);
-      return branch?.branch_name || 'All Branches';
+      if (selectedBranchId === null || selectedBranchId === undefined)
+        return "All Branches";
+      const branch = branches.find((b) => b.id === selectedBranchId);
+      return branch?.branch_name || "All Branches";
     } else {
       if (user?.branch_id) {
-        const branch = branches.find(b => b.id === user.branch_id);
-        return branch?.branch_name || user.branch?.branch_name || 'My Branch';
+        const branch = branches.find((b) => b.id === user.branch_id);
+        return branch?.branch_name || user.branch?.branch_name || "My Branch";
       }
-      return 'No Branch Assigned';
+      return "No Branch Assigned";
     }
   };
 
@@ -96,10 +111,10 @@ export default function POSTerminalPage() {
     if (userCanSwitchBranch) {
       setSelectedBranchId(branchId);
       if (branchId === null) {
-        setSelectedBranch('All Branches');
+        setSelectedBranch("All Branches");
       } else {
-        const branch = branches.find(b => b.id === branchId);
-        setSelectedBranch(branch?.branch_name || '');
+        const branch = branches.find((b) => b.id === branchId);
+        setSelectedBranch(branch?.branch_name || "");
       }
       setShowBranchDropdown(false);
     }
@@ -107,51 +122,60 @@ export default function POSTerminalPage() {
 
   const handleStartPOS = async (e: React.MouseEvent) => {
     e.preventDefault();
-    
+
     if (!selectedBranchId || !openingCash.trim()) {
-      alert(!selectedBranchId ? 'Please select a branch' : 'Please enter opening cash amount');
+      alert(
+        !selectedBranchId
+          ? "Please select a branch"
+          : "Please enter opening cash amount",
+      );
       return;
     }
 
     const cashAmount = parseFloat(openingCash);
     if (isNaN(cashAmount) || cashAmount < 0) {
-      alert('Please enter a valid opening cash amount');
+      alert("Please enter a valid opening cash amount");
       return;
     }
 
     if (branchRegistersResponse?.data?.data?.length > 0) {
       const confirmOpen = window.confirm(
-        `This branch already has ${branchRegistersResponse.data.data.length} open register(s). Are you sure you want to open another?`
+        `This branch already has ${branchRegistersResponse.data.data.length} open register(s). Are you sure you want to open another?`,
       );
       if (!confirmOpen) return;
     }
-    
+
     try {
       const response = await openCashRegister({
         branch_id: selectedBranchId,
         opening_balance: cashAmount,
-        opening_notes: `Shift - ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
+        opening_notes: `Shift - ${new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`,
       }).unwrap();
 
       // Save to localStorage
-      localStorage.setItem('pos_session', JSON.stringify({
-        registerId: response.data.id,
-        branchId: response.data.branch_id,
-        branchName: selectedBranch,
-        terminal: selectedTerminal,
-        openingBalance: cashAmount,
-        openedAt: new Date().toISOString()
-      }));
+      localStorage.setItem(
+        "pos_session",
+        JSON.stringify({
+          registerId: response.data.id,
+          branchId: response.data.branch_id,
+          branchName: selectedBranch,
+          terminal: selectedTerminal,
+          openingBalance: cashAmount,
+          openedAt: new Date().toISOString(),
+        }),
+      );
 
       // Navigate to POS page
-      navigate(`${basePath}/pos`, { 
+      navigate(`${basePath}/pos`, {
         replace: true,
-        state: { register: response.data }
+        state: { register: response.data },
       });
-      
     } catch (error: any) {
-      console.error('Failed to open cash register:', error);
-      alert(error?.data?.message || 'Failed to open cash register. Please try again.');
+      console.error("Failed to open cash register:", error);
+      alert(
+        error?.data?.message ||
+          "Failed to open cash register. Please try again.",
+      );
     }
   };
 
@@ -178,36 +202,63 @@ export default function POSTerminalPage() {
           <div className="w-full">
             <div className="bg-green-50 rounded-xl p-6 text-center">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg
+                  className="w-8 h-8"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
               </div>
-              
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Active POS Session</h3>
-              
+
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                Active POS Session
+              </h3>
+
               <div className="bg-white rounded-lg p-4 mb-4 text-left space-y-2">
                 <div className="flex justify-between">
                   <span className="text-gray-500">Register #:</span>
-                  <span className="font-semibold">{currentRegister?.register_number}</span>
+                  <span className="font-semibold">
+                    {currentRegister?.register_number}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">Branch:</span>
-                  <span className="font-semibold">{currentRegister?.branch?.branch_name}</span>
+                  <span className="font-semibold">
+                    {currentRegister?.branch?.branch_name}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">Opened:</span>
-                  <span className="font-semibold">{currentRegister?.opened_at ? new Date(currentRegister.opened_at).toLocaleString() : 'N/A'}</span>
+                  <span className="font-semibold">
+                    {currentRegister?.opened_at
+                      ? new Date(currentRegister.opened_at).toLocaleString()
+                      : "N/A"}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">Opening Balance:</span>
-                  <span className="font-semibold">KD {parseFloat(currentRegister?.opening_balance || '0').toFixed(3)}</span>
+                  <span className="font-semibold">
+                    KD{" "}
+                    {parseFloat(
+                      currentRegister?.opening_balance || "0",
+                    ).toFixed(3)}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">Cashier:</span>
-                  <span className="font-semibold">{currentRegister?.user?.name || user?.name}</span>
+                  <span className="font-semibold">
+                    {currentRegister?.user?.name || user?.name}
+                  </span>
                 </div>
               </div>
-              
+
               {/* <button
                 onClick={handleGoToPOS}
                 className="w-full py-3 bg-[#1773CF] text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
@@ -259,7 +310,11 @@ export default function POSTerminalPage() {
                     disabled={branchesLoading || !!branchesError}
                   >
                     <span className="block truncate">
-                      {branchesLoading ? 'Loading...' : branchesError ? 'Error loading branches' : getCurrentBranchDisplay()}
+                      {branchesLoading
+                        ? "Loading..."
+                        : branchesError
+                          ? "Error loading branches"
+                          : getCurrentBranchDisplay()}
                     </span>
                   </button>
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
@@ -269,7 +324,10 @@ export default function POSTerminalPage() {
 
                 {showBranchDropdown && !branchesLoading && !branchesError && (
                   <>
-                    <div className="fixed inset-0 z-40" onClick={() => setShowBranchDropdown(false)} />
+                    <div
+                      className="fixed inset-0 z-40"
+                      onClick={() => setShowBranchDropdown(false)}
+                    />
                     <div className="absolute left-0 mt-2 w-full bg-white rounded-lg shadow-lg border border-gray-200 z-50">
                       <div className="p-2">
                         <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -278,9 +336,10 @@ export default function POSTerminalPage() {
                         <button
                           onClick={() => handleBranchSelect(null)}
                           className={`w-full text-left px-3 py-2 rounded text-sm transition-colors ${
-                            selectedBranchId === null || selectedBranchId === undefined
-                              ? 'bg-blue-50 text-blue-600 font-medium'
-                              : 'text-gray-700 hover:bg-gray-100'
+                            selectedBranchId === null ||
+                            selectedBranchId === undefined
+                              ? "bg-blue-50 text-blue-600 font-medium"
+                              : "text-gray-700 hover:bg-gray-100"
                           }`}
                         >
                           All Branches
@@ -292,8 +351,8 @@ export default function POSTerminalPage() {
                             onClick={() => handleBranchSelect(branch.id)}
                             className={`w-full text-left px-3 py-2 rounded text-sm transition-colors ${
                               selectedBranchId === branch.id
-                                ? 'bg-blue-50 text-blue-600 font-medium'
-                                : 'text-gray-700 hover:bg-gray-100'
+                                ? "bg-blue-50 text-blue-600 font-medium"
+                                : "text-gray-700 hover:bg-gray-100"
                             }`}
                           >
                             {branch.branch_name}
@@ -310,22 +369,35 @@ export default function POSTerminalPage() {
                   <img src={market_icon} alt="" />
                 </div>
                 <div className="w-full pl-12 pr-10 py-3.5 bg-gray-50 border border-gray-200 rounded-sm text-gray-900 font-medium text-base">
-                  <span className="block truncate">{getCurrentBranchDisplay()}</span>
+                  <span className="block truncate">
+                    {getCurrentBranchDisplay()}
+                  </span>
                 </div>
                 <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
                   <img src={dropdown_arrow_icon} alt="" />
                 </div>
               </div>
             )}
-            
-            {branchesLoading && <p className="text-xs text-blue-600 mt-1 text-center">Loading branches...</p>}
-            {branchesError && <p className="text-xs text-red-600 mt-1 text-center">Failed to load branches</p>}
+
+            {branchesLoading && (
+              <p className="text-xs text-blue-600 mt-1 text-center">
+                Loading branches...
+              </p>
+            )}
+            {branchesError && (
+              <p className="text-xs text-red-600 mt-1 text-center">
+                Failed to load branches
+              </p>
+            )}
             {!branchesLoading && !branchesError && branches.length === 0 && (
-              <p className="text-xs text-yellow-600 mt-1 text-center">No branches found</p>
+              <p className="text-xs text-yellow-600 mt-1 text-center">
+                No branches found
+              </p>
             )}
             {branchRegistersResponse?.data?.data?.length > 0 && (
               <p className="text-xs text-orange-600 mt-1 text-center">
-                ⚠️ {branchRegistersResponse.data.data.length} open register(s) in this branch
+                ⚠️ {branchRegistersResponse.data.data.length} open register(s)
+                in this branch
               </p>
             )}
           </div>
@@ -349,12 +421,26 @@ export default function POSTerminalPage() {
               <div className="lg:col-span-3">
                 <button
                   onClick={handleStartPOS}
-                  disabled={isOpening || checkingRegister || !selectedBranchId || !openingCash.trim()}
+                  disabled={
+                    isOpening ||
+                    checkingRegister ||
+                    !selectedBranchId ||
+                    !openingCash.trim()
+                  }
                   className={`w-full px-8 sm:px-12 py-4 bg-[#1773CF] hover:bg-blue-700 text-white font-semibold text-lg rounded-lg transition-all duration-200 cursor-pointer ${
-                    (isOpening || checkingRegister || !selectedBranchId || !openingCash.trim()) ? 'opacity-50 cursor-not-allowed' : ''
+                    isOpening ||
+                    checkingRegister ||
+                    !selectedBranchId ||
+                    !openingCash.trim()
+                      ? "opacity-50 cursor-not-allowed"
+                      : ""
                   }`}
                 >
-                  {isOpening ? 'Opening...' : checkingRegister ? 'Checking...' : 'Start POS'}
+                  {isOpening
+                    ? "Opening..."
+                    : checkingRegister
+                      ? "Checking..."
+                      : "Start POS"}
                 </button>
               </div>
             </div>

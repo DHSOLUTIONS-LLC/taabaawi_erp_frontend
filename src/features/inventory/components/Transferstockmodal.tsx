@@ -15,6 +15,17 @@ interface TransferStockModalProps {
     name: string;
     sku: string;
   } | null;
+  onTransferComplete?: () => void; // Add this
+  preFillData?: {
+    // Add this
+    fromBranchId?: number;
+    toBranchId?: number;
+    items?: Array<{
+      product_id: number;
+      variant_id: number | null;
+      quantity: number;
+    }>;
+  };
 }
 
 interface BranchStock {
@@ -174,6 +185,7 @@ export default function TransferStockModal({
         alert(
           `Successfully transferred ${finalQuantity} units from ${fromBranchName} to ${toBranchName}`,
         );
+
         onClose();
         // Refresh stock data
         getProductStock(product.id);
@@ -572,4 +584,7 @@ export default function TransferStockModal({
       </div>
     </>
   );
+}
+function onTransferComplete() {
+  throw new Error("Function not implemented.");
 }

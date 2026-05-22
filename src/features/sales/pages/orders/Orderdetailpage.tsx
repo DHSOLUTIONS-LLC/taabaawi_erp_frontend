@@ -144,7 +144,7 @@ export default function OrderDetailPage() {
     if (primaryImage?.image_path) {
       const baseUrl =
         import.meta.env.VITE_API_URL?.replace("/api", "") ||
-        "https://puristic-filmily-bula.ngrok-free.dev";
+        "https://erp.petlovekw.com/public";
       return `${baseUrl}/storage/${primaryImage.image_path}`;
     }
     return "https://via.placeholder.com/80?text=No+Image";

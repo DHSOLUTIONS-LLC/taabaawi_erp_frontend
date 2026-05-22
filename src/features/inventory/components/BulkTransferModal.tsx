@@ -77,7 +77,7 @@ export default function BulkTransferModal({
 
       for (const product of selectedProducts) {
         const response = await fetch(
-          `https://puristic-filmily-bula.ngrok-free.dev/api/products/${product.id}/stock`,
+          `https://erp.petlovekw.com/public/api/products/${product.id}/stock`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

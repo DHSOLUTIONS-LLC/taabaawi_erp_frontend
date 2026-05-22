@@ -125,7 +125,8 @@ export const api = createApi({
     "EmployeeDocuments",
     "Expenses",
     "ExpenseStatistics",
-    "ExpenseCategories"
+    "ExpenseCategories",
+    "BulkDiscounts",
   ],
   endpoints: () => ({
     // Common endpoints will be injected by other API files

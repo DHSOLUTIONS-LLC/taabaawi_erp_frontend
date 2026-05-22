@@ -880,7 +880,7 @@ export const router = createBrowserRouter([
               </PermissionRoute>
             ),
           },
-         
+
           {
             path: "expenses",
             element: (
@@ -889,7 +889,6 @@ export const router = createBrowserRouter([
               </PermissionRoute>
             ),
           },
-         
 
           // {
           //   path: 'financial-reports/trial-balance',
@@ -1491,7 +1490,7 @@ export const router = createBrowserRouter([
             path: "expenses",
             element: <ExpensesPage />,
           },
-         
+
           // Financial Reports
           { path: "financial-reports", element: <FinancialReportsPage /> },
           // { path: 'financial-reports/profit-loss', element: <ProfitLossPage /> },

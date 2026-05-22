@@ -282,12 +282,11 @@ export default function Sidebar({
           label: "Financial Reports",
           path: `${basePath}/accounting/financial-reports`,
         },
-         {
+        {
           id: "expenses",
-      label: 'Manage Expenses',
-      path: `${basePath}/accounting/expenses`
-    },
-   
+          label: "Manage Expenses",
+          path: `${basePath}/accounting/expenses`,
+        },
       ],
     },
     hasPermission("") && {

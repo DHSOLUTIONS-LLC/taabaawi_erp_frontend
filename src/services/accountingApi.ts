@@ -931,159 +931,187 @@ export const accountingApi = api.injectEndpoints({
       providesTags: ["Users"],
     }),
 
-
-
     // ==================== EXPENSE CATEGORIES ====================
-getExpenseCategories: builder.query<any, {  }>({
-  query: (params) => ({ url: '/expense-categories', params }),
-  providesTags: ['ExpenseCategories'],
-}),
+    getExpenseCategories: builder.query<any, {}>({
+      query: (params) => ({ url: "/expense-categories" }),
+      providesTags: ["ExpenseCategories"],
+    }),
 
-createExpenseCategory: builder.mutation<any, {
-  category_name: string;
-  category_code: string;
-  description?: string;
-  is_active?: boolean;
-}>({
-  query: (body) => ({
-    url: '/expense-categories',
-    method: 'POST',
-    body,
-  }),
-  invalidatesTags: ['ExpenseCategories'],
-}),
+    createExpenseCategory: builder.mutation<
+      any,
+      {
+        category_name: string;
+        category_code: string;
+        description?: string;
+        is_active?: boolean;
+      }
+    >({
+      query: (body) => ({
+        url: "/expense-categories",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["ExpenseCategories"],
+    }),
 
-updateExpenseCategory: builder.mutation<any, {
-  id: number;
-  data: Partial<{
-    category_name: string;
-    category_code: string;
-    description: string;
-    is_active: boolean;
-  }>;
-}>({
-  query: ({ id, data }) => ({
-    url: `/expense-categories/${id}`,
-    method: 'PUT',
-    body: data,
-  }),
-  invalidatesTags: ['ExpenseCategories'],
-}),
+    updateExpenseCategory: builder.mutation<
+      any,
+      {
+        id: number;
+        data: Partial<{
+          category_name: string;
+          category_code: string;
+          description: string;
+          is_active: boolean;
+        }>;
+      }
+    >({
+      query: ({ id, data }) => ({
+        url: `/expense-categories/${id}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["ExpenseCategories"],
+    }),
 
-deleteExpenseCategory: builder.mutation<any, number>({
-  query: (id) => ({
-    url: `/expense-categories/${id}`,
-    method: 'DELETE',
-  }),
-  invalidatesTags: ['ExpenseCategories'],
-}),
+    deleteExpenseCategory: builder.mutation<any, number>({
+      query: (id) => ({
+        url: `/expense-categories/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["ExpenseCategories"],
+    }),
 
-// ==================== EXPENSES ====================
-getExpenses: builder.query<any, {
-  branch_id?: number;
-  expense_category_id?: number;
-  status?: string;
-  start_date?: string;
-  end_date?: string;
-  is_recurring?: boolean;
-  page?: number;
-  per_page?: number;
-}>({
-  query: (params) => ({ url: '/expenses', params }),
-  providesTags: ['Expenses'],
-}),
+    // ==================== EXPENSES ====================
+    getExpenses: builder.query<
+      any,
+      {
+        branch_id?: number;
+        expense_category_id?: number;
+        status?: string;
+        start_date?: string;
+        end_date?: string;
+        is_recurring?: boolean;
+        page?: number;
+        per_page?: number;
+      }
+    >({
+      query: (params) => ({ url: "/expenses", params }),
+      providesTags: ["Expenses"],
+    }),
 
-getExpenseById: builder.query<any, number>({
-  query: (id) => `/expenses/${id}`,
-  providesTags: (_r, _e, id) => [{ type: 'Expenses', id }],
-}),
+    getExpenseById: builder.query<any, number>({
+      query: (id) => `/expenses/${id}`,
+      providesTags: (_r, _e, id) => [{ type: "Expenses", id }],
+    }),
 
-createExpense: builder.mutation<any, FormData>({
-  query: (formData) => ({
-    url: '/expenses',
-    method: 'POST',
-    body: formData,
-  }),
-  invalidatesTags: ['Expenses', 'ExpenseStatistics'],
-}),
+    createExpense: builder.mutation<any, FormData>({
+      query: (formData) => ({
+        url: "/expenses",
+        method: "POST",
+        body: formData,
+      }),
+      invalidatesTags: ["Expenses", "ExpenseStatistics"],
+    }),
 
-updateExpense: builder.mutation<any, { id: number; data: FormData }>({
-  query: ({ id, data }) => ({
-    url: `/expenses/${id}`,
-    method: 'PUT',
-    body: data,
-  }),
-  invalidatesTags: (_r, _e, { id }) => ['Expenses', { type: 'Expenses', id }],
-}),
+    updateExpense: builder.mutation<any, { id: number; data: FormData }>({
+      query: ({ id, data }) => ({
+        url: `/expenses/${id}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: (_r, _e, { id }) => [
+        "Expenses",
+        { type: "Expenses", id },
+      ],
+    }),
 
-deleteExpense: builder.mutation<any, number>({
-  query: (id) => ({
-    url: `/expenses/${id}`,
-    method: 'DELETE',
-  }),
-  invalidatesTags: ['Expenses'],
-}),
+    deleteExpense: builder.mutation<any, number>({
+      query: (id) => ({
+        url: `/expenses/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Expenses"],
+    }),
 
-approveExpense: builder.mutation<any, { id: number; approval_notes?: string }>({
-  query: ({ id, ...body }) => ({
-    url: `/expenses/${id}/approve`,
-    method: 'POST',
-    body,
-  }),
-  invalidatesTags: (_r, _e, { id }) => ['Expenses', { type: 'Expenses', id }],
-}),
+    approveExpense: builder.mutation<
+      any,
+      { id: number; approval_notes?: string }
+    >({
+      query: ({ id, ...body }) => ({
+        url: `/expenses/${id}/approve`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: (_r, _e, { id }) => [
+        "Expenses",
+        { type: "Expenses", id },
+      ],
+    }),
 
-rejectExpense: builder.mutation<any, { id: number; approval_notes: string }>({
-  query: ({ id, ...body }) => ({
-    url: `/expenses/${id}/reject`,
-    method: 'POST',
-    body,
-  }),
-  invalidatesTags: (_r, _e, { id }) => ['Expenses', { type: 'Expenses', id }],
-}),
+    rejectExpense: builder.mutation<
+      any,
+      { id: number; approval_notes: string }
+    >({
+      query: ({ id, ...body }) => ({
+        url: `/expenses/${id}/reject`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: (_r, _e, { id }) => [
+        "Expenses",
+        { type: "Expenses", id },
+      ],
+    }),
 
-markExpenseAsPaid: builder.mutation<any, number>({
-  query: (id) => ({
-    url: `/expenses/${id}/mark-paid`,
-    method: 'POST',
-  }),
-  invalidatesTags: (_r, _e, id) => ['Expenses', { type: 'Expenses', id }],
-}),
+    markExpenseAsPaid: builder.mutation<any, number>({
+      query: (id) => ({
+        url: `/expenses/${id}/mark-paid`,
+        method: "POST",
+      }),
+      invalidatesTags: (_r, _e, id) => ["Expenses", { type: "Expenses", id }],
+    }),
 
-getExpenseStatistics: builder.query<any, {
-  branch_id?: number;
-  start_date?: string;
-  end_date?: string;
-}>({
-  query: (params) => ({ url: '/expenses/statistics', params }),
-  providesTags: ['ExpenseStatistics'],
-}),
+    getExpenseStatistics: builder.query<
+      any,
+      {
+        branch_id?: number;
+        start_date?: string;
+        end_date?: string;
+      }
+    >({
+      query: (params) => ({ url: "/expenses/statistics", params }),
+      providesTags: ["ExpenseStatistics"],
+    }),
 
-getExpenseSummary: builder.query<any, {
-  start_date: string;
-  end_date: string;
-  branch_id?: number;
-  expense_category_id?: number;
-  group_by?: 'category' | 'branch' | 'month' | 'payment_method';
-}>({
-  query: (params) => ({ url: '/expenses/summary', params }),
-  providesTags: ['ExpenseStatistics'],
-}),
+    getExpenseSummary: builder.query<
+      any,
+      {
+        start_date: string;
+        end_date: string;
+        branch_id?: number;
+        expense_category_id?: number;
+        group_by?: "category" | "branch" | "month" | "payment_method";
+      }
+    >({
+      query: (params) => ({ url: "/expenses/summary", params }),
+      providesTags: ["ExpenseStatistics"],
+    }),
 
-downloadExpenseReceipt: builder.query<Blob, number>({
-  query: (id) => ({
-    url: `/expenses/${id}/receipt/download`,
-    responseHandler: (response) => response.blob(),
-  }),
-}),
+    downloadExpenseReceipt: builder.query<Blob, number>({
+      query: (id) => ({
+        url: `/expenses/${id}/receipt/download`,
+        responseHandler: (response) => response.blob(),
+      }),
+    }),
 
-deleteExpenseReceipt: builder.mutation<any, number>({
-  query: (id) => ({
-    url: `/expenses/${id}/receipt`,
-    method: 'DELETE',
-  }),
-  invalidatesTags: (_r, _e, id) => [{ type: 'Expenses', id }],
-}),
+    deleteExpenseReceipt: builder.mutation<any, number>({
+      query: (id) => ({
+        url: `/expenses/${id}/receipt`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (_r, _e, id) => [{ type: "Expenses", id }],
+    }),
   }),
 });
 
@@ -1152,7 +1180,7 @@ export const {
   useGetCashFlowQuery,
   useGetCustomersQuery,
 
-   useGetExpenseCategoriesQuery,
+  useGetExpenseCategoriesQuery,
   useCreateExpenseCategoryMutation,
   useUpdateExpenseCategoryMutation,
   useDeleteExpenseCategoryMutation,

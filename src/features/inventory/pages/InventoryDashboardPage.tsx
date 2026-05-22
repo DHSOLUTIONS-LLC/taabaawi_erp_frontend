@@ -1333,6 +1333,7 @@ export default function DashboardPage() {
           start_date: isCustomDateSelected ? customStartDate : undefined,
           end_date: isCustomDateSelected ? customEndDate : undefined,
         }}
+        products={productsToDisplay}
       />
       <ProductDetailsSidebar
         isOpen={showProductDetails}

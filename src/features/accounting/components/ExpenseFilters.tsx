@@ -1,8 +1,8 @@
 // src/features/accounting/components/ExpenseFilters.tsx
-import { useState } from 'react';
-import search_icon from '../../../assets/icons/search_icon.svg';
-import dropdown_arrow_icon from '../../../assets/icons/dropdown_arrow_icon.svg';
-import calendar_icon from '../../../assets/icons/calender_icon.png';
+import { useState } from "react";
+import search_icon from "../../../assets/icons/search_icon.svg";
+import dropdown_arrow_icon from "../../../assets/icons/dropdown_arrow_icon.svg";
+import calendar_icon from "../../../assets/icons/calender_icon.png";
 
 interface ExpenseFiltersProps {
   onFilterChange: (filters: any) => void;
@@ -11,21 +11,32 @@ interface ExpenseFiltersProps {
   initialFilters?: any;
 }
 
-export default function ExpenseFilters({ onFilterChange, categories, branches, initialFilters = {} }: ExpenseFiltersProps) {
-  const [searchQuery, setSearchQuery] = useState(initialFilters.search || '');
-  const [selectedStatus, setSelectedStatus] = useState(initialFilters.status || '');
-  const [selectedCategory, setSelectedCategory] = useState(initialFilters.category || '');
-  const [selectedBranch, setSelectedBranch] = useState(initialFilters.branch || '');
-  const [startDate, setStartDate] = useState(initialFilters.startDate || '');
-  const [endDate, setEndDate] = useState(initialFilters.endDate || '');
+export default function ExpenseFilters({
+  onFilterChange,
+  categories,
+  branches,
+  initialFilters = {},
+}: ExpenseFiltersProps) {
+  const [searchQuery, setSearchQuery] = useState(initialFilters.search || "");
+  const [selectedStatus, setSelectedStatus] = useState(
+    initialFilters.status || "",
+  );
+  const [selectedCategory, setSelectedCategory] = useState(
+    initialFilters.category || "",
+  );
+  const [selectedBranch, setSelectedBranch] = useState(
+    initialFilters.branch || "",
+  );
+  const [startDate, setStartDate] = useState(initialFilters.startDate || "");
+  const [endDate, setEndDate] = useState(initialFilters.endDate || "");
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   const statusOptions = [
-    { value: '', label: 'All Status' },
-    { value: 'Pending', label: 'Pending' },
-    { value: 'Approved', label: 'Approved' },
-    { value: 'Rejected', label: 'Rejected' },
-    { value: 'Paid', label: 'Paid' },
+    { value: "", label: "All Status" },
+    { value: "Pending", label: "Pending" },
+    { value: "Approved", label: "Approved" },
+    { value: "Rejected", label: "Rejected" },
+    { value: "Paid", label: "Paid" },
   ];
 
   const applyFilters = () => {
@@ -40,24 +51,24 @@ export default function ExpenseFilters({ onFilterChange, categories, branches, i
   };
 
   const resetFilters = () => {
-    setSearchQuery('');
-    setSelectedStatus('');
-    setSelectedCategory('');
-    setSelectedBranch('');
-    setStartDate('');
-    setEndDate('');
+    setSearchQuery("");
+    setSelectedStatus("");
+    setSelectedCategory("");
+    setSelectedBranch("");
+    setStartDate("");
+    setEndDate("");
     onFilterChange({
-      search: '',
-      status: '',
-      category: '',
-      branch: '',
-      startDate: '',
-      endDate: '',
+      search: "",
+      status: "",
+      category: "",
+      branch: "",
+      startDate: "",
+      endDate: "",
     });
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       applyFilters();
     }
   };
@@ -140,7 +151,11 @@ export default function ExpenseFilters({ onFilterChange, categories, branches, i
         <div className="relative flex items-center gap-2">
           <div className="relative">
             <div className="absolute left-3 top-1/2 -translate-y-1/2">
-              <img src={calendar_icon} alt="" className="w-4 h-4 text-gray-400" />
+              <img
+                src={calendar_icon}
+                alt=""
+                className="w-4 h-4 text-gray-400"
+              />
             </div>
             <input
               type="date"
@@ -153,7 +168,11 @@ export default function ExpenseFilters({ onFilterChange, categories, branches, i
           <span className="text-gray-400">to</span>
           <div className="relative">
             <div className="absolute left-3 top-1/2 -translate-y-1/2">
-              <img src={calendar_icon} alt="" className="w-4 h-4 text-gray-400" />
+              <img
+                src={calendar_icon}
+                alt=""
+                className="w-4 h-4 text-gray-400"
+              />
             </div>
             <input
               type="date"
@@ -183,40 +202,99 @@ export default function ExpenseFilters({ onFilterChange, categories, branches, i
       </div>
 
       {/* Active Filters Display */}
-      {(searchQuery || selectedStatus || selectedCategory || selectedBranch || startDate || endDate) && (
+      {(searchQuery ||
+        selectedStatus ||
+        selectedCategory ||
+        selectedBranch ||
+        startDate ||
+        endDate) && (
         <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-gray-100">
           <span className="text-xs text-gray-500">Active filters:</span>
           {searchQuery && (
             <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-xs">
               Search: {searchQuery}
-              <button onClick={() => { setSearchQuery(''); applyFilters(); }} className="hover:text-blue-900">×</button>
+              <button
+                onClick={() => {
+                  setSearchQuery("");
+                  applyFilters();
+                }}
+                className="hover:text-blue-900"
+              >
+                ×
+              </button>
             </span>
           )}
           {selectedStatus && (
             <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-xs">
               Status: {selectedStatus}
-              <button onClick={() => { setSelectedStatus(''); applyFilters(); }} className="hover:text-blue-900">×</button>
+              <button
+                onClick={() => {
+                  setSelectedStatus("");
+                  applyFilters();
+                }}
+                className="hover:text-blue-900"
+              >
+                ×
+              </button>
             </span>
           )}
           {selectedCategory && (
             <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-xs">
-              Category: {categories.find((c: any) => c.id === parseInt(selectedCategory))?.category_name}
-              <button onClick={() => { setSelectedCategory(''); applyFilters(); }} className="hover:text-blue-900">×</button>
+              Category:{" "}
+              {
+                categories.find((c: any) => c.id === parseInt(selectedCategory))
+                  ?.category_name
+              }
+              <button
+                onClick={() => {
+                  setSelectedCategory("");
+                  applyFilters();
+                }}
+                className="hover:text-blue-900"
+              >
+                ×
+              </button>
             </span>
           )}
           {selectedBranch && (
             <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-xs">
-              Branch: {branches.find((b: any) => b.id === parseInt(selectedBranch))?.branch_name}
-              <button onClick={() => { setSelectedBranch(''); applyFilters(); }} className="hover:text-blue-900">×</button>
+              Branch:{" "}
+              {
+                branches.find((b: any) => b.id === parseInt(selectedBranch))
+                  ?.branch_name
+              }
+              <button
+                onClick={() => {
+                  setSelectedBranch("");
+                  applyFilters();
+                }}
+                className="hover:text-blue-900"
+              >
+                ×
+              </button>
             </span>
           )}
           {(startDate || endDate) && (
             <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-xs">
-              Date: {startDate || 'any'} to {endDate || 'any'}
-              <button onClick={() => { setStartDate(''); setEndDate(''); applyFilters(); }} className="hover:text-blue-900">×</button>
+              Date: {startDate || "any"} to {endDate || "any"}
+              <button
+                onClick={() => {
+                  setStartDate("");
+                  setEndDate("");
+                  applyFilters();
+                }}
+                className="hover:text-blue-900"
+              >
+                ×
+              </button>
             </span>
           )}
-          <button onClick={resetFilters} className="text-xs text-red-500 hover:text-red-700">Clear all</button>
+          <button
+            onClick={resetFilters}
+            className="text-xs text-red-500 hover:text-red-700"
+          >
+            Clear all
+          </button>
         </div>
       )}
     </div>

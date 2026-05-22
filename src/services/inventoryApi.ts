@@ -75,7 +75,7 @@ export const inventoryApi = createApi({
     },
   }),
 
-  tagTypes: ["Products"],
+  tagTypes: ["Products", "BulkDiscounts"],
 
   endpoints: (builder) => ({
     createProduct: builder.mutation<any, FormData | CreateProductPayload>({
@@ -320,25 +320,104 @@ export const inventoryApi = createApi({
       }),
     }),
 
-    // Import bulk discount
-    importBulkDiscount: builder.mutation<
-      {
-        success: boolean;
-        data: {
-          created: number;
-          updated: number;
-          errors: string[];
-          total_processed: number;
-        };
-      },
-      FormData
+    downloadBulkDiscountTemplate: builder.query<
+      Blob,
+      { include_variants?: boolean }
     >({
+      query: (params) => ({
+        url: "/bulk-discounts/template",
+        params,
+        responseHandler: (response) => response.blob(),
+      }),
+    }),
+
+    // Preview import (validate without saving)
+    previewBulkDiscountImport: builder.mutation<any, FormData>({
       query: (formData) => ({
-        url: "/products/discounts/import",
+        url: "/bulk-discounts/preview",
         method: "POST",
         body: formData,
       }),
-      invalidatesTags: ["Products"],
+    }),
+
+    // Import bulk discount
+    importBulkDiscount: builder.mutation<any, FormData>({
+      query: (formData) => ({
+        url: "/bulk-discounts/import",
+        method: "POST",
+        body: formData,
+      }),
+      invalidatesTags: ["Products", "BulkDiscounts"],
+    }),
+
+    getBulkDiscounts: builder.query<
+      any,
+      {
+        status?: string;
+        start_date?: string;
+        end_date?: string;
+        page?: number;
+        per_page?: number;
+      }
+    >({
+      query: (params) => ({ url: "/bulk-discounts", params }),
+      providesTags: ["BulkDiscounts"],
+    }),
+
+    getBulkDiscountById: builder.query<any, number>({
+      query: (id) => `/bulk-discounts/${id}`,
+      providesTags: (_r, _e, id) => [{ type: "BulkDiscounts", id }],
+    }),
+
+    activateBulkDiscount: builder.mutation<any, number>({
+      query: (id) => ({
+        url: `/bulk-discounts/${id}/activate`,
+        method: "POST",
+      }),
+      invalidatesTags: ["Products", "BulkDiscounts"],
+    }),
+
+    deactivateBulkDiscount: builder.mutation<any, number>({
+      query: (id) => ({
+        url: `/bulk-discounts/${id}/deactivate`,
+        method: "POST",
+      }),
+      invalidatesTags: ["Products", "BulkDiscounts"],
+    }),
+
+    // Delete bulk discount
+    deleteBulkDiscount: builder.mutation<any, number>({
+      query: (id) => ({
+        url: `/bulk-discounts/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["BulkDiscounts"],
+    }),
+
+    // Get bulk discount statistics
+    getBulkDiscountStatistics: builder.query<
+      any,
+      {
+        start_date?: string;
+        end_date?: string;
+      }
+    >({
+      query: (params) => ({ url: "/bulk-discounts/statistics", params }),
+      providesTags: ["BulkDiscounts"],
+    }),
+
+    // Get active discounts (for POS)
+    getActiveBulkDiscounts: builder.query<any, void>({
+      query: () => ({ url: "/bulk-discounts/active" }),
+      providesTags: ["BulkDiscounts"],
+    }),
+
+    // Export bulk discount
+    exportBulkDiscount: builder.query<Blob, number>({
+      query: (id) => ({
+        url: `/bulk-discounts/${id}/export`,
+        responseHandler: (response) => response.blob(),
+      }),
     }),
 
     createStockRequest: builder.mutation<
@@ -471,9 +550,19 @@ export const {
   useBulkDiscountMutation,
   useReportDamagedItemMutation,
   useGenerateDiscountTemplateMutation,
-  useImportBulkDiscountMutation,
   useCreateStockRequestMutation,
   useApproveStockRequestMutation,
   useGetStockRequestsQuery,
   useRejectStockRequestMutation,
+  useDownloadBulkDiscountTemplateQuery,
+  usePreviewBulkDiscountImportMutation,
+  useImportBulkDiscountMutation,
+  useGetBulkDiscountsQuery,
+  useGetBulkDiscountByIdQuery,
+  useActivateBulkDiscountMutation,
+  useDeactivateBulkDiscountMutation,
+  useDeleteBulkDiscountMutation,
+  useGetBulkDiscountStatisticsQuery,
+  useGetActiveBulkDiscountsQuery,
+  useExportBulkDiscountQuery,
 } = inventoryApi;

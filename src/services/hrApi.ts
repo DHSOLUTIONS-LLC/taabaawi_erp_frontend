@@ -2,6 +2,98 @@
 import { api } from "./api";
 
 /* ================= TYPES ================= */
+export interface LeavePlannerCalendar {
+  month: number;
+  year: number;
+  month_name: string;
+  total_leaves: number;
+  calendar: Array<{
+    date: string;
+    day_name: string;
+    is_weekend: boolean;
+    leaves_count: number;
+    leaves: Array<{
+      id: number;
+      user_id: number;
+      user_name: string;
+      department: string;
+      leave_type: string;
+      status: string;
+      start_date: string;
+      end_date: string;
+      days: number;
+    }>;
+  }>;
+}
+
+export interface TeamSchedule {
+  period: { start_date: string; end_date: string };
+  total_employees: number;
+  employees_on_leave: number;
+  schedule: Array<{
+    user_id: number;
+    user_name: string;
+    email: string;
+    department: string;
+    branch: string;
+    total_leaves: number;
+    total_days: number;
+    leaves: Array<{
+      id: number;
+      leave_type: string;
+      start_date: string;
+      end_date: string;
+      days: number;
+      status: string;
+      reason: string;
+    }>;
+  }>;
+}
+
+export interface LeaveConflict {
+  date: string;
+  day_name: string;
+  employees_on_leave: number;
+  employees: Array<{
+    user_id: number;
+    user_name: string;
+    department: string;
+    leave_type: string;
+    leave_id: number;
+    status: string;
+  }>;
+}
+
+export interface AvailabilityResponse {
+  period: { start_date: string; end_date: string };
+  summary: {
+    total_employees: number;
+    available: number;
+    on_leave: number;
+    availability_percentage: number;
+  };
+  available_employees: Array<{
+    user_id: number;
+    name: string;
+    email: string;
+    department: string;
+    branch: string;
+  }>;
+  employees_on_leave: Array<{
+    user_id: number;
+    name: string;
+    email: string;
+    department: string;
+    branch: string;
+    leaves: Array<{
+      start_date: string;
+      end_date: string;
+      days: number;
+    }>;
+  }>;
+}
+
+
 export interface Category {
   id: number;
   category_name: string;
@@ -379,6 +471,80 @@ export const hrApi = api.injectEndpoints({
       }),
       invalidatesTags: ["Payroll"],
     }),
+
+
+    // Get calendar view of leaves
+    getLeaveCalendar: builder.query<
+      { success: boolean; data: LeavePlannerCalendar },
+      {
+        month?: number;
+        year?: number;
+        branch_id?: number;
+        department?: string;
+      }
+    >({
+      query: (params) => ({ url: "/leave-planner/calendar", params }),
+      providesTags: ["LeavePlanner"],
+    }),
+
+    // Get team schedule
+    getTeamSchedule: builder.query<
+      { success: boolean; data: TeamSchedule },
+      {
+        start_date: string;
+        end_date: string;
+        branch_id?: number;
+        department?: string;
+      }
+    >({
+      query: (params) => ({ url: "/leave-planner/team-schedule", params }),
+      providesTags: ["LeavePlanner"],
+    }),
+
+    // Get leave conflicts
+    getLeaveConflicts: builder.query<
+      { success: boolean; data: any },
+      {
+        start_date: string;
+        end_date: string;
+        department?: string;
+        branch_id?: number;
+        min_employees?: number;
+      }
+    >({
+      query: (params) => ({ url: "/leave-planner/conflicts", params }),
+      providesTags: ["LeavePlanner"],
+    }),
+
+    // Get department view
+    getDepartmentView: builder.query<
+      { success: boolean; data: any },
+      {
+        department: string;
+        start_date: string;
+        end_date: string;
+      }
+    >({
+      query: ({ department, ...params }) => ({
+        url: `/leave-planner/department/${department}`,
+        params,
+      }),
+      providesTags: ["LeavePlanner"],
+    }),
+
+    // Check team availability
+    getAvailability: builder.query<
+      { success: boolean; data: AvailabilityResponse },
+      {
+        start_date: string;
+        end_date: string;
+        branch_id?: number;
+        department?: string;
+      }
+    >({
+      query: (params) => ({ url: "/leave-planner/availability", params }),
+      providesTags: ["LeavePlanner"],
+    }),
   }),
 });
 
@@ -423,4 +589,10 @@ export const {
   useDeletePayrollMutation,
    useGetExpiringDocumentsQuery,
   useGetExpiredDocumentsQuery,
+
+   useGetLeaveCalendarQuery,
+  useGetTeamScheduleQuery,
+  useGetLeaveConflictsQuery,
+  useGetDepartmentViewQuery,
+  useGetAvailabilityQuery,
 } = hrApi;

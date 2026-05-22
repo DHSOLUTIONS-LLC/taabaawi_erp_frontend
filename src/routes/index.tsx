@@ -140,6 +140,7 @@ import SecurityCenterPage from "../features/security/pages/SecurityCenterPage";
 import CreateNewBranch from "../features/branch/pages/CreateNewBranch";
 import BranchesDashboard from "../features/branch/pages/BranchesDashboard";
 import CouponsPage from "../features/pos/pages/CouponsPage";
+import LeavePlannerPage from "../features/hr/pages/LeavePlannerPage";
 
 // ---------------------------
 // Helper functions
@@ -1142,6 +1143,14 @@ export const router = createBrowserRouter([
                 <DocumentManagementPage />
               </PermissionRoute>
             ),
+          }, 
+          {
+            path: "leave-planner",
+            element: (
+              <PermissionRoute requiredPermissions={["view_users"]}>
+                <LeavePlannerPage />
+              </PermissionRoute>
+            ),
           },
         ],
       },
@@ -1544,6 +1553,10 @@ export const router = createBrowserRouter([
             element: <BulkGeneratePayrollPage />,
           },
           { path: "payrolls/:id", element: <PayrollDetailsPage /> },
+          {
+  path: "leave-planner",
+  element: <LeavePlannerPage />,
+},
           { path: "documents", element: <DocumentManagementPage /> },
         ],
       },

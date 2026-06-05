@@ -284,9 +284,8 @@ export const inventoryApi = createApi({
         url: "/products/discounts/import",
         method: "POST",
         body: formData,
-        // Don't set Content-Type header - let browser set it with boundary for multipart/form-data
       }),
-      invalidatesTags: ["Products"], // This will refresh your products list after discount is applied
+      invalidatesTags: ["Products"],
     }),
 
     reportDamagedItem: builder.mutation({
@@ -294,7 +293,7 @@ export const inventoryApi = createApi({
         // Changed from damagedItemsData to damagedItemData
         url: "/damaged-items",
         method: "POST",
-        body: damagedItemData, // Use the correct parameter name
+        body: damagedItemData, 
         headers: {
           "Content-Type": "application/json",
         },

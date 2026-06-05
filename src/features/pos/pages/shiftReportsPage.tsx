@@ -571,7 +571,7 @@ export default function ShiftReportsPage() {
                           <td className="px-4 py-4">
                             <button
                               onClick={() => handleViewReport(r.id, r)}
-                              className="px-3 py-1.5 text-xs bg-[#1773CF] text-white rounded-lg hover:bg-blue-700 font-medium transition-colors"
+                              className="px-3 py-1.5 text-xs bg-[#1773CF] text-white rounded-lg hover:bg-blue-700 font-medium transition-colors cursor-pointer"
                             >
                               View
                             </button>

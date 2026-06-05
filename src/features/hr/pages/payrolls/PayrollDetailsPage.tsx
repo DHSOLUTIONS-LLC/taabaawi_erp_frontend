@@ -185,7 +185,7 @@ export default function PayrollDetailsPage() {
                             </div>
                             <div>
                                 <p className="text-xs sm:text-sm text-gray-500 mb-1">Role</p>
-                                <p className="text-sm sm:text-base font-medium">{payroll.user?.role?.role_name || 'N/A'}</p>
+                                <p className="text-sm sm:text-base font-medium">{payroll.user?.role_id?.role_name || 'N/A'}</p>
                             </div>
                         </div>
                     </div>

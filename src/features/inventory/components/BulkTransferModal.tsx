@@ -33,6 +33,10 @@ interface BranchStock {
   is_low_stock: boolean;
 }
 
+const baseUrl =
+  import.meta.env.VITE_API_URL?.replace("/api", "") ||
+  "https://erp.petlovekw.com/public";
+
 export default function BulkTransferModal({
   isOpen,
   onClose,
@@ -77,7 +81,7 @@ export default function BulkTransferModal({
 
       for (const product of selectedProducts) {
         const response = await fetch(
-          `https://erp.petlovekw.com/public/api/products/${product.id}/stock`,
+          `${baseUrl}/api/products/${product.id}/stock`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

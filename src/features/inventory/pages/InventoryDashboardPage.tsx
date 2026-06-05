@@ -514,6 +514,7 @@ export default function DashboardPage() {
   const currentProducts = shouldPaginate
     ? productsToDisplay.slice(indexOfFirstProduct, indexOfLastProduct)
     : productsWithInventory;
+    console.log("Products to Display:", currentProducts);
   const totalPages = Math.ceil(productsToDisplay.length / productsPerPage);
 
   const getPageNumbers = () => {

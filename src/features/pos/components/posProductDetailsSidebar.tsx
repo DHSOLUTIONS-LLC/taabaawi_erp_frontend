@@ -116,6 +116,13 @@ export default function CartSidebar({
     setAppliedCoupon(null);
     if (!promoCode.trim()) return;
 
+     console.log("Sending coupon request:", {
+    coupon_code: promoCode.trim(),
+    total_amount: subtotal - itemDiscountTotal,
+    branch_id: branchId,
+  });
+
+  
     try {
       const result = await validateCoupon({
         coupon_code: promoCode.trim(),
@@ -525,7 +532,7 @@ export default function CartSidebar({
 
           {/* Footer */}
           {cartItems.length > 0 && (
-            <div className="border-t bg-gray-50 p-5 space-y-4">
+            <div className="border-t border-gray-200 bg-gray-50 p-5 space-y-4">
               {/* Toggles */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -620,7 +627,7 @@ export default function CartSidebar({
                     <span>-KD {employeeDiscount.toFixed(3)}</span>
                   </div>
                 )}
-                <div className="border-t pt-2 flex justify-between font-bold text-base">
+                <div className="border-t border-gray-200 pt-2 flex justify-between font-bold text-base">
                   <span>Total Due</span>
                   <span className="text-[#1773CF] text-lg">
                     KD {total.toFixed(3)}

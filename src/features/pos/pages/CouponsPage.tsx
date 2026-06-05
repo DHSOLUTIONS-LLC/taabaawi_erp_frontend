@@ -435,7 +435,7 @@ export default function CouponsPage() {
                   )}
 
                   {/* Actions */}
-                  <div className="flex gap-2 pt-1 border-t">
+                  <div className="flex gap-2 pt-1 border-t border-gray-200">
                     <button
                       onClick={() => {
                         setViewingCouponId(coupon.id);
@@ -562,12 +562,12 @@ export default function CouponsPage() {
       {showModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
-            <div className="bg-[#1773CF] px-6 py-5 flex items-center justify-between shrink-0">
+            <div className="px-6 py-5 flex items-center justify-between shrink-0">
               <div>
-                <h2 className="text-xl font-bold text-white">
+                <h2 className="text-xl font-bold text-black">
                   {editingCoupon ? "Edit Coupon" : "Create Coupon"}
                 </h2>
-                <p className="text-blue-100 text-sm">
+                <p className="text-black text-sm">
                   {editingCoupon
                     ? "Update coupon details"
                     : "Add a new discount coupon"}
@@ -778,7 +778,7 @@ export default function CouponsPage() {
               )}
             </div>
 
-            <div className="px-6 py-4 border-t bg-gray-50 flex gap-3 shrink-0">
+            <div className="px-6 py-4 border-t border-gray-300 bg-gray-50 flex gap-3 shrink-0">
               <button
                 onClick={() => setShowModal(false)}
                 className="flex-1 py-3 border border-gray-300 rounded-xl font-semibold text-gray-700 hover:bg-gray-100"

@@ -131,7 +131,7 @@ export default function TransferStockModal({ isOpen, onClose, product }: Transfe
                                             <option value="">All Locations</option>
                                             {branches.map((branch: any) => (
                                                 <option key={branch.id} value={branch.id}>
-                                                    {branch.branch_name}
+                                                    {branch.branch_name }
                                                 </option>
                                             ))}
                                         </select>
@@ -263,7 +263,7 @@ export default function TransferStockModal({ isOpen, onClose, product }: Transfe
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                        {movement.from_branch?.branch_name || '-'}
+                                                        {movement.from_branch?.branch_name || 'Central Warehouse'}
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                         {movement.to_branch?.branch_name || '-'}

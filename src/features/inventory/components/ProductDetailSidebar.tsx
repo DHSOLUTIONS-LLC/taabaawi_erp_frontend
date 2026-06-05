@@ -126,7 +126,7 @@ export default function ProductDetailsSidebar({
     }
     return [
       product.image ||
-        "https://images.unsplash.com/photo-1457089328109-e5d9bd499191?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fGZsb3dlcnN8ZW58MHwxfDB8fHww",
+      "https://images.unsplash.com/photo-1457089328109-e5d9bd499191?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fGZsb3dlcnN8ZW58MHwxfDB8fHww",
     ];
   })();
 
@@ -170,57 +170,60 @@ export default function ProductDetailsSidebar({
     !product.variants || product.variants.length === 0
       ? []
       : product.variants.map((variant: any) => ({
-          id: variant.id,
-          name: variant.variant_name,
-          value: variant.variant_value,
-          sku: variant.sku,
-          barcode: variant.barcode,
-          barcode_image: variant.barcode_image,
-          cost_price: variant.cost_price,
-          selling_price: variant.selling_price,
-          additional_price: variant.additional_price,
-          is_active: variant.is_active,
-        }));
+        id: variant.id,
+        name: variant.variant_name,
+        value: variant.variant_value,
+        sku: variant.sku,
+        barcode: variant.barcode,
+        barcode_image: variant.barcode_image,
+        cost_price: variant.cost_price,
+        selling_price: variant.selling_price,
+        additional_price: variant.additional_price,
+        is_active: variant.is_active,
+      }));
 
+  // console.log('varian spec:', variantSpecifications)
   // ============ BRANCH STOCK DATA FROM API ============
   const branchStock =
     !product.inventory || product.inventory.length === 0
       ? [
-          {
-            name: "No Branch Data",
-            available: 0,
-            reserved: 0,
-            total: 0,
-            is_low_stock: false,
-          },
-        ]
+        {
+          name: "No Branch Data",
+          available: 0,
+          reserved: 0,
+          total: 0,
+          is_low_stock: false,
+        },
+      ]
       : product.inventory.map((inv) => ({
-          name: inv.branch?.branch_name || "Unknown Branch",
-          available: inv.available_quantity || 0,
-          reserved: inv.reserved_quantity || 0,
-          total: inv.quantity || 0,
-          is_low_stock: inv.quantity <= (product.low_stock_alert || 10),
-        }));
+        name: inv.branch?.branch_name || "Unknown Branch",
+        available: inv.available_quantity || 0,
+        reserved: inv.reserved_quantity || 0,
+        total: inv.quantity || 0,
+        is_low_stock: inv.quantity <= (product.low_stock_alert || 10),
+      }));
+console.log("branch stock:", branchStock);
 
   // ============ VARIANT BRANCH STOCK ============
   const variantBranchStock = !product.variants
     ? []
     : product.variants.map((variant) => {
-        const variantStock =
-          variant.inventory?.map((inv) => ({
-            branch_name: inv.branch?.branch_name || "Unknown Branch",
-            quantity: inv.quantity || 0,
-            available: inv.available_quantity || 0,
-            reserved: inv.reserved_quantity || 0,
-          })) || [];
+      const variantStock =
+        variant.inventory?.map((inv) => ({
+          branch_name: inv.branch?.branch_name || "Unknown Branch",
+          quantity: inv.quantity || 0,
+          available: inv.available_quantity || 0,
+          reserved: inv.reserved_quantity || 0,
+        })) || [];
 
-        return {
-          variant_name: `${variant.variant_name}: ${variant.variant_value}`,
-          sku: variant.sku,
-          stock: variantStock,
-        };
-      });
+      return {
+        variant_name: `${variant.variant_name}: ${variant.variant_value}`,
+        sku: variant.sku,
+        stock: variantStock,
+      };
+    });
 
+  // console.log("variant branch stock:", variantBranchStock);
   // ============ PROFIT CALCULATIONS ============
   const profitMargin = (() => {
     if (product.price && product.cost && product.cost > 0) {
@@ -234,6 +237,8 @@ export default function ProductDetailsSidebar({
   const totalStock = product.inventory
     ? product.inventory.reduce((sum, inv) => sum + (inv.quantity || 0), 0)
     : product.quantity || 0;
+
+    console.log("Total Stock:", totalStock);
 
   // ============ HANDLERS ============
   const handleThumbnailClick = (index: number) => {
@@ -340,9 +345,8 @@ export default function ProductDetailsSidebar({
 
       {/* Sidebar */}
       <div
-        className={`fixed right-0 top-0 bottom-0 w-full md:w-175 lg:w-212.5 xl:w-237.5 bg-[#F8F8F8] shadow-2xl z-50 transform transition-transform duration-300 ease-in-out overflow-hidden ${
-          isOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+        className={`fixed right-0 top-0 bottom-0 w-full md:w-175 lg:w-212.5 xl:w-237.5 bg-[#F8F8F8] shadow-2xl z-50 transform transition-transform duration-300 ease-in-out overflow-hidden ${isOpen ? "translate-x-0" : "translate-x-full"
+          }`}
       >
         <div className="h-full overflow-y-auto">
           {/* Sidebar Header */}
@@ -405,11 +409,10 @@ export default function ProductDetailsSidebar({
                     <button
                       key={index}
                       onClick={() => handleThumbnailClick(index)}
-                      className={`shrink-0 w-20 h-20 md:w-full md:h-24 rounded-lg overflow-hidden border-2 transition-all ${
-                        selectedImageIndex === index
+                      className={`shrink-0 w-20 h-20 md:w-full md:h-24 rounded-lg overflow-hidden border-2 transition-all ${selectedImageIndex === index
                           ? "border-blue-500 ring-2 ring-blue-200"
                           : "border-gray-200 hover:border-gray-300"
-                      }`}
+                        }`}
                     >
                       <div className="w-full h-full bg-gray-50 p-2">
                         <img
@@ -569,11 +572,10 @@ export default function ProductDetailsSidebar({
               <button
                 onClick={handleEditProductClick}
                 disabled={!isSuperAdmin}
-                className={`flex flex-col items-center justify-center px-4 py-10 rounded-lg border transition-colors ${
-                  isSuperAdmin
+                className={`flex flex-col items-center justify-center px-4 py-10 rounded-lg border transition-colors ${isSuperAdmin
                     ? "border-[#0088FF] hover:bg-blue-50 cursor-pointer"
                     : "border-gray-300 opacity-50 cursor-not-allowed"
-                }`}
+                  }`}
               >
                 <div className="w-14 h-14 bg-gray-200 rounded-xl flex items-center justify-center mb-2">
                   <img src={edit_icon} alt="Edit" />
@@ -621,11 +623,10 @@ export default function ProductDetailsSidebar({
               <button
                 onClick={handleTransferStockClick}
                 disabled={!isSuperAdmin}
-                className={`flex flex-col items-center justify-center px-4 py-10 rounded-lg border transition-colors ${
-                  isSuperAdmin
+                className={`flex flex-col items-center justify-center px-4 py-10 rounded-lg border transition-colors ${isSuperAdmin
                     ? "border-[#0088FF] hover:bg-blue-50 cursor-pointer"
                     : "border-gray-300 opacity-50 cursor-not-allowed"
-                }`}
+                  }`}
               >
                 <div className="w-14 h-14 bg-gray-200 rounded-xl flex items-center justify-center mb-2">
                   <img src={transfer_stock_icon} alt="Transfer" />
@@ -681,7 +682,7 @@ export default function ProductDetailsSidebar({
               </div>
 
               {branchStock.length > 0 &&
-              branchStock[0].name !== "No Branch Data" ? (
+                branchStock[0].name !== "No Branch Data" ? (
                 <div className="rounded-lg overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
@@ -721,13 +722,12 @@ export default function ProductDetailsSidebar({
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <span
-                                className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                                  branch.is_low_stock
+                                className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${branch.is_low_stock
                                     ? "bg-yellow-100 text-yellow-800"
                                     : branch.total > 0
                                       ? "bg-green-100 text-green-800"
                                       : "bg-red-100 text-red-800"
-                                }`}
+                                  }`}
                               >
                                 {branch.is_low_stock
                                   ? "Low Stock"
@@ -768,7 +768,7 @@ export default function ProductDetailsSidebar({
             </div>
 
             {/* Variant Stock By Branch - Only show if product has variants */}
-            {variantBranchStock.length > 0 && (
+            {/* {variantBranchStock.length > 0 && (
               <div className="shadow bg-white rounded-xl">
                 <div className="px-4 py-3 border-b border-gray-200">
                   <h3 className="text-xl font-bold text-gray-900">
@@ -839,7 +839,7 @@ export default function ProductDetailsSidebar({
                   ))}
                 </div>
               </div>
-            )}
+            )} */}
           </div>
         </div>
       </div>
@@ -851,10 +851,10 @@ export default function ProductDetailsSidebar({
         product={
           product
             ? {
-                id: product.id,
-                name: product.name,
-                sku: product.sku,
-              }
+              id: product.id,
+              name: product.name,
+              sku: product.sku,
+            }
             : null
         }
       />
@@ -881,29 +881,29 @@ export default function ProductDetailsSidebar({
         product={
           product
             ? {
-                id: product.id,
-                name: product.name,
-                sku: product.sku,
-                category:
-                  typeof product.category === "object"
-                    ? (product.category as any)?.category_name ||
-                      "Uncategorized"
-                    : product.category || "Uncategorized",
-                quantity: product.quantity,
-                cost: product.cost,
-                price: product.price,
-                status: product.status,
-                image: product.image,
-                description: product.description,
-                barcode: product.barcode,
-                barcode_image: product.barcode_image,
-                unit: product.unit,
-                weight: product.weight,
-                dimensions: product.dimensions,
-                color: product.color,
-                low_stock_alert: product.low_stock_alert,
-                is_active: product.is_active,
-              }
+              id: product.id,
+              name: product.name,
+              sku: product.sku,
+              category:
+                typeof product.category === "object"
+                  ? (product.category as any)?.category_name ||
+                  "Uncategorized"
+                  : product.category || "Uncategorized",
+              quantity: product.quantity,
+              cost: product.cost,
+              price: product.price,
+              status: product.status,
+              image: product.image,
+              description: product.description,
+              barcode: product.barcode,
+              barcode_image: product.barcode_image,
+              unit: product.unit,
+              weight: product.weight,
+              dimensions: product.dimensions,
+              color: product.color,
+              low_stock_alert: product.low_stock_alert,
+              is_active: product.is_active,
+            }
             : null
         }
       />
@@ -914,10 +914,10 @@ export default function ProductDetailsSidebar({
         product={
           product
             ? {
-                id: product.id,
-                name: product.name,
-                sku: product.sku,
-              }
+              id: product.id,
+              name: product.name,
+              sku: product.sku,
+            }
             : null
         }
       />
@@ -928,9 +928,9 @@ export default function ProductDetailsSidebar({
         product={
           product
             ? {
-                name: product.name,
-                sku: product.sku,
-              }
+              name: product.name,
+              sku: product.sku,
+            }
             : null
         }
       />

@@ -83,12 +83,12 @@ export default function ShiftReportDetailModal({
     <div className="fixed inset-0 flex items-center justify-center z-50 p-2 sm:p-4">
       <div className="bg-white rounded-2xl w-full max-w-3xl shadow-2xl overflow-hidden max-h-[95vh] sm:max-h-[90vh] flex flex-col">
         {/* Header — shows immediately from registerData prop */}
-        <div className="bg-[#1773CF] px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between shrink-0">
-          <div className="min-w-0 flex-1 pr-2">
-            <h2 className="text-lg sm:text-xl font-bold text-white truncate">
+        <div className="px-4 sm:px-6 py-4 sm:py-5 flex text-center items-center justify-between shrink-0">
+          <div className="min-w-0 flex-1 pr-2 border-b border-gray-300 pb-3">
+            <h2 className="text-lg sm:text-xl font-bold text-black truncate">
               Shift Details
             </h2>
-            <p className="text-blue-100 text-xs sm:text-sm mt-0.5 truncate">
+            <p className="text-black text-xs sm:text-sm mt-0.5 truncate">
               {registerData?.user?.name} — {registerData?.branch?.branch_name}{" "}
               &nbsp;·&nbsp;
               {registerData?.opened_at &&

@@ -140,10 +140,10 @@ export default function CreateReturnModal({ isOpen, onClose, onSuccess, saleId: 
     <div className="fixed inset-0 flex items-center justify-center z-50 p-2 sm:p-4">
       <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden max-h-[95vh] sm:max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="bg-[#1773CF] px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between shrink-0">
+        <div className="px-4 sm:px-6 py-4  text-center sm:py-5 flex items-center justify-between shrink-0">
           <div className="min-w-0 flex-1 pr-2">
-            <h2 className="text-lg sm:text-xl font-bold text-white truncate">Process Return</h2>
-            <p className="text-blue-100 text-xs sm:text-sm mt-0.5 truncate">Select items to return from a sale</p>
+            <h2 className="text-lg sm:text-xl font-bold text-black truncate">Process Return</h2>
+            <p className="text-black text-xs sm:text-sm mt-0.5 truncate">Select items to return from a sale</p>
           </div>
           <button onClick={onClose} className="text-white/70 hover:text-white shrink-0 ml-2">
             <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

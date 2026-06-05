@@ -87,10 +87,11 @@ export default function TransferStockModal({
   if (!isOpen || !product) return null;
 
   const branchStock: BranchStock[] = stockData?.data?.stock_by_branch || [];
+  console.log("Branch Stock Data:", branchStock);
 
   const totalQuantity = stockData?.data?.total_quantity || 0;
   const totalAvailable = stockData?.data?.total_available || 0;
-  console.log("branchStock", totalAvailable);
+  // console.log("branchStock", totalAvailable);
   // Get available quantity for selected "from" branch
   const fromBranchStock = branchStock.find((b) => b.branch_id === fromBranchId);
   const maxAvailable = fromBranchStock?.available || 0;

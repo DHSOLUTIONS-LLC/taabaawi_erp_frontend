@@ -32,6 +32,10 @@ interface ProductGridProps {
   branchId?: number;
 }
 
+const baseUrl =
+  import.meta.env.VITE_API_URL?.replace("/api", "") ||
+  "https://erp.petlovekw.com/public";
+
 export default function ProductGrid({
   searchQuery,
   onAddToCart,
@@ -97,7 +101,7 @@ export default function ProductGrid({
         }
 
         const imagePath = product.primary_image?.image_path
-          ? `https://erp.petlovekw.com/public/storage/${product.primary_image.image_path}`
+          ? `${baseUrl}/storage/${product.primary_image.image_path}`
           : "https://images.unsplash.com/photo-1541275055241-329bbdf9a191?w=500&auto=format&fit=crop&q=60";
 
         console.log("imagePath", imagePath);
@@ -206,9 +210,8 @@ export default function ProductGrid({
             {selectedCategory || "Select Category"}
           </span>
           <ChevronDown
-            className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${
-              isDropdownOpen ? "rotate-180" : ""
-            }`}
+            className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""
+              }`}
           />
         </button>
 
@@ -223,11 +226,10 @@ export default function ProductGrid({
                     setSelectedCategory(category);
                     setIsDropdownOpen(false);
                   }}
-                  className={`w-full text-left px-4 py-2.5 text-sm transition-colors duration-150 ${
-                    selectedCategory === category
+                  className={`w-full text-left px-4 py-2.5 text-sm transition-colors duration-150 ${selectedCategory === category
                       ? "bg-blue-50 text-blue-700 font-medium"
                       : "text-gray-700 hover:bg-gray-50"
-                  }`}
+                    }`}
                 >
                   {category}
                 </button>
@@ -243,11 +245,10 @@ export default function ProductGrid({
           <button
             key={category}
             onClick={() => setSelectedCategory(category)}
-            className={`px-3 py-1.5 rounded-md font-medium text-sm whitespace-nowrap transition-all duration-200 cursor-pointer ${
-              selectedCategory === category
+            className={`px-3 py-1.5 rounded-md font-medium text-sm whitespace-nowrap transition-all duration-200 cursor-pointer ${selectedCategory === category
                 ? "border border-[#1773CF] text-black shadow-md shadow-blue-200 bg-white"
                 : "bg-white text-gray-700 border border-gray-200 hover:border-blue-300 hover:text-blue-600"
-            }`}
+              }`}
           >
             {category}
           </button>

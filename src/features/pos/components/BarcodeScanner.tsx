@@ -98,7 +98,7 @@ export default function BarcodeScannerPopup({
                 onChange={(e) => setBarcode(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Scan barcode or enter manually..."
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg text-sm"
                 disabled={isLoading || isScanning}
                 autoFocus
               />

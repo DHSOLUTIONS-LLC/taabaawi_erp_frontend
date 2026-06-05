@@ -578,32 +578,32 @@ export default function CashRegistersPage() {
                     ) : (
                       filteredRegisters.map((register: any) => (
                         <tr key={register.id} className="hover:bg-gray-50">
-                          <td className="px-6 py-4">
+                          <td className="px-4 py-4 text-sm text-gray-900">
                             {register.branch?.branch_name}
                           </td>
-                          <td className="px-6 py-4">{register.user?.name}</td>
-                          <td className="px-6 py-4">
+                          <td className="px-4 py-4 text-sm text-gray-900">{register.user?.name}</td>
+                          <td className="px-4 py-4 text-sm text-gray-900">
                             {new Date(register.opened_at).toLocaleString()}
                           </td>
-                          <td className="px-6 py-4">
+                          <td className="px-4 py-4 text-sm text-gray-900">
                             {register.closed_at
                               ? new Date(register.closed_at).toLocaleString()
                               : "-"}
                           </td>
-                          <td className="px-6 py-4">
+                          <td className="px-4 py-4 text-sm text-gray-900">
                             KD {register.opening_balance}
                           </td>
-                          <td className="px-6 py-4">
+                          <td className="px-4 py-4 text-sm text-gray-900">
                             {register.closing_balance
                               ? `KD ${register.closing_balance}`
                               : "-"}
                           </td>
-                          {/* <td className="px-6 py-4">
+                          {/* <td className="px-4 py-4 text-sm text-gray-900">
                             {register.expected_balance
                               ? `KD ${register.expected_balance}`
                               : "-"}
                           </td> */}
-                          <td className="px-6 py-4">
+                          <td className="px-4 py-4 text-sm text-gray-900">
                             <span
                               className={
                                 register.difference > 0
@@ -618,7 +618,7 @@ export default function CashRegistersPage() {
                                 : "-"}
                             </span>
                           </td>
-                          <td className="px-6 py-4">
+                          <td className="px-4 py-4 text-sm text-gray-900">
                             <span
                               className={`px-2 py-1 rounded-full text-xs ${
                                 register.status === "Open"
@@ -629,10 +629,10 @@ export default function CashRegistersPage() {
                               {register.status}
                             </span>
                           </td>
-                          <td className="px-6 py-4">
+                          <td className="px-4 py-4 text-sm text-gray-900">
                             <button
                               onClick={() => handleViewDetails(register.id)}
-                              className="text-blue-600 hover:text-blue-800"
+                              className="text-blue-600 hover:text-blue-800 cursor-pointer"
                             >
                               <img
                                 src={view_icon}

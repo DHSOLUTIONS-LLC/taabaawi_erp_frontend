@@ -267,12 +267,12 @@ export default function OrderDetailPage() {
             <div class="order-info">
               <table>
                 <tr><td>Order Date:</td><td>${new Date(
-                  order?.created_at || new Date(),
-                ).toLocaleDateString("en-GB", {
-                  day: "2-digit",
-                  month: "long",
-                  year: "numeric",
-                })}</td></tr>
+      order?.created_at || new Date(),
+    ).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    })}</td></tr>
                 <tr><td>Status:</td><td>${order?.order_status || ""}</td></tr>
                 <tr><td>Payment Status:</td><td>${order?.payment_status || ""}</td></tr>
                 <tr><td>Payment Method:</td><td>${order?.payment_method || ""}</td></tr>
@@ -313,10 +313,9 @@ export default function OrderDetailPage() {
                 </tr>
               </thead>
               <tbody>
-                ${
-                  (order?.items || [])
-                    .map(
-                      (item: any) => `
+                ${(order?.items || [])
+        .map(
+          (item: any) => `
                   <tr>
                   <td class="border border-gray-300 p-2">
   <div class="flex items-center gap-2">
@@ -331,9 +330,9 @@ export default function OrderDetailPage() {
                     <td>KD ${parseFloat(item.total).toFixed(3)}</td>
                   </tr>
                 `,
-                    )
-                    .join("") || ""
-                }
+        )
+        .join("") || ""
+      }
               </tbody>
             </table>
 
@@ -425,10 +424,9 @@ export default function OrderDetailPage() {
             </tr>
           </thead>
           <tbody>
-            ${
-              order?.items
-                ?.map(
-                  (item: any) => `
+            ${order?.items
+          ?.map(
+            (item: any) => `
               <tr>
               <td style="border: 1px solid #ddd; padding: 8px;">
   <div style="display: flex; align-items: center; gap: 8px;">
@@ -445,9 +443,9 @@ export default function OrderDetailPage() {
                 <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">KD ${parseFloat(item.total).toFixed(3)}</td>
               </tr>
             `,
-                )
-                .join("") || ""
-            }
+          )
+          .join("") || ""
+        }
           </tbody>
         </table>
 
@@ -688,11 +686,10 @@ export default function OrderDetailPage() {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
-                  activeTab === tab
+                className={`px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${activeTab === tab
                     ? "border-[#1773CF] text-[#1773CF]"
                     : "border-transparent text-gray-500 hover:text-gray-700"
-                }`}
+                  }`}
               >
                 {tab === "history"
                   ? "Status History"
@@ -935,9 +932,8 @@ export default function OrderDetailPage() {
                   <div key={h.id} className="flex gap-3 sm:gap-4">
                     <div className="flex flex-col items-center">
                       <div
-                        className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full mt-1 ${
-                          i === 0 ? "bg-[#1773CF]" : "bg-gray-300"
-                        }`}
+                        className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full mt-1 ${i === 0 ? "bg-[#1773CF]" : "bg-gray-300"
+                          }`}
                       />
                       {i < history.length - 1 && (
                         <div className="w-0.5 flex-1 bg-gray-200 mt-1" />

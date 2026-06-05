@@ -427,8 +427,8 @@ export default function PayrollListPage() {
                                         onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                                         disabled={currentPage === 1}
                                         className={`px-3 py-1 rounded transition-colors ${currentPage === 1
-                                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                             }`}
                                     >
                                         Previous
@@ -440,8 +440,8 @@ export default function PayrollListPage() {
                                         onClick={() => setCurrentPage(prev => Math.min(prev + 1, pagination.last_page))}
                                         disabled={currentPage === pagination.last_page}
                                         className={`px-3 py-1 rounded transition-colors ${currentPage === pagination.last_page
-                                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                             }`}
                                     >
                                         Next

@@ -294,23 +294,23 @@ export default function InventoryReportsPage() {
 
   // Process inventory movements
   const inventoryMovementData: InventoryMovementItem[] = useMemo(() => {
-    const movements = inventoryResponse?.data?.data || [];
-    console.log("movement data:", movements);
-    return movements.map((movement: any) => ({
-      id: movement.id,
-      date: new Date(movement.movement_date).toLocaleDateString(),
-      product: movement.product.product_name,
-      product_id: movement.product_id,
-      type: movement.movement_type,
-      from: movement.from_branch?.branch_name || "-",
-      to: movement.to_branch?.branch_name || "-",
-      quantity: movement.quantity,
-      balanceAfter: 0,
-      user: movement.moved_by.name,
-      from_branch_id: movement.from_branch_id,
-      to_branch_id: movement.to_branch_id,
-    }));
-  }, [inventoryResponse]);
+  const movements = inventoryResponse?.data?.data || [];
+  console.log("movement data:", movements);
+  return movements.map((movement: any) => ({
+    id: movement.id,
+    date: new Date(movement.movement_date).toLocaleDateString(),
+    product: movement.product?.product_name || movement.product?.name || "Unknown Product",
+    product_id: movement.product_id,
+    type: movement.movement_type || "Unknown",
+    from: movement.from_branch?.branch_name || "-",
+    to: movement.to_branch?.branch_name || "-",
+    quantity: movement.quantity || 0,
+    balanceAfter: 0,
+    user: movement.moved_by?.name || movement.moved_by?.employee_code || "System",
+    from_branch_id: movement.from_branch_id,
+    to_branch_id: movement.to_branch_id,
+  }));
+}, [inventoryResponse]);
 
   // Process low stock data
   const lowStockData: LowStockItem[] = useMemo(() => {
@@ -497,6 +497,7 @@ export default function InventoryReportsPage() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentItems = filteredData.slice(startIndex, endIndex);
+  console.log("currentItems", currentItems);
 
   // Reset to page 1 when filters change
   useEffect(() => {

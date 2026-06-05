@@ -1037,7 +1037,7 @@ export default function EditProductModal({
                 {variants.map((variant, index) => (
                   <div
                     key={index}
-                    className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 border border-gray-200 rounded-lg bg-white"
+                    className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 border border-gray-200 rounded-lg bg-white"
                   >
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">
@@ -1129,7 +1129,7 @@ export default function EditProductModal({
                       />
                     </div>
 
-                    <div className="flex items-end space-x-2">
+                    {/* <div className="flex items-end space-x-2">
                       <div className="flex-1">
                         <label className="block text-xs font-medium text-gray-600 mb-1">
                           Additional Price
@@ -1173,7 +1173,7 @@ export default function EditProductModal({
                           </svg>
                         </button>
                       )}
-                    </div>
+                    </div> */}
                   </div>
                 ))}
 

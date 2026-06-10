@@ -298,7 +298,7 @@ return (
           </div>
 
           {/* Actions */}
-          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-4 border-t">
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-4 border-t border-gray-200">
             <button
               type="button"
               onClick={() => navigate(`${basePath}/accounting/bank-accounts/${accountId}`)}

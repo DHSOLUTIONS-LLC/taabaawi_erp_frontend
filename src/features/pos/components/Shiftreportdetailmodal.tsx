@@ -171,7 +171,7 @@ export default function ShiftReportDetailModal({
                     {[
                       {
                         label: "Total Sales",
-                        value: `KD ${totalSales.toFixed(3)}`,
+                        value: `KWD ${totalSales.toFixed(3)}`,
                         color: "text-[#1773CF]",
                       },
                       {
@@ -181,12 +181,12 @@ export default function ShiftReportDetailModal({
                       },
                       {
                         label: "Opening Balance",
-                        value: `KD ${parseFloat(r.opening_balance || 0).toFixed(3)}`,
+                        value: `KWD ${parseFloat(r.opening_balance || 0).toFixed(3)}`,
                         color: "text-gray-900",
                       },
                       {
                         label: "Closing Balance",
-                        value: `KD ${parseFloat(r.closing_balance || 0).toFixed(3)}`,
+                        value: `KWD ${parseFloat(r.closing_balance || 0).toFixed(3)}`,
                         color: "text-gray-900",
                       },
                     ].map(({ label, value, color }) => (
@@ -280,7 +280,7 @@ export default function ShiftReportDetailModal({
                         <div className="flex justify-between font-semibold">
                           <span>Actual Closing</span>
                           <span>
-                            KD {parseFloat(r.closing_balance || 0).toFixed(3)}
+                            KWD {parseFloat(r.closing_balance || 0).toFixed(3)}
                           </span>
                         </div>
                         <div className="flex justify-between font-bold text-sm sm:text-base border-t border-gray-300 pt-1.5">
@@ -294,7 +294,7 @@ export default function ShiftReportDetailModal({
                                   : "text-red-600"
                             }
                           >
-                            {diff > 0 ? "+" : ""}KD {diff.toFixed(3)}
+                            {diff > 0 ? "+" : ""}KWD {diff.toFixed(3)}
                           </span>
                         </div>
                       </div>
@@ -391,7 +391,7 @@ export default function ShiftReportDetailModal({
                                 </span>
                               </div>
                               <span className="font-semibold text-xs sm:text-sm">
-                                KD {amount.toFixed(3)}
+                                KWD {amount.toFixed(3)}
                               </span>
                             </div>
                           ))}
@@ -480,7 +480,7 @@ export default function ShiftReportDetailModal({
                               </span>
                             </td>
                             <td className="px-3 sm:px-4 py-2.5 sm:py-3 font-semibold text-gray-900 whitespace-nowrap">
-                              KD {parseFloat(sale.total_amount || 0).toFixed(3)}
+                              KWD {parseFloat(sale.total_amount || 0).toFixed(3)}
                             </td>
                           </tr>
                         ))}
@@ -494,7 +494,7 @@ export default function ShiftReportDetailModal({
                             Total
                           </td>
                           <td className="px-3 sm:px-4 py-2.5 sm:py-3 font-bold text-[#1773CF] whitespace-nowrap">
-                            KD {totalSales.toFixed(3)}
+                            KWD {totalSales.toFixed(3)}
                           </td>
                         </tr>
                       </tfoot>

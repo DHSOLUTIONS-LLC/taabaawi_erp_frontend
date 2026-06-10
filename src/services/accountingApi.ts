@@ -683,7 +683,7 @@ export const accountingApi = api.injectEndpoints({
 
     recordAPPayment: builder.mutation<
       { data: AccountsPayable },
-      { id: number; payment_amount: number }
+      { id: number; payment_amount: number, payment_account_id: number }
     >({
       query: ({ id, ...body }) => ({
         url: `/accounts-payable/${id}/record-payment`,

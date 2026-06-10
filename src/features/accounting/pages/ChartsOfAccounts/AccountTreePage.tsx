@@ -1,4 +1,3 @@
-// src/features/accounting/pages/chart-of-accounts/AccountTreePage.tsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../../../../layouts/DashboardLayout";
@@ -22,6 +21,9 @@ export default function AccountTreePage() {
   const navigate = useNavigate();
   const { user } = useAppSelector((state: RootState) => state.auth);
   const [accountType, setAccountType] = useState("");
+  
+  // Track expanded/collapsed state of each node
+  const [expandedNodes, setExpandedNodes] = useState<Set<number>>(new Set());
 
   const isSuperAdmin = user?.role?.role_name === "Super Admin";
   const basePath = isSuperAdmin ? "/admin" : "";
@@ -32,20 +34,63 @@ export default function AccountTreePage() {
 
   const treeData = (data as any)?.data || [];
 
+  // Toggle expand/collapse for a node
+  const toggleNode = (nodeId: number) => {
+    setExpandedNodes((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(nodeId)) {
+        newSet.delete(nodeId);
+      } else {
+        newSet.add(nodeId);
+      }
+      return newSet;
+    });
+  };
+
+  // Handle node click - separate navigation from expand/collapse
+  const handleNodeClick = (node: any, e: React.MouseEvent) => {
+    // Stop propagation to prevent triggering parent clicks
+    e.stopPropagation();
+    
+    // Navigate to account details
+    navigate(`${basePath}/accounting/chart-of-accounts/${node.id}`);
+  };
+
+  // Handle chevron click - toggle expand/collapse without navigating
+  const handleChevronClick = (node: any, e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggleNode(node.id);
+  };
+
   const renderTree = (nodes: any[], level = 0) => {
-    return nodes.map((node) => (
+  // Add safety check - if nodes is not an array, return nothing
+  if (!nodes || !Array.isArray(nodes)) {
+    return null;
+  }
+  
+  return nodes.map((node) => {
+    // Safe check for sub_accounts - ensure it's an array
+    const hasChildren = node.sub_accounts && Array.isArray(node.sub_accounts) && node.sub_accounts.length > 0;
+    const isExpanded = expandedNodes.has(node.id);
+    
+    // console.log(`Rendering node: ${node.account_name} Level: ${level} Has children: ${hasChildren} Sub accounts:`, node.sub_accounts);
+    
+    return (
       <div key={node.id}>
         <div
-          className={`flex items-center py-2 hover:bg-gray-50 rounded-lg cursor-pointer whitespace-nowrap`}
+          className={`flex items-center py-2 hover:bg-gray-50 rounded-lg group`}
           style={{ paddingLeft: `${level * 24 + 12}px` }}
-          onClick={() =>
-            navigate(`${basePath}/accounting/chart-of-accounts/${node.id}`)
-          }
         >
-          <div className="w-6 h-6 flex items-center justify-center mr-2 flex-shrink-0">
-            {node.subAccounts && node.subAccounts.length > 0 ? (
+          {/* Chevron / Icon - Click to expand/collapse */}
+          <div 
+            className="w-6 h-6 flex items-center justify-center mr-2 flex-shrink-0 cursor-pointer"
+            onClick={(e) => handleChevronClick(node, e)}
+          >
+            {hasChildren ? (
               <svg
-                className="w-4 h-4 text-gray-400 flex-shrink-0"
+                className={`w-4 h-4 text-gray-400 transition-transform duration-200 flex-shrink-0 ${
+                  isExpanded ? "rotate-180" : ""
+                }`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -58,23 +103,15 @@ export default function AccountTreePage() {
                 />
               </svg>
             ) : (
-              <svg
-                className="w-4 h-4 text-gray-300 flex-shrink-0"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M12 5v14m-7-7h14"
-                />
-              </svg>
+              <div className="w-4 h-4 flex-shrink-0"></div>
             )}
           </div>
 
-          <div className="flex-1 flex items-center justify-between gap-4 min-w-0">
+          {/* Account Content - Click to navigate to details */}
+          <div 
+            className="flex-1 flex items-center justify-between gap-4 min-w-0 cursor-pointer"
+            onClick={(e) => handleNodeClick(node, e)}
+          >
             <div className="flex items-center gap-3 flex-shrink-0">
               <span className="text-sm font-mono font-semibold text-gray-900 whitespace-nowrap">
                 {node.account_code}
@@ -106,11 +143,37 @@ export default function AccountTreePage() {
             </div>
           </div>
         </div>
-        {node.subAccounts && node.subAccounts.length > 0 && (
-          <div>{renderTree(node.subAccounts, level + 1)}</div>
+        
+        {/* Only render children if hasChildren is true AND isExpanded AND sub_accounts is an array */}
+        {hasChildren && isExpanded && node.sub_accounts && Array.isArray(node.sub_accounts) && (
+          <div className="ml-4">
+            {renderTree(node.sub_accounts, level + 1)}
+          </div>
         )}
       </div>
-    ));
+    );
+  });
+};
+
+  // Optional: Expand all / Collapse all functionality
+  const expandAll = () => {
+    const allNodeIds = collectAllNodeIds(treeData);
+    setExpandedNodes(new Set(allNodeIds));
+  };
+
+  const collapseAll = () => {
+    setExpandedNodes(new Set());
+  };
+
+  const collectAllNodeIds = (nodes: any[]): number[] => {
+    let ids: number[] = [];
+    nodes.forEach((node) => {
+      if (node.sub_accounts && node.sub_accounts.length > 0) {
+        ids.push(node.id);
+        ids = [...ids, ...collectAllNodeIds(node.subAccounts)];
+      }
+    });
+    return ids;
   };
 
   return (
@@ -136,9 +199,25 @@ export default function AccountTreePage() {
                 Account Tree
               </h1>
               <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
-                Hierarchical view of your chart of accounts
+                Click on chevron to expand/collapse, click on account to view details
               </p>
             </div>
+          </div>
+          
+          {/* Expand/Collapse All Buttons */}
+          <div className="flex gap-2">
+            <button
+              onClick={expandAll}
+              className="px-3 py-1.5 text-xs bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              Expand All
+            </button>
+            <button
+              onClick={collapseAll}
+              className="px-3 py-1.5 text-xs bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              Collapse All
+            </button>
           </div>
         </div>
 
@@ -151,7 +230,11 @@ export default function AccountTreePage() {
             <div className="relative w-full sm:w-64">
               <select
                 value={accountType}
-                onChange={(e) => setAccountType(e.target.value)}
+                onChange={(e) => {
+                  setAccountType(e.target.value);
+                  // Reset expanded nodes when filter changes
+                  setExpandedNodes(new Set());
+                }}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 text-sm"
               >
                 <option value="">All Account Types</option>

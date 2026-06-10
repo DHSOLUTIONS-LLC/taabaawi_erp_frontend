@@ -144,7 +144,7 @@ export default function PaymentModal({
           <div className="bg-gray-50 rounded-lg p-4 text-center">
             <p className="text-sm text-gray-500 mb-1">Total Amount</p>
             <p className="text-2xl font-bold text-[#1773CF]">
-              KD {total.toFixed(3)}
+              KWD {total.toFixed(3)}
             </p>
             <p className="text-xs text-gray-400 mt-1">
               {cartItems.length} item(s)
@@ -190,7 +190,7 @@ export default function PaymentModal({
               />
               {cashReceived && parseFloat(cashReceived) >= total && (
                 <div className="mt-2 text-sm text-green-600">
-                  Change: KD {change.toFixed(3)}
+                  Change: KWD {change.toFixed(3)}
                 </div>
               )}
             </div>
@@ -273,7 +273,7 @@ export default function PaymentModal({
                   Processing...
                 </span>
               ) : (
-                `Pay KD ${total.toFixed(3)}`
+                `Pay KWD ${total.toFixed(3)}`
               )}
             </button>
           </div>

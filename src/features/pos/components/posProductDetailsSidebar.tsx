@@ -89,7 +89,7 @@ export default function CartSidebar({
   }, 0);
   const couponDiscount = appliedCoupon?.discount || 0;
   const employeeDiscount = isEmployeePurchase
-    ? (subtotal - itemDiscountTotal) * 0.2
+    ? (subtotal - itemDiscountTotal) * 0.3
     : 0;
   const total =
     subtotal - itemDiscountTotal - couponDiscount - employeeDiscount;
@@ -437,11 +437,11 @@ export default function CartSidebar({
                             {/* Price */}
                             <div className="text-right">
                               <p className="font-bold text-sm text-gray-900">
-                                KD {lineTotal.toFixed(3)}
+                                KWD {lineTotal.toFixed(3)}
                               </p>
                               {discPct > 0 && (
                                 <p className="text-xs text-red-500 line-through">
-                                  KD {(item.price * item.quantity).toFixed(3)}
+                                  KWD {(item.price * item.quantity).toFixed(3)}
                                 </p>
                               )}
                             </div>
@@ -588,7 +588,7 @@ export default function CartSidebar({
                       {appliedCoupon.code} applied
                     </p>
                     <p className="text-sm font-bold text-green-700">
-                      -KD {appliedCoupon.discount.toFixed(3)}
+                      -KWD {appliedCoupon.discount.toFixed(3)}
                     </p>
                   </div>
                   <button
@@ -607,30 +607,30 @@ export default function CartSidebar({
               <div className="space-y-1.5 text-sm">
                 <div className="flex justify-between text-gray-600">
                   <span>Subtotal</span>
-                  <span>KD {subtotal.toFixed(3)}</span>
+                  <span>KWD {subtotal.toFixed(3)}</span>
                 </div>
                 {itemDiscountTotal > 0 && (
                   <div className="flex justify-between text-red-600">
                     <span>Item Discounts</span>
-                    <span>-KD {itemDiscountTotal.toFixed(3)}</span>
+                    <span>-KWD {itemDiscountTotal.toFixed(3)}</span>
                   </div>
                 )}
                 {couponDiscount > 0 && (
                   <div className="flex justify-between text-green-600">
                     <span>Coupon</span>
-                    <span>-KD {couponDiscount.toFixed(3)}</span>
+                    <span>-KWD {couponDiscount.toFixed(3)}</span>
                   </div>
                 )}
                 {employeeDiscount > 0 && (
                   <div className="flex justify-between text-purple-600">
                     <span>Employee (20%)</span>
-                    <span>-KD {employeeDiscount.toFixed(3)}</span>
+                    <span>-KWD {employeeDiscount.toFixed(3)}</span>
                   </div>
                 )}
                 <div className="border-t border-gray-200 pt-2 flex justify-between font-bold text-base">
                   <span>Total Due</span>
                   <span className="text-[#1773CF] text-lg">
-                    KD {total.toFixed(3)}
+                    KWD {total.toFixed(3)}
                   </span>
                 </div>
               </div>
@@ -657,7 +657,7 @@ export default function CartSidebar({
                 }}
                 className="w-full py-3.5 bg-[#1773CF] hover:bg-blue-700 text-white rounded-xl font-bold text-base transition-colors flex items-center justify-center gap-2"
               >
-                Charge KD {total.toFixed(3)}
+                Charge KWD {total.toFixed(3)}
               </button>
             </div>
           )}

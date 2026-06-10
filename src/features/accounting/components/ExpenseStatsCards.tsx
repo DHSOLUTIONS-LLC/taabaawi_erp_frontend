@@ -18,7 +18,7 @@ export default function ExpenseStatsCards({
   if (isLoading)
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl p-5 border animate-pulse h-28" />
+        <div className="bg-white rounded-xl p-5 border border-gray-200 animate-pulse h-28" />
       </div>
     );
 

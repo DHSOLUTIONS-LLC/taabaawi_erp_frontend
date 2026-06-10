@@ -339,16 +339,15 @@ export default function PurchaseOrderDetailPage() {
           </div>
 
           <!-- Shipping Terms -->
-          ${
-            po?.shipping_terms || po?.terms_and_conditions
-              ? `
+          ${po?.shipping_terms || po?.terms_and_conditions
+        ? `
             <div class="shipping-terms">
               <h3>📦 SHIPPING TERMS & CONDITIONS</h3>
               <p>${po?.shipping_terms || po?.terms_and_conditions || "Standard shipping terms apply"}</p>
             </div>
           `
-              : ""
-          }
+        : ""
+      }
 
           <!-- Products Table (Excel Style) -->
           <table>
@@ -364,13 +363,12 @@ export default function PurchaseOrderDetailPage() {
             </thead>
             <tbody>
               ${itemsHtml}
-              ${
-                po.items?.length === 0
-                  ? `
+              ${po.items?.length === 0
+        ? `
                 <tr><td colspan="6" style="text-align: center; padding: 40px;">No items found</td></tr>
               `
-                  : ""
-              }
+        : ""
+      }
             </tbody>
           </table>
 
@@ -384,16 +382,15 @@ export default function PurchaseOrderDetailPage() {
           </table>
 
           <!-- Additional Notes -->
-          ${
-            po?.notes
-              ? `
+          ${po?.notes
+        ? `
             <div style="background: #f0fdf4; border: 1px solid #22c55e; border-radius: 8px; padding: 12px; margin-top: 15px;">
               <h3 style="font-size: 12px; font-weight: bold; color: #166534; margin-bottom: 5px;">📝 NOTES</h3>
               <p style="font-size: 12px; color: #14532d;">${po?.notes}</p>
             </div>
           `
-              : ""
-          }
+        : ""
+      }
 
           <!-- Footer -->
           <div class="footer">
@@ -503,15 +500,14 @@ export default function PurchaseOrderDetailPage() {
           </div>
         </div>
 
-        ${
-          po?.shipping_terms || po?.terms_and_conditions
-            ? `
+        ${po?.shipping_terms || po?.terms_and_conditions
+          ? `
           <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 12px; margin-bottom: 20px;">
             <h3 style="font-size: 13px; font-weight: bold; color: #92400e;">📦 SHIPPING TERMS & CONDITIONS</h3>
             <p style="font-size: 12px; color: #78350f;">${po?.shipping_terms || po?.terms_and_conditions}</p>
           </div>
         `
-            : ""
+          : ""
         }
 
         <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
@@ -711,13 +707,12 @@ export default function PurchaseOrderDetailPage() {
                 </h1>
                 <POStatusBadge status={po.status} />
                 <span
-                  className={`px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
-                    po.payment_status === "Paid"
+                  className={`px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ${po.payment_status === "Paid"
                       ? "bg-green-100 text-green-700"
                       : po.payment_status === "Partially Paid"
                         ? "bg-yellow-100 text-yellow-700"
                         : "bg-red-100 text-red-700"
-                  }`}
+                    }`}
                 >
                   {po.payment_status}
                 </span>
@@ -792,7 +787,7 @@ export default function PurchaseOrderDetailPage() {
                 onClick={handleSubmitForApproval}
                 className="flex items-center gap-2 px-3 py-2 md:px-4 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors text-sm md:text-base cursor-pointer"
               >
-                <img src={send_icon} alt="" className="w-4 h-4" />
+                {/* <img src={send_icon} alt="" className="w-4 h-4" /> */}
                 Submit for Approval
               </button>
             )}

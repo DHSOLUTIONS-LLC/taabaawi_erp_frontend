@@ -698,7 +698,7 @@ export default function LeaveRequestDetails() {
                                                         {bonus.bonus_type}
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
-                                                        KD {bonus.amount}
+                                                        KWD {bonus.amount}
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                         {formatDate(bonus.bonus_date)}
@@ -766,11 +766,11 @@ export default function LeaveRequestDetails() {
                                 </div>
                                 <div className="bg-green-50 p-3 sm:p-4 rounded-lg">
                                     <p className="text-xs sm:text-sm text-green-600 font-medium mb-1">Total Amount</p>
-                                    <p className="text-xl sm:text-2xl font-bold text-green-800">KD {bonusSummary.total_amount || 0}</p>
+                                    <p className="text-xl sm:text-2xl font-bold text-green-800">KWD {bonusSummary.total_amount || 0}</p>
                                 </div>
                                 <div className="bg-purple-50 p-3 sm:p-4 rounded-lg">
                                     <p className="text-xs sm:text-sm text-purple-600 font-medium mb-1">Average Amount</p>
-                                    <p className="text-xl sm:text-2xl font-bold text-purple-800">KD {bonusSummary.average_amount || 0}</p>
+                                    <p className="text-xl sm:text-2xl font-bold text-purple-800">KWD {bonusSummary.average_amount || 0}</p>
                                 </div>
                             </div>
 
@@ -792,7 +792,7 @@ export default function LeaveRequestDetails() {
                                                 <span className="font-medium text-gray-700 text-sm sm:text-base">{type}</span>
                                                 <div className="flex flex-wrap gap-3 sm:gap-4">
                                                     <span className="text-xs sm:text-sm text-gray-600">Count: <span className="font-semibold">{data.count}</span></span>
-                                                    <span className="text-xs sm:text-sm text-gray-600">Total: <span className="font-semibold">KD {data.total}</span></span>
+                                                    <span className="text-xs sm:text-sm text-gray-600">Total: <span className="font-semibold">KWD {data.total}</span></span>
                                                 </div>
                                             </div>
                                         ))}
@@ -811,7 +811,7 @@ export default function LeaveRequestDetails() {
                                                 <p className="text-xs text-gray-500">{formatDate(bonus.bonus_date)}</p>
                                             </div>
                                             <div className="flex items-center justify-between sm:justify-end gap-3">
-                                                <p className="font-semibold text-green-600 text-sm sm:text-base">KD {bonus.amount}</p>
+                                                <p className="font-semibold text-green-600 text-sm sm:text-base">KWD {bonus.amount}</p>
                                                 <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${getBonusStatusColor(bonus.status || 'Pending')}`}>
                                                     {bonus.status || '-'}
                                                 </span>
@@ -936,7 +936,7 @@ export default function LeaveRequestDetails() {
                         </div>
                         <div className="p-6">
                             <p className="text-gray-700">
-                                Are you sure you want to delete this bonus of <span className="font-semibold">KD {selectedBonus.amount}</span> for <span className="font-semibold">{selectedBonus.bonus_type}</span>?
+                                Are you sure you want to delete this bonus of <span className="font-semibold">KWD {selectedBonus.amount}</span> for <span className="font-semibold">{selectedBonus.bonus_type}</span>?
                             </p>
                             <p className="text-sm text-gray-500 mt-2">This action cannot be undone.</p>
                         </div>

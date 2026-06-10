@@ -1,15 +1,12 @@
 // src/features/accounting/pages/accounts-payable/CreateAPPage.tsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
 import { useAppSelector } from '../../../../app/hooks';
 import type { RootState } from '../../../../app/store';
 import {
   useCreateAPMutation,
-
 } from '../../../../services/accountingApi';
-
-
 import { useGetPurchaseOrdersQuery, useGetSuppliersQuery } from '../../../../services/purchaseApi';
 
 import arrow_back_icon from '../../../../assets/icons/arrow_back_icon.svg';
@@ -33,6 +30,7 @@ export default function CreateAPPage() {
   });
 
   const [errors, setErrors] = useState<Record<string, string[]>>({});
+  const [filteredPOs, setFilteredPOs] = useState<any[]>([]);
 
   const isSuperAdmin = user?.role?.role_name === 'Super Admin';
   const basePath = isSuperAdmin ? '/admin' : '';
@@ -45,13 +43,24 @@ export default function CreateAPPage() {
     per_page: 1000,
   });
   const suppliers = (suppliersData as any)?.data?.data || (suppliersData as any)?.data || [];
-  console.log('suppliers:', suppliers)
 
   // Fetch purchase orders for dropdown
   const { data: posData } = useGetPurchaseOrdersQuery({
     per_page: 1000,
   });
   const purchaseOrders = (posData as any)?.data?.data || (posData as any)?.data || [];
+
+  // Filter POs based on selected supplier
+  useEffect(() => {
+    if (formData.supplier_id) {
+      const filtered = purchaseOrders.filter(
+        (po: any) => po.supplier_id?.toString() === formData.supplier_id
+      );
+      setFilteredPOs(filtered);
+    } else {
+      setFilteredPOs([]);
+    }
+  }, [formData.supplier_id, purchaseOrders]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -60,20 +69,30 @@ export default function CreateAPPage() {
 
   const handleSupplierChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const supplierId = e.target.value;
-    setFormData(prev => ({ ...prev, supplier_id: supplierId }));
+    setFormData(prev => ({ 
+      ...prev, 
+      supplier_id: supplierId,
+      purchase_order_id: '', // Reset PO when supplier changes
+      invoice_number: '',
+      invoice_amount: 0,
+      currency: 'KWD',
+    }));
   };
 
   const handlePOChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const poId = e.target.value;
-    setFormData(prev => ({ ...prev, purchase_order_id: poId }));
+    const selectedPOId = e.target.value;
+    setFormData(prev => ({ ...prev, purchase_order_id: selectedPOId }));
 
-    // Auto-fill supplier if PO selected
-    if (poId) {
-      const selectedPO = purchaseOrders.find((po: any) => po.id.toString() === poId);
+    // Auto-fill fields based on selected PO
+    if (selectedPOId) {
+      const selectedPO = purchaseOrders.find((po: any) => po.id.toString() === selectedPOId);
       if (selectedPO) {
         setFormData(prev => ({
           ...prev,
-          supplier_id: selectedPO.supplier_id?.toString() || '',
+          invoice_number: selectedPO.po_number || '',
+          invoice_date: selectedPO.order_date ? new Date(selectedPO.order_date).toISOString().split('T')[0] : prev.invoice_date,
+          due_date: selectedPO.expected_delivery_date ? new Date(selectedPO.expected_delivery_date).toISOString().split('T')[0] : prev.due_date,
+          invoice_amount: selectedPO.total_amount || 0,
           currency: selectedPO.currency || 'KWD',
         }));
       }
@@ -104,6 +123,8 @@ export default function CreateAPPage() {
       }
     }
   };
+
+  const isPOSelected = !!formData.purchase_order_id;
 
   return (
     <DashboardLayout>
@@ -159,12 +180,13 @@ export default function CreateAPPage() {
                   name="purchase_order_id"
                   value={formData.purchase_order_id}
                   onChange={handlePOChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500"
+                  disabled={!formData.supplier_id}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                 >
-                  <option value="">None</option>
-                  {purchaseOrders.map((po: any) => (
+                  <option value="">Select Purchase Order</option>
+                  {filteredPOs.map((po: any) => (
                     <option key={po.id} value={po.id}>
-                      {po.po_number} - {po.supplier?.supplier_name} ({po.currency} {parseFloat(po.total_amount).toFixed(3)})
+                      {po.po_number} - {po.currency} {parseFloat(po.total_amount).toFixed(3)}
                     </option>
                   ))}
                 </select>
@@ -172,6 +194,9 @@ export default function CreateAPPage() {
                   <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
                 </div>
               </div>
+              {!formData.supplier_id && (
+                <p className="text-xs text-gray-400 mt-1">Select a supplier first to see their purchase orders</p>
+              )}
             </div>
           </div>
 
@@ -187,8 +212,10 @@ export default function CreateAPPage() {
                 value={formData.invoice_number}
                 onChange={handleChange}
                 placeholder="e.g. INV-2025-001"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
                 required
+                disabled={isPOSelected}
+                readOnly={isPOSelected}
               />
               {errors.invoice_number && (
                 <p className="text-xs text-red-500 mt-1">{errors.invoice_number[0]}</p>
@@ -205,8 +232,9 @@ export default function CreateAPPage() {
                 value={formData.invoice_date}
                 onChange={handleChange}
                 max={new Date().toISOString().split('T')[0]}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
                 required
+                disabled={isPOSelected}
               />
             </div>
 
@@ -220,8 +248,9 @@ export default function CreateAPPage() {
                 value={formData.due_date}
                 onChange={handleChange}
                 min={formData.invoice_date}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
                 required
+                disabled={isPOSelected}
               />
             </div>
 
@@ -234,7 +263,8 @@ export default function CreateAPPage() {
                   name="currency"
                   value={formData.currency}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                  disabled={isPOSelected}
                 >
                   {CURRENCIES.map(currency => (
                     <option key={currency} value={currency}>{currency}</option>
@@ -260,8 +290,9 @@ export default function CreateAPPage() {
               onChange={handleChange}
               placeholder="0.000"
               min="0.001"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
               required
+              disabled={isPOSelected}
             />
             {errors.invoice_amount && (
               <p className="text-xs text-red-500 mt-1">{errors.invoice_amount[0]}</p>

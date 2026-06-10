@@ -229,11 +229,11 @@ export default function AccountingDashboard() {
             <p className="text-2xl font-bold text-gray-900 mt-1">
               KWD {num(trialBalance?.total_debit).toFixed(3)}
             </p>
-            <p
+            {/* <p
               className={`text-xs mt-1 ${trialBalance?.is_balanced ? "text-green-600" : "text-red-600"}`}
             >
               {trialBalance?.is_balanced ? "✓ Balanced" : "✗ Not Balanced"}
-            </p>
+            </p> */}
           </div>
         </div>
 

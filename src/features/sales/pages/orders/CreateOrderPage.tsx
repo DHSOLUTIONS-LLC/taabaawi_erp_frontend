@@ -8,12 +8,13 @@ import {
   removeOrderProduct,
   updateOrderProductQty,
   clearOrderForm,
+  updateOrderProductDiscount,
 } from "../../salesSlice";
 import {
   useCreateOrderMutation,
   useGetShippingMethodsQuery,
 } from "../../../../services/salesApi";
-import { useGetBranchesQuery } from "../../../../services/superAdminApi";
+import { useGetBranchesQuery, useGetUsersQuery } from "../../../../services/superAdminApi";
 import { useGetCustomersQuery } from "../../../../services/crmApi";
 import { canSwitchBranch } from "../../../../utils/roleHelpers";
 
@@ -74,6 +75,8 @@ export default function CreateOrderPage() {
   const [shippingFee, setShippingFee] = useState(2.0);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [search, _setSearch] = useState("");
+const [salesPersonId, setSalesPersonId] = useState("");
+// const [salesPersons, setSalesPersons] = useState<any[]>([]);
 
   // ─── APIs ─────────────────────────────────────────
   const [createOrder, { isLoading: isCreating }] = useCreateOrderMutation();
@@ -81,8 +84,25 @@ export default function CreateOrderPage() {
   const { data: methodsResponse, isLoading: _isLoadingShipping } =
     useGetShippingMethodsQuery({ search: search || undefined });
   const { data: customersResponse, isLoading: isLoadingCustomers } =
-    useGetCustomersQuery(customerSearch ? { search: customerSearch } : {});
+    useGetCustomersQuery({ per_page: 1000 });
   console.log("customersResponse:", customersResponse);
+
+
+ const { data: salesPersonsResponse, isLoading: isLoadingSalesPersons } = useGetUsersQuery({
+  is_active: 1 as any,
+  per_page: 1000,
+});
+
+const allUsers =
+  salesPersonsResponse?.data?.data ||
+  salesPersonsResponse?.data ||
+  [];
+
+const salesPersons = (Array.isArray(allUsers) ? allUsers : []).filter((u: any) => {
+  const roleName = u.role?.role_name || u.role_id?.role_name || "";
+  return roleName.toLowerCase().includes("sales");
+});
+
 
   const branches = Array.isArray(branchesData) ? branchesData : [];
   const methods: ShippingMethod[] =
@@ -116,6 +136,7 @@ export default function CreateOrderPage() {
     setCustomerSearch(selectedCustomer.first_name + selectedCustomer.last_name);
     setShowCustomerDropdown(false);
   };
+  console.log("selectedCustomerId:", customerId);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -171,6 +192,7 @@ export default function CreateOrderPage() {
         shipping_postal_code: shippingPostalCode || null,
         payment_method: paymentMethod,
         shipping_fee: shippingFee,
+        sales_person_id: parseInt(salesPersonId),
         items: items,
       };
 
@@ -198,7 +220,7 @@ export default function CreateOrderPage() {
       } else {
         alert(
           err?.data?.message ||
-            "Failed to create order. Please check all fields and try again.",
+          "Failed to create order. Please check all fields and try again.",
         );
       }
     }
@@ -217,15 +239,19 @@ export default function CreateOrderPage() {
   }, [dispatch]);
 
   // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = () => {
-      setShowCustomerDropdown(false);
-    };
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
-  }, []);
+  // useEffect(() => {
+  //   const handleClickOutside = () => {
+  //     setShowCustomerDropdown(false);
+  //   };
+  //   document.addEventListener("click", handleClickOutside);
+  //   return () => document.removeEventListener("click", handleClickOutside);
+  // }, []);
 
-  const CHANNELS = ["Website", "Mobile App", "POS", "Phone", "Manual"];
+  const handleUpdateDiscount = (id: string, discountPercentage: number) => {
+  dispatch(updateOrderProductDiscount({ id, discount_percentage: discountPercentage }));
+};
+
+  const CHANNELS = ["Phone", "Manual"];
   const PAYMENT_METHODS = [
     "Cash on Delivery",
     "Credit Card",
@@ -283,78 +309,39 @@ export default function CreateOrderPage() {
                 {/* Customer Search */}
                 <div className="relative sm:col-span-1">
                   <label className="block text-sm font-medium text-gray-600 mb-1 sm:mb-2">
-                    Search Customer <span className="text-red-500">*</span>
+                    Select Customer <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                     
+                    <select
+                      value={customerId}
+                      onChange={(e) => {
+                        const selectedCustomer = customers.find(
+                          (c: any) => c.id.toString() === e.target.value
+                        );
+                        if (selectedCustomer) {
+                          handleCustomerSelect(selectedCustomer);
+                        }
+                      }}
+                      className="w-full pl-4  pr-3 sm:pr-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none bg-white"
+                    >
+                      <option value="">Select a customer</option>
+                      {customers.map((customer: any) => (
+                        <option key={customer.id} value={customer.id}>
+                          {customer.full_name || customer.first_name} 
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:pr-3 pointer-events-none">
                       <img
-                        src={search_icon}
+                        src={dropdown_arrow_icon}
                         alt=""
-                        className="w-4 h-4 text-gray-400"
+                        className="w-3 h-3 sm:w-4 sm:h-4"
                       />
                     </div>
-                    <input
-                      type="text"
-                      value={customerSearch}
-                      onChange={(e) => {
-                        setCustomerSearch(e.target.value);
-                        setShowCustomerDropdown(true);
-                        setCustomerId("");
-                        setCustomerName("");
-                        setCustomerEmail("");
-                        setCustomerPhone("");
-                      }}
-                      onFocus={() => setShowCustomerDropdown(true)}
-                      placeholder="Search by name, email or phone..."
-                      className="w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
                   </div>
-
-                  {/* Customer Dropdown */}
-                  {showCustomerDropdown && (
-                    <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                      {isLoadingCustomers ? (
-                        <div className="p-4 text-center text-gray-500">
-                          <div className="animate-spin inline-block w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full mr-2" />
-                          Loading customers...
-                        </div>
-                      ) : customers.length === 0 ? (
-                        <div className="p-4 text-center text-gray-500">
-                          No customers found
-                        </div>
-                      ) : (
-                        customers.map((customer: any) => (
-                          <button
-                            key={customer.id}
-                            className="w-full px-3 sm:px-4 py-2 sm:py-3 text-left hover:bg-gray-50 focus:bg-gray-50 focus:outline-none border-b border-gray-300  last:border-b-0"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleCustomerSelect(customer);
-                            }}
-                          >
-                            <div className="font-medium text-gray-900 text-sm">
-                              {customer.full_name}
-                            </div>
-                            <div className="text-xs sm:text-sm text-gray-500 break-all">
-                              {customer.email}
-                            </div>
-                            <div className="text-xs text-gray-400">
-                              {customer.phone}
-                            </div>
-                            {customer.loyalty_tier && (
-                              <div className="text-xs text-yellow-600 mt-0.5">
-                                {customer.loyalty_tier}
-                              </div>
-                            )}
-                          </button>
-                        ))
-                      )}
-                    </div>
-                  )}
                   {errors.customerId && (
-                    <p className="text-xs text-red-500 mt-1">
-                      {errors.customerId}
-                    </p>
+                    <p className="text-xs text-red-500 mt-1">{errors.customerId}</p>
                   )}
                 </div>
 
@@ -424,6 +411,33 @@ export default function CreateOrderPage() {
                     </div>
                   )}
                 </div>
+
+                <div className="sm:col-span-2">
+  <label className="block text-sm font-medium text-gray-600 mb-1 sm:mb-2">
+    Sales Person <span className="text-red-500">*</span>
+  </label>
+  <div className="relative">
+    <select
+      value={salesPersonId}
+      onChange={(e) => setSalesPersonId(e.target.value)}
+      className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10"
+      required
+    >
+      <option value="">Select Sales Person</option>
+      {salesPersons.map((person: any) => (
+        <option key={person.id} value={person.id}>
+          {person.name} ({person.employee_id || person.email})
+        </option>
+      ))}
+    </select>
+    <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:pr-3 pointer-events-none">
+      <img src={dropdown_arrow_icon} alt="" className="w-3 h-3 sm:w-4 sm:h-4" />
+    </div>
+  </div>
+  {errors.salesPerson && (
+    <p className="text-xs text-red-500 mt-1">{errors.salesPerson}</p>
+  )}
+</div>
               </div>
             </div>
 
@@ -441,9 +455,8 @@ export default function CreateOrderPage() {
                     type="text"
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
-                    className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 bg-gray-50 ${
-                      errors.customerName ? "border-red-500" : "border-gray-300"
-                    }`}
+                    className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 bg-gray-50 ${errors.customerName ? "border-red-500" : "border-gray-300"
+                      }`}
                     placeholder="Auto-filled from customer"
                     readOnly
                   />
@@ -461,11 +474,10 @@ export default function CreateOrderPage() {
                     type="email"
                     value={customerEmail}
                     onChange={(e) => setCustomerEmail(e.target.value)}
-                    className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 bg-gray-50 ${
-                      errors.customerEmail
+                    className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 bg-gray-50 ${errors.customerEmail
                         ? "border-red-500"
                         : "border-gray-300"
-                    }`}
+                      }`}
                     placeholder="Auto-filled from customer"
                     readOnly
                   />
@@ -483,11 +495,10 @@ export default function CreateOrderPage() {
                     type="text"
                     value={customerPhone}
                     onChange={(e) => setCustomerPhone(e.target.value)}
-                    className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 bg-gray-50 ${
-                      errors.customerPhone
+                    className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 bg-gray-50 ${errors.customerPhone
                         ? "border-red-500"
                         : "border-gray-300"
-                    }`}
+                      }`}
                     placeholder="Auto-filled from customer"
                     readOnly
                   />
@@ -514,11 +525,10 @@ export default function CreateOrderPage() {
                     type="text"
                     value={shippingAddress}
                     onChange={(e) => setShippingAddress(e.target.value)}
-                    className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 ${
-                      errors.shippingAddress
+                    className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 ${errors.shippingAddress
                         ? "border-red-500"
                         : "border-gray-300"
-                    }`}
+                      }`}
                     placeholder="Block, Street, House number, Area"
                   />
                   {errors.shippingAddress && (
@@ -535,11 +545,10 @@ export default function CreateOrderPage() {
                     <select
                       value={shippingCity}
                       onChange={(e) => setShippingCity(e.target.value)}
-                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10 ${
-                        errors.shippingCity
+                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10 ${errors.shippingCity
                           ? "border-red-500"
                           : "border-gray-300"
-                      }`}
+                        }`}
                     >
                       <option value="">Select City</option>
                       {KUWAIT_CITIES.map((city) => (
@@ -582,11 +591,10 @@ export default function CreateOrderPage() {
                     <select
                       value={shippingCountry}
                       onChange={(e) => setShippingCountry(e.target.value)}
-                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10 ${
-                        errors.shippingCountry
+                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10 ${errors.shippingCountry
                           ? "border-red-500"
                           : "border-gray-300"
-                      }`}
+                        }`}
                     >
                       {COUNTRIES.map((country) => (
                         <option key={country} value={country}>
@@ -643,157 +651,175 @@ export default function CreateOrderPage() {
                 </button>
               </div>
 
-              {selectedProducts.length > 0 ? (
-                <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
-                  <div className="xl:col-span-4 overflow-x-auto">
-                    <div className="min-w-[768px] lg:min-w-full">
-                      <table className="w-full">
-                        <thead className="bg-gray-50 border-y border-gray-200">
-                          <tr>
-                            <th className="px-3 sm:px-4 py-2 sm:py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                              Product
-                            </th>
-                            <th className="px-3 sm:px-4 py-2 sm:py-3 text-left text-xs font-semibold text-gray-600 uppercase hidden md:table-cell">
-                              SKU
-                            </th>
-                            <th className="px-3 sm:px-4 py-2 sm:py-3 text-center text-xs font-semibold text-gray-600 uppercase">
-                              Qty
-                            </th>
-                            <th className="px-3 sm:px-4 py-2 sm:py-3 text-right text-xs font-semibold text-gray-600 uppercase">
-                              Price
-                            </th>
-                            <th className="px-3 sm:px-4 py-2 sm:py-3 text-right text-xs font-semibold text-gray-600 uppercase">
-                              Total
-                            </th>
-                            <th className="px-3 sm:px-4 py-2 sm:py-3 text-center text-xs font-semibold text-gray-600 uppercase">
-                              Action
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100">
-                          {selectedProducts.map((product: any) => {
-                            const total = product.price * product.quantity;
-                            return (
-                              <tr key={product.id} className="hover:bg-gray-50">
-                                <td className="px-3 sm:px-4 py-3">
-                                  <div className="flex items-center gap-2 sm:gap-3">
-                                    <img
-                                      src={(() => {
-                                        const imgSrc =
-                                          product.image_url || product.image;
-                                        if (
-                                          imgSrc &&
-                                          imgSrc.startsWith("/storage/")
-                                        ) {
-                                          const API_BASE_URL =
-                                            import.meta.env.VITE_API_URL?.replace(
-                                              "/api",
-                                              "",
-                                            ) ||
-                                            "https://erp-backend.ttexpresskw.com";
-                                          return `${API_BASE_URL}${imgSrc}`;
-                                        }
-                                        return (
-                                          imgSrc ||
-                                          "https://images.unsplash.com/photo-1541275055241-329bbdf9a191?w=100&auto=format&fit=crop"
-                                        );
-                                      })()}
-                                      alt={product.name}
-                                      className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg object-cover"
-                                      onError={(e) => {
-                                        (e.target as HTMLImageElement).src =
-                                          "https://images.unsplash.com/photo-1541275055241-329bbdf9a191?w=100&auto=format&fit=crop";
-                                      }}
-                                    />
-                                    <div>
-                                      <div className="text-xs sm:text-sm font-medium text-gray-900">
-                                        {product.name}
-                                      </div>
-                                      <div className="text-xs text-gray-500 md:hidden mt-1">
-                                        SKU: {product.sku}
-                                      </div>
-                                      {product.size &&
-                                        product.size !== "Default" && (
-                                          <div className="text-xs text-gray-500">
-                                            Variant: {product.size}
-                                          </div>
-                                        )}
-                                    </div>
-                                  </div>
-                                </td>
-                                <td className="px-3 sm:px-4 py-3 text-xs sm:text-sm text-gray-600 hidden md:table-cell">
-                                  {product.sku}
-                                </td>
-                                <td className="px-3 sm:px-4 py-3">
-                                  <div className="flex items-center justify-center gap-1 sm:gap-2">
-                                    <button
-                                      onClick={() =>
-                                        handleUpdateQuantity(
-                                          product.id,
-                                          product.quantity - 1,
-                                        )
-                                      }
-                                      className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded"
-                                    >
-                                      <span className="text-gray-600 font-semibold text-xs sm:text-sm">
-                                        -
-                                      </span>
-                                    </button>
-                                    <span className="w-6 sm:w-8 text-center font-medium text-sm">
-                                      {product.quantity}
-                                    </span>
-                                    <button
-                                      onClick={() =>
-                                        handleUpdateQuantity(
-                                          product.id,
-                                          product.quantity + 1,
-                                        )
-                                      }
-                                      className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white rounded"
-                                    >
-                                      <span className="font-semibold text-xs sm:text-sm">
-                                        +
-                                      </span>
-                                    </button>
-                                  </div>
-                                </td>
-                                <td className="px-3 sm:px-4 py-3 text-right text-xs sm:text-sm font-medium">
-                                  KWD {product.price.toFixed(3)}
-                                </td>
-                                <td className="px-3 sm:px-4 py-3 text-right text-xs sm:text-sm font-semibold">
-                                  KWD {total.toFixed(3)}
-                                </td>
-                                <td className="px-3 sm:px-4 py-3 text-center">
-                                  <button
-                                    onClick={() =>
-                                      handleRemoveProduct(product.id)
-                                    }
-                                    className="text-red-500 hover:text-red-700"
-                                  >
-                                    <svg
-                                      className="w-4 h-4 sm:w-5 sm:h-5"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      viewBox="0 0 24 24"
-                                    >
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                      />
-                                    </svg>
-                                  </button>
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
+            {selectedProducts.length > 0 ? (
+  <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+    <div className="xl:col-span-4 overflow-x-auto">
+      <div className="min-w-[900px] lg:min-w-full">
+        <table className="w-full">
+          <thead className="bg-gray-50 border-y border-gray-200">
+            <tr>
+              <th className="px-3 sm:px-4 py-2 sm:py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                Product
+              </th>
+              <th className="px-3 sm:px-4 py-2 sm:py-3 text-left text-xs font-semibold text-gray-600 uppercase hidden md:table-cell">
+                SKU
+              </th>
+              <th className="px-3 sm:px-4 py-2 sm:py-3 text-center text-xs font-semibold text-gray-600 uppercase">
+                Qty
+              </th>
+              <th className="px-3 sm:px-4 py-2 sm:py-3 text-right text-xs font-semibold text-gray-600 uppercase">
+                Price
+              </th>
+              {/* <th className="px-3 sm:px-4 py-2 sm:py-3 text-right text-xs font-semibold text-gray-600 uppercase">
+                Discount (%)
+              </th> */}
+              <th className="px-3 sm:px-4 py-2 sm:py-3 text-right text-xs font-semibold text-gray-600 uppercase">
+                Total
+              </th>
+              <th className="px-3 sm:px-4 py-2 sm:py-3 text-center text-xs font-semibold text-gray-600 uppercase">
+                Action
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-100">
+            {selectedProducts.map((product: any) => {
+              const discountPercent = product.discount_percentage || 0;
+              const discountedPrice = product.price * (1 - discountPercent / 100);
+              const total = discountedPrice * product.quantity;
+              
+              return (
+                <tr key={product.id} className="hover:bg-gray-50">
+                  <td className="px-3 sm:px-4 py-3">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <img
+                        src={(() => {
+                          const imgSrc = product.image_url || product.image;
+                          if (imgSrc && imgSrc.startsWith("/storage/")) {
+                            const API_BASE_URL =
+                              import.meta.env.VITE_API_URL?.replace("/api", "") ||
+                              "https://erp-backend.ttexpresskw.com";
+                            return `${API_BASE_URL}${imgSrc}`;
+                          }
+                          return (
+                            imgSrc ||
+                            "https://images.unsplash.com/photo-1541275055241-329bbdf9a191?w=100&auto=format&fit=crop"
+                          );
+                        })()}
+                        alt={product.name}
+                        className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src =
+                            "https://images.unsplash.com/photo-1541275055241-329bbdf9a191?w=100&auto=format&fit=crop";
+                        }}
+                      />
+                      <div>
+                        <div className="text-xs sm:text-sm font-medium text-gray-900">
+                          {product.name}
+                        </div>
+                        <div className="text-xs text-gray-500 md:hidden mt-1">
+                          SKU: {product.sku}
+                        </div>
+                        {product.size && product.size !== "Default" && (
+                          <div className="text-xs text-gray-500">
+                            Variant: {product.size}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </div>
-              ) : (
+                   </td>
+                  <td className="px-3 sm:px-4 py-3 text-xs sm:text-sm text-gray-600 hidden md:table-cell">
+                    {product.sku}
+                   </td>
+                  <td className="px-3 sm:px-4 py-3">
+                    <div className="flex items-center justify-center gap-1 sm:gap-2">
+                      <button
+                        onClick={() => handleUpdateQuantity(product.id, product.quantity - 1)}
+                        className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded"
+                      >
+                        <span className="text-gray-600 font-semibold text-xs sm:text-sm">-</span>
+                      </button>
+                      <input
+                        type="number"
+                        min="1"
+                        value={product.quantity}
+                        onChange={(e) => {
+                          const newQuantity = parseInt(e.target.value) || 1;
+                          if (newQuantity > 0) {
+                            handleUpdateQuantity(product.id, newQuantity);
+                          }
+                        }}
+                        className="w-12 sm:w-14 text-center font-medium text-sm border border-gray-300 rounded-md py-1 focus:outline-none focus:ring-1 focus:ring-blue-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      />
+                      <button
+                        onClick={() => handleUpdateQuantity(product.id, product.quantity + 1)}
+                        className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white rounded"
+                      >
+                        <span className="font-semibold text-xs sm:text-sm">+</span>
+                      </button>
+                    </div>
+                   </td>
+                  <td className="px-3 sm:px-4 py-3 text-right text-xs sm:text-sm font-medium">
+                    KWD {product.price.toFixed(3)}
+                   </td>
+                  {/* <td className="px-3 sm:px-4 py-3">
+                    <div className="flex items-center justify-end gap-1">
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        step="1"
+                        value={product.discount_percentage || 0}
+                        onChange={(e) => {
+                          const discount = parseFloat(e.target.value) || 0;
+                          const finalDiscount = Math.min(100, Math.max(0, discount));
+                          // You need to add this function to your parent component
+                          handleUpdateDiscount(product.id, finalDiscount);
+                        }}
+                        className="w-16 sm:w-20 text-right font-medium text-sm border border-gray-300 rounded-md py-1 px-2 focus:outline-none focus:ring-1 focus:ring-blue-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        placeholder="0"
+                      />
+                      <span className="text-xs text-gray-500">%</span>
+                    </div>
+                   </td> */}
+                  <td className="px-3 sm:px-4 py-3 text-right text-xs sm:text-sm font-semibold">
+                    <div className="flex flex-col items-end">
+                      <span className="text-green-600">KWD {total.toFixed(3)}</span>
+                      {discountPercent > 0 && (
+                        <span className="text-xs text-gray-400 line-through">
+                          KWD {(product.price * product.quantity).toFixed(3)}
+                        </span>
+                      )}
+                    </div>
+                   </td>
+                  <td className="px-3 sm:px-4 py-3 text-center">
+                    <button
+                      onClick={() => handleRemoveProduct(product.id)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <svg
+                        className="w-4 h-4 sm:w-5 sm:h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                        />
+                      </svg>
+                    </button>
+                   </td>
+                 </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+) : (
                 <div className="bg-gray-50 rounded-lg p-6 sm:p-8 text-center">
                   <p className="text-gray-500 text-sm">
                     No products added yet. Click "Add Product" to get started.
@@ -844,7 +870,7 @@ export default function CreateOrderPage() {
                     </p>
                   )}
                 </div>
-                <div>
+                {/* <div>
                   <label className="block text-sm font-medium text-gray-600 mb-1 sm:mb-2">
                     Coupon Code
                   </label>
@@ -855,7 +881,7 @@ export default function CreateOrderPage() {
                     className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     placeholder="Enter coupon code"
                   />
-                </div>
+                </div> */}
               </div>
             </div>
 
@@ -884,11 +910,10 @@ export default function CreateOrderPage() {
                           );
                         }
                       }}
-                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10 ${
-                        errors.shippingMethod
+                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10 ${errors.shippingMethod
                           ? "border-red-500"
                           : "border-gray-300"
-                      }`}
+                        }`}
                     >
                       <option value="">Select a shipping method</option>
                       {methods.map((method: ShippingMethod) => (

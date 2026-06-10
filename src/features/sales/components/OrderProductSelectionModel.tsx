@@ -191,6 +191,7 @@ export default function ProductSelectionModal({
         quantity: productWithDetails.quantity || 1,
         image: currentProduct?.image || "",
         image_url: fullImageUrl,
+         discount_percentage: 0,
       }),
     );
 

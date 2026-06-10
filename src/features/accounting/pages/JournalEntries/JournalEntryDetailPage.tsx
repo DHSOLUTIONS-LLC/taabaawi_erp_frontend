@@ -41,6 +41,7 @@ export default function JournalEntryDetailPage() {
   const [reverseJournal, { isLoading: isReversing }] = useReverseJournalEntryMutation();
 
   const journal = (data as any)?.data;
+  console.log("Journal entry data:", journal);
 
   const handlePost = async () => {
     try {
@@ -214,7 +215,7 @@ export default function JournalEntryDetailPage() {
               <div className="space-y-3">
                 <div>
                   <p className="text-xs text-gray-500">Created By</p>
-                  <p className="text-sm font-medium text-gray-900 mt-1">{journal.createdBy?.name || '—'}</p>
+                  <p className="text-sm font-medium text-gray-900 mt-1">{journal.created_by?.name || '—'}</p>
                   <p className="text-xs text-gray-400">
                     {new Date(journal.created_at).toLocaleString()}
                   </p>

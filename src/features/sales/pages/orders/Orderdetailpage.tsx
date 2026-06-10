@@ -325,9 +325,9 @@ export default function OrderDetailPage() {
                     <td>${item.product_name}${item.variant_name ? ` (${item.variant_name})` : ""}</td>
                     <td>${item.sku || "—"}</td>
                     <td>${item.quantity}</td>
-                    <td>KD ${parseFloat(item.unit_price).toFixed(3)}</td>
-                    <td>KD ${parseFloat(item.discount_amount).toFixed(3)}</td>
-                    <td>KD ${parseFloat(item.total).toFixed(3)}</td>
+                    <td>KWD ${parseFloat(item.unit_price).toFixed(3)}</td>
+                    <td>KWD ${parseFloat(item.discount_amount).toFixed(3)}</td>
+                    <td>KWD ${parseFloat(item.total).toFixed(3)}</td>
                   </tr>
                 `,
         )
@@ -338,12 +338,12 @@ export default function OrderDetailPage() {
 
             <div class="totals">
               <table>
-                <tr><td>Subtotal:</td><td>KD ${Number(order?.subtotal).toFixed(3)}</td></tr>
-                ${(order?.discount_amount || 0) > 0 ? `<tr><td>Discount:</td><td>-KD ${Number(order?.discount_amount).toFixed(3)}</td></tr>` : ""}
-                ${(order?.discount_amount || 0) > 0 ? `<tr><td>Coupon:</td><td>-KD ${Number(order?.coupon_discount).toFixed(3)}</td></tr>` : ""}
-                <tr><td>Tax:</td><td>KD ${Number(order?.tax_amount).toFixed(3)}</td></tr>
-                <tr><td>Shipping:</td><td>KD ${Number(order?.shipping_fee).toFixed(3)}</td></tr>
-                <tr class="grand-total"><td>Total:</td><td>KD ${Number(order?.total_amount).toFixed(3)}</td></tr>
+                <tr><td>Subtotal:</td><td>KWD ${Number(order?.subtotal).toFixed(3)}</td></tr>
+                ${(order?.discount_amount || 0) > 0 ? `<tr><td>Discount:</td><td>-KWD ${Number(order?.discount_amount).toFixed(3)}</td></tr>` : ""}
+                ${(order?.discount_amount || 0) > 0 ? `<tr><td>Coupon:</td><td>-KWD ${Number(order?.coupon_discount).toFixed(3)}</td></tr>` : ""}
+                <tr><td>Tax:</td><td>KWD ${Number(order?.tax_amount).toFixed(3)}</td></tr>
+                <tr><td>Shipping:</td><td>KWD ${Number(order?.shipping_fee).toFixed(3)}</td></tr>
+                <tr class="grand-total"><td>Total:</td><td>KWD ${Number(order?.total_amount).toFixed(3)}</td></tr>
               </table>
             </div>
 
@@ -439,8 +439,8 @@ export default function OrderDetailPage() {
                 <td style="border: 1px solid #ddd; padding: 8px;">${item.product_name}${item.variant_name ? ` (${item.variant_name})` : ""}</td>
                 <td style="border: 1px solid #ddd; padding: 8px;">${item.sku || "—"}</td>
                 <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${item.quantity}</td>
-                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">KD ${parseFloat(item.unit_price).toFixed(3)}</td>
-                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">KD ${parseFloat(item.total).toFixed(3)}</td>
+                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">KWD ${parseFloat(item.unit_price).toFixed(3)}</td>
+                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">KWD ${parseFloat(item.total).toFixed(3)}</td>
               </tr>
             `,
           )
@@ -452,12 +452,12 @@ export default function OrderDetailPage() {
         <!-- Totals -->
         <div style="text-align: right; margin-top: 20px;">
           <table style="width: 250px; margin-left: auto;">
-            <tr><td style="padding: 4px;">Subtotal:</td><td style="text-align: right;">KD ${Number(order?.subtotal).toFixed(3)}</td></tr>
-            ${(order?.discount_amount || 0) > 0 ? `<tr><td style="padding: 4px;">Discount:</td><td style="text-align: right; color: red;">-KD ${Number(order?.discount_amount).toFixed(3)}</td></tr>` : ""}
-            ${(order?.discount_amount || 0) > 0 ? `<tr><td style="padding: 4px;">Coupon:</td><td style="text-align: right; color: red;">-KD ${Number(order?.coupon_discount).toFixed(3)}</td></tr>` : ""}
-            <tr><td style="padding: 4px;">Tax:</td><td style="text-align: right;">KD ${Number(order?.tax_amount).toFixed(3)}</td></tr>
-            <tr><td style="padding: 4px;">Shipping:</td><td style="text-align: right;">KD ${Number(order?.shipping_fee).toFixed(3)}</td></tr>
-            <tr style="font-weight: bold; color: #1773CF;"><td style="padding-top: 8px;">Total:</td><td style="text-align: right; padding-top: 8px;">KD ${Number(order?.total_amount).toFixed(3)}</td></tr>
+            <tr><td style="padding: 4px;">Subtotal:</td><td style="text-align: right;">KWD ${Number(order?.subtotal).toFixed(3)}</td></tr>
+            ${(order?.discount_amount || 0) > 0 ? `<tr><td style="padding: 4px;">Discount:</td><td style="text-align: right; color: red;">-KWD ${Number(order?.discount_amount).toFixed(3)}</td></tr>` : ""}
+            ${(order?.discount_amount || 0) > 0 ? `<tr><td style="padding: 4px;">Coupon:</td><td style="text-align: right; color: red;">-KWD ${Number(order?.coupon_discount).toFixed(3)}</td></tr>` : ""}
+            <tr><td style="padding: 4px;">Tax:</td><td style="text-align: right;">KWD ${Number(order?.tax_amount).toFixed(3)}</td></tr>
+            <tr><td style="padding: 4px;">Shipping:</td><td style="text-align: right;">KWD ${Number(order?.shipping_fee).toFixed(3)}</td></tr>
+            <tr style="font-weight: bold; color: #1773CF;"><td style="padding-top: 8px;">Total:</td><td style="text-align: right; padding-top: 8px;">KWD ${Number(order?.total_amount).toFixed(3)}</td></tr>
           </table>
         </div>
 
@@ -776,14 +776,14 @@ export default function OrderDetailPage() {
                     <span
                       className={`font-medium text-xs sm:text-sm ${value < 0 ? "text-red-600" : "text-gray-900"}`}
                     >
-                      {value < 0 ? "-" : ""}KD {Math.abs(value).toFixed(3)}
+                      {value < 0 ? "-" : ""}KWD {Math.abs(value).toFixed(3)}
                     </span>
                   </div>
                 ))}
                 <div className="flex justify-between pt-2 border-t border-gray-300 font-bold text-sm sm:text-base">
                   <span>Total</span>
                   <span className="text-[#1773CF]">
-                    KD {Number(order.total_amount).toFixed(3)}
+                    KWD {Number(order.total_amount).toFixed(3)}
                   </span>
                 </div>
               </div>
@@ -886,16 +886,16 @@ export default function OrderDetailPage() {
                             {item.quantity}
                           </td>
                           <td className="px-3 sm:px-5 py-3 sm:py-4 text-xs sm:text-sm text-gray-900 whitespace-nowrap">
-                            KD {parseFloat(item.unit_price).toFixed(3)}
+                            KWD {parseFloat(item.unit_price).toFixed(3)}
                           </td>
                           <td className="px-3 sm:px-5 py-3 sm:py-4 text-xs sm:text-sm text-red-600 whitespace-nowrap">
-                            KD {parseFloat(item.discount_amount).toFixed(3)}
+                            KWD {parseFloat(item.discount_amount).toFixed(3)}
                           </td>
                           <td className="px-3 sm:px-5 py-3 sm:py-4 text-xs sm:text-sm text-gray-600 whitespace-nowrap">
-                            KD {parseFloat(item.tax_amount).toFixed(3)}
+                            KWD {parseFloat(item.tax_amount).toFixed(3)}
                           </td>
                           <td className="px-3 sm:px-5 py-3 sm:py-4 text-xs sm:text-sm font-semibold text-gray-900 whitespace-nowrap">
-                            KD {parseFloat(item.total).toFixed(3)}
+                            KWD {parseFloat(item.total).toFixed(3)}
                           </td>
                         </tr>
                       ))}
@@ -909,7 +909,7 @@ export default function OrderDetailPage() {
                           Grand Total
                         </td>
                         <td className="px-3 sm:px-5 py-2 sm:py-3 font-bold text-[#1773CF] text-xs sm:text-sm whitespace-nowrap">
-                          KD {Number(order.total_amount).toFixed(3)}
+                          KWD {Number(order.total_amount).toFixed(3)}
                         </td>
                       </tr>
                     </tfoot>

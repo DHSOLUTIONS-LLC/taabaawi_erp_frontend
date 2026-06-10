@@ -53,24 +53,55 @@ export default function CreateAccountPage() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const payload = {
-        ...formData,
-        parent_account_id: formData.parent_account_id ? parseInt(formData.parent_account_id) : undefined,
-      };
-      console.log('payload creating JE:', payload)
-
-      await createAccount(payload).unwrap();
-      navigate(`${basePath}/accounting/chart-of-accounts`);
-    } catch (err: any) {
-      if (err.data?.errors) {
-        setErrors(err.data.errors);
-      } else {
-        alert(err?.data?.message || 'Failed to create account');
-      }
+  e.preventDefault();
+  
+  try {
+    // CLEAN THE PAYLOAD - Remove undefined and convert types properly
+    const payload: any = {
+      account_code: formData.account_code,
+      account_name: formData.account_name,
+      account_type: formData.account_type,
+      opening_balance: Number(formData.opening_balance) || 0,  // Convert to number
+      currency: formData.currency,
+      is_active: formData.is_active,
+    };
+    
+    // Only add account_sub_type if it has a value
+    if (formData.account_sub_type && formData.account_sub_type.trim() !== '') {
+      payload.account_sub_type = formData.account_sub_type;
     }
-  };
+    
+    // Only add parent_account_id if it has a value (not empty string and not undefined)
+    if (formData.parent_account_id && formData.parent_account_id !== '') {
+      payload.parent_account_id = parseInt(formData.parent_account_id);
+    }
+    
+    // Only add description if it has a value
+    if (formData.description && formData.description.trim() !== '') {
+      payload.description = formData.description;
+    }
+    
+    console.log('Cleaned payload:', payload);
+    
+    const result = await createAccount(payload).unwrap();
+    console.log('Success:', result);
+    
+    navigate(`${basePath}/accounting/chart-of-accounts`);
+  } catch (err: any) {
+    console.error('Full error object:', err);
+    
+    // Try to get the actual error message
+    if (err?.data?.errors) {
+      setErrors(err.data.errors);
+    } else if (err?.data?.message) {
+      alert(err.data.message);
+    } else if (err?.error) {
+      alert(err.error);
+    } else {
+      alert('Failed to create account. Please check console for details.');
+    }
+  }
+};
 
   return (
     <DashboardLayout>

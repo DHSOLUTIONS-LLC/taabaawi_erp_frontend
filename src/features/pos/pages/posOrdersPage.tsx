@@ -196,7 +196,7 @@ export default function POSOrdersPage() {
       );
       yPos += 5;
       doc.text(
-        `Total Revenue: KD ${totalRevenue.toFixed(3)}`,
+        `Total Revenue: KWD ${totalRevenue.toFixed(3)}`,
         marginLeft,
         yPos,
       );
@@ -242,7 +242,7 @@ export default function POSOrdersPage() {
           s.branch?.branch_name || "",
           s.cashier?.name || "",
           s.payment_method,
-          `KD ${parseFloat(s.total_amount).toFixed(3)}`,
+          `KWD ${parseFloat(s.total_amount).toFixed(3)}`,
         ];
         doc.setFontSize(9);
         row.forEach((cell, i) => {
@@ -449,7 +449,7 @@ export default function POSOrdersPage() {
         ),
         cell: ({ row }) => (
           <div className="text-sm font-semibold text-gray-900">
-            KD {parseFloat(row.original.total_amount).toFixed(3)}
+            KWD {parseFloat(row.original.total_amount).toFixed(3)}
           </div>
         ),
       },

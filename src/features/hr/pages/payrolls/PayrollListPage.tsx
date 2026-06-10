@@ -55,11 +55,18 @@ export default function PayrollListPage() {
     const [selectedBranch, setSelectedBranch] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
     const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
-
+    const [activeMenu, setActiveMenu] = useState<number | null>(null);
     // Fetch branches
     const { data: branchesData = [] } = useGetBranchesQuery();
     const branches = Array.isArray(branchesData) ? branchesData : [];
 
+    useEffect(() => {
+        const handleClickOutside = () => {
+            setActiveMenu(null);
+        };
+        document.addEventListener('click', handleClickOutside);
+        return () => document.removeEventListener('click', handleClickOutside);
+    }, []);
     // Fetch payrolls - only send month if selected
     const { data: payrollsResponse, isLoading, refetch } = useGetPayrollsQuery({
         ...(selectedMonth && { payroll_month: selectedMonth }),
@@ -98,7 +105,7 @@ export default function PayrollListPage() {
         : payrolls;
 
     const formatCurrency = (value: string) => {
-        return `KD ${parseFloat(value).toFixed(3)}`;
+        return `KWD ${parseFloat(value).toFixed(3)}`;
     };
 
     const formatMonth = (month: string) => {
@@ -378,33 +385,99 @@ export default function PayrollListPage() {
                                                     </span>
                                                 </td>
                                                 <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-500" onClick={(e) => e.stopPropagation()}>
-                                                    <div className="flex items-center gap-2 sm:gap-3">
-                                                        <button
-                                                            onClick={() => navigate(`${basePath}/hr/payrolls/${payroll.id}`)}
-                                                            className="p-1.5 sm:p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
-                                                            title="View Details"
-                                                        >
-                                                            <img src={view_icon} alt="View" className="w-4" />
-                                                        </button>
-                                                        {payroll.status === 'Draft' && (
-                                                            <>
-                                                                <button
-                                                                    onClick={() => navigate(`${basePath}/hr/payrolls/${payroll.id}`)}
-                                                                    className="p-1.5 sm:p-2 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-lg transition-colors"
-                                                                    title="Edit"
-                                                                >
-                                                                    <img src={edit_icon} alt="Edit" className="w-4 h-4" />
-                                                                </button>
-                                                                <button
-                                                                    onClick={() => setShowDeleteConfirm(payroll.id)}
-                                                                    className="p-1.5 sm:p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
-                                                                    title="Delete"
-                                                                >
-                                                                    <img src={delete_icon} alt="Delete" className="w-4" />
-                                                                </button>
-                                                            </>
-                                                        )}
-                                                    </div>
+                                                    <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-500" onClick={(e) => e.stopPropagation()}>
+    <div className="relative">
+        {/* Three Dots Button */}
+        <button
+            id={`menu-btn-${payroll.id}`}
+            onClick={(e) => {
+                e.stopPropagation();
+                setActiveMenu(activeMenu === payroll.id ? null : payroll.id);
+            }}
+            className="p-1.5 sm:p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+            title="Actions"
+        >
+            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+            </svg>
+        </button>
+
+        {/* Dropdown Menu */}
+        {activeMenu === payroll.id && (
+            <>
+                {/* Backdrop */}
+                <div 
+                    className="fixed inset-0 z-40"
+                    onClick={() => setActiveMenu(null)}
+                />
+                {/* Menu positioned relative to button with boundary detection */}
+                <div 
+                    className="fixed z-50 w-48 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden"
+                    style={{
+                        top: (() => {
+                            const rect = document.getElementById(`menu-btn-${payroll.id}`)?.getBoundingClientRect();
+                            const menuHeight = 150;
+                            const spaceBelow = window.innerHeight - (rect?.bottom || 0);
+                            // If not enough space below, show above
+                            if (spaceBelow < menuHeight && (rect?.top || 0) > menuHeight) {
+                                return (rect?.top || 0) - menuHeight + 'px';
+                            }
+                            return (rect?.bottom || 0) + 5 + 'px';
+                        })(),
+                        left: (() => {
+                            const rect = document.getElementById(`menu-btn-${payroll.id}`)?.getBoundingClientRect();
+                            const menuWidth = 192; // w-48 = 192px
+                            const rightSpace = window.innerWidth - (rect?.right || 0);
+                            // If not enough space on the right, align to the right edge
+                            if (rightSpace < menuWidth) {
+                                return (rect?.right || 0) - menuWidth + 'px';
+                            }
+                            return (rect?.right || 0) - menuWidth + 10 + 'px';
+                        })(),
+                    }}
+                >
+                    <div className="py-1">
+                        <button
+                            onClick={() => {
+                                navigate(`${basePath}/hr/payrolls/${payroll.id}`);
+                                setActiveMenu(null);
+                            }}
+                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                        >
+                            <img src={view_icon} alt="View" className="w-4 h-4" />
+                            View Details
+                        </button>
+                        
+                        {payroll.status === 'Draft' && (
+                            <>
+                                <button
+                                    onClick={() => {
+                                        navigate(`${basePath}/hr/payrolls/${payroll.id}/edit`);
+                                        setActiveMenu(null);
+                                    }}
+                                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                                >
+                                    <img src={edit_icon} alt="Edit" className="w-4 h-4" />
+                                    Edit
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setShowDeleteConfirm(payroll.id);
+                                        setActiveMenu(null);
+                                    }}
+                                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                                >
+                                    <img src={delete_icon} alt="Delete" className="w-4 h-4" />
+                                    Delete
+                                </button>
+                            </>
+                        )}
+                    </div>
+                </div>
+            </>
+        )}
+    </div>
+</td>
                                                 </td>
                                             </tr>
                                         ))

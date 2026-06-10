@@ -131,7 +131,7 @@ export default function TransferStockModal({ isOpen, onClose, product }: Transfe
                                             <option value="">All Locations</option>
                                             {branches.map((branch: any) => (
                                                 <option key={branch.id} value={branch.id}>
-                                                    {branch.branch_name }
+                                                    {branch.branch_name}
                                                 </option>
                                             ))}
                                         </select>

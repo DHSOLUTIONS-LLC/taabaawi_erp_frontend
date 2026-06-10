@@ -107,10 +107,10 @@ export default function SalesStatisticsPage() {
             {/* Top KPI cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
-                { label: "Total Sales", value: `KD ${parseFloat(stats?.total_revenue || 0).toFixed(3)}`, color: "text-[#1773CF]", bg: "bg-blue-50" },
+                { label: "Total Sales", value: `KWD ${parseFloat(stats?.total_revenue || 0).toFixed(3)}`, color: "text-[#1773CF]", bg: "bg-blue-50" },
                 { label: "Total Orders", value: stats?.total_orders || 0, color: "text-gray-900", bg: "bg-gray-50" },
-                { label: "Average Order", value: `KD ${parseFloat(stats?.average_order_value || 0).toFixed(3)}`, color: "text-purple-600", bg: "bg-purple-50" },
-                { label: "Total Refunds", value: `KD ${parseFloat(stats?.total_refunds || 0).toFixed(3)}`, color: "text-red-600", bg: "bg-red-50" },
+                { label: "Average Order", value: `KWD ${parseFloat(stats?.average_order_value || 0).toFixed(3)}`, color: "text-purple-600", bg: "bg-purple-50" },
+                { label: "Total Refunds", value: `KWD ${parseFloat(stats?.total_refunds || 0).toFixed(3)}`, color: "text-red-600", bg: "bg-red-50" },
               ].map(({ label, value, color, bg }) => (
                 <div key={label} className={`${bg} rounded-xl p-5`}>
                   <p className="text-sm text-gray-500 mb-1">{label}</p>
@@ -138,7 +138,7 @@ export default function SalesStatisticsPage() {
                               </span>
                               <span className="text-xs text-gray-500">{item.count} orders</span>
                             </div>
-                            <span className="font-semibold text-sm">KD {parseFloat(item.total).toFixed(3)}</span>
+                            <span className="font-semibold text-sm">KWD {parseFloat(item.total).toFixed(3)}</span>
                           </div>
                           <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                             <div className="h-full bg-[#1773CF] rounded-full" style={{ width: `${pct}%` }} />
@@ -168,7 +168,7 @@ export default function SalesStatisticsPage() {
                               <p className="text-sm font-medium text-gray-900">{item.branch_name}</p>
                               <p className="text-xs text-gray-400">{item.count} orders</p>
                             </div>
-                            <span className="font-semibold text-sm">KD {parseFloat(item.total).toFixed(3)}</span>
+                            <span className="font-semibold text-sm">KWD {parseFloat(item.total).toFixed(3)}</span>
                           </div>
                           <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                             <div className="h-full bg-green-500 rounded-full" style={{ width: `${pct}%` }} />
@@ -196,7 +196,7 @@ export default function SalesStatisticsPage() {
                           <p className="text-sm font-medium text-gray-900 truncate">{item.product_name}</p>
                           <p className="text-xs text-gray-400">{item.total_quantity} units sold</p>
                         </div>
-                        <span className="font-semibold text-sm text-gray-900">KD {parseFloat(item.total_revenue).toFixed(3)}</span>
+                        <span className="font-semibold text-sm text-gray-900">KWD {parseFloat(item.total_revenue).toFixed(3)}</span>
                       </div>
                     ))}
                   </div>
@@ -216,7 +216,7 @@ export default function SalesStatisticsPage() {
                           </p>
                           <p className="text-xs text-gray-400">{day.count} orders</p>
                         </div>
-                        <span className="font-semibold text-sm text-[#1773CF]">KD {parseFloat(day.total).toFixed(3)}</span>
+                        <span className="font-semibold text-sm text-[#1773CF]">KWD {parseFloat(day.total).toFixed(3)}</span>
                       </div>
                     ))}
                   </div>

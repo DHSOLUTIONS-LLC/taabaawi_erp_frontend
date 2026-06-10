@@ -704,7 +704,7 @@ export default function FinancialReportsPage() {
             </div>
           </div>
           <div className="mt-2 text-center">
-            <span
+            {/* <span
               className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm ${
                 report?.is_balanced
                   ? "bg-green-100 text-green-700"
@@ -712,7 +712,7 @@ export default function FinancialReportsPage() {
               }`}
             >
               {report?.is_balanced ? "✓ Balanced" : "✗ Not Balanced"}
-            </span>
+            </span> */}
           </div>
         </div>
       </div>
@@ -1001,7 +1001,7 @@ export default function FinancialReportsPage() {
                 KWD {num(report?.total_liabilities_and_equity).toFixed(3)}
               </span>
             </div>
-            <div className="mt-2 text-center">
+            {/* <div className="mt-2 text-center">
               <span
                 className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm ${
                   report?.is_balanced
@@ -1011,7 +1011,7 @@ export default function FinancialReportsPage() {
               >
                 {report?.is_balanced ? "✓ Balanced" : "✗ Not Balanced"}
               </span>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

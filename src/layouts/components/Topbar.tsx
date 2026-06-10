@@ -14,7 +14,7 @@ import { canSwitchBranch } from "../../utils/roleHelpers";
 
 import type { RootState } from "../../app/store";
 import history_icon_2 from "../../assets/icons/history_icon_3.svg";
-import market_icon from "../../assets/icons/market_icon.svg";
+// import market_icon from "../../assets/icons/market_icon.svg";
 
 import { useCreateCategoryMutation } from "../../services/inventoryApi";
 import CategoryPopup from "../../features/inventory/components/CategoryPopup";
@@ -323,7 +323,7 @@ export default function Topbar({
                   {canSeeAdminButtons && canCreateUser && (
                     <Link
                       to={
-                        isSuperAdmin ? "/admin/hr/add_staff" : "/hr/add_staff"
+                        isSuperAdmin ? "/admin/hr/add_employee" : "/hr/add_employee"
                       }
                       onClick={() => setShowCreateMenu(false)}
                     >
@@ -422,7 +422,7 @@ export default function Topbar({
               </Link>
             )}
             {canSeeAdminButtons && canCreateUser && (
-              <Link to={isSuperAdmin ? "/admin/hr/add_staff" : "/hr/add_staff"}>
+              <Link to={isSuperAdmin ? "/admin/hr/add_employee" : "/hr/add_employee"}>
                 <button className="flex items-center gap-2 px-3 py-2 text-black border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors cursor-pointer text-sm">
                   <svg
                     className="w-4 h-4"

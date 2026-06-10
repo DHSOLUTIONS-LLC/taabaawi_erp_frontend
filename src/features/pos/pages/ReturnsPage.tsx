@@ -232,7 +232,7 @@ export default function ReturnsPage() {
           returnItem.sale?.sale_number || "-",
           returnItem.branch?.branch_name || "-",
           returnItem.processed_by?.name || "-",
-          `KD ${parseFloat(returnItem.return_amount || 0).toFixed(3)}`,
+          `KWD ${parseFloat(returnItem.return_amount || 0).toFixed(3)}`,
           returnItem.refund_method || "-",
           returnItem.status || "-",
           returnItem.reason || "-",
@@ -373,7 +373,7 @@ export default function ReturnsPage() {
             },
             {
               label: "Total Refunded",
-              value: `KD ${parseFloat(stats?.total_refund_amount || 0).toFixed(3)}`,
+              value: `KWD ${parseFloat(stats?.total_refund_amount || 0).toFixed(3)}`,
               color: "text-red-600",
             },
             {
@@ -529,7 +529,7 @@ export default function ReturnsPage() {
                           {r.items?.length || 0} item(s)
                         </td>
                         <td className="px-5 py-4 text-sm font-semibold text-gray-900">
-                          KD {parseFloat(r.return_amount).toFixed(3)}
+                          KWD {parseFloat(r.return_amount).toFixed(3)}
                         </td>
                         <td className="px-5 py-4">
                           <span className="px-2 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-lg">

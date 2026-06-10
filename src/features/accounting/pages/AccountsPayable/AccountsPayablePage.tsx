@@ -5,6 +5,7 @@ import DashboardLayout from '../../../../layouts/DashboardLayout';
 import { useAppSelector } from '../../../../app/hooks';
 import type { RootState } from '../../../../app/store';
 import { useGetAccountsPayableQuery } from '../../../../services/accountingApi';
+import { useGetPurchaseOrdersQuery } from '../../../../services/purchaseApi';
 
 import search_icon from '../../../../assets/icons/search_icon.svg';
 import add_icon from '../../../../assets/icons/add.svg';
@@ -16,6 +17,7 @@ const STATUS_COLORS: Record<string, string> = {
   Partial: 'bg-yellow-100 text-yellow-700',
   Paid: 'bg-green-100 text-green-700',
   Overdue: 'bg-orange-100 text-orange-700',
+  Pending: 'bg-gray-100 text-gray-700',
 };
 
 const num = (v: any) => parseFloat(v) || 0;
@@ -45,14 +47,53 @@ export default function AccountsPayablePage() {
     per_page: 15,
   });
 
+  const { data: posData, isLoading: posLoading } = useGetPurchaseOrdersQuery({
+    search: search || undefined,
+    page: currentPage,
+    per_page: 15,
+  });
+
   const payables = (data as any)?.data?.data || (data as any)?.data || [];
+  const purchaseOrders = (posData as any)?.data?.data || (posData as any)?.data || [];
+
+  // Transform purchase orders to match AP structure
+  const transformedPOs = purchaseOrders.map((po: any) => ({
+    id: `po-${po.id}`,
+    ap_number: po.po_number || `PO-${po.id}`,
+    supplier: { supplier_name: po.supplier?.supplier_name || '—' },
+    invoice_number: po.po_number || '—',
+    invoice_date: po.order_date,
+    due_date: po.expected_delivery_date,
+    invoice_amount: parseFloat(po.total_amount || 0),
+    paid_amount: 0,
+    outstanding_amount: parseFloat(po.total_amount || 0),
+    currency: po.currency || 'KWD',
+    status: 'Pending',
+    type: 'Purchase Order'
+  }));
+
+  const allItems = [...payables, ...transformedPOs];
+
+  // Sort by date (newest first)
+  const sortedItems = allItems.sort((a, b) => {
+    const dateA = new Date(a.invoice_date || a.created_at);
+    const dateB = new Date(b.invoice_date || b.created_at);
+    return dateB.getTime() - dateA.getTime();
+  });
+
   const pagination = (data as any)?.data;
 
-  // Calculate totals
-  const totalOutstanding = payables.reduce((sum: number, ap: any) => sum + num(ap.outstanding_amount), 0);
-  const totalOverdue = payables
-    .filter((ap: any) => ap.status === 'Overdue')
-    .reduce((sum: number, ap: any) => sum + num(ap.outstanding_amount), 0);
+  // Calculate totals using sortedItems
+  const totalOutstanding = sortedItems.reduce(
+    (sum: number, item: any) => sum + num(item.outstanding_amount),
+    0
+  );
+
+  const totalOverdue = sortedItems
+    .filter((item: any) => item.status === 'Overdue')
+    .reduce((sum: number, item: any) => sum + num(item.outstanding_amount), 0);
+
+  const overdueCount = sortedItems.filter((item: any) => item.status === 'Overdue').length;
 
   return (
     <DashboardLayout>
@@ -61,7 +102,7 @@ export default function AccountsPayablePage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Accounts Payable</h1>
-            <p className="text-xs sm:text-sm text-gray-500 mt-1">Manage money owed to suppliers</p>
+            <p className="text-xs sm:text-sm text-gray-500 mt-1">Manage money owed to suppliers (AP + Purchase Orders)</p>
           </div>
           <div className='flex flex-col sm:flex-row gap-2 sm:space-x-2'>
             <button
@@ -88,7 +129,7 @@ export default function AccountsPayablePage() {
             <p className="text-lg sm:text-2xl font-bold text-blue-600 mt-1 break-words">
               KWD {totalOutstanding.toFixed(3)}
             </p>
-            <p className="text-xs text-gray-400 mt-1">{payables.length} invoices</p>
+            <p className="text-xs text-gray-400 mt-1">{sortedItems.length} items (AP + Orders)</p>
           </div>
           <div className="bg-white rounded-xl p-4 sm:p-5">
             <p className="text-xs sm:text-sm text-gray-500">Overdue Amount</p>
@@ -96,19 +137,19 @@ export default function AccountsPayablePage() {
               KWD {totalOverdue.toFixed(3)}
             </p>
             <p className="text-xs text-gray-400 mt-1">
-              {payables.filter((ap: any) => ap.status === 'Overdue').length} overdue
+              {overdueCount} overdue
             </p>
           </div>
           <div className="bg-white rounded-xl p-4 sm:p-5 sm:col-span-2 lg:col-span-1">
             <p className="text-xs sm:text-sm text-gray-500">This Month</p>
             <p className="text-lg sm:text-2xl font-bold text-green-600 mt-1 break-words">
-              KWD {payables
-                .filter((ap: any) => {
-                  const date = new Date(ap.invoice_date);
+              KWD {sortedItems
+                .filter((item: any) => {
+                  const date = new Date(item.invoice_date);
                   const now = new Date();
                   return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
                 })
-                .reduce((sum: number, ap: any) => sum + num(ap.invoice_amount), 0)
+                .reduce((sum: number, item: any) => sum + num(item.invoice_amount), 0)
                 .toFixed(3)}
             </p>
           </div>
@@ -123,7 +164,7 @@ export default function AccountsPayablePage() {
                 type="text"
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
-                placeholder="Search by invoice or AP number..."
+                placeholder="Search by invoice, AP number or PO..."
                 className="w-full pl-9 pr-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -139,6 +180,7 @@ export default function AccountsPayablePage() {
                 <option value="Partial">Partial</option>
                 <option value="Paid">Paid</option>
                 <option value="Overdue">Overdue</option>
+                <option value="Pending">Pending</option>
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                 <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
@@ -199,13 +241,14 @@ export default function AccountsPayablePage() {
             </div>
           </div>
         </div>
+
         {/* Table */}
         <div className="bg-white rounded-xl overflow-hidden shadow-sm">
-          {isLoading ? (
+          {isLoading || posLoading ? (
             <div className="flex items-center justify-center py-24">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
             </div>
-          ) : payables.length === 0 ? (
+          ) : sortedItems.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-24 text-center">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -213,8 +256,8 @@ export default function AccountsPayablePage() {
                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
-              <p className="text-gray-500 font-medium">No accounts payable found</p>
-              <p className="text-sm text-gray-400 mt-1">Create your first AP record</p>
+              <p className="text-gray-500 font-medium">No records found</p>
+              <p className="text-sm text-gray-400 mt-1">No AP records or purchase orders available</p>
               <button
                 onClick={() => navigate(`${basePath}/accounting/accounts-payable/create`)}
                 className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
@@ -228,10 +271,10 @@ export default function AccountsPayablePage() {
                 <table className="w-full">
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">AP #</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">AP / PO #</th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Supplier</th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Invoice #</th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Invoice Date</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Invoice / PO #</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Date</th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Due Date</th>
                       <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase">Amount</th>
                       <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase">Paid</th>
@@ -241,41 +284,51 @@ export default function AccountsPayablePage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
-                    {payables.map((ap: any) => {
-                      const isOverdue = new Date(ap.due_date) < new Date() && ap.outstanding_amount > 0;
-                      const displayStatus = isOverdue && ap.status === 'Unpaid' ? 'Overdue' : ap.status;
+                    {sortedItems.map((item: any) => {
+                      const isOverdue = new Date(item.due_date) < new Date() && item.outstanding_amount > 0;
+                      const displayStatus = isOverdue && item.status === 'Unpaid' ? 'Overdue' : item.status;
+                      const isPurchaseOrder = item.type === 'Purchase Order';
 
                       return (
-                        <tr key={ap.id} className="hover:bg-gray-50">
+                        <tr key={item.id} className="hover:bg-gray-50">
                           <td className="px-6 py-4">
                             <button
-                              onClick={() => navigate(`${basePath}/accounting/accounts-payable/${ap.id}`)}
+                              onClick={() => navigate(
+                                isPurchaseOrder
+                                  ? `${basePath}/purchase/purchase/orders/${item.id.replace('po-', '')}`
+                                  : `${basePath}/accounting/accounts-payable/${item.id}`
+                              )}
                               className="text-sm font-semibold text-blue-600 hover:underline"
                             >
-                              {ap.ap_number}
+                              {item.ap_number}
                             </button>
+                            {isPurchaseOrder && (
+                              <span className="ml-2 text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">
+                                PO
+                              </span>
+                            )}
                           </td>
                           <td className="px-6 py-4">
-                            <div className="text-sm font-medium text-gray-900">{ap.supplier?.supplier_name || '—'}</div>
+                            <div className="text-sm font-medium text-gray-900">{item.supplier?.supplier_name || '—'}</div>
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-700">{ap.invoice_number}</td>
+                          <td className="px-6 py-4 text-sm text-gray-700">{item.invoice_number}</td>
                           <td className="px-6 py-4 text-sm text-gray-700">
-                            {new Date(ap.invoice_date).toLocaleDateString()}
+                            {new Date(item.invoice_date).toLocaleDateString()}
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-700">
-                            {new Date(ap.due_date).toLocaleDateString()}
+                            {new Date(item.due_date).toLocaleDateString()}
                             {isOverdue && (
                               <span className="ml-2 text-xs text-red-600 font-medium">Overdue</span>
                             )}
                           </td>
                           <td className="px-6 py-4 text-right text-sm font-mono text-gray-900">
-                            {ap.currency} {num(ap.invoice_amount).toFixed(3)}
+                            {item.currency} {num(item.invoice_amount).toFixed(3)}
                           </td>
                           <td className="px-6 py-4 text-right text-sm font-mono text-green-600">
-                            {ap.currency} {num(ap.paid_amount).toFixed(3)}
+                            {item.currency} {num(item.paid_amount).toFixed(3)}
                           </td>
                           <td className="px-6 py-4 text-right text-sm font-mono font-bold text-orange-600">
-                            {ap.currency} {num(ap.outstanding_amount).toFixed(3)}
+                            {item.currency} {num(item.outstanding_amount).toFixed(3)}
                           </td>
                           <td className="px-6 py-4 text-center">
                             <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${STATUS_COLORS[displayStatus]}`}>
@@ -285,7 +338,11 @@ export default function AccountsPayablePage() {
                           <td className="px-6 py-4">
                             <div className="flex justify-center gap-2">
                               <button
-                                onClick={() => navigate(`${basePath}/accounting/accounts-payable/${ap.id}`)}
+                                onClick={() => navigate(
+                                  isPurchaseOrder
+                                    ? `${basePath}/purchase/orders/${item.id.replace('po-', '')}`
+                                    : `${basePath}/accounting/accounts-payable/${item.id}`
+                                )}
                                 className="px-3 py-1.5 text-xs bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                               >
                                 View
@@ -299,7 +356,6 @@ export default function AccountsPayablePage() {
                 </table>
               </div>
             </div>
-
           )}
         </div>
 

@@ -20,6 +20,7 @@ export default function CurrencyConverter({ currencies, onClose }: CurrencyConve
   const [convertCurrency] = useConvertCurrencyMutation();
 
   const activeCurrencies = currencies.filter((c: any) => c.is_active);
+  console.log("Active currencies:", activeCurrencies);
 
     const convertWithLiveAPI = async () => {
     if (!amount || parseFloat(amount) <= 0) {

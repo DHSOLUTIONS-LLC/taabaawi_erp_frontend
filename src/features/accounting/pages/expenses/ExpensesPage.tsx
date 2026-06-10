@@ -620,7 +620,7 @@ export default function ExpensesManagementPage() {
   // Render Categories Tab
   const renderCategoriesTab = () => (
     <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200">
-      <div className="px-6 py-4 border-b flex justify-between items-center">
+      <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
         <h3 className="text-base font-semibold">Expense Categories</h3>
         <button
           onClick={() => {
@@ -720,18 +720,18 @@ export default function ExpensesManagementPage() {
             type="date"
             value={reportStartDate}
             onChange={(e) => setReportStartDate(e.target.value)}
-            className="px-4 py-2.5 border rounded-lg text-sm"
+            className="px-4 py-2.5 border rounded-lg text-sm  border-gray-300"
           />
           <input
             type="date"
             value={reportEndDate}
             onChange={(e) => setReportEndDate(e.target.value)}
-            className="px-4 py-2.5 border rounded-lg text-sm"
+            className="px-4 py-2.5 border rounded-lg text-sm border-gray-300"
           />
           <select
             value={reportSelectedBranch}
             onChange={(e) => setReportSelectedBranch(e.target.value)}
-            className="px-4 py-2.5 border rounded-lg appearance-none bg-white pr-8"
+            className="px-4 py-2.5 border rounded-lg appearance-none bg-white pr-8 border-gray-200"
           >
             <option value="">All Branches</option>
             {branches.map((b: any) => (
@@ -743,7 +743,7 @@ export default function ExpensesManagementPage() {
           <select
             value={reportSelectedCategory}
             onChange={(e) => setReportSelectedCategory(e.target.value)}
-            className="px-4 py-2.5 border rounded-lg appearance-none bg-white pr-8"
+            className="px-4 py-2.5 border rounded-lg appearance-none bg-white pr-8 border-gray-200"
           >
             <option value="">All Categories</option>
             {categories.map((c: any) => (
@@ -755,7 +755,7 @@ export default function ExpensesManagementPage() {
           <select
             value={groupBy}
             onChange={(e) => setGroupBy(e.target.value as any)}
-            className="px-4 py-2.5 border rounded-lg appearance-none bg-white pr-8"
+            className="px-4 py-2.5 border rounded-lg appearance-none bg-white pr-8 border-gray-200"
           >
             {groupByOptions.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -776,25 +776,25 @@ export default function ExpensesManagementPage() {
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl p-5 border">
+        <div className="bg-white rounded-xl p-5 border border-gray-200">
           <p className="text-sm text-gray-500">Total Expenses</p>
           <p className="text-2xl font-bold text-gray-900">
             {stats?.total_count || 0}
           </p>
         </div>
-        <div className="bg-white rounded-xl p-5 border">
+        <div className="bg-white rounded-xl p-5 border border-gray-200">
           <p className="text-sm text-gray-500">Total Amount</p>
           <p className="text-2xl font-bold text-blue-600">
             KWD {stats?.total_amount || "0.000"}
           </p>
         </div>
-        <div className="bg-white rounded-xl p-5 border">
+        <div className="bg-white rounded-xl p-5 border border-gray-200">
           <p className="text-sm text-gray-500">Pending Approval</p>
           <p className="text-2xl font-bold text-yellow-600">
             KWD {stats?.pending_amount || "0.000"}
           </p>
         </div>
-        <div className="bg-white rounded-xl p-5 border">
+        <div className="bg-white rounded-xl p-5 border border-gray-200">
           <p className="text-sm text-gray-500">Paid Expenses</p>
           <p className="text-2xl font-bold text-green-600">
             KWD {stats?.paid_amount || "0.000"}
@@ -803,8 +803,8 @@ export default function ExpensesManagementPage() {
       </div>
 
       {/* Summary Table */}
-      <div className="bg-white rounded-xl overflow-hidden shadow-sm border">
-        <div className="px-6 py-4 border-b">
+      <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200">
+        <div className="px-6 py-4 border-b bg-gray-50 border-gray-200">
           <h3 className="text-base font-semibold">
             Expense Summary (
             {groupByOptions.find((o) => o.value === groupBy)?.label})
@@ -850,7 +850,7 @@ export default function ExpensesManagementPage() {
             </table>
           </div>
         )}
-        <div className="px-6 py-4 bg-gray-50 border-t">
+        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
           <div className="flex justify-between">
             <span className="font-semibold">Total</span>
             <span className="font-bold text-blue-600">

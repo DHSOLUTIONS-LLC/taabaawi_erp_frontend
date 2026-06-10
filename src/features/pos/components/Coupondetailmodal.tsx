@@ -41,7 +41,7 @@ export default function CouponDetailModal({ isOpen, onClose, couponId }: CouponD
               <div className="text-right">
                 <p className="text-white/70 text-xs">Discount</p>
                 <p className="text-white text-xl font-bold">
-                  {coupon.discount_type === 'Percentage' ? `${coupon.discount_value}%` : `KD ${coupon.discount_value}`}
+                  {coupon.discount_type === 'Percentage' ? `${coupon.discount_value}%` : `KWD ${coupon.discount_value}`}
                 </p>
               </div>
             )}
@@ -97,13 +97,13 @@ export default function CouponDetailModal({ isOpen, onClose, couponId }: CouponD
                   {coupon.min_purchase_amount > 0 && (
                     <div>
                       <p className="text-gray-400 text-xs">Min Purchase</p>
-                      <p className="font-medium text-gray-800">KD {parseFloat(coupon.min_purchase_amount).toFixed(3)}</p>
+                      <p className="font-medium text-gray-800">KWD {parseFloat(coupon.min_purchase_amount).toFixed(3)}</p>
                     </div>
                   )}
                   {coupon.max_discount_amount > 0 && (
                     <div>
                       <p className="text-gray-400 text-xs">Max Discount Cap</p>
-                      <p className="font-medium text-gray-800">KD {parseFloat(coupon.max_discount_amount).toFixed(3)}</p>
+                      <p className="font-medium text-gray-800">KWD {parseFloat(coupon.max_discount_amount).toFixed(3)}</p>
                     </div>
                   )}
                   <div>
@@ -143,8 +143,8 @@ export default function CouponDetailModal({ isOpen, onClose, couponId }: CouponD
                     {[
                       { label: 'Total Uses', value: stats.total_uses || 0 },
                       { label: 'Unique Users', value: stats.unique_users || 0 },
-                      { label: 'Total Discounted', value: `KD ${parseFloat(stats.total_discount_given || 0).toFixed(3)}` },
-                      { label: 'Avg Discount', value: `KD ${parseFloat(stats.average_discount || 0).toFixed(3)}` },
+                      { label: 'Total Discounted', value: `KWD ${parseFloat(stats.total_discount_given || 0).toFixed(3)}` },
+                      { label: 'Avg Discount', value: `KWD ${parseFloat(stats.average_discount || 0).toFixed(3)}` },
                     ].map(({ label, value }) => (
                       <div key={label} className="bg-white rounded-lg p-3 text-center">
                         <p className="text-gray-400 text-xs mb-1">{label}</p>
@@ -164,7 +164,7 @@ export default function CouponDetailModal({ isOpen, onClose, couponId }: CouponD
                               <p className="font-medium text-gray-800">{use.sale_number}</p>
                               <p className="text-gray-400">{new Date(use.used_at).toLocaleDateString('en-GB')}</p>
                             </div>
-                            <span className="text-green-600 font-semibold">-KD {parseFloat(use.discount_amount || 0).toFixed(3)}</span>
+                            <span className="text-green-600 font-semibold">-KWD {parseFloat(use.discount_amount || 0).toFixed(3)}</span>
                           </div>
                         ))}
                       </div>

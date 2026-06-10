@@ -288,19 +288,19 @@ export default function ReceiptModal({ isOpen, onClose, saleId, onNewSale }: Rec
                                                 {item.variant && <span className="text-gray-500"> ({item.variant})</span>}
                                             </span>
                                             {!receipt.is_gift && (
-                                                <span className="font-semibold">KD {parseFloat(item.total ?? '0')?.toFixed(3)}</span>
+                                                <span className="font-semibold">KWD {parseFloat(item.total ?? '0')?.toFixed(3)}</span>
                                             )}
                                         </div>
                                         <div className="flex justify-between text-gray-500">
                                             <span>x{item.quantity}</span>
                                             {!receipt.is_gift && (
-                                                <span>@ KD {parseFloat(item.unit_price ?? '0')?.toFixed(3)}</span>
+                                                <span>@ KWD {parseFloat(item.unit_price ?? '0')?.toFixed(3)}</span>
                                             )}
                                         </div>
                                         {!receipt.is_gift && item.discount > 0 && (
                                             <div className="flex justify-between text-red-500">
                                                 <span>Discount</span>
-                                                <span>-KD {parseFloat(item.discount ?? '0')?.toFixed(3)}</span>
+                                                <span>-KWD {parseFloat(item.discount ?? '0')?.toFixed(3)}</span>
                                             </div>
                                         )}
                                     </div>
@@ -314,38 +314,38 @@ export default function ReceiptModal({ isOpen, onClose, saleId, onNewSale }: Rec
                                     <div className="space-y-1 text-xs">
                                         <div className="flex justify-between">
                                             <span className="text-gray-500">Subtotal</span>
-                                            <span>KD {parseFloat(receipt.subtotal).toFixed(3)}</span>
+                                            <span>KWD {parseFloat(receipt.subtotal).toFixed(3)}</span>
                                         </div>
                                         {parseFloat(receipt.discount) > 0 && (
                                             <div className="flex justify-between text-red-600">
                                                 <span>Discount</span>
-                                                <span>-KD {parseFloat(receipt.discount).toFixed(3)}</span>
+                                                <span>-KWD {parseFloat(receipt.discount).toFixed(3)}</span>
                                             </div>
                                         )}
                                         {parseFloat(receipt.coupon_discount) > 0 && (
                                             <div className="flex justify-between text-green-600">
                                                 <span>Coupon</span>
-                                                <span>-KD {parseFloat(receipt.coupon_discount).toFixed(3)}</span>
+                                                <span>-KWD {parseFloat(receipt.coupon_discount).toFixed(3)}</span>
                                             </div>
                                         )}
                                         {parseFloat(receipt.employee_discount) > 0 && (
                                             <div className="flex justify-between text-purple-600">
                                                 <span>Employee Disc.</span>
-                                                <span>-KD {parseFloat(receipt.employee_discount).toFixed(3)}</span>
+                                                <span>-KWD {parseFloat(receipt.employee_discount).toFixed(3)}</span>
                                             </div>
                                         )}
                                         <div className="flex justify-between font-bold text-sm border-t border-gray-200 pt-1">
                                             <span>TOTAL</span>
-                                            <span>KD {parseFloat(receipt.total).toFixed(3)}</span>
+                                            <span>KWD {parseFloat(receipt.total).toFixed(3)}</span>
                                         </div>
                                         <div className="flex justify-between text-gray-500">
                                             <span>{receipt.payment_method}</span>
-                                            {receipt.cash_received && <span>KD {parseFloat(receipt.cash_received).toFixed(3)}</span>}
+                                            {receipt.cash_received && <span>KWD {parseFloat(receipt.cash_received).toFixed(3)}</span>}
                                         </div>
                                         {parseFloat(receipt.change_given) > 0 && (
                                             <div className="flex justify-between font-semibold text-green-600">
                                                 <span>Change</span>
-                                                <span>KD {parseFloat(receipt.change_given).toFixed(3)}</span>
+                                                <span>KWD {parseFloat(receipt.change_given).toFixed(3)}</span>
                                             </div>
                                         )}
                                     </div>

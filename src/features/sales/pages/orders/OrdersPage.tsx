@@ -123,7 +123,7 @@ export default function OrdersPage() {
         "Order Status": o.order_status,
         "Payment Status": o.payment_status,
         "Payment Method": o.payment_method,
-        Total: `KD ${parseFloat(o.total_amount).toFixed(3)}`,
+        Total: `KWD ${parseFloat(o.total_amount).toFixed(3)}`,
         Date: new Date(o.created_at).toLocaleDateString(),
       }));
       const ws = XLSX.utils.json_to_sheet(data);
@@ -245,7 +245,7 @@ export default function OrdersPage() {
           order.order_status || "-",
           order.payment_status || "-",
           order.payment_method || "-",
-          `KD ${parseFloat(order.total_amount || 0).toFixed(3)}`,
+          `KWD ${parseFloat(order.total_amount || 0).toFixed(3)}`,
           new Date(order.created_at).toLocaleDateString(),
         ];
 
@@ -397,7 +397,7 @@ export default function OrdersPage() {
             },
             {
               label: "Total Revenue",
-              value: `KD ${Number(totalRevenue).toFixed(3)}`,
+              value: `KWD ${Number(totalRevenue).toFixed(3)}`,
               color: "text-[#1773CF]",
             },
             { label: "Pending", value: pendingCount, color: "text-yellow-600" },
@@ -617,7 +617,7 @@ export default function OrdersPage() {
                           {order.items?.length || 0}
                         </td>
                         <td className="px-4 py-4 text-sm font-semibold text-gray-900">
-                          KD {parseFloat(order.total_amount).toFixed(3)}
+                          KWD {parseFloat(order.total_amount).toFixed(3)}
                         </td>
                         <td className="px-4 py-4">
                           <span

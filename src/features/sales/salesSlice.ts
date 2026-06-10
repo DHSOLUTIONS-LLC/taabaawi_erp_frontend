@@ -29,6 +29,7 @@ export interface OrderProduct {
   quantity: number;
   image: string;
   image_url: string;
+  discount_percentage?: number;
 }
 
 // ─── Order Form type ────────────────────────────────────────
@@ -346,6 +347,16 @@ const salesSlice = createSlice({
       state.orderForm = initialOrderForm;
       state.orderProducts = [];
     },
+
+
+    updateOrderProductDiscount: (state, action) => {
+  const { id, discount_percentage } = action.payload;
+  const product = state.orderProducts.find((p) => p.id === id);
+  if (product) {
+    product.discount_percentage = discount_percentage;
+  }
+},
+
   },
 });
 
@@ -384,6 +395,7 @@ export const {
   // Order form
   setOrderFormField,
   clearOrderForm,
+  updateOrderProductDiscount
 } = salesSlice.actions;
 
 export default salesSlice.reducer;

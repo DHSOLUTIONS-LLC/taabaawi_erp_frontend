@@ -117,9 +117,9 @@ export default function ShiftReportsPage() {
         Branch: r.branch?.branch_name,
         "Shift Date": new Date(r.opened_at).toLocaleDateString(),
         "Shift Time": `${new Date(r.opened_at).toLocaleTimeString()} - ${r.closed_at ? new Date(r.closed_at).toLocaleTimeString() : ""}`,
-        "Opening Cash": `KD ${parseFloat(r.opening_balance || 0).toFixed(3)}`,
-        "Actual Cash": `KD ${parseFloat(r.closing_balance || 0).toFixed(3)}`,
-        Difference: r.difference ? `KD ${r.difference}` : "-",
+        "Opening Cash": `KWD ${parseFloat(r.opening_balance || 0).toFixed(3)}`,
+        "Actual Cash": `KWD ${parseFloat(r.closing_balance || 0).toFixed(3)}`,
+        Difference: r.difference ? `KWD ${r.difference}` : "-",
         Status: r.status,
       }));
       const ws = XLSX.utils.json_to_sheet(exportData);
@@ -243,9 +243,9 @@ export default function ShiftReportsPage() {
           register.branch?.branch_name || "-",
           openedAt.toLocaleDateString(),
           `${openedAt.toLocaleTimeString()} - ${closedAt ? closedAt.toLocaleTimeString() : ""}`,
-          `KD ${parseFloat(register.opening_balance || 0).toFixed(3)}`,
-          `KD ${parseFloat(register.closing_balance || 0).toFixed(3)}`,
-          register.difference ? `KD ${register.difference}` : "-",
+          `KWD ${parseFloat(register.opening_balance || 0).toFixed(3)}`,
+          `KWD ${parseFloat(register.closing_balance || 0).toFixed(3)}`,
+          register.difference ? `KWD ${register.difference}` : "-",
           register.status || "-",
         ];
 
@@ -546,16 +546,16 @@ export default function ShiftReportsPage() {
                               : "Open"}
                           </td>
                           <td className="px-4 py-4 text-sm text-gray-700">
-                            KD {parseFloat(r.opening_balance || 0).toFixed(3)}
+                            KWD {parseFloat(r.opening_balance || 0).toFixed(3)}
                           </td>
                           <td className="px-4 py-4 text-sm font-semibold text-gray-900">
-                            KD {parseFloat(r.closing_balance || 0).toFixed(3)}
+                            KWD {parseFloat(r.closing_balance || 0).toFixed(3)}
                           </td>
                           <td
                             className={`px-4 py-4 text-sm font-semibold ${diff > 0 ? "text-green-600" : diff < 0 ? "text-red-600" : "text-gray-500"}`}
                           >
                             {diff !== 0
-                              ? `${diff > 0 ? "+" : ""}KD ${diff.toFixed(3)}`
+                              ? `${diff > 0 ? "+" : ""}KWD ${diff.toFixed(3)}`
                               : "-"}
                           </td>
                           <td className="px-4 py-4">

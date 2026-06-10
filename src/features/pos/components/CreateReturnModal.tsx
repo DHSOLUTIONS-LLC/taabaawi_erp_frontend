@@ -200,7 +200,7 @@ export default function CreateReturnModal({ isOpen, onClose, onSuccess, saleId: 
                   </div>
                   <div>
                     <p className="text-blue-600 text-xs font-medium">Total</p>
-                    <p className="font-semibold text-gray-900 text-xs sm:text-sm break-words">KD {parseFloat(sale.total_amount).toFixed(3)}</p>
+                    <p className="font-semibold text-gray-900 text-xs sm:text-sm break-words">KWD {parseFloat(sale.total_amount).toFixed(3)}</p>
                   </div>
                   <div>
                     <p className="text-blue-600 text-xs font-medium">Status</p>
@@ -235,10 +235,10 @@ export default function CreateReturnModal({ isOpen, onClose, onSuccess, saleId: 
                                 <p className="font-medium text-gray-900 text-sm sm:text-base break-words">{item.product?.product_name}</p>
                                 {item.variant && <p className="text-xs text-gray-500 break-words">{item.variant.variant_name}</p>}
                                 <p className="text-xs text-gray-500 mt-0.5">
-                                  Qty: {item.quantity} × KD {parseFloat(item.unit_price).toFixed(3)}
+                                  Qty: {item.quantity} × KWD {parseFloat(item.unit_price).toFixed(3)}
                                 </p>
                               </div>
-                              <p className="font-semibold text-gray-900 text-sm sm:text-base shrink-0">KD {parseFloat(item.total).toFixed(3)}</p>
+                              <p className="font-semibold text-gray-900 text-sm sm:text-base shrink-0">KWD {parseFloat(item.total).toFixed(3)}</p>
                             </div>
 
                             {selected && (
@@ -321,7 +321,7 @@ export default function CreateReturnModal({ isOpen, onClose, onSuccess, saleId: 
                     </div>
                     <div className="text-left sm:text-right">
                       <p className="text-xs text-amber-600">Refund Amount</p>
-                      <p className="text-lg sm:text-xl font-bold text-amber-800">KD {returnTotal.toFixed(3)}</p>
+                      <p className="text-lg sm:text-xl font-bold text-amber-800">KWD {returnTotal.toFixed(3)}</p>
                     </div>
                   </div>
                 </div>
@@ -349,7 +349,7 @@ export default function CreateReturnModal({ isOpen, onClose, onSuccess, saleId: 
             disabled={isLoading || selectedItems.length === 0 || !sale}
             className="flex-1 py-2 sm:py-3 bg-[#1773CF] text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
           >
-            {isLoading ? 'Processing...' : `Process Return — KD ${returnTotal.toFixed(3)}`}
+            {isLoading ? 'Processing...' : `Process Return — KWD ${returnTotal.toFixed(3)}`}
           </button>
         </div>
       </div>

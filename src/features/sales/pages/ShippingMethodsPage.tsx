@@ -232,10 +232,10 @@ export default function ShippingMethodsPage() {
                         {method.provider || "—"}
                       </td>
                       <td className="px-5 py-4 text-sm font-semibold text-gray-900">
-                        KD {parseFloat(method.base_cost as any).toFixed(3)}
+                        KWD {parseFloat(method.base_cost as any).toFixed(3)}
                       </td>
                       <td className="px-5 py-4 text-sm text-gray-700">
-                        KD {parseFloat(method.cost_per_kg as any).toFixed(3)}
+                        KWD {parseFloat(method.cost_per_kg as any).toFixed(3)}
                       </td>
                       <td className="px-5 py-4 text-sm text-gray-700">
                         {method.estimated_days_min && method.estimated_days_max
@@ -282,8 +282,8 @@ export default function ShippingMethodsPage() {
         <div className="fixed inset-0 flex items-center justify-center z-50 p-2 sm:p-4 bg-black/50">
           <div className="bg-white rounded-xl sm:rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden mx-2 sm:mx-0">
             {/* Header */}
-            <div className="bg-[#1773CF] px-4 sm:px-6 py-4 sm:py-5">
-              <h2 className="text-base sm:text-lg font-bold text-white">
+            <div className=" px-4 sm:px-6 py-4 sm:py-5">
+              <h2 className="text-base sm:text-lg font-bold text-black">
                 {editingMethod ? "Edit Shipping Method" : "New Shipping Method"}
               </h2>
             </div>

@@ -1,5 +1,5 @@
 // src/features/accounting/pages/accounts-receivable/CreateARPage.tsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
 import { useAppSelector } from '../../../../app/hooks';
@@ -31,24 +31,37 @@ export default function CreateARPage() {
   });
 
   const [errors, setErrors] = useState<Record<string, string[]>>({});
+  const [filteredOrders, setFilteredOrders] = useState<any[]>([]);
 
   const isSuperAdmin = user?.role?.role_name === 'Super Admin';
   const basePath = isSuperAdmin ? '/admin' : '';
 
   const [createAR, { isLoading }] = useCreateARMutation();
 
-  // Fetch customers (users with role 'Customer')
+  // Fetch customers
   const { data: customersData } = useGetCustomersQuery({
     is_active: true,
     per_page: 1000,
   });
   const customers = (customersData as any)?.data?.data || (customersData as any)?.data || [];
 
-  // Fetch orders for dropdown
+  // Fetch orders
   const { data: ordersData } = useGetOrdersQuery({
     per_page: 1000,
   });
   const orders = (ordersData as any)?.data?.data || (ordersData as any)?.data || [];
+
+  // Filter orders based on selected customer
+  useEffect(() => {
+    if (formData.customer_id) {
+      const filtered = orders.filter(
+        (order: any) => order.customer_id?.toString() === formData.customer_id
+      );
+      setFilteredOrders(filtered);
+    } else {
+      setFilteredOrders([]);
+    }
+  }, [formData.customer_id, orders]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -57,22 +70,31 @@ export default function CreateARPage() {
 
   const handleCustomerChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const customerId = e.target.value;
-    setFormData(prev => ({ ...prev, customer_id: customerId }));
+    setFormData(prev => ({ 
+      ...prev, 
+      customer_id: customerId,
+      order_id: '', // Reset order when customer changes
+      invoice_number: '',
+      invoice_amount: 0,
+      currency: 'KWD',
+    }));
   };
 
   const handleOrderChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const orderId = e.target.value;
-    setFormData(prev => ({ ...prev, order_id: orderId }));
+    const selectedOrderId = e.target.value;
+    setFormData(prev => ({ ...prev, order_id: selectedOrderId }));
 
-    // Auto-fill customer if order selected
-    if (orderId) {
-      const selectedOrder = orders.find((order: any) => order.id.toString() === orderId);
+    // Auto-fill fields based on selected order
+    if (selectedOrderId) {
+      const selectedOrder = orders.find((order: any) => order.id.toString() === selectedOrderId);
       if (selectedOrder) {
         setFormData(prev => ({
           ...prev,
-          customer_id: selectedOrder.customer_id?.toString() || '',
-          currency: selectedOrder.currency || 'KWD',
+          invoice_number: selectedOrder.order_number || '',
+          invoice_date: selectedOrder.created_at ? new Date(selectedOrder.created_at).toISOString().split('T')[0] : prev.invoice_date,
+          due_date: selectedOrder.due_date ? new Date(selectedOrder.due_date).toISOString().split('T')[0] : prev.due_date,
           invoice_amount: selectedOrder.total_amount || 0,
+          currency: selectedOrder.currency || 'KWD',
         }));
       }
     }
@@ -102,6 +124,8 @@ export default function CreateARPage() {
       }
     }
   };
+
+  const isOrderSelected = !!formData.order_id;
 
   return (
     <DashboardLayout>
@@ -157,12 +181,13 @@ export default function CreateARPage() {
                   name="order_id"
                   value={formData.order_id}
                   onChange={handleOrderChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500"
+                  disabled={!formData.customer_id}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                 >
-                  <option value="">None</option>
-                  {orders.map((order: any) => (
+                  <option value="">Select Order</option>
+                  {filteredOrders.map((order: any) => (
                     <option key={order.id} value={order.id}>
-                      {order.order_number} - {order.customer_name} ({order.currency} {parseFloat(order.total_amount).toFixed(3)})
+                      {order.order_number} - {order.currency} {parseFloat(order.total_amount).toFixed(3)}
                     </option>
                   ))}
                 </select>
@@ -170,6 +195,9 @@ export default function CreateARPage() {
                   <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
                 </div>
               </div>
+              {!formData.customer_id && (
+                <p className="text-xs text-gray-400 mt-1">Select a customer first to see their orders</p>
+              )}
             </div>
           </div>
 
@@ -185,8 +213,10 @@ export default function CreateARPage() {
                 value={formData.invoice_number}
                 onChange={handleChange}
                 placeholder="e.g. INV-2025-001"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
                 required
+                disabled={isOrderSelected}
+                readOnly={isOrderSelected}
               />
               {errors.invoice_number && (
                 <p className="text-xs text-red-500 mt-1">{errors.invoice_number[0]}</p>
@@ -203,8 +233,9 @@ export default function CreateARPage() {
                 value={formData.invoice_date}
                 onChange={handleChange}
                 max={new Date().toISOString().split('T')[0]}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
                 required
+                disabled={isOrderSelected}
               />
             </div>
 
@@ -218,8 +249,9 @@ export default function CreateARPage() {
                 value={formData.due_date}
                 onChange={handleChange}
                 min={formData.invoice_date}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
                 required
+                disabled={isOrderSelected}
               />
             </div>
 
@@ -232,7 +264,8 @@ export default function CreateARPage() {
                   name="currency"
                   value={formData.currency}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                  disabled={isOrderSelected}
                 >
                   {CURRENCIES.map(currency => (
                     <option key={currency} value={currency}>{currency}</option>
@@ -258,8 +291,9 @@ export default function CreateARPage() {
               onChange={handleChange}
               placeholder="0.000"
               min="0.001"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
               required
+              disabled={isOrderSelected}
             />
             {errors.invoice_amount && (
               <p className="text-xs text-red-500 mt-1">{errors.invoice_amount[0]}</p>

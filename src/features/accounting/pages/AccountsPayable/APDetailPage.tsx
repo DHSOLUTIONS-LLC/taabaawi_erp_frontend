@@ -8,9 +8,11 @@ import {
   useGetAPByIdQuery,
   useRecordAPPaymentMutation
 } from '../../../../services/accountingApi';
+import { useGetChartOfAccountsQuery } from '../../../../services/accountingApi';
 
 import arrow_back_icon from '../../../../assets/icons/arrow_back_icon.svg';
 import payment_icon from '../../../../assets/icons/payment_icon.png';
+import dropdown_arrow_icon from '../../../../assets/icons/dropdown_arrow_icon.svg';
 
 const STATUS_COLORS: Record<string, string> = {
   Unpaid: 'bg-red-100 text-red-700',
@@ -27,6 +29,7 @@ export default function APDetailPage() {
   const { user } = useAppSelector((state: RootState) => state.auth);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState('');
+  const [selectedAccountId, setSelectedAccountId] = useState('');
   const [isRecording, setIsRecording] = useState(false);
 
   const isSuperAdmin = user?.role?.role_name === 'Super Admin';
@@ -36,8 +39,22 @@ export default function APDetailPage() {
   const { data, isLoading, refetch } = useGetAPByIdQuery(apId);
   const [recordPayment] = useRecordAPPaymentMutation();
 
-  const ap = (data as any)?.data;
+  // Fetch chart of accounts for dropdown (only active asset/cash accounts)
+  const { data: accountsData } = useGetChartOfAccountsQuery({
+    is_active: 1 as any,
+    per_page: 1000,
+  });
 
+  const ap = (data as any)?.data;
+  
+  // Filter accounts - typically payment should go to Cash/Bank accounts
+  const accounts = (accountsData as any)?.data?.data || (accountsData as any)?.data || [];
+  
+  // Filter only Asset accounts (Cash, Bank, etc.) for payment
+  const paymentAccounts = accounts.filter((account: any) => 
+    account.account_type === 'Asset' && 
+    account.is_active === true
+  );
 
   const handleRecordPayment = async () => {
     const amount = parseFloat(paymentAmount);
@@ -51,12 +68,22 @@ export default function APDetailPage() {
       return;
     }
 
+    if (!selectedAccountId) {
+      alert('Please select a payment account');
+      return;
+    }
+
     setIsRecording(true);
     try {
-      await recordPayment({ id: apId, payment_amount: amount }).unwrap();
+      await recordPayment({ 
+        id: apId, 
+        payment_amount: amount,
+        payment_account_id: parseInt(selectedAccountId)
+      }).unwrap();
       refetch();
       setShowPaymentModal(false);
       setPaymentAmount('');
+      setSelectedAccountId('');
     } catch (err: any) {
       alert(err?.data?.message || 'Failed to record payment');
     } finally {
@@ -130,7 +157,7 @@ export default function APDetailPage() {
         </div>
 
         <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4 sm:gap-6">
-          {/* Left Column - 2/3 width on desktop, full width on mobile */}
+          {/* Left Column */}
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Invoice Details */}
             <div className="bg-white rounded-xl p-4 sm:p-6">
@@ -190,7 +217,7 @@ export default function APDetailPage() {
             )}
           </div>
 
-          {/* Right Column - 1/3 width on desktop, full width on mobile */}
+          {/* Right Column */}
           <div className="space-y-4 sm:space-y-6">
             {/* Amount Summary */}
             <div className="bg-white rounded-xl p-4 sm:p-6">
@@ -267,7 +294,7 @@ export default function APDetailPage() {
         </div>
       </div>
 
-      {/* Payment Modal - Responsive */}
+      {/* Payment Modal with Chart of Accounts */}
       {showPaymentModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl w-full max-w-md mx-4 sm:mx-auto p-4 sm:p-6">
@@ -291,6 +318,7 @@ export default function APDetailPage() {
                 </p>
               </div>
 
+              {/* Payment Amount */}
               <div>
                 <label className="block text-sm font-medium text-gray-600 mb-2">
                   Payment Amount <span className="text-red-500">*</span>
@@ -304,6 +332,34 @@ export default function APDetailPage() {
                   className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                   autoFocus
                 />
+              </div>
+
+              {/* Chart of Accounts Dropdown */}
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-2">
+                  Payment Account <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <select
+                    value={selectedAccountId}
+                    onChange={(e) => setSelectedAccountId(e.target.value)}
+                    className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                    required
+                  >
+                    <option value="">Select Payment Account</option>
+                    {paymentAccounts.map((account: any) => (
+                      <option key={account.id} value={account.id}>
+                        {account.account_code} - {account.account_name} ({account.account_type})
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
+                  </div>
+                </div>
+                <p className="text-xs text-gray-400 mt-1">
+                  Select the cash/bank account used for this payment
+                </p>
               </div>
 
               <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-4">

@@ -193,6 +193,7 @@ export const posApi = api.injectEndpoints({
         id: number;
         closing_balance: number;
         closing_notes?: string;
+        denominations?: Record<string, number>;
       }
     >({
       query: ({ id, ...data }) => ({

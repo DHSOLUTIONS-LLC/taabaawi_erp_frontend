@@ -133,7 +133,7 @@ const SEOForm: React.FC<Props> = ({
       </div>
 
       {/* Open Graph */}
-      <div className="space-y-4 pt-4 border-t">
+      <div className="space-y-4 pt-4 border-t border-gray-200">
         <h3 className="text-lg font-medium text-gray-900">Open Graph (Facebook)</h3>
         
         <div>
@@ -191,7 +191,7 @@ const SEOForm: React.FC<Props> = ({
       </div>
 
       {/* Twitter Card */}
-      <div className="space-y-4 pt-4 border-t">
+      <div className="space-y-4 pt-4 border-t border-gray-200">
         <h3 className="text-lg font-medium text-gray-900">Twitter Card</h3>
         
         <div>
@@ -248,7 +248,7 @@ const SEOForm: React.FC<Props> = ({
       </div>
 
       {/* Schema Markup */}
-      <div className="space-y-4 pt-4 border-t">
+      <div className="space-y-4 pt-4 border-t border-gray-200">
         <h3 className="text-lg font-medium text-gray-900">Schema Markup (JSON-LD)</h3>
         
         <div>

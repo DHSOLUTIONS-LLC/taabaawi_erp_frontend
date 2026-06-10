@@ -229,7 +229,7 @@ export default function DocumentManagementPage() {
           </div>
 
           <div
-            className={`bg-white rounded-xl p-5 border shadow-sm cursor-pointer transition-all ${activeTab === "expiring" ? "border-yellow-500 bg-yellow-50" : "border-gray-200 hover:border-yellow-300"}`}
+            className={`bg-white rounded-xl p-5 border border-gray-200 shadow-sm cursor-pointer transition-all ${activeTab === "expiring" ? "border-yellow-500 bg-yellow-50" : "border-gray-200 hover:border-yellow-300"}`}
             onClick={() => setActiveTab("expiring")}
           >
             <div className="flex items-center justify-between">
@@ -259,7 +259,7 @@ export default function DocumentManagementPage() {
           </div>
 
           <div
-            className={`bg-white rounded-xl p-5 border shadow-sm cursor-pointer transition-all ${activeTab === "expired" ? "border-red-500 bg-red-50" : "border-gray-200 hover:border-red-300"}`}
+            className={`bg-white rounded-xl p-5 border border-gray-200 shadow-sm cursor-pointer transition-all ${activeTab === "expired" ? "border-red-500 bg-red-50" : "border-gray-200 hover:border-red-300"}`}
             onClick={() => setActiveTab("expired")}
           >
             <div className="flex items-center justify-between">

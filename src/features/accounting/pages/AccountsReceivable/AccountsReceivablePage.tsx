@@ -5,6 +5,7 @@ import DashboardLayout from "../../../../layouts/DashboardLayout";
 import { useAppSelector } from "../../../../app/hooks";
 import type { RootState } from "../../../../app/store";
 import { useGetAccountsReceivableQuery } from "../../../../services/accountingApi";
+import { useGetOrdersQuery } from "../../../../services/salesApi";
 
 import search_icon from "../../../../assets/icons/search_icon.svg";
 import add_icon from "../../../../assets/icons/add.svg";
@@ -45,19 +46,53 @@ export default function AccountsReceivablePage() {
     per_page: 15,
   });
 
+  const { data: ordersData, isLoading: ordersLoading } = useGetOrdersQuery({
+    search: search || undefined,
+    page: currentPage,
+    per_page: 15,
+  });
+
   const receivables = (data as any)?.data?.data || (data as any)?.data || [];
-  console.log("receivables", receivables);
+  const orders = (ordersData as any)?.data?.data || (ordersData as any)?.data || [];
+
+  const transformedOrders = orders.map((order: any) => ({
+    id: `order-${order.id}`,
+    ar_number: order.order_number || `ORD-${order.id}`,
+    customer: { name: order.customer_name || "—" },
+    invoice_number: order.order_number || "—",
+    invoice_date: order.created_at,
+    due_date: order.created_at,
+    invoice_amount: parseFloat(order.total_amount || 0),
+    received_amount: parseFloat(order.paid_amount || 0),
+    outstanding_amount: parseFloat(order.total_amount || 0) - parseFloat(order.paid_amount || 0),
+    currency: "KWD",
+    status: order.payment_status === "Paid" ? "Paid" : 
+             order.payment_status === "Partial" ? "Partial" : "Unpaid",
+    type: "Sales Order"
+  }));
+
+  const allItems = [...receivables, ...transformedOrders];
+
+  // Sort by date (newest first)
+  const sortedItems = allItems.sort((a, b) => {
+    const dateA = new Date(a.invoice_date || a.created_at);
+    const dateB = new Date(b.invoice_date || b.created_at);
+    return dateB.getTime() - dateA.getTime();
+  });
 
   const pagination = (data as any)?.data;
 
-  // Calculate totals
-  const totalOutstanding = receivables.reduce(
-    (sum: number, ar: any) => sum + num(ar.outstanding_amount),
+  // Calculate totals using sortedItems
+  const totalOutstanding = sortedItems.reduce(
+    (sum: number, item: any) => sum + num(item.outstanding_amount),
     0,
   );
-  const totalOverdue = receivables
-    .filter((ar: any) => ar.status === "Overdue")
-    .reduce((sum: number, ar: any) => sum + num(ar.outstanding_amount), 0);
+  
+  const totalOverdue = sortedItems
+    .filter((item: any) => item.status === "Overdue")
+    .reduce((sum: number, item: any) => sum + num(item.outstanding_amount), 0);
+
+  const overdueCount = sortedItems.filter((item: any) => item.status === "Overdue").length;
 
   return (
     <DashboardLayout>
@@ -69,7 +104,7 @@ export default function AccountsReceivablePage() {
               Accounts Receivable
             </h1>
             <p className="text-xs sm:text-sm text-gray-500 mt-1">
-              Manage money owed by customers
+              Manage money owed by customers (AR + Sales Orders)
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-2 sm:space-x-2">
@@ -106,7 +141,7 @@ export default function AccountsReceivablePage() {
               KWD {totalOutstanding.toFixed(3)}
             </p>
             <p className="text-xs text-gray-400 mt-1">
-              {receivables.length} invoices
+              {sortedItems.length} items (AR + Orders)
             </p>
           </div>
           <div className="bg-white rounded-xl p-4 sm:p-5">
@@ -115,17 +150,16 @@ export default function AccountsReceivablePage() {
               KWD {totalOverdue.toFixed(3)}
             </p>
             <p className="text-xs text-gray-400 mt-1">
-              {receivables.filter((ar: any) => ar.status === "Overdue").length}{" "}
-              overdue
+              {overdueCount} overdue
             </p>
           </div>
           <div className="bg-white rounded-xl p-4 sm:p-5 sm:col-span-2 lg:col-span-1">
             <p className="text-xs sm:text-sm text-gray-500">This Month</p>
             <p className="text-lg sm:text-2xl font-bold text-green-600 mt-1 break-words">
               KWD{" "}
-              {receivables
-                .filter((ar: any) => {
-                  const date = new Date(ar.invoice_date);
+              {sortedItems
+                .filter((item: any) => {
+                  const date = new Date(item.invoice_date);
                   const now = new Date();
                   return (
                     date.getMonth() === now.getMonth() &&
@@ -133,7 +167,7 @@ export default function AccountsReceivablePage() {
                   );
                 })
                 .reduce(
-                  (sum: number, ar: any) => sum + num(ar.invoice_amount),
+                  (sum: number, item: any) => sum + num(item.invoice_amount),
                   0,
                 )
                 .toFixed(3)}
@@ -157,7 +191,7 @@ export default function AccountsReceivablePage() {
                   setSearch(e.target.value);
                   setCurrentPage(1);
                 }}
-                placeholder="Search by invoice or AR number..."
+                placeholder="Search by invoice, AR number or order..."
                 className="w-full pl-9 pr-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -259,13 +293,14 @@ export default function AccountsReceivablePage() {
             </div>
           </div>
         </div>
+
         {/* Table */}
         <div className="bg-white rounded-xl overflow-hidden shadow-sm">
-          {isLoading ? (
+          {isLoading || ordersLoading ? (
             <div className="flex items-center justify-center py-24">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
             </div>
-          ) : receivables.length === 0 ? (
+          ) : sortedItems.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-24 text-center">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg
@@ -283,10 +318,10 @@ export default function AccountsReceivablePage() {
                 </svg>
               </div>
               <p className="text-gray-500 font-medium">
-                No accounts receivable found
+                No records found
               </p>
               <p className="text-sm text-gray-400 mt-1">
-                Create your first AR record
+                No AR records or sales orders available
               </p>
               <button
                 onClick={() =>
@@ -304,16 +339,16 @@ export default function AccountsReceivablePage() {
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">
-                        AR #
+                        AR / Order #
                       </th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">
                         Customer
                       </th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">
-                        Invoice #
+                        Invoice / Order #
                       </th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">
-                        Invoice Date
+                        Date
                       </th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">
                         Due Date
@@ -336,42 +371,50 @@ export default function AccountsReceivablePage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
-                    {receivables.map((ar: any) => {
+                    {sortedItems.map((item: any) => {
                       const isOverdue =
-                        new Date(ar.due_date) < new Date() &&
-                        ar.outstanding_amount > 0;
+                        new Date(item.due_date) < new Date() &&
+                        item.outstanding_amount > 0;
                       const displayStatus =
-                        isOverdue && ar.status === "Unpaid"
+                        isOverdue && item.status === "Unpaid"
                           ? "Overdue"
-                          : ar.status;
+                          : item.status;
+                      const isSalesOrder = item.type === "Sales Order";
 
                       return (
-                        <tr key={ar.id} className="hover:bg-gray-50">
+                        <tr key={item.id} className="hover:bg-gray-50">
                           <td className="px-6 py-4">
                             <button
                               onClick={() =>
                                 navigate(
-                                  `${basePath}/accounting/accounts-receivable/${ar.id}`,
+                                  isSalesOrder
+                                    ? `${basePath}/sales/orders/${item.id.replace("order-", "")}`
+                                    : `${basePath}/accounting/accounts-receivable/${item.id}`
                                 )
                               }
                               className="text-sm font-semibold text-blue-600 hover:underline"
                             >
-                              {ar.ar_number}
+                              {item.ar_number}
                             </button>
+                            {isSalesOrder && (
+                              <span className="ml-2 text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">
+                                Order
+                              </span>
+                            )}
                           </td>
                           <td className="px-6 py-4">
                             <div className="text-sm font-medium text-gray-900">
-                              {ar.customer?.name || "—"}
+                              {item.customer?.name || "—"}
                             </div>
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-700">
-                            {ar.invoice_number}
+                            {item.invoice_number}
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-700">
-                            {new Date(ar.invoice_date).toLocaleDateString()}
+                            {new Date(item.invoice_date).toLocaleDateString()}
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-700">
-                            {new Date(ar.due_date).toLocaleDateString()}
+                            {new Date(item.due_date).toLocaleDateString()}
                             {isOverdue && (
                               <span className="ml-2 text-xs text-red-600 font-medium">
                                 Overdue
@@ -379,14 +422,13 @@ export default function AccountsReceivablePage() {
                             )}
                           </td>
                           <td className="px-6 py-4 text-right text-sm font-mono text-gray-900">
-                            {ar.currency} {num(ar.invoice_amount).toFixed(3)}
+                            {item.currency} {num(item.invoice_amount).toFixed(3)}
                           </td>
                           <td className="px-6 py-4 text-right text-sm font-mono text-green-600">
-                            {ar.currency} {num(ar.received_amount).toFixed(3)}
+                            {item.currency} {num(item.received_amount).toFixed(3)}
                           </td>
                           <td className="px-6 py-4 text-right text-sm font-mono font-bold text-orange-600">
-                            {ar.currency}{" "}
-                            {num(ar.outstanding_amount).toFixed(3)}
+                            {item.currency} {num(item.outstanding_amount).toFixed(3)}
                           </td>
                           <td className="px-6 py-4 text-center">
                             <span
@@ -400,7 +442,9 @@ export default function AccountsReceivablePage() {
                               <button
                                 onClick={() =>
                                   navigate(
-                                    `${basePath}/accounting/accounts-receivable/${ar.id}`,
+                                    isSalesOrder
+                                      ? `${basePath}/sales/orders/${item.id.replace("order-", "")}`
+                                      : `${basePath}/accounting/accounts-receivable/${item.id}`
                                   )
                                 }
                                 className="px-3 py-1.5 text-xs bg-blue-600 text-white rounded-lg hover:bg-blue-700"

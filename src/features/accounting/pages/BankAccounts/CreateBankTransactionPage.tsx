@@ -207,7 +207,7 @@ export default function CreateBankTransactionPage() {
           </div>
 
           {/* Reference Information */}
-          <div className="space-y-4 pt-4 border-t">
+          <div className="space-y-4 pt-4 border-t border-gray-200">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <h3 className="text-base sm:text-lg font-semibold text-gray-900">Reference (Optional)</h3>
               <button
@@ -301,7 +301,7 @@ export default function CreateBankTransactionPage() {
           </div>
 
           {/* Actions */}
-          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-4 border-t">
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-4 border-t border-gray-200">
             <button
               type="button"
               onClick={() => navigate(`${basePath}/accounting/bank-accounts/${id}`)}

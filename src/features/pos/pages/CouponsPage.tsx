@@ -331,7 +331,7 @@ export default function CouponsPage() {
                       <p className="text-white text-2xl font-bold">
                         {coupon.discount_type === "Percentage"
                           ? `${coupon.discount_value}%`
-                          : `KD ${coupon.discount_value}`}
+                          : `KWD ${coupon.discount_value}`}
                       </p>
                     </div>
                   </div>
@@ -399,7 +399,7 @@ export default function CouponsPage() {
                       <div>
                         <p className="text-gray-400">Min Purchase</p>
                         <p className="font-medium text-gray-700">
-                          KD {parseFloat(coupon.min_purchase_amount).toFixed(3)}
+                          KWD {parseFloat(coupon.min_purchase_amount).toFixed(3)}
                         </p>
                       </div>
                     )}

@@ -82,7 +82,7 @@ export default function ProfilePage() {
 
     const formatAllowance = (value: string | number | null | undefined) => {
         if (!value || value === '0.000' || value === '0' || value === 0) return 'N/A';
-        return `KD ${value}`;
+        return `KWD ${value}`;
     };
 
     const getStatusColor = (status: string) => {

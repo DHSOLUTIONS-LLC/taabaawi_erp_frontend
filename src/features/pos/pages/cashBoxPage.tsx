@@ -18,6 +18,26 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import jsPDF from "jspdf";
 
+interface DenominationCount {
+  [key: number]: number;
+}
+
+// Update the register type to include denominations
+// If you have a proper type definition, add denominations field
+// Otherwise, the code will work with the existing any type
+
+const KUWAIT_DENOMINATIONS = [
+  { value: 20, label: "20 KWD", type: "note", color: "bg-purple-100" },
+  { value: 10, label: "10 KWD", type: "note", color: "bg-blue-100" },
+  { value: 5, label: "5 KWD", type: "note", color: "bg-green-100" },
+  { value: 1, label: "1 KWD", type: "note", color: "bg-yellow-100" },
+  { value: 0.5, label: "500 Fils", type: "coin", color: "bg-gray-100" },
+  { value: 0.25, label: "250 Fils", type: "coin", color: "bg-gray-100" },
+  { value: 0.1, label: "100 Fils", type: "coin", color: "bg-gray-100" },
+  { value: 0.05, label: "50 Fils", type: "coin", color: "bg-gray-100" },
+];
+
+
 export default function CashRegistersPage() {
   const { user } = useAppSelector((state: RootState) => state.auth);
   const [selectedBranch, setSelectedBranch] = useState("");
@@ -433,11 +453,53 @@ export default function CashRegistersPage() {
               <div className="text-right">
                 <p className="text-xs text-blue-600">Total Difference</p>
                 <p className="text-lg font-semibold text-blue-800">
-                  KD {totalDifference.toFixed(3)}
+                  KWD {totalDifference.toFixed(3)}
                 </p>
               </div>
             </div>
           </div>
+          {/* {selectedRegister?.denominations && Object.keys(selectedRegister.denominations).length > 0 && (
+  <div className="mb-6">
+    <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">
+      Currency Denominations Counted
+    </h3>
+    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        {KUWAIT_DENOMINATIONS.map((denom) => {
+          const count = selectedRegister.denominations[denom.value] || 0;
+          if (count > 0) {
+            return (
+              <div key={denom.value} className={`${denom.color} rounded-lg p-3`}>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="font-semibold text-gray-800">{denom.label}</p>
+                    <p className="text-xs text-gray-500 capitalize">{denom.type}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-lg font-bold text-gray-800">{count} × {denom.value}</p>
+                    <p className="text-sm text-gray-600">= {(count * denom.value).toFixed(3)} KWD</p>
+                  </div>
+                </div>
+              </div>
+            );
+          }
+          return null;
+        })}
+      </div>
+      <div className="mt-3 pt-3 border-t border-blue-200">
+        <div className="flex justify-between items-center">
+          <span className="font-semibold text-gray-700">Total Cash Counted:</span>
+          <span className="text-xl font-bold text-blue-600">
+            KWD {Object.entries(selectedRegister.denominations).reduce(
+              (sum, [value, count]) => sum + parseFloat(value) * (count as number),
+              0
+            ).toFixed(3)}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+)} */}
 
           {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
@@ -448,13 +510,13 @@ export default function CashRegistersPage() {
             <div className="bg-white rounded-lg p-4">
               <p className="text-sm text-gray-500 mb-3">Total Opening Cash</p>
               <p className="text-3xl font-semibold">
-                KD {totalOpening.toFixed(3)}
+                KWD {totalOpening.toFixed(3)}
               </p>
             </div>
             <div className="bg-white rounded-lg p-4">
               <p className="text-sm text-gray-500 mb-3">Total Closing Cash</p>
               <p className="text-3xl font-semibold">
-                KD {totalClosing.toFixed(3)}
+                KWD {totalClosing.toFixed(3)}
               </p>
             </div>
             <div className="bg-white rounded-lg p-4">
@@ -462,7 +524,7 @@ export default function CashRegistersPage() {
               <p
                 className={`text-3xl font-semibold ${totalDifference >= 0 ? "text-green-600" : "text-red-600"}`}
               >
-                KD {totalDifference.toFixed(3)}
+                KWD {totalDifference.toFixed(3)}
               </p>
             </div>
           </div>
@@ -591,16 +653,16 @@ export default function CashRegistersPage() {
                               : "-"}
                           </td>
                           <td className="px-4 py-4 text-sm text-gray-900">
-                            KD {register.opening_balance}
+                            KWD {register.opening_balance}
                           </td>
                           <td className="px-4 py-4 text-sm text-gray-900">
                             {register.closing_balance
-                              ? `KD ${register.closing_balance}`
+                              ? `KWD ${register.closing_balance}`
                               : "-"}
                           </td>
                           {/* <td className="px-4 py-4 text-sm text-gray-900">
                             {register.expected_balance
-                              ? `KD ${register.expected_balance}`
+                              ? `KWD ${register.expected_balance}`
                               : "-"}
                           </td> */}
                           <td className="px-4 py-4 text-sm text-gray-900">
@@ -614,17 +676,16 @@ export default function CashRegistersPage() {
                               }
                             >
                               {register.difference
-                                ? `KD ${register.difference}`
+                                ? `KWD ${register.difference}`
                                 : "-"}
                             </span>
                           </td>
                           <td className="px-4 py-4 text-sm text-gray-900">
                             <span
-                              className={`px-2 py-1 rounded-full text-xs ${
-                                register.status === "Open"
+                              className={`px-2 py-1 rounded-full text-xs ${register.status === "Open"
                                   ? "bg-green-100 text-green-800"
                                   : "bg-gray-100"
-                              }`}
+                                }`}
                             >
                               {register.status}
                             </span>
@@ -711,13 +772,13 @@ export default function CashRegistersPage() {
                     Opening Balance
                   </p>
                   <p className="text-xl sm:text-2xl font-bold break-words">
-                    KD {selectedRegister.opening_balance}
+                    KWD {selectedRegister.opening_balance}
                   </p>
                 </div>
                 {/* <div className="bg-green-50 p-3 sm:p-4 rounded-lg">
                   <p className="text-xs sm:text-sm text-green-600">Expected Balance</p>
                   <p className="text-xl sm:text-2xl font-bold break-words">
-                    KD {selectedRegister.expected_balance || "0.000"}
+                    KWD {selectedRegister.expected_balance || "0.000"}
                   </p>
                 </div> */}
                 <div className="bg-purple-50 p-3 sm:p-4 rounded-lg">
@@ -725,7 +786,7 @@ export default function CashRegistersPage() {
                     Closing Balance
                   </p>
                   <p className="text-xl sm:text-2xl font-bold break-words">
-                    KD {selectedRegister.closing_balance || "0.000"}
+                    KWD {selectedRegister.closing_balance || "0.000"}
                   </p>
                 </div>
               </div>
@@ -762,17 +823,16 @@ export default function CashRegistersPage() {
                           <tr key={movement.id}>
                             <td className="px-2 sm:px-4 py-2 whitespace-nowrap">
                               <span
-                                className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs ${
-                                  movement.type === "Cash In"
+                                className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs ${movement.type === "Cash In"
                                     ? "bg-green-100 text-green-800"
                                     : "bg-red-100 text-red-800"
-                                }`}
+                                  }`}
                               >
                                 {movement.type}
                               </span>
                             </td>
                             <td className="px-2 sm:px-4 py-2 font-medium text-xs sm:text-sm whitespace-nowrap">
-                              KD {movement.amount}
+                              KWD {movement.amount}
                             </td>
                             <td className="px-2 sm:px-4 py-2 text-xs sm:text-sm break-words max-w-[150px] sm:max-w-[200px]">
                               {movement.reason}
@@ -840,7 +900,7 @@ export default function CashRegistersPage() {
                               {sale.items?.length || 0}
                             </td> */}
                             <td className="px-2 sm:px-4 py-2 font-medium text-xs sm:text-sm whitespace-nowrap">
-                              KD {sale.total_amount}
+                              KWD {sale.total_amount}
                             </td>
                             <td className="px-2 sm:px-4 py-2 text-xs sm:text-sm whitespace-nowrap">
                               {sale.payment_method}

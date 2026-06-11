@@ -8,9 +8,11 @@ import {
   useGetARByIdQuery,
   useRecordARReceiptMutation
 } from '../../../../services/accountingApi';
+import { useGetChartOfAccountsQuery } from '../../../../services/accountingApi';
 
 import arrow_back_icon from '../../../../assets/icons/arrow_back_icon.svg';
 import payment_icon from '../../../../assets/icons/payment_icon.png';
+import dropdown_arrow_icon from '../../../../assets/icons/dropdown_arrow_icon.svg';
 
 const STATUS_COLORS: Record<string, string> = {
   Unpaid: 'bg-red-100 text-red-700',
@@ -27,6 +29,7 @@ export default function ARDetailPage() {
   const { user } = useAppSelector((state: RootState) => state.auth);
   const [showReceiptModal, setShowReceiptModal] = useState(false);
   const [receiptAmount, setReceiptAmount] = useState('');
+  const [selectedAccountId, setSelectedAccountId] = useState('');
   const [isRecording, setIsRecording] = useState(false);
 
   const isSuperAdmin = user?.role?.role_name === 'Super Admin';
@@ -36,7 +39,22 @@ export default function ARDetailPage() {
   const { data, isLoading, refetch } = useGetARByIdQuery(arId);
   const [recordReceipt] = useRecordARReceiptMutation();
 
+  // Fetch chart of accounts for dropdown (only active asset/cash accounts)
+  const { data: accountsData } = useGetChartOfAccountsQuery({
+    is_active: 1 as any,
+    per_page: 1000,
+  });
+
   const ar = (data as any)?.data;
+  
+  // Filter accounts - receipt should go to Cash/Bank accounts
+  const accounts = (accountsData as any)?.data?.data || (accountsData as any)?.data || [];
+  
+  // Filter only Asset accounts (Cash, Bank, etc.) for receipt
+  const receiptAccounts = accounts.filter((account: any) => 
+    account.account_type === 'Asset' && 
+    account.is_active === true
+  );
 
   const handleRecordReceipt = async () => {
     const amount = parseFloat(receiptAmount);
@@ -50,12 +68,22 @@ export default function ARDetailPage() {
       return;
     }
 
+    if (!selectedAccountId) {
+      alert('Please select a receipt account');
+      return;
+    }
+
     setIsRecording(true);
     try {
-      await recordReceipt({ id: arId, receipt_amount: amount }).unwrap();
+      await recordReceipt({ 
+        id: arId, 
+        receipt_amount: amount,
+        receipt_account_id: parseInt(selectedAccountId)
+      }).unwrap();
       refetch();
       setShowReceiptModal(false);
       setReceiptAmount('');
+      setSelectedAccountId('');
     } catch (err: any) {
       alert(err?.data?.message || 'Failed to record receipt');
     } finally {
@@ -266,7 +294,7 @@ export default function ARDetailPage() {
         </div>
       </div>
 
-      {/* Receipt Modal - Responsive */}
+      {/* Receipt Modal with Chart of Accounts */}
       {showReceiptModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl w-full max-w-md mx-4 sm:mx-auto p-4 sm:p-6">
@@ -290,6 +318,7 @@ export default function ARDetailPage() {
                 </p>
               </div>
 
+              {/* Receipt Amount */}
               <div>
                 <label className="block text-sm font-medium text-gray-600 mb-2">
                   Receipt Amount <span className="text-red-500">*</span>
@@ -303,6 +332,34 @@ export default function ARDetailPage() {
                   className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                   autoFocus
                 />
+              </div>
+
+              {/* Chart of Accounts Dropdown */}
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-2">
+                  Receipt Account <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <select
+                    value={selectedAccountId}
+                    onChange={(e) => setSelectedAccountId(e.target.value)}
+                    className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                    required
+                  >
+                    <option value="">Select Receipt Account</option>
+                    {receiptAccounts.map((account: any) => (
+                      <option key={account.id} value={account.id}>
+                        {account.account_code} - {account.account_name} ({account.account_type})
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
+                  </div>
+                </div>
+                <p className="text-xs text-gray-400 mt-1">
+                  Select the cash/bank account where the payment is received
+                </p>
               </div>
 
               <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-4">

@@ -113,12 +113,15 @@ export default function CloseRegisterPage({
 
     // Close the register
     await closeRegister(payload).unwrap();
+ localStorage.removeItem("pos_session");
 
+ 
     setStep("generating");
 
     // Generate shift report
     const reportResult = await generateShiftReport(register.id).unwrap();
     setShiftReport(reportResult?.data);
+
     setStep("done");
   } catch (err: any) {
     console.error("Close register error:", err);

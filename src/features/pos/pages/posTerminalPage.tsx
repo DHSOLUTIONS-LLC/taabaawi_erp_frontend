@@ -39,7 +39,7 @@ export default function POSTerminalPage() {
     refetch: refetchCurrent,
   } = useGetCurrentPOSQuery(undefined, {
     skip: !user?.id,
-    pollingInterval: 30000, // Poll every 30 seconds to keep session info fresh
+    pollingInterval: 300000,  
   });
 
   const { data: branchRegistersResponse } = useGetPOSsQuery(

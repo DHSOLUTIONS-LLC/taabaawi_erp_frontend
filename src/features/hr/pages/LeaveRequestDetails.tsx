@@ -1,6 +1,6 @@
 // src/features/hr/pages/LeaveRequestDetails.tsx
 import DashboardLayout from '../../../layouts/DashboardLayout';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate  } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import dropdown_icon from '../../../assets/icons/dropdown_arrow_icon.svg';
 import edit_icon from '../../../assets/icons/edit_icon.svg';
@@ -18,6 +18,8 @@ import {
     useUpdateBonusMutation,
     useGetUserBonusSummaryQuery
 } from '../../../services/hrApi';
+import { useAppSelector } from '../../../app/hooks';
+import type { RootState } from '../../../app/store';
 
 interface Attendance {
     id: number;
@@ -66,6 +68,8 @@ interface BonusSummary {
 }
 
 export default function LeaveRequestDetails() {
+      const { user } = useAppSelector((state: RootState) => state.auth);
+    const navigate = useNavigate();
     const [personalDetailsOpen, setPersonalDetailsOpen] = useState(false);
     const [employmentDetailsOpen, setEmploymentDetailsOpen] = useState(false);
     const [editingField, setEditingField] = useState<string | null>(null);
@@ -86,6 +90,9 @@ export default function LeaveRequestDetails() {
 
     const params = useParams<{ id: string }>();
     const id = params.id;
+
+      const isSuperAdmin = user?.role?.role_name === "Super Admin";
+  const basePath = isSuperAdmin ? "/admin" : "";
 
     // Queries
     const { data: employeeResponse, isLoading, refetch: refetchEmployee } = useGetEmployeeByIdQuery(Number(id));
@@ -123,16 +130,16 @@ export default function LeaveRequestDetails() {
         });
     };
 
-    const formatDateTime = (dateString: string | null) => {
-        if (!dateString) return 'N/A';
-        return new Date(dateString).toLocaleString('en-GB', {
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    };
+    // const formatDateTime = (dateString: string | null) => {
+    //     if (!dateString) return 'N/A';
+    //     return new Date(dateString).toLocaleString('en-GB', {
+    //         day: '2-digit',
+    //         month: 'short',
+    //         year: 'numeric',
+    //         hour: '2-digit',
+    //         minute: '2-digit'
+    //     });
+    // };
 
     const calculateDays = (startDate: string, endDate: string) => {
         if (!startDate || !endDate) return 0;
@@ -238,6 +245,11 @@ export default function LeaveRequestDetails() {
         }
     };
 
+    const handleEditEmployee = () => {
+    navigate(`${basePath}/hr/add_employee/edit/${id}`);
+};
+
+
     const employeeData = {
         name: emp?.name ?? 'Loading...',
         status: emp?.is_active ? 'Active' : 'Inactive',
@@ -336,11 +348,19 @@ export default function LeaveRequestDetails() {
                                 {employeeData.name}
                             </h1>
                             <button className="inline-flex items-center justify-center px-3 sm:px-4 py-1.5 sm:py-2 border border-[#0088FF] rounded-full cursor-pointer w-full sm:w-auto">
+                               
                                 <span className="text-sm sm:text-md font-medium px-2 sm:px-4 text-[#0088FF]">
                                     {employeeData.status}
                                 </span>
                                 <img src={active_icon} alt="Active" className="w-5 h-5 sm:w-7 sm:h-7" />
                             </button>
+                            <button 
+    onClick={handleEditEmployee}
+    className="inline-flex items-center justify-center px-3 sm:px-4 py-1.5 sm:py-2 border border-blue-600 rounded-full cursor-pointer w-full sm:w-auto"
+>
+    <img src={edit_icon} alt="Edit" className="w-4 h-4" />
+    <span className="text-sm sm:text-md font-medium px-2 text-blue-600">Edit Employee</span>
+</button>
                         </div>
                     </div>
 

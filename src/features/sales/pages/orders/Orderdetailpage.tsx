@@ -2,6 +2,9 @@
 import { useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import DashboardLayout from "../../../../layouts/DashboardLayout";
+import { useGetChartOfAccountsQuery } from "../../../../services/accountingApi";
+import dropdown_arrow_icon from "../../../../assets/icons/dropdown_arrow_icon.svg";
+
 import {
   useGetOrderByIdQuery,
   useConfirmOrderMutation,
@@ -13,6 +16,7 @@ import {
   useReturnOrderMutation,
   useMarkOrderAsPaidMutation,
   useGetOrderStatusHistoryQuery,
+  useRecordSalePaymentMutation,
 } from "../../../../services/salesApi";
 
 import arrow_back_icon from "../../../../assets/icons/arrow_back_icon.svg";
@@ -59,6 +63,26 @@ export default function OrderDetailPage() {
   const [shippingProvider, setShippingProvider] = useState("");
   const [cancelReason, setCancelReason] = useState("");
   const [returnReason, setReturnReason] = useState("");
+
+
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [paymentAmount, setPaymentAmount] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("");
+  const [selectedAccountId, setSelectedAccountId] = useState("");
+  const [paymentReference, setPaymentReference] = useState("");
+
+  const { data: accountsData } = useGetChartOfAccountsQuery({
+    is_active: 1 as any,
+    per_page: 1000,
+  });
+
+  const accounts = accountsData?.data?.data || accountsData?.data || [];
+  const paymentAccounts = accounts.filter((account: any) =>
+    account.account_type === 'Asset' && account.is_active === true
+  );
+
+
+  const [recordPayment, { isLoading: isRecordingPayment }] = useRecordSalePaymentMutation();
 
   const { data: orderResponse, isLoading } = useGetOrderByIdQuery(orderId, {
     skip: !orderId,
@@ -134,6 +158,53 @@ export default function OrderDetailPage() {
       setReturnReason("");
     } catch (err: any) {
       alert(err?.data?.message || "Failed to return order");
+    }
+  };
+
+  const handleRecordPayment = async () => {
+    const amount = parseFloat(paymentAmount);
+
+    if (!amount || amount <= 0) {
+      alert("Please enter a valid amount");
+      return;
+    }
+
+    const outstanding = order.total_amount - (order.total_paid || 0);
+    if (amount > outstanding) {
+      alert(`Amount cannot exceed outstanding balance (${outstanding.toFixed(3)})`);
+      return;
+    }
+
+    if (!paymentMethod) {
+      alert("Please select a payment method");
+      return;
+    }
+
+    if (!selectedAccountId) {
+      alert("Please select a payment account");
+      return;
+    }
+
+    try {
+      await recordPayment({
+        sale_id: orderId,
+        amount: amount,
+        payment_method: paymentMethod,
+        payment_account_id: parseInt(selectedAccountId),
+        reference_number: paymentReference || undefined,
+        payment_date: new Date().toISOString().split('T')[0],
+      }).unwrap();
+
+      setShowPaymentModal(false);
+      setPaymentAmount("");
+      setPaymentMethod("");
+      setSelectedAccountId("");
+      setPaymentReference("");
+
+      // Refetch order data
+      refetch();
+    } catch (err: any) {
+      alert(err?.data?.message || "Failed to record payment");
     }
   };
 
@@ -649,16 +720,10 @@ export default function OrderDetailPage() {
           )}
           {canMarkPaid && (
             <button
-              onClick={() =>
-                handleAction(
-                  () => markAsPaid(orderId).unwrap(),
-                  "Failed to mark as paid",
-                )
-              }
-              disabled={isMarkingPaid}
-              className="px-3 sm:px-4 py-1.5 sm:py-2 bg-emerald-600 text-white rounded-lg text-xs sm:text-sm font-semibold hover:bg-emerald-700 disabled:opacity-50 transition-colors"
+              onClick={() => setShowPaymentModal(true)}
+              className="px-3 sm:px-4 py-1.5 sm:py-2 bg-emerald-600 text-white rounded-lg text-xs sm:text-sm font-semibold hover:bg-emerald-700 transition-colors"
             >
-              {isMarkingPaid ? "Updating..." : "Mark as Paid"}
+              Record Payment
             </button>
           )}
           {canCancel && (
@@ -687,8 +752,8 @@ export default function OrderDetailPage() {
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={`px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${activeTab === tab
-                    ? "border-[#1773CF] text-[#1773CF]"
-                    : "border-transparent text-gray-500 hover:text-gray-700"
+                  ? "border-[#1773CF] text-[#1773CF]"
+                  : "border-transparent text-gray-500 hover:text-gray-700"
                   }`}
               >
                 {tab === "history"
@@ -1078,6 +1143,125 @@ export default function OrderDetailPage() {
                 className="flex-1 py-2 sm:py-2.5 bg-gray-700 text-white rounded-xl font-medium hover:bg-gray-800 disabled:opacity-50 text-sm transition-colors"
               >
                 {isReturning ? "Processing..." : "Return Order"}
+              </button>
+            </div>
+
+
+          </div>
+        </div>
+      )}
+
+      {/* Payment Modal */}
+      {showPaymentModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl p-4 sm:p-6">
+            <h3 className="text-lg font-bold mb-4">Record Payment</h3>
+
+            <div className="space-y-4">
+              {/* Outstanding Amount Display */}
+              <div className="bg-orange-50 rounded-lg p-3 text-center">
+                <p className="text-xs text-gray-500 mb-1">Outstanding Amount</p>
+                <p className="text-xl font-bold text-orange-600">
+                  KWD {(order.total_amount - (order.total_paid || 0)).toFixed(3)}
+                </p>
+              </div>
+
+              {/* Payment Amount */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Payment Amount <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="number"
+                  step="0.001"
+                  min="0.001"
+                  value={paymentAmount}
+                  onChange={(e) => setPaymentAmount(e.target.value)}
+                  placeholder="Enter amount"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  autoFocus
+                />
+              </div>
+
+              {/* Payment Method */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Payment Method <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <select
+                    value={paymentMethod}
+                    onChange={(e) => setPaymentMethod(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Select Payment Method</option>
+                    <option value="Cash">Cash</option>
+                    <option value="Credit Card">Credit Card</option>
+                    <option value="Debit Card">Debit Card</option>
+                    <option value="K-Net">K-Net</option>
+                    <option value="Bank Transfer">Bank Transfer</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment Account (Chart of Accounts) */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Payment Account <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <select
+                    value={selectedAccountId}
+                    onChange={(e) => setSelectedAccountId(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Select Account</option>
+                    {paymentAccounts.map((account: any) => (
+                      <option key={account.id} value={account.id}>
+                        {account.account_code} - {account.account_name}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
+                  </div>
+                </div>
+                <p className="text-xs text-gray-400 mt-1">
+                  Select the bank/cash account receiving this payment
+                </p>
+              </div>
+
+              {/* Reference Number */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Reference Number (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={paymentReference}
+                  onChange={(e) => setPaymentReference(e.target.value)}
+                  placeholder="Cheque #, Transaction ID, etc."
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowPaymentModal(false)}
+                className="flex-1 py-2 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRecordPayment}
+                disabled={isRecordingPayment}
+                className="flex-1 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 disabled:opacity-50"
+              >
+                {isRecordingPayment ? "Recording..." : "Record Payment"}
               </button>
             </div>
           </div>

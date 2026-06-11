@@ -109,6 +109,26 @@ export const salesApi = api.injectEndpoints({
       invalidatesTags: (_r, _e, id) => [{ type: 'Orders', id }, 'Orders'],
     }),
 
+    recordSalePayment: builder.mutation<{ success: boolean; data: Order }, {
+  sale_id: number;
+  amount: number;
+  payment_method: string;
+  payment_account_id: number;
+  reference_number?: string;
+  payment_date: string;
+  notes?: string;
+}>({
+  query: ({ sale_id, ...body }) => ({
+    url: `/sales/${sale_id}/record-payment`,
+    method: 'POST',
+    body,
+  }),
+  invalidatesTags: (_r, _e, { sale_id }) => [
+    { type: 'Orders', id: sale_id },
+    'Orders',
+  ],
+}),
+
     getOrderStatusHistory: builder.query<{ success: boolean; data: any[] }, number>({
       query: (id) => `/orders/${id}/status-history`,
       providesTags: (_r, _e, id) => [{ type: 'Orders', id }],
@@ -213,4 +233,6 @@ export const {
     useGetSalesMonthlyQuery,
     useGetSalesOverviewQuery,
     useGetChannelBreakdownQuery,
+
+    useRecordSalePaymentMutation
 } = salesApi;

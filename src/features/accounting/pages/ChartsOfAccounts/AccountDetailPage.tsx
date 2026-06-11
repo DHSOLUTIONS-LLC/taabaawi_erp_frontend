@@ -45,6 +45,8 @@ export default function AccountDetailPage() {
 
   const account = (data as any)?.data;
   const balance = (balanceData as any)?.data;
+  console.log("AccountDetailPage account:", account);
+  console.log("AccountDetailPage balance:", balance);
 
   if (isLoading) {
     return (

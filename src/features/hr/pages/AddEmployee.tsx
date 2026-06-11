@@ -1,7 +1,7 @@
 // src/features/hr/pages/AddEmployee.tsx
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useCreateEmpMutation } from '../../../services/hrApi';
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useCreateEmpMutation, useGetEmployeeByIdQuery, useUpdateEmployeeMutation } from '../../../services/hrApi';
 import { useAppSelector } from '../../../app/hooks';
 import type { RootState } from '../../../app/store';
 import { useGetBranchesQuery, useGetRolesQuery } from '../../../services/superAdminApi';
@@ -19,8 +19,8 @@ import DashboardLayout from '../../../layouts/DashboardLayout';
 interface CreateEmployeeData {
     name: string;
     email: string;
-    password: string;
-    password_confirmation: string;
+    password?: string;
+    password_confirmation?: string;
     phone: string;
     role_id: number;
     branch_id: number;
@@ -52,9 +52,19 @@ interface Allowance {
 
 export default function AddEmployee() {
     const navigate = useNavigate();
+    const { id } = useParams<{ id: string }>();
     const { user } = useAppSelector((state: RootState) => state.auth);
-    const [createUser, { isLoading }] = useCreateEmpMutation();
+    const isEditMode = !!id;
+
+    const [createUser, { isLoading: isCreating }] = useCreateEmpMutation();
+    const [updateUser, { isLoading: isUpdating }] = useUpdateEmployeeMutation();
     const [isEditingAllowances, setIsEditingAllowances] = useState(false);
+
+    // Fetch employee data for edit mode
+    const { data: employeeData, isLoading: isLoadingEmployee } = useGetEmployeeByIdQuery(Number(id), {
+        skip: !isEditMode
+    });
+    const employee = employeeData?.data;
 
     // State with backend-compatible fields
     const [formData, setFormData] = useState({
@@ -90,7 +100,7 @@ export default function AddEmployee() {
         accommodation_allowance: '',
     });
 
-    // Allowances table state (keeping original UI)
+    // Allowances table state
     const [allowances, setAllowances] = useState<Allowance[]>([
         { id: '1', type: 'Housing Allowance', amount: 150 },
         { id: '2', type: 'Transport Allowance', amount: 75 }
@@ -105,52 +115,108 @@ export default function AddEmployee() {
     const isHR = user?.role?.role_name === 'HR';
     const basePath = isSuperAdmin ? '/admin' : isHR ? '/hr' : '';
 
+    // Populate form data when in edit mode
+    useEffect(() => {
+        if (isEditMode && employee) {
+            // Split name into first and last name
+            const nameParts = (employee.name || '').split(' ');
+            const firstName = nameParts[0] || '';
+            const lastName = nameParts.slice(1).join(' ') || '';
+
+            setFormData({
+                firstName: firstName,
+                lastName: lastName,
+                email: employee.email || '',
+                password: '',
+                password_confirmation: '',
+                phone: employee.phone || '',
+                role_id: employee.role_id?.toString() || '',
+                branch_id: employee.branch_id?.toString() || '',
+                is_active: employee.is_active ?? true,
+                national_id: employee.national_id || '',
+                gender: employee.gender || '',
+                date_of_birth: employee.date_of_birth || '',
+                marital_status: employee.marital_status || '',
+                joining_date: employee.joining_date || '',
+                job_title: employee.job_title || '',
+                department: employee.department || '',
+                address: employee.address || '',
+                emergency_contact_name: employee.emergency_contact_name || '',
+                emergency_contact_phone: employee.emergency_contact_phone || '',
+                basic_salary: employee.basic_salary?.toString() || '',
+                transportation_allowance: employee.transportation_allowance?.toString() || '',
+                housing_allowance: employee.housing_allowance?.toString() || '',
+                communication_allowance: employee.communication_allowance?.toString() || '',
+                meal_allowance: employee.meal_allowance?.toString() || '',
+                accommodation_allowance: employee.accommodation_allowance?.toString() || '',
+            });
+        }
+    }, [isEditMode, employee]);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         try {
-            // Combine first and last name
             const fullName = `${formData.firstName} ${formData.lastName}`.trim();
 
-            // Prepare data for API
-            const employeeData: CreateEmployeeData = {
+            // Build the payload based on mode
+            const payload: any = {
                 name: fullName,
                 email: formData.email,
-                password: formData.password,
-                password_confirmation: formData.password_confirmation,
                 phone: formData.phone,
                 role_id: Number(formData.role_id),
                 branch_id: Number(formData.branch_id),
                 is_active: formData.is_active,
-
-                // Optional fields (only send if not empty)
-                ...(formData.national_id && { national_id: formData.national_id }),
-                ...(formData.date_of_birth && { date_of_birth: formData.date_of_birth }),
-                ...(formData.gender && { gender: formData.gender }),
-                ...(formData.marital_status && { marital_status: formData.marital_status }),
-                ...(formData.joining_date && { joining_date: formData.joining_date }),
-                ...(formData.job_title && { job_title: formData.job_title }),
-                ...(formData.department && { department: formData.department }),
-                ...(formData.address && { address: formData.address }),
-                ...(formData.emergency_contact_name && { emergency_contact_name: formData.emergency_contact_name }),
-                ...(formData.emergency_contact_phone && { emergency_contact_phone: formData.emergency_contact_phone }),
-
-                // Allowances (convert to numbers)
-                ...(formData.basic_salary && { basic_salary: parseFloat(formData.basic_salary) }),
-                ...(formData.transportation_allowance && { transportation_allowance: parseFloat(formData.transportation_allowance) }),
-                ...(formData.housing_allowance && { housing_allowance: parseFloat(formData.housing_allowance) }),
-                ...(formData.communication_allowance && { communication_allowance: parseFloat(formData.communication_allowance) }),
-                ...(formData.meal_allowance && { meal_allowance: parseFloat(formData.meal_allowance) }),
-                ...(formData.accommodation_allowance && { accommodation_allowance: parseFloat(formData.accommodation_allowance) }),
+                // Optional fields - send empty strings as null or undefined
+                national_id: formData.national_id || null,
+                date_of_birth: formData.date_of_birth || null,
+                gender: formData.gender || null,
+                marital_status: formData.marital_status || null,
+                joining_date: formData.joining_date || null,
+                job_title: formData.job_title || null,
+                department: formData.department || null,
+                address: formData.address || null,
+                emergency_contact_name: formData.emergency_contact_name || null,
+                emergency_contact_phone: formData.emergency_contact_phone || null,
             };
 
-            await createUser(employeeData).unwrap();
-            console.log('emp created:', employeeData)
-            alert('Employee created successfully!');
+            // Add allowance fields only if they have values
+            if (formData.basic_salary) payload.basic_salary = parseFloat(formData.basic_salary);
+            if (formData.transportation_allowance) payload.transportation_allowance = parseFloat(formData.transportation_allowance);
+            if (formData.housing_allowance) payload.housing_allowance = parseFloat(formData.housing_allowance);
+            if (formData.communication_allowance) payload.communication_allowance = parseFloat(formData.communication_allowance);
+            if (formData.meal_allowance) payload.meal_allowance = parseFloat(formData.meal_allowance);
+            if (formData.accommodation_allowance) payload.accommodation_allowance = parseFloat(formData.accommodation_allowance);
 
-        } catch (error) {
-            console.error('Failed to create employee:', error);
-            alert('Failed to create employee. Please check all fields.');
+            // Only include password for create mode
+            if (!isEditMode) {
+                payload.password = formData.password;
+                payload.password_confirmation = formData.password_confirmation;
+            }
+
+            console.log("Sending payload:", payload);
+
+            if (isEditMode) {
+                await updateUser({ id: Number(id), ...payload }).unwrap();
+                alert('Employee updated successfully!');
+            } else {
+                await createUser(payload).unwrap();
+                alert('Employee created successfully!');
+            }
+
+            // navigate(`${basePath}/hr/employee/${isEditMode ? id : ''}`);
+        } catch (error: any) {
+            console.error('Failed to save employee:', error);
+            console.error('Error response:', error?.data);
+
+            // Show detailed validation errors
+            if (error?.data?.errors) {
+                const errorMessages = Object.values(error.data.errors).flat().join('\n');
+                alert(`Validation failed:\n${errorMessages}`);
+            } else {
+                const errorMessage = error?.data?.message || 'Failed to save employee. Please check all fields.';
+                alert(errorMessage);
+            }
         }
     };
 
@@ -179,6 +245,19 @@ export default function AddEmployee() {
         navigate(-1);
     };
 
+    if (isEditMode && isLoadingEmployee) {
+        return (
+            <DashboardLayout>
+                <div className="flex justify-center items-center h-64">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                </div>
+            </DashboardLayout>
+        );
+    }
+
+    const isLoading = isCreating || isUpdating;
+    const pageTitle = isEditMode ? 'Edit Employee' : 'Add New Employee';
+
     return (
         <DashboardLayout>
             <div className="space-y-6">
@@ -186,7 +265,7 @@ export default function AddEmployee() {
                 <div className='flex flex-row justify-between items-center'>
                     <Link to={`${basePath}/hr`} className='flex flex-row items-center'>
                         <img src={arrow_back_icon} alt="Back" className='w-6 h-6 md:w-8 md:h-8' />
-                        <span className='px-2 font-semibold text-sm md:text-base'>Add New Employee</span>
+                        <span className='px-2 font-semibold text-sm md:text-base'>{pageTitle}</span>
                     </Link>
                 </div>
 
@@ -477,7 +556,7 @@ export default function AddEmployee() {
                         </div>
                     </div>
 
-                    {/* Salary & Allowances Section - Keeping Original UI */}
+                    {/* Salary & Allowances Section */}
                     <div className="bg-white rounded-xl p-4 md:p-6">
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             {/* Basic Salary Column */}
@@ -495,7 +574,7 @@ export default function AddEmployee() {
                                 />
                             </div>
 
-                            {/* Allowances Column - Original Table UI */}
+                            {/* Allowances Column */}
                             <div className='shadow-lg rounded-xl overflow-hidden'>
                                 <div className="flex justify-between items-center px-4 py-3 bg-gray-50">
                                     <span className="text-md font-bold text-gray-700">Monthly Allowances</span>
@@ -555,6 +634,7 @@ export default function AddEmployee() {
                                                             <div className="flex items-center space-x-2">
                                                                 <button
                                                                     type="button"
+                                                                    onClick={() => handleUpdateAllowance(allowance.id, 'amount', allowance.amount)}
                                                                     className="p-1 hover:bg-green-50 rounded transition-colors"
                                                                 >
                                                                     <img src={tick_icon_1} alt="Save" className="w-4 h-4" />
@@ -664,41 +744,43 @@ export default function AddEmployee() {
                         </div>
                     </div>
 
-                    {/* System Access */}
-                    <div className="bg-white rounded-xl p-4 md:p-6">
-                        <h2 className="text-lg font-semibold mb-4 text-gray-800">System Access</h2>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-400 mb-2">
-                                    Password <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="password"
-                                    required
-                                    value={formData.password}
-                                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
-                                    placeholder="Enter password"
-                                />
-                            </div>
+                    {/* System Access - Only show password fields for create mode */}
+                    {!isEditMode && (
+                        <div className="bg-white rounded-xl p-4 md:p-6">
+                            <h2 className="text-lg font-semibold mb-4 text-gray-800">System Access</h2>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-400 mb-2">
+                                        Password <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="password"
+                                        required
+                                        value={formData.password}
+                                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                        placeholder="Enter password"
+                                    />
+                                </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-400 mb-2">
-                                    Confirm Password <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="password"
-                                    required
-                                    value={formData.password_confirmation}
-                                    onChange={(e) => setFormData({ ...formData, password_confirmation: e.target.value })}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
-                                    placeholder="Confirm password"
-                                />
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-400 mb-2">
+                                        Confirm Password <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="password"
+                                        required
+                                        value={formData.password_confirmation}
+                                        onChange={(e) => setFormData({ ...formData, password_confirmation: e.target.value })}
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                        placeholder="Confirm password"
+                                    />
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    )}
 
-                    {/* Action Buttons - Responsive Grid */}
+                    {/* Action Buttons */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
                         <button
                             type="button"
@@ -712,9 +794,8 @@ export default function AddEmployee() {
                             disabled={isLoading}
                             className="w-full px-6 py-3 bg-[#6155F5] text-white font-medium rounded-lg hover:bg-[#4F46E5] transition-colors disabled:opacity-50 cursor-pointer text-sm md:text-base"
                         >
-                            {isLoading ? 'Creating...' : 'Save Employee'}
+                            {isLoading ? 'Saving...' : (isEditMode ? 'Update Employee' : 'Save Employee')}
                         </button>
-
                     </div>
                 </form>
             </div>

@@ -1057,6 +1057,14 @@ export const router = createBrowserRouter([
             ),
           },
           {
+            path: "add_employee/edit/:id",
+            element: (
+              <PermissionRoute requiredPermissions={["view_users"]}>
+                <AddEmployee />
+              </PermissionRoute>
+            ),
+          },
+          {
             path: "mark_attendance",
             element: (
               <PermissionRoute requiredPermissions={["view_users"]}>
@@ -1540,6 +1548,7 @@ export const router = createBrowserRouter([
         children: [
           { index: true, element: <HRDashboard /> },
           { path: "add_employee", element: <AddEmployee /> },
+          { path: "add_employee/edit/:id", element: <AddEmployee /> },
           { path: "mark_attendance", element: <MarkAttendance /> },
           { path: "add_bonuses", element: <AddBonusesPage /> },
           { path: "leave_requests", element: <PreviewLeaveRequests /> },

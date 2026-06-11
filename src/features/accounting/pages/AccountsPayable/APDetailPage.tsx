@@ -39,7 +39,6 @@ export default function APDetailPage() {
   const { data, isLoading, refetch } = useGetAPByIdQuery(apId);
   const [recordPayment] = useRecordAPPaymentMutation();
 
-  // Fetch chart of accounts for dropdown (only active asset/cash accounts)
   const { data: accountsData } = useGetChartOfAccountsQuery({
     is_active: 1 as any,
     per_page: 1000,
@@ -47,10 +46,8 @@ export default function APDetailPage() {
 
   const ap = (data as any)?.data;
   
-  // Filter accounts - typically payment should go to Cash/Bank accounts
   const accounts = (accountsData as any)?.data?.data || (accountsData as any)?.data || [];
   
-  // Filter only Asset accounts (Cash, Bank, etc.) for payment
   const paymentAccounts = accounts.filter((account: any) => 
     account.account_type === 'Asset' && 
     account.is_active === true
@@ -58,6 +55,7 @@ export default function APDetailPage() {
 
   const handleRecordPayment = async () => {
     const amount = parseFloat(paymentAmount);
+    
     if (!amount || amount <= 0) {
       alert('Please enter a valid amount');
       return;
@@ -75,17 +73,24 @@ export default function APDetailPage() {
 
     setIsRecording(true);
     try {
-      await recordPayment({ 
+      const payload = { 
         id: apId, 
         payment_amount: amount,
-        payment_account_id: parseInt(selectedAccountId)
-      }).unwrap();
+        payment_account_id: parseInt(selectedAccountId),
+      };
+      console.log('Sending payload:', payload);
+      
+      await recordPayment(payload).unwrap();
+      
       refetch();
       setShowPaymentModal(false);
       setPaymentAmount('');
       setSelectedAccountId('');
+      alert('Payment recorded successfully!');
     } catch (err: any) {
-      alert(err?.data?.message || 'Failed to record payment');
+      console.error('Payment error:', err);
+      const errorMsg = err?.data?.message || err?.message || 'Failed to record payment';
+      alert(errorMsg);
     } finally {
       setIsRecording(false);
     }
@@ -159,7 +164,6 @@ export default function APDetailPage() {
         <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Left Column */}
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">
-            {/* Invoice Details */}
             <div className="bg-white rounded-xl p-4 sm:p-6">
               <h2 className="text-base font-semibold text-gray-900 mb-4">Invoice Details</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -189,7 +193,6 @@ export default function APDetailPage() {
               </div>
             </div>
 
-            {/* Purchase Order Info */}
             {ap.purchaseOrder && (
               <div className="bg-white rounded-xl p-4 sm:p-6">
                 <h2 className="text-base font-semibold text-gray-900 mb-4">Purchase Order</h2>
@@ -208,7 +211,6 @@ export default function APDetailPage() {
               </div>
             )}
 
-            {/* Notes */}
             {ap.notes && (
               <div className="bg-white rounded-xl p-4 sm:p-6">
                 <h2 className="text-base font-semibold text-gray-900 mb-4">Notes</h2>
@@ -219,7 +221,6 @@ export default function APDetailPage() {
 
           {/* Right Column */}
           <div className="space-y-4 sm:space-y-6">
-            {/* Amount Summary */}
             <div className="bg-white rounded-xl p-4 sm:p-6">
               <h2 className="text-base font-semibold text-gray-900 mb-4">Amount Summary</h2>
               <div className="space-y-3">
@@ -244,7 +245,6 @@ export default function APDetailPage() {
               </div>
             </div>
 
-            {/* Supplier Info */}
             {ap.supplier && (
               <div className="bg-white rounded-xl p-4 sm:p-6">
                 <h2 className="text-base font-semibold text-gray-900 mb-4">Supplier Information</h2>
@@ -274,7 +274,6 @@ export default function APDetailPage() {
               </div>
             )}
 
-            {/* Timeline */}
             <div className="bg-white rounded-xl p-4 sm:p-6">
               <h2 className="text-base font-semibold text-gray-900 mb-4">Timeline</h2>
               <div className="space-y-2">
@@ -294,7 +293,7 @@ export default function APDetailPage() {
         </div>
       </div>
 
-      {/* Payment Modal with Chart of Accounts */}
+      {/* Payment Modal */}
       {showPaymentModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl w-full max-w-md mx-4 sm:mx-auto p-4 sm:p-6">
@@ -318,7 +317,6 @@ export default function APDetailPage() {
                 </p>
               </div>
 
-              {/* Payment Amount */}
               <div>
                 <label className="block text-sm font-medium text-gray-600 mb-2">
                   Payment Amount <span className="text-red-500">*</span>
@@ -334,7 +332,6 @@ export default function APDetailPage() {
                 />
               </div>
 
-              {/* Chart of Accounts Dropdown */}
               <div>
                 <label className="block text-sm font-medium text-gray-600 mb-2">
                   Payment Account <span className="text-red-500">*</span>
@@ -349,7 +346,7 @@ export default function APDetailPage() {
                     <option value="">Select Payment Account</option>
                     {paymentAccounts.map((account: any) => (
                       <option key={account.id} value={account.id}>
-                        {account.account_code} - {account.account_name} ({account.account_type})
+                        {account.account_code} - {account.account_name}
                       </option>
                     ))}
                   </select>

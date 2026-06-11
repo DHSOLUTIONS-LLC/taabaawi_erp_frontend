@@ -4,7 +4,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import DashboardLayout from "../../../../layouts/DashboardLayout";
 import { useGetChartOfAccountsQuery } from "../../../../services/accountingApi";
 import dropdown_arrow_icon from "../../../../assets/icons/dropdown_arrow_icon.svg";
-import { useRecordARReceiptMutation } from '../../../../services/accountingApi';
 
 import {
   useGetOrderByIdQuery,
@@ -46,8 +45,6 @@ const PAYMENT_COLORS: Record<string, string> = {
   Failed: "bg-red-100 text-red-700",
 };
 
-const PAYMENT_METHODS = ["Cash", "Bank Transfer", "Cheque", "Credit Card", "Online Payment"];
-
 export default function OrderDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -85,7 +82,7 @@ export default function OrderDetailPage() {
   );
 
 
-const [recordPayment, { isLoading: isRecordingPayment }] = useRecordARReceiptMutation();
+  const [recordPayment, { isLoading: isRecordingPayment }] = useRecordSalePaymentMutation();
 
   const { data: orderResponse, isLoading } = useGetOrderByIdQuery(orderId, {
     skip: !orderId,
@@ -164,50 +161,49 @@ const [recordPayment, { isLoading: isRecordingPayment }] = useRecordARReceiptMut
     }
   };
 
-const handleRecordPayment = async () => {
+  const handleRecordPayment = async () => {
   const amount = parseFloat(paymentAmount);
   
   if (!amount || amount <= 0) {
     alert("Please enter a valid amount");
     return;
   }
-
+  
   const outstanding = order.total_amount - (order.total_paid || 0);
   if (amount > outstanding) {
     alert(`Amount cannot exceed outstanding balance (${outstanding.toFixed(3)})`);
     return;
   }
-
+  
   if (!paymentMethod) {
     alert("Please select a payment method");
     return;
   }
-
+  
   if (!selectedAccountId) {
-    alert("Please select a receipt account");
+    alert("Please select a payment account");
     return;
   }
-
+  
   try {
-    // Call AR receipt API with same format as Accounts Receivable
-    await recordPayment({ 
-      id: orderId, 
-      receipt_amount: amount,
-      receipt_account_id: parseInt(selectedAccountId),
+    await recordPayment({
+      sale_id: orderId,
+      amount: amount,
       payment_method: paymentMethod,
+      payment_account_id: parseInt(selectedAccountId),
       reference_number: paymentReference || undefined,
+      payment_date: new Date().toISOString().split('T')[0],
     }).unwrap();
-
+    
     setShowPaymentModal(false);
     setPaymentAmount("");
     setPaymentMethod("");
     setSelectedAccountId("");
     setPaymentReference("");
-
+    
+    // Refetch order data
     refetch();
-    alert("Payment recorded successfully!");
   } catch (err: any) {
-    console.error("Payment error:", err);
     alert(err?.data?.message || "Failed to record payment");
   }
 };
@@ -724,10 +720,16 @@ const handleRecordPayment = async () => {
           )}
           {canMarkPaid && (
             <button
-              onClick={() => setShowPaymentModal(true)}
-              className="px-3 sm:px-4 py-1.5 sm:py-2 bg-emerald-600 text-white rounded-lg text-xs sm:text-sm font-semibold hover:bg-emerald-700 transition-colors"
+              onClick={() =>
+                handleAction(
+                  () => markAsPaid(orderId).unwrap(),
+                  "Failed to mark as paid",
+                )
+              }
+              disabled={isMarkingPaid}
+              className="px-3 sm:px-4 py-1.5 sm:py-2 bg-emerald-600 text-white rounded-lg text-xs sm:text-sm font-semibold hover:bg-emerald-700 disabled:opacity-50 transition-colors"
             >
-              Record Payment
+              {isMarkingPaid ? "Updating..." : "Mark as Paid"}
             </button>
           )}
           {canCancel && (
@@ -1149,141 +1151,9 @@ const handleRecordPayment = async () => {
                 {isReturning ? "Processing..." : "Return Order"}
               </button>
             </div>
-
-
           </div>
         </div>
       )}
-
-      {/* Payment Modal */}
-    {/* Payment Modal */}
-{showPaymentModal && (
-  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-    <div className="bg-white rounded-2xl w-full max-w-md mx-4 sm:mx-auto p-4 sm:p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-bold text-gray-900">Record Payment</h3>
-        <button
-          onClick={() => setShowPaymentModal(false)}
-          className="text-gray-400 hover:text-gray-600"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-
-      <div className="space-y-4">
-        <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
-          <p className="text-xs text-gray-500">Outstanding Amount</p>
-          <p className="text-lg sm:text-xl font-bold text-orange-600 break-words">
-            KWD {(order.total_amount - (order?.total_paid || 0)).toFixed(3)}
-          </p>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-600 mb-2">
-            Payment Amount <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="number"
-            step="0.001"
-            min="0.001"
-            value={paymentAmount}
-            onChange={(e) => setPaymentAmount(e.target.value)}
-            placeholder="Enter amount in KWD"
-            className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
-            autoFocus
-          />
-          {(order.total_amount - (order.total_paid || 0)) > 0 && (
-            <button
-              type="button"
-              onClick={() => setPaymentAmount((order.total_amount - (order.total_paid || 0)).toString())}
-              className="mt-1.5 text-xs text-blue-600 hover:underline"
-            >
-              Pay full outstanding (KWD {(order.total_amount - (order.total_paid || 0)).toFixed(3)})
-            </button>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-600 mb-2">
-            Payment Method <span className="text-red-500">*</span>
-          </label>
-          <div className="relative">
-            <select
-              value={paymentMethod}
-              onChange={(e) => setPaymentMethod(e.target.value)}
-              className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
-            >
-              <option value="">Select Payment Method</option>
-              {PAYMENT_METHODS.map((method) => (
-                <option key={method} value={method}>{method}</option>
-              ))}
-            </select>
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-              <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-600 mb-2">
-            Payment Account <span className="text-red-500">*</span>
-          </label>
-          <div className="relative">
-            <select
-              value={selectedAccountId}
-              onChange={(e) => setSelectedAccountId(e.target.value)}
-              className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
-            >
-              <option value="">Select Payment Account</option>
-              {paymentAccounts.map((account: any) => (
-                <option key={account.id} value={account.id}>
-                  {account.account_code} - {account.account_name}
-                </option>
-              ))}
-            </select>
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-              <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
-            </div>
-          </div>
-          <p className="text-xs text-gray-400 mt-1">
-            Select the bank/cash account receiving this payment
-          </p>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-600 mb-2">
-            Reference Number (Optional)
-          </label>
-          <input
-            type="text"
-            value={paymentReference}
-            onChange={(e) => setPaymentReference(e.target.value)}
-            placeholder="Cheque #, Transaction ID, etc."
-            className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
-          />
-        </div>
-
-        <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-4">
-          <button
-            onClick={() => setShowPaymentModal(false)}
-            className="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 text-sm sm:text-base"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleRecordPayment}
-            disabled={isRecordingPayment || !paymentAmount || !paymentMethod || !selectedAccountId}
-            className="w-full sm:w-auto px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 text-sm sm:text-base"
-          >
-            {isRecordingPayment ? 'Recording...' : 'Record Payment'}
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-)}
     </DashboardLayout>
   );
 }

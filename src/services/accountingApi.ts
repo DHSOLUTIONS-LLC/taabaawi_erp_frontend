@@ -928,7 +928,7 @@ export const accountingApi = api.injectEndpoints({
       { is_active?: boolean; per_page?: number }
     >({
       query: (params) => ({
-        url: "/users",
+        url: "/customers",
         params: { ...params, role_id: 10 },
       }),
       providesTags: ["Users"],

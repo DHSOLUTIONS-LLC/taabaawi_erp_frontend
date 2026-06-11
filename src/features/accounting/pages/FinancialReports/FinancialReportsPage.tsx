@@ -19,7 +19,7 @@ import autoTable from "jspdf-autotable";
 
 import arrow_back_icon from "../../../../assets/icons/arrow_back_icon.svg";
 import download_icon from "../../../../assets/icons/download_icon.png";
-import print_icon from "../../../../assets/icons/print_icon.png";
+// import print_icon from "../../../../assets/icons/print_icon.png";
 import refresh_icon from "../../../../assets/icons/refresh_icon.png";
 import calendar_icon from "../../../../assets/icons/calender_icon.png";
 import dropdown_arrow_icon from "../../../../assets/icons/dropdown_arrow_icon.svg";
@@ -65,9 +65,9 @@ export default function FinancialReportsPage() {
 
   const [startDate, setStartDate] = useState(
     searchParams.get("start_date") ||
-      new Date(new Date().setMonth(new Date().getMonth() - 1))
-        .toISOString()
-        .split("T")[0],
+    new Date(new Date().setMonth(new Date().getMonth() - 1))
+      .toISOString()
+      .split("T")[0],
   );
 
   const [endDate, setEndDate] = useState(
@@ -374,7 +374,7 @@ export default function FinancialReportsPage() {
             [
               "Investing Activities - Purchase of Assets",
               report.investing_activities?.purchase_assets?.toFixed(3) ||
-                "0.000",
+              "0.000",
             ],
             [
               "Investing Activities - Sale of Assets",
@@ -635,6 +635,7 @@ export default function FinancialReportsPage() {
         {ACCOUNT_TYPE_ORDER.map((type) => {
           const typeAccounts = groupedAccounts[type] || [];
           if (typeAccounts.length === 0) return null;
+          console.log(`Rendering ${type} accounts:`, typeAccounts);
 
           return (
             <div key={type} className="mb-6">
@@ -652,11 +653,17 @@ export default function FinancialReportsPage() {
                         <th className="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase">
                           Account
                         </th>
+                        <th className="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase">
+                          Opening Balance
+                        </th>
                         <th className="px-4 py-2 text-right text-xs font-semibold text-gray-600 uppercase">
                           Debit
                         </th>
                         <th className="px-4 py-2 text-right text-xs font-semibold text-gray-600 uppercase">
                           Credit
+                        </th>
+                        <th className="px-4 py-2 text-right text-xs font-semibold text-gray-600 uppercase">
+                          Ending Balance
                         </th>
                       </tr>
                     </thead>
@@ -672,8 +679,14 @@ export default function FinancialReportsPage() {
                           <td className="px-4 py-2 text-sm text-gray-900 break-words">
                             {account.account_name}
                           </td>
+                          <td className="px-4 py-2 text-sm text-gray-900 break-words">
+                            {account.account_name}
+                          </td>
                           <td className="px-4 py-2 text-right text-sm font-mono text-gray-900 whitespace-nowrap">
                             {num(account.debit).toFixed(3)}
+                          </td>
+                          <td className="px-4 py-2 text-right text-sm font-mono text-gray-900 whitespace-nowrap">
+                            {num(account.credit).toFixed(3)}
                           </td>
                           <td className="px-4 py-2 text-right text-sm font-mono text-gray-900 whitespace-nowrap">
                             {num(account.credit).toFixed(3)}
@@ -1048,11 +1061,10 @@ export default function FinancialReportsPage() {
           <div className="bg-gray-50 rounded-lg p-3">
             <p className="text-xs text-gray-500">Net Change</p>
             <p
-              className={`text-base sm:text-lg font-bold whitespace-nowrap ${
-                num(report.closing_balance - report.opening_balance) >= 0
+              className={`text-base sm:text-lg font-bold whitespace-nowrap ${num(report.closing_balance - report.opening_balance) >= 0
                   ? "text-green-600"
                   : "text-red-600"
-              }`}
+                }`}
             >
               KWD{" "}
               {(
@@ -1232,11 +1244,10 @@ export default function FinancialReportsPage() {
           </div>
 
           <div
-            className={`bg-gradient-to-br rounded-xl p-4 border ${
-              netCashFlow >= 0
+            className={`bg-gradient-to-br rounded-xl p-4 border ${netCashFlow >= 0
                 ? "from-green-50 to-green-100 border-green-200"
                 : "from-red-50 to-red-100 border-red-200"
-            }`}
+              }`}
           >
             <div className="flex items-center justify-between">
               <div>
@@ -1248,22 +1259,19 @@ export default function FinancialReportsPage() {
                   Net Change
                 </p>
                 <p
-                  className={`text-xl sm:text-2xl font-bold mt-1 ${
-                    netCashFlow >= 0 ? "text-green-700" : "text-red-700"
-                  }`}
+                  className={`text-xl sm:text-2xl font-bold mt-1 ${netCashFlow >= 0 ? "text-green-700" : "text-red-700"
+                    }`}
                 >
                   KWD {netCashFlow.toFixed(3)}
                 </p>
               </div>
               <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                  netCashFlow >= 0 ? "bg-green-200" : "bg-red-200"
-                }`}
+                className={`w-10 h-10 rounded-full flex items-center justify-center ${netCashFlow >= 0 ? "bg-green-200" : "bg-red-200"
+                  }`}
               >
                 <svg
-                  className={`w-5 h-5 ${
-                    netCashFlow >= 0 ? "text-green-600" : "text-red-600"
-                  }`}
+                  className={`w-5 h-5 ${netCashFlow >= 0 ? "text-green-600" : "text-red-600"
+                    }`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -1495,11 +1503,10 @@ export default function FinancialReportsPage() {
 
         {/* Net Cash Flow Summary */}
         <div
-          className={`rounded-xl overflow-hidden shadow-lg ${
-            netCashFlow >= 0
+          className={`rounded-xl overflow-hidden shadow-lg ${netCashFlow >= 0
               ? "bg-gradient-to-r from-green-500 to-emerald-600"
               : "bg-gradient-to-r from-red-500 to-rose-600"
-          }`}
+            }`}
         >
           <div className="px-6 py-5">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -1514,9 +1521,8 @@ export default function FinancialReportsPage() {
 
               <div className="flex items-center gap-3">
                 <div
-                  className={`px-4 py-2 rounded-lg ${
-                    netCashFlow >= 0 ? "bg-white/20" : "bg-white/20"
-                  }`}
+                  className={`px-4 py-2 rounded-lg ${netCashFlow >= 0 ? "bg-white/20" : "bg-white/20"
+                    }`}
                 >
                   <div className="flex items-center gap-2">
                     {netCashFlow >= 0 ? (
@@ -1570,9 +1576,8 @@ export default function FinancialReportsPage() {
             {/* Mini trend indicator */}
             <div className="mt-4 h-1.5 w-full bg-white/20 rounded-full overflow-hidden">
               <div
-                className={`h-full rounded-full transition-all duration-500 ${
-                  netCashFlow >= 0 ? "bg-white" : "bg-white"
-                }`}
+                className={`h-full rounded-full transition-all duration-500 ${netCashFlow >= 0 ? "bg-white" : "bg-white"
+                  }`}
                 style={{
                   width: `${Math.min(Math.abs(netCashFlow) / 1000, 100)}%`,
                 }}
@@ -1707,11 +1712,10 @@ export default function FinancialReportsPage() {
                   onClick={() => handleTabChange(tab.id as ReportTab)}
                   className={`
             py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 whitespace-nowrap
-            ${
-              activeTab === tab.id
-                ? "border-blue-500 text-blue-600"
-                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-            }
+            ${activeTab === tab.id
+                      ? "border-blue-500 text-blue-600"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    }
           `}
                 >
                   <span className="text-base">{tab.icon}</span>

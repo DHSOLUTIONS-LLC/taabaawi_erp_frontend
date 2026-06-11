@@ -4,10 +4,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
 import { useAppSelector } from '../../../../app/hooks';
 import type { RootState } from '../../../../app/store';
-import {
-  useCreateARMutation,
-  useGetCustomersQuery
-} from '../../../../services/accountingApi';
+import { useCreateARMutation } from '../../../../services/accountingApi';
+import { useGetCustomersQuery } from '../../../../services/crmApi';
 import { useGetOrdersQuery } from '../../../../services/salesApi';
 
 import arrow_back_icon from '../../../../assets/icons/arrow_back_icon.svg';
@@ -19,6 +17,7 @@ export default function CreateARPage() {
   const navigate = useNavigate();
   const { orderId } = useParams<{ orderId?: string }>();
   const { user } = useAppSelector((state: RootState) => state.auth);
+
   const [formData, setFormData] = useState({
     customer_id: '',
     order_id: orderId || '',
@@ -38,42 +37,48 @@ export default function CreateARPage() {
 
   const [createAR, { isLoading }] = useCreateARMutation();
 
-  // Fetch customers
+  // ─── Customers (crmApi getCustomers → transformResponse returns { data: Customer[] }) ───
   const { data: customersData } = useGetCustomersQuery({
-    is_active: true,
+    is_active: 1 as any,  
     per_page: 1000,
   });
-  const customers = (customersData as any)?.data?.data || (customersData as any)?.data || [];
+  const customers = Array.isArray((customersData as any)?.data?.data)
+    ? (customersData as any).data.data
+    : [];
+    // console.log('customers', customersData);
 
-  // Fetch orders
-  const { data: ordersData } = useGetOrdersQuery({
-    per_page: 1000,
-  });
-  const orders = (ordersData as any)?.data?.data || (ordersData as any)?.data || [];
+  // ─── Orders ───
+  const { data: ordersData } = useGetOrdersQuery({ per_page: 1000 });
+  const ordersRaw =
+    (ordersData as any)?.data?.data ?? (ordersData as any)?.data ?? [];
+  const orders = Array.isArray(ordersRaw) ? ordersRaw : [];
 
   // Filter orders based on selected customer
   useEffect(() => {
     if (formData.customer_id) {
-      const filtered = orders.filter(
-        (order: any) => order.customer_id?.toString() === formData.customer_id
+      setFilteredOrders(
+        orders.filter(
+          (order: any) => order.customer_id?.toString() === formData.customer_id
+        )
       );
-      setFilteredOrders(filtered);
     } else {
       setFilteredOrders([]);
     }
   }, [formData.customer_id, orders]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleCustomerChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const customerId = e.target.value;
-    setFormData(prev => ({ 
-      ...prev, 
+    setFormData(prev => ({
+      ...prev,
       customer_id: customerId,
-      order_id: '', // Reset order when customer changes
+      order_id: '',
       invoice_number: '',
       invoice_amount: 0,
       currency: 'KWD',
@@ -84,15 +89,20 @@ export default function CreateARPage() {
     const selectedOrderId = e.target.value;
     setFormData(prev => ({ ...prev, order_id: selectedOrderId }));
 
-    // Auto-fill fields based on selected order
     if (selectedOrderId) {
-      const selectedOrder = orders.find((order: any) => order.id.toString() === selectedOrderId);
+      const selectedOrder = orders.find(
+        (order: any) => order.id.toString() === selectedOrderId
+      );
       if (selectedOrder) {
         setFormData(prev => ({
           ...prev,
           invoice_number: selectedOrder.order_number || '',
-          invoice_date: selectedOrder.created_at ? new Date(selectedOrder.created_at).toISOString().split('T')[0] : prev.invoice_date,
-          due_date: selectedOrder.due_date ? new Date(selectedOrder.due_date).toISOString().split('T')[0] : prev.due_date,
+          invoice_date: selectedOrder.created_at
+            ? new Date(selectedOrder.created_at).toISOString().split('T')[0]
+            : prev.invoice_date,
+          due_date: selectedOrder.due_date
+            ? new Date(selectedOrder.due_date).toISOString().split('T')[0]
+            : prev.due_date,
           invoice_amount: selectedOrder.total_amount || 0,
           currency: selectedOrder.currency || 'KWD',
         }));
@@ -115,7 +125,9 @@ export default function CreateARPage() {
       };
 
       const result = await createAR(payload).unwrap();
-      navigate(`${basePath}/accounting/accounts-receivable/${(result as any).data?.id}`);
+      navigate(
+        `${basePath}/accounting/accounts-receivable/${(result as any).data?.id}`
+      );
     } catch (err: any) {
       if (err.data?.errors) {
         setErrors(err.data.errors);
@@ -159,7 +171,9 @@ export default function CreateARPage() {
                   <option value="">Select Customer</option>
                   {customers.map((customer: any) => (
                     <option key={customer.id} value={customer.id}>
-                      {customer.name} ({customer.email})
+                      {customer.first_name ||
+                        `${customer.first_name} ${customer.last_name || ''}`.trim()}{' '}
+                      
                     </option>
                   ))}
                 </select>
@@ -173,9 +187,7 @@ export default function CreateARPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
-                Order
-              </label>
+              <label className="block text-sm font-medium text-gray-600 mb-2">Order</label>
               <div className="relative">
                 <select
                   name="order_id"
@@ -187,7 +199,8 @@ export default function CreateARPage() {
                   <option value="">Select Order</option>
                   {filteredOrders.map((order: any) => (
                     <option key={order.id} value={order.id}>
-                      {order.order_number} - {order.currency} {parseFloat(order.total_amount).toFixed(3)}
+                      {order.order_number} - {order.currency}{' '}
+                      {parseFloat(order.total_amount).toFixed(3)}
                     </option>
                   ))}
                 </select>
@@ -196,7 +209,9 @@ export default function CreateARPage() {
                 </div>
               </div>
               {!formData.customer_id && (
-                <p className="text-xs text-gray-400 mt-1">Select a customer first to see their orders</p>
+                <p className="text-xs text-gray-400 mt-1">
+                  Select a customer first to see their orders
+                </p>
               )}
             </div>
           </div>
@@ -256,9 +271,7 @@ export default function CreateARPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
-                Currency
-              </label>
+              <label className="block text-sm font-medium text-gray-600 mb-2">Currency</label>
               <div className="relative">
                 <select
                   name="currency"
@@ -268,7 +281,9 @@ export default function CreateARPage() {
                   disabled={isOrderSelected}
                 >
                   {CURRENCIES.map(currency => (
-                    <option key={currency} value={currency}>{currency}</option>
+                    <option key={currency} value={currency}>
+                      {currency}
+                    </option>
                   ))}
                 </select>
                 <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -302,9 +317,7 @@ export default function CreateARPage() {
 
           {/* Notes */}
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-2">
-              Notes
-            </label>
+            <label className="block text-sm font-medium text-gray-600 mb-2">Notes</label>
             <textarea
               name="notes"
               value={formData.notes}

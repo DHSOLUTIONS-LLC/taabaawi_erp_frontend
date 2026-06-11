@@ -231,7 +231,7 @@ const SystemSettingsPage: React.FC = () => {
 
             {activeTab === 'company' && (
               <div className="space-y-6">
-                <LogoUploader />
+                <LogoLogoUploader />
                 <CompanyInfo register={register} errors={errors} />
               </div>
             )}

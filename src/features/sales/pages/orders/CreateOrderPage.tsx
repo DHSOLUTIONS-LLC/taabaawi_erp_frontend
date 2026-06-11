@@ -15,13 +15,17 @@ import {
   useGetShippingMethodsQuery,
 } from "../../../../services/salesApi";
 import { useGetBranchesQuery, useGetUsersQuery } from "../../../../services/superAdminApi";
+
+
 import { useGetCustomersQuery } from "../../../../services/crmApi";
+
+
 import { canSwitchBranch } from "../../../../utils/roleHelpers";
 
 import arrow_back_icon from "../../../../assets/icons/arrow_back_icon.svg";
 import dropdown_arrow_icon from "../../../../assets/icons/dropdown_arrow_icon.svg";
 import add_icon from "../../../../assets/icons/add.svg";
-import search_icon from "../../../../assets/icons/search_icon.svg";
+// import search_icon from "../../../../assets/icons/search_icon.svg";
 import ProductSelectionModal from "../../components/OrderProductSelectionModel";
 
 export interface ShippingMethod {
@@ -83,8 +87,10 @@ const [salesPersonId, setSalesPersonId] = useState("");
   const { data: branchesData } = useGetBranchesQuery();
   const { data: methodsResponse, isLoading: _isLoadingShipping } =
     useGetShippingMethodsQuery({ search: search || undefined });
+
   const { data: customersResponse, isLoading: isLoadingCustomers } =
-    useGetCustomersQuery({ per_page: 1000 });
+   useGetCustomersQuery({ per_page: 1000 });
+
   console.log("customersResponse:", customersResponse);
 
 
@@ -107,7 +113,12 @@ const salesPersons = (Array.isArray(allUsers) ? allUsers : []).filter((u: any) =
   const branches = Array.isArray(branchesData) ? branchesData : [];
   const methods: ShippingMethod[] =
     methodsResponse?.data?.data || methodsResponse?.data || [];
-  const customers = customersResponse?.data || [];
+
+
+const customers = customersResponse?.data?.data || customersResponse?.data || [];
+
+
+
   console.log("customers", customers);
   // ─── Calculations ─────────────────────────────────
   const subtotal = selectedProducts.reduce(

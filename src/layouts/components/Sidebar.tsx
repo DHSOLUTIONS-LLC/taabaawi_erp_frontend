@@ -19,6 +19,7 @@ import accounting from "../../assets/icons/accounting.png";
 import hr_users from "../../assets/icons/hr_users_.png";
 import branches from "../../assets/icons/branches.png";
 import type { RootState } from "../../app/store";
+import { useGetSystemSettingsQuery } from "../../services/systemApi";
 
 interface SidebarProps {
   onMenuSelect?: (pageTitle: string) => void;
@@ -88,6 +89,16 @@ export default function Sidebar({
     if (isSuperAdmin) return true;
     return permissions.some((permission) => hasPermission(permission));
   };
+
+  const { data: settingsData } = useGetSystemSettingsQuery();
+const settings = settingsData?.data;
+console.log("System settings in sidebar:", settings);
+const companyLogo = settings?.logo 
+  ? `https://erp-backend.ttexpresskw.com/storage/${settings.logo}` 
+  : erp_logo;
+const companyName = settings?.company_name || "ERP";
+const companyTagline = settings?.company_tagline || "Enterprise Suite";
+
 
   const menuItems: MenuItem[] = isSuperAdmin
     ? [
@@ -724,11 +735,11 @@ export default function Sidebar({
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 rounded-lg flex items-center justify-center">
-                <img src={erp_logo} alt="ERP Logo" className="w-8 h-8" />
+                <img src={companyLogo} alt={companyName} className="w-8 h-8" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-gray-900">ERP</h2>
-                <p className="text-sm text-gray-400">Enterprise Suite</p>
+                <h2 className="text-xl font-bold text-gray-900">{companyName}</h2>
+                <p className="text-sm text-gray-400">{companyTagline}</p>
               </div>
             </div>
 

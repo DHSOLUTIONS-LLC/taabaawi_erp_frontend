@@ -629,9 +629,8 @@ export default function EditProductModal({
               />
               <label
                 htmlFor="image-upload"
-                className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all ${
-                  isLoading ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+                className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all ${isLoading ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
               >
                 <svg
                   className="w-10 h-10 text-gray-400 mb-2"
@@ -1192,22 +1191,20 @@ export default function EditProductModal({
             <button
               onClick={onClose}
               disabled={isLoading}
-              className={`px-6 py-3 bg-[#1773CF33] text-gray-700 font-semibold rounded-lg transition-colors ${
-                isLoading
+              className={`px-6 py-3 bg-[#1773CF33] text-gray-700 font-semibold rounded-lg transition-colors ${isLoading
                   ? "opacity-50 cursor-not-allowed"
                   : "cursor-pointer hover:bg-gray-200"
-              }`}
+                }`}
             >
               Cancel
             </button>
             <button
               onClick={handleSaveProduct}
               disabled={isLoading}
-              className={`px-6 py-3 bg-[#1773CF] text-white font-semibold rounded-lg transition-colors flex items-center justify-center ${
-                isLoading
+              className={`px-6 py-3 bg-[#1773CF] text-white font-semibold rounded-lg transition-colors flex items-center justify-center ${isLoading
                   ? "opacity-50 cursor-not-allowed"
                   : "cursor-pointer hover:bg-blue-700"
-              }`}
+                }`}
             >
               {isLoading ? (
                 <>

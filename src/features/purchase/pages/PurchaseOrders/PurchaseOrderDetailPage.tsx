@@ -22,9 +22,6 @@ import CreatePaymentModal from "../SupplierPayments/CreatePaymentModal";
 
 import arrow_back_icon from "../../../../assets/icons/arrow_back_icon.svg";
 import edit_icon from "../../../../assets/icons/edit_icon.svg";
-import check_icon from "../../../../assets/icons/check_icon.png";
-import close_icon from "../../../../assets/icons/cross_icon.svg";
-import send_icon from "../../../../assets/icons/send_icon.png";
 import delete_icon from "../../../../assets/icons/delete-icon.png";
 import print_icon from "../../../../assets/icons/print_icon.png";
 import export_pdf_icon from "../../../../assets/icons/export_pdf.svg";
@@ -36,6 +33,8 @@ const METHOD_COLORS: Record<string, string> = {
   "Credit Card": "bg-orange-100 text-orange-700",
   "Online Payment": "bg-indigo-100 text-indigo-700",
 };
+
+const PAYMENT_METHODS = ["Cash", "Bank Transfer", "Cheque", "Credit Card", "Online Payment"];
 
 export default function PurchaseOrderDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -332,7 +331,7 @@ export default function PurchaseOrderDetailPage() {
             </div>
             <div class="info-section">
               <h3>ORDER DETAILS</h3>
-              <div class="info-row"><div class="info-label">Order Date:</div><div class="info-value">${new Date(po?.order_date).toLocaleDateString()}</div></div>
+              <div class="info-row"><div class="info-label">Order Date:</div><div class="info-value">${new Date(po?.order_date || new Date()).toLocaleDateString()}</div></div>
               <div class="info-row"><div class="info-label">Expected Delivery:</div><div class="info-value">${po?.expected_delivery_date ? new Date(po?.expected_delivery_date).toLocaleDateString() : "—"}</div></div>
               <div class="info-row"><div class="info-label">Status:</div><div class="info-value">${po?.status}</div></div>
               <div class="info-row"><div class="info-label">Currency:</div><div class="info-value">${po?.currency}</div></div>
@@ -340,11 +339,11 @@ export default function PurchaseOrderDetailPage() {
           </div>
 
           <!-- Shipping Terms -->
-          ${po?.shipping_terms || po?.terms_and_conditions
+          ${po?.terms_and_conditions || po?.terms_and_conditions
         ? `
             <div class="shipping-terms">
               <h3>📦 SHIPPING TERMS & CONDITIONS</h3>
-              <p>${po?.shipping_terms || po?.terms_and_conditions || "Standard shipping terms apply"}</p>
+              <p>${po?.terms_and_conditions || po?.terms_and_conditions || "Standard shipping terms apply"}</p>
             </div>
           `
         : ""
@@ -364,7 +363,7 @@ export default function PurchaseOrderDetailPage() {
             </thead>
             <tbody>
               ${itemsHtml}
-              ${po.items?.length === 0
+              ${po?.items?.length === 0
         ? `
                 <tr><td colspan="6" style="text-align: center; padding: 40px;">No items found</td></tr>
               `
@@ -375,11 +374,11 @@ export default function PurchaseOrderDetailPage() {
 
           <!-- Totals Section -->
           <table class="totals-table">
-            <tr><td style="text-align: right;">Subtotal:</td><td style="text-align: right; width: 120px;">${po.currency} ${(po.subtotal || 0).toFixed(3)}</td></tr>
-            <tr><td style="text-align: right;">Discount:</td><td style="text-align: right;">- ${po.currency} ${(po.discount_amount || 0).toFixed(3)}</td></tr>
-            <tr><td style="text-align: right;">Tax:</td><td style="text-align: right;">${po.currency} ${(po.tax_amount || 0).toFixed(3)}</td></tr>
-            <tr><td style="text-align: right;">Shipping Cost:</td><td style="text-align: right;">${po.currency} ${(po.shipping_cost || 0).toFixed(3)}</td></tr>
-            <tr><td style="text-align: right; font-size: 14px;">GRAND TOTAL:</td><td style="text-align: right; font-size: 14px; font-weight: bold; color: #2563eb;">${po.currency} ${(po.total_amount || 0).toFixed(3)}</td></tr>
+            <tr><td style="text-align: right;">Subtotal:</td><td style="text-align: right; width: 120px;">${po?.currency} ${(po?.subtotal || 0).toFixed(3)}</td></tr>
+            <tr><td style="text-align: right;">Discount:</td><td style="text-align: right;">- ${po?.currency} ${(po?.discount_amount || 0).toFixed(3)}</td></tr>
+            <tr><td style="text-align: right;">Tax:</td><td style="text-align: right;">${po?.currency} ${(po?.tax_amount || 0).toFixed(3)}</td></tr>
+            <tr><td style="text-align: right;">Shipping Cost:</td><td style="text-align: right;">${po?.currency} ${(po?.shipping_cost || 0).toFixed(3)}</td></tr>
+            <tr><td style="text-align: right; font-size: 14px;">GRAND TOTAL:</td><td style="text-align: right; font-size: 14px; font-weight: bold; color: #2563eb;">${po?.currency} ${(po?.total_amount || 0).toFixed(3)}</td></tr>
           </table>
 
           <!-- Additional Notes -->
@@ -431,7 +430,7 @@ export default function PurchaseOrderDetailPage() {
 
       // Convert images to base64 for PDF
       const itemsWithImages = await Promise.all(
-        (po.items || []).map(async (item: any) => {
+        (po?.items || []).map(async (item: any) => {
           const imageUrl = getProductImage(item);
           let base64Image = "";
           if (imageUrl) {
@@ -470,8 +469,8 @@ export default function PurchaseOrderDetailPage() {
           <td style="border: 1px solid #d1d5db; padding: 8px;">${item.product_name}${item.variant_name ? ` (${item.variant_name})` : ""}</td>
           <td style="border: 1px solid #d1d5db; padding: 8px; text-align: center;">${item.sku || "—"}</td>
           <td style="border: 1px solid #d1d5db; padding: 8px; text-align: center;">${qty}</td>
-          <td style="border: 1px solid #d1d5db; padding: 8px; text-align: right;">${po.currency} ${unitPrice.toFixed(3)}</td>
-          <td style="border: 1px solid #d1d5db; padding: 8px; text-align: right;">${po.currency} ${total.toFixed(3)}</td>
+          <td style="border: 1px solid #d1d5db; padding: 8px; text-align: right;">${po?.currency} ${unitPrice.toFixed(3)}</td>
+          <td style="border: 1px solid #d1d5db; padding: 8px; text-align: right;">${po?.currency} ${total.toFixed(3)}</td>
         </tr>
       `;
         })
@@ -494,18 +493,18 @@ export default function PurchaseOrderDetailPage() {
           </div>
           <div>
             <h3 style="font-size: 14px; font-weight: bold; margin-bottom: 10px;">ORDER DETAILS</h3>
-            <p style="margin: 4px 0;"><strong>Order Date:</strong> ${new Date(po?.order_date).toLocaleDateString()}</p>
+            <p style="margin: 4px 0;"><strong>Order Date:</strong> ${new Date(po?.order_date || new Date()).toLocaleDateString()}</p>
             <p style="margin: 4px 0;"><strong>Expected Delivery:</strong> ${po?.expected_delivery_date ? new Date(po?.expected_delivery_date).toLocaleDateString() : "—"}</p>
             <p style="margin: 4px 0;"><strong>Status:</strong> ${po?.status}</p>
             <p style="margin: 4px 0;"><strong>Currency:</strong> ${po?.currency}</p>
           </div>
         </div>
 
-        ${po?.shipping_terms || po?.terms_and_conditions
+        ${po?.terms_and_conditions || po?.terms_and_conditions
           ? `
           <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 12px; margin-bottom: 20px;">
             <h3 style="font-size: 13px; font-weight: bold; color: #92400e;">📦 SHIPPING TERMS & CONDITIONS</h3>
-            <p style="font-size: 12px; color: #78350f;">${po?.shipping_terms || po?.terms_and_conditions}</p>
+            <p style="font-size: 12px; color: #78350f;">${po?.terms_and_conditions || po?.terms_and_conditions}</p>
           </div>
         `
           : ""
@@ -554,7 +553,7 @@ export default function PurchaseOrderDetailPage() {
       const imgWidth = 190;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
-      pdf.save(`PO_${po.po_number}.pdf`);
+      pdf.save(`PO_${po?.po_number}.pdf`);
     } catch (error) {
       console.error("PDF export failed:", error);
       alert("Failed to export PDF. Please try again.");

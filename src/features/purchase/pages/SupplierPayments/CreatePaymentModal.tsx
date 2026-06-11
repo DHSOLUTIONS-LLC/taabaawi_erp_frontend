@@ -25,7 +25,7 @@ export default function CreatePaymentModal({ po, onClose, onSuccess }: CreatePay
   });
 
   const accounts = accountsData?.data?.data || accountsData?.data || [];
-  const paymentAccounts = accounts.filter((account: any) => 
+  const paymentAccounts = accounts.filter((account: any) =>
     account.account_type === 'Asset' && account.is_active === true
   );
 
@@ -52,7 +52,7 @@ export default function CreatePaymentModal({ po, onClose, onSuccess }: CreatePay
     const errs: Record<string, string> = {};
     const amt = parseFloat(formData.amount);
     if (!formData.amount || isNaN(amt) || amt <= 0) errs.amount = 'Enter a valid amount';
-    if (amt > outstanding + 0.001) errs.amount = `Amount cannot exceed outstanding KWD ${outstanding.toFixed(3)}`;
+    if (amt > outstanding + 0.001) errs.amount = `Amount cannot exceed outstanding ${po.currency} ${outstanding.toFixed(3)}`;
     if (!formData.payment_date) errs.payment_date = 'Payment date is required';
     if (!paymentMethod) errs.payment_method = 'Please select a payment method';
     if (!selectedAccountId) errs.payment_account = 'Please select a payment account';
@@ -201,7 +201,7 @@ export default function CreatePaymentModal({ po, onClose, onSuccess }: CreatePay
                 <option value="">Select Payment Account</option>
                 {paymentAccounts.map((account: any) => (
                   <option key={account.id} value={account.id}>
-                    {account.account_code} - {account.account_name} ({account.account_type})
+                    {account.account_code} - {account.account_name}
                   </option>
                 ))}
               </select>

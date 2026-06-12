@@ -109,17 +109,16 @@ export const salesApi = api.injectEndpoints({
       invalidatesTags: (_r, _e, id) => [{ type: 'Orders', id }, 'Orders'],
     }),
 
-    recordSalePayment: builder.mutation<{ success: boolean; data: Order }, {
+  recordSalePayment: builder.mutation<{ success: boolean; data: Order }, {
   sale_id: number;
-  amount: number;
-  payment_method: string;
+  payment_amount: number;
+  payment_gateway: string;
   payment_account_id: number;
-  reference_number?: string;
-  payment_date: string;
-  notes?: string;
+  gateway_reference?: string;
+  gateway_response?: any;
 }>({
   query: ({ sale_id, ...body }) => ({
-    url: `/sales/${sale_id}/record-payment`,
+    url: `/orders/${sale_id}/process-payment`,
     method: 'POST',
     body,
   }),

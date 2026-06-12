@@ -91,24 +91,24 @@ export default function Sidebar({
   };
 
   const { data: settingsData } = useGetSystemSettingsQuery();
-const settings = settingsData?.data;
-console.log("System settings in sidebar:", settings);
-const companyLogo = settings?.logo 
-  ? `https://erp-backend.ttexpresskw.com/storage/${settings.logo}` 
-  : erp_logo;
-const companyName = settings?.company_name || "ERP";
-const companyTagline = settings?.company_tagline || "Enterprise Suite";
+  const settings = settingsData?.data;
+  // console.log("System settings in sidebar:", settings);
+  const companyLogo = settings?.logo
+    ? `https://erp-backend.ttexpresskw.com/storage/${settings.logo}`
+    : erp_logo;
+  const companyName = settings?.company_name || "ERP";
+  const companyTagline = settings?.company_tagline || "Enterprise Suite";
 
 
   const menuItems: MenuItem[] = isSuperAdmin
     ? [
-        {
-          id: "dashboard",
-          label: "Dashboard",
-          icon: dashboard,
-          path: `${basePath}/dashboard`,
-        },
-      ]
+      {
+        id: "dashboard",
+        label: "Dashboard",
+        icon: dashboard,
+        path: `${basePath}/dashboard`,
+      },
+    ]
     : [];
 
   const posSubmenus: SubMenuItem[] = [
@@ -646,11 +646,10 @@ const companyTagline = settings?.company_tagline || "Enterprise Suite";
             <div key={menu.id}>
               <button
                 onClick={() => handleMenuClick(menu)}
-                className={`w-full flex items-center rounded-lg transition-all duration-200 cursor-pointer px-4 py-3 space-x-3 ${
-                  isActive || isParentActive
+                className={`w-full flex items-center rounded-lg transition-all duration-200 cursor-pointer px-4 py-3 space-x-3 ${isActive || isParentActive
                     ? "bg-gray-200 text-blue-600"
                     : "text-gray-700 hover:bg-gray-100 hover:text-blue-600"
-                }`}
+                  }`}
               >
                 <div
                   className={`shrink-0 ${isActive || isParentActive ? "text-blue-500" : "text-gray-500"}`}
@@ -689,11 +688,10 @@ const companyTagline = settings?.company_tagline || "Enterprise Suite";
                       <button
                         key={submenu.id}
                         onClick={() => handleSubmenuClick(submenu, menu.label)}
-                        className={`w-full flex items-center rounded-lg transition-all duration-200 px-4 py-2.5 cursor-pointer ${
-                          isSubmenuActive
+                        className={`w-full flex items-center rounded-lg transition-all duration-200 px-4 py-2.5 cursor-pointer ${isSubmenuActive
                             ? "bg-blue-50 text-blue-600 font-medium"
                             : "text-gray-600 hover:bg-gray-50 hover:text-blue-600"
-                        }`}
+                          }`}
                       >
                         <span className="text-base truncate">
                           {submenu.label}
@@ -776,11 +774,10 @@ const companyTagline = settings?.company_tagline || "Enterprise Suite";
                   <button
                     key={menu.id}
                     onClick={() => handleMenuClick(menu)}
-                    className={`w-full flex items-center rounded-lg transition-all duration-200 px-4 py-3 space-x-3 ${
-                      isActive
+                    className={`w-full flex items-center rounded-lg transition-all duration-200 px-4 py-3 space-x-3 ${isActive
                         ? "bg-gray-200 text-blue-600 font-bold"
                         : "text-gray-700 hover:bg-gray-100 hover:text-blue-600"
-                    }`}
+                      }`}
                   >
                     <div
                       className={`shrink-0 ${isActive ? "text-blue-500" : "text-gray-500"}`}

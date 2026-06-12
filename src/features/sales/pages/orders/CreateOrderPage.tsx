@@ -79,8 +79,8 @@ export default function CreateOrderPage() {
   const [shippingFee, setShippingFee] = useState(2.0);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [search, _setSearch] = useState("");
-const [salesPersonId, setSalesPersonId] = useState("");
-// const [salesPersons, setSalesPersons] = useState<any[]>([]);
+  const [salesPersonId, setSalesPersonId] = useState("");
+  // const [salesPersons, setSalesPersons] = useState<any[]>([]);
 
   // ─── APIs ─────────────────────────────────────────
   const [createOrder, { isLoading: isCreating }] = useCreateOrderMutation();
@@ -89,25 +89,25 @@ const [salesPersonId, setSalesPersonId] = useState("");
     useGetShippingMethodsQuery({ search: search || undefined });
 
   const { data: customersResponse, isLoading: isLoadingCustomers } =
-   useGetCustomersQuery({ per_page: 1000 });
+    useGetCustomersQuery({ per_page: 1000 });
 
   console.log("customersResponse:", customersResponse);
 
 
- const { data: salesPersonsResponse, isLoading: isLoadingSalesPersons } = useGetUsersQuery({
-  is_active: 1 as any,
-  per_page: 1000,
-});
+  const { data: salesPersonsResponse, isLoading: isLoadingSalesPersons } = useGetUsersQuery({
+    is_active: 1 as any,
+    per_page: 1000,
+  });
 
-const allUsers =
-  salesPersonsResponse?.data?.data ||
-  salesPersonsResponse?.data ||
-  [];
+  const allUsers =
+    salesPersonsResponse?.data?.data ||
+    salesPersonsResponse?.data ||
+    [];
 
-const salesPersons = (Array.isArray(allUsers) ? allUsers : []).filter((u: any) => {
-  const roleName = u.role?.role_name || u.role_id?.role_name || "";
-  return roleName.toLowerCase().includes("sales");
-});
+  const salesPersons = (Array.isArray(allUsers) ? allUsers : []).filter((u: any) => {
+    const roleName = u.role?.role_name || u.role_id?.role_name || "";
+    return roleName.toLowerCase().includes("sales");
+  });
 
 
   const branches = Array.isArray(branchesData) ? branchesData : [];
@@ -115,7 +115,7 @@ const salesPersons = (Array.isArray(allUsers) ? allUsers : []).filter((u: any) =
     methodsResponse?.data?.data || methodsResponse?.data || [];
 
 
-const customers = customersResponse?.data?.data || customersResponse?.data || [];
+  const customers = customersResponse?.data?.data || customersResponse?.data || [];
 
 
 
@@ -259,8 +259,8 @@ const customers = customersResponse?.data?.data || customersResponse?.data || []
   // }, []);
 
   const handleUpdateDiscount = (id: string, discountPercentage: number) => {
-  dispatch(updateOrderProductDiscount({ id, discount_percentage: discountPercentage }));
-};
+    dispatch(updateOrderProductDiscount({ id, discount_percentage: discountPercentage }));
+  };
 
   const CHANNELS = ["Phone", "Manual"];
   const PAYMENT_METHODS = [
@@ -323,7 +323,7 @@ const customers = customersResponse?.data?.data || customersResponse?.data || []
                     Select Customer <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
-                     
+
                     <select
                       value={customerId}
                       onChange={(e) => {
@@ -339,7 +339,7 @@ const customers = customersResponse?.data?.data || customersResponse?.data || []
                       <option value="">Select a customer</option>
                       {customers.map((customer: any) => (
                         <option key={customer.id} value={customer.id}>
-                          {customer.full_name || customer.first_name} 
+                          {customer.full_name || customer.first_name}
                         </option>
                       ))}
                     </select>
@@ -424,31 +424,31 @@ const customers = customersResponse?.data?.data || customersResponse?.data || []
                 </div>
 
                 <div className="sm:col-span-2">
-  <label className="block text-sm font-medium text-gray-600 mb-1 sm:mb-2">
-    Sales Person <span className="text-red-500">*</span>
-  </label>
-  <div className="relative">
-    <select
-      value={salesPersonId}
-      onChange={(e) => setSalesPersonId(e.target.value)}
-      className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10"
-      required
-    >
-      <option value="">Select Sales Person</option>
-      {salesPersons.map((person: any) => (
-        <option key={person.id} value={person.id}>
-          {person.name} ({person.employee_id || person.email})
-        </option>
-      ))}
-    </select>
-    <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:pr-3 pointer-events-none">
-      <img src={dropdown_arrow_icon} alt="" className="w-3 h-3 sm:w-4 sm:h-4" />
-    </div>
-  </div>
-  {errors.salesPerson && (
-    <p className="text-xs text-red-500 mt-1">{errors.salesPerson}</p>
-  )}
-</div>
+                  <label className="block text-sm font-medium text-gray-600 mb-1 sm:mb-2">
+                    Sales Person <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={salesPersonId}
+                      onChange={(e) => setSalesPersonId(e.target.value)}
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10"
+                      required
+                    >
+                      <option value="">Select Sales Person</option>
+                      {salesPersons.map((person: any) => (
+                        <option key={person.id} value={person.id}>
+                          {person.name} ({person.employee_id || person.email})
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:pr-3 pointer-events-none">
+                      <img src={dropdown_arrow_icon} alt="" className="w-3 h-3 sm:w-4 sm:h-4" />
+                    </div>
+                  </div>
+                  {errors.salesPerson && (
+                    <p className="text-xs text-red-500 mt-1">{errors.salesPerson}</p>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -486,8 +486,8 @@ const customers = customersResponse?.data?.data || customersResponse?.data || []
                     value={customerEmail}
                     onChange={(e) => setCustomerEmail(e.target.value)}
                     className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 bg-gray-50 ${errors.customerEmail
-                        ? "border-red-500"
-                        : "border-gray-300"
+                      ? "border-red-500"
+                      : "border-gray-300"
                       }`}
                     placeholder="Auto-filled from customer"
                     readOnly
@@ -507,8 +507,8 @@ const customers = customersResponse?.data?.data || customersResponse?.data || []
                     value={customerPhone}
                     onChange={(e) => setCustomerPhone(e.target.value)}
                     className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 bg-gray-50 ${errors.customerPhone
-                        ? "border-red-500"
-                        : "border-gray-300"
+                      ? "border-red-500"
+                      : "border-gray-300"
                       }`}
                     placeholder="Auto-filled from customer"
                     readOnly
@@ -537,8 +537,8 @@ const customers = customersResponse?.data?.data || customersResponse?.data || []
                     value={shippingAddress}
                     onChange={(e) => setShippingAddress(e.target.value)}
                     className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 ${errors.shippingAddress
-                        ? "border-red-500"
-                        : "border-gray-300"
+                      ? "border-red-500"
+                      : "border-gray-300"
                       }`}
                     placeholder="Block, Street, House number, Area"
                   />
@@ -557,8 +557,8 @@ const customers = customersResponse?.data?.data || customersResponse?.data || []
                       value={shippingCity}
                       onChange={(e) => setShippingCity(e.target.value)}
                       className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10 ${errors.shippingCity
-                          ? "border-red-500"
-                          : "border-gray-300"
+                        ? "border-red-500"
+                        : "border-gray-300"
                         }`}
                     >
                       <option value="">Select City</option>
@@ -603,8 +603,8 @@ const customers = customersResponse?.data?.data || customersResponse?.data || []
                       value={shippingCountry}
                       onChange={(e) => setShippingCountry(e.target.value)}
                       className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10 ${errors.shippingCountry
-                          ? "border-red-500"
-                          : "border-gray-300"
+                        ? "border-red-500"
+                        : "border-gray-300"
                         }`}
                     >
                       {COUNTRIES.map((country) => (
@@ -662,117 +662,117 @@ const customers = customersResponse?.data?.data || customersResponse?.data || []
                 </button>
               </div>
 
-            {selectedProducts.length > 0 ? (
-  <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
-    <div className="xl:col-span-4 overflow-x-auto">
-      <div className="min-w-[900px] lg:min-w-full">
-        <table className="w-full">
-          <thead className="bg-gray-50 border-y border-gray-200">
-            <tr>
-              <th className="px-3 sm:px-4 py-2 sm:py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                Product
-              </th>
-              <th className="px-3 sm:px-4 py-2 sm:py-3 text-left text-xs font-semibold text-gray-600 uppercase hidden md:table-cell">
-                SKU
-              </th>
-              <th className="px-3 sm:px-4 py-2 sm:py-3 text-center text-xs font-semibold text-gray-600 uppercase">
-                Qty
-              </th>
-              <th className="px-3 sm:px-4 py-2 sm:py-3 text-right text-xs font-semibold text-gray-600 uppercase">
-                Price
-              </th>
-              {/* <th className="px-3 sm:px-4 py-2 sm:py-3 text-right text-xs font-semibold text-gray-600 uppercase">
+              {selectedProducts.length > 0 ? (
+                <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+                  <div className="xl:col-span-4 overflow-x-auto">
+                    <div className="min-w-[900px] lg:min-w-full">
+                      <table className="w-full">
+                        <thead className="bg-gray-50 border-y border-gray-200">
+                          <tr>
+                            <th className="px-3 sm:px-4 py-2 sm:py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                              Product
+                            </th>
+                            <th className="px-3 sm:px-4 py-2 sm:py-3 text-left text-xs font-semibold text-gray-600 uppercase hidden md:table-cell">
+                              SKU
+                            </th>
+                            <th className="px-3 sm:px-4 py-2 sm:py-3 text-center text-xs font-semibold text-gray-600 uppercase">
+                              Qty
+                            </th>
+                            <th className="px-3 sm:px-4 py-2 sm:py-3 text-right text-xs font-semibold text-gray-600 uppercase">
+                              Price
+                            </th>
+                            {/* <th className="px-3 sm:px-4 py-2 sm:py-3 text-right text-xs font-semibold text-gray-600 uppercase">
                 Discount (%)
               </th> */}
-              <th className="px-3 sm:px-4 py-2 sm:py-3 text-right text-xs font-semibold text-gray-600 uppercase">
-                Total
-              </th>
-              <th className="px-3 sm:px-4 py-2 sm:py-3 text-center text-xs font-semibold text-gray-600 uppercase">
-                Action
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {selectedProducts.map((product: any) => {
-              const discountPercent = product.discount_percentage || 0;
-              const discountedPrice = product.price * (1 - discountPercent / 100);
-              const total = discountedPrice * product.quantity;
-              
-              return (
-                <tr key={product.id} className="hover:bg-gray-50">
-                  <td className="px-3 sm:px-4 py-3">
-                    <div className="flex items-center gap-2 sm:gap-3">
-                      <img
-                        src={(() => {
-                          const imgSrc = product.image_url || product.image;
-                          if (imgSrc && imgSrc.startsWith("/storage/")) {
-                            const API_BASE_URL =
-                              import.meta.env.VITE_API_URL?.replace("/api", "") ||
-                              "https://erp-backend.ttexpresskw.com";
-                            return `${API_BASE_URL}${imgSrc}`;
-                          }
-                          return (
-                            imgSrc ||
-                            "https://images.unsplash.com/photo-1541275055241-329bbdf9a191?w=100&auto=format&fit=crop"
-                          );
-                        })()}
-                        alt={product.name}
-                        className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg object-cover"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src =
-                            "https://images.unsplash.com/photo-1541275055241-329bbdf9a191?w=100&auto=format&fit=crop";
-                        }}
-                      />
-                      <div>
-                        <div className="text-xs sm:text-sm font-medium text-gray-900">
-                          {product.name}
-                        </div>
-                        <div className="text-xs text-gray-500 md:hidden mt-1">
-                          SKU: {product.sku}
-                        </div>
-                        {product.size && product.size !== "Default" && (
-                          <div className="text-xs text-gray-500">
-                            Variant: {product.size}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                   </td>
-                  <td className="px-3 sm:px-4 py-3 text-xs sm:text-sm text-gray-600 hidden md:table-cell">
-                    {product.sku}
-                   </td>
-                  <td className="px-3 sm:px-4 py-3">
-                    <div className="flex items-center justify-center gap-1 sm:gap-2">
-                      <button
-                        onClick={() => handleUpdateQuantity(product.id, product.quantity - 1)}
-                        className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded"
-                      >
-                        <span className="text-gray-600 font-semibold text-xs sm:text-sm">-</span>
-                      </button>
-                      <input
-                        type="number"
-                        min="1"
-                        value={product.quantity}
-                        onChange={(e) => {
-                          const newQuantity = parseInt(e.target.value) || 1;
-                          if (newQuantity > 0) {
-                            handleUpdateQuantity(product.id, newQuantity);
-                          }
-                        }}
-                        className="w-12 sm:w-14 text-center font-medium text-sm border border-gray-300 rounded-md py-1 focus:outline-none focus:ring-1 focus:ring-blue-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                      />
-                      <button
-                        onClick={() => handleUpdateQuantity(product.id, product.quantity + 1)}
-                        className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white rounded"
-                      >
-                        <span className="font-semibold text-xs sm:text-sm">+</span>
-                      </button>
-                    </div>
-                   </td>
-                  <td className="px-3 sm:px-4 py-3 text-right text-xs sm:text-sm font-medium">
-                    KWD {product.price.toFixed(3)}
-                   </td>
-                  {/* <td className="px-3 sm:px-4 py-3">
+                            <th className="px-3 sm:px-4 py-2 sm:py-3 text-right text-xs font-semibold text-gray-600 uppercase">
+                              Total
+                            </th>
+                            <th className="px-3 sm:px-4 py-2 sm:py-3 text-center text-xs font-semibold text-gray-600 uppercase">
+                              Action
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                          {selectedProducts.map((product: any) => {
+                            const discountPercent = product.discount_percentage || 0;
+                            const discountedPrice = product.price * (1 - discountPercent / 100);
+                            const total = discountedPrice * product.quantity;
+
+                            return (
+                              <tr key={product.id} className="hover:bg-gray-50">
+                                <td className="px-3 sm:px-4 py-3">
+                                  <div className="flex items-center gap-2 sm:gap-3">
+                                    <img
+                                      src={(() => {
+                                        const imgSrc = product.image_url || product.image;
+                                        if (imgSrc && imgSrc.startsWith("/storage/")) {
+                                          const API_BASE_URL =
+                                            import.meta.env.VITE_API_URL?.replace("/api", "") ||
+                                            "https://erp-backend.ttexpresskw.com";
+                                          return `${API_BASE_URL}${imgSrc}`;
+                                        }
+                                        return (
+                                          imgSrc ||
+                                          "https://images.unsplash.com/photo-1541275055241-329bbdf9a191?w=100&auto=format&fit=crop"
+                                        );
+                                      })()}
+                                      alt={product.name}
+                                      className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg object-cover"
+                                      onError={(e) => {
+                                        (e.target as HTMLImageElement).src =
+                                          "https://images.unsplash.com/photo-1541275055241-329bbdf9a191?w=100&auto=format&fit=crop";
+                                      }}
+                                    />
+                                    <div>
+                                      <div className="text-xs sm:text-sm font-medium text-gray-900">
+                                        {product.name}
+                                      </div>
+                                      <div className="text-xs text-gray-500 md:hidden mt-1">
+                                        SKU: {product.sku}
+                                      </div>
+                                      {product.size && product.size !== "Default" && (
+                                        <div className="text-xs text-gray-500">
+                                          Variant: {product.size}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="px-3 sm:px-4 py-3 text-xs sm:text-sm text-gray-600 hidden md:table-cell">
+                                  {product.sku}
+                                </td>
+                                <td className="px-3 sm:px-4 py-3">
+                                  <div className="flex items-center justify-center gap-1 sm:gap-2">
+                                    <button
+                                      onClick={() => handleUpdateQuantity(product.id, product.quantity - 1)}
+                                      className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded"
+                                    >
+                                      <span className="text-gray-600 font-semibold text-xs sm:text-sm">-</span>
+                                    </button>
+                                    <input
+                                      type="number"
+                                      min="1"
+                                      value={product.quantity}
+                                      onChange={(e) => {
+                                        const newQuantity = parseInt(e.target.value) || 1;
+                                        if (newQuantity > 0) {
+                                          handleUpdateQuantity(product.id, newQuantity);
+                                        }
+                                      }}
+                                      className="w-12 sm:w-14 text-center font-medium text-sm border border-gray-300 rounded-md py-1 focus:outline-none focus:ring-1 focus:ring-blue-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                    />
+                                    <button
+                                      onClick={() => handleUpdateQuantity(product.id, product.quantity + 1)}
+                                      className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white rounded"
+                                    >
+                                      <span className="font-semibold text-xs sm:text-sm">+</span>
+                                    </button>
+                                  </div>
+                                </td>
+                                <td className="px-3 sm:px-4 py-3 text-right text-xs sm:text-sm font-medium">
+                                  KWD {product.price.toFixed(3)}
+                                </td>
+                                {/* <td className="px-3 sm:px-4 py-3">
                     <div className="flex items-center justify-end gap-1">
                       <input
                         type="number"
@@ -792,45 +792,45 @@ const customers = customersResponse?.data?.data || customersResponse?.data || []
                       <span className="text-xs text-gray-500">%</span>
                     </div>
                    </td> */}
-                  <td className="px-3 sm:px-4 py-3 text-right text-xs sm:text-sm font-semibold">
-                    <div className="flex flex-col items-end">
-                      <span className="text-green-600">KWD {total.toFixed(3)}</span>
-                      {discountPercent > 0 && (
-                        <span className="text-xs text-gray-400 line-through">
-                          KWD {(product.price * product.quantity).toFixed(3)}
-                        </span>
-                      )}
+                                <td className="px-3 sm:px-4 py-3 text-right text-xs sm:text-sm font-semibold">
+                                  <div className="flex flex-col items-end">
+                                    <span className="text-green-600">KWD {total.toFixed(3)}</span>
+                                    {discountPercent > 0 && (
+                                      <span className="text-xs text-gray-400 line-through">
+                                        KWD {(product.price * product.quantity).toFixed(3)}
+                                      </span>
+                                    )}
+                                  </div>
+                                </td>
+                                <td className="px-3 sm:px-4 py-3 text-center">
+                                  <button
+                                    onClick={() => handleRemoveProduct(product.id)}
+                                    className="text-red-500 hover:text-red-700"
+                                  >
+                                    <svg
+                                      className="w-4 h-4 sm:w-5 sm:h-5"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth="2"
+                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                      />
+                                    </svg>
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
                     </div>
-                   </td>
-                  <td className="px-3 sm:px-4 py-3 text-center">
-                    <button
-                      onClick={() => handleRemoveProduct(product.id)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      <svg
-                        className="w-4 h-4 sm:w-5 sm:h-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                        />
-                      </svg>
-                    </button>
-                   </td>
-                 </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-) : (
+                  </div>
+                </div>
+              ) : (
                 <div className="bg-gray-50 rounded-lg p-6 sm:p-8 text-center">
                   <p className="text-gray-500 text-sm">
                     No products added yet. Click "Add Product" to get started.
@@ -922,8 +922,8 @@ const customers = customersResponse?.data?.data || customersResponse?.data || []
                         }
                       }}
                       className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10 ${errors.shippingMethod
-                          ? "border-red-500"
-                          : "border-gray-300"
+                        ? "border-red-500"
+                        : "border-gray-300"
                         }`}
                     >
                       <option value="">Select a shipping method</option>

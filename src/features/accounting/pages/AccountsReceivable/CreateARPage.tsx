@@ -39,13 +39,13 @@ export default function CreateARPage() {
 
   // ─── Customers (crmApi getCustomers → transformResponse returns { data: Customer[] }) ───
   const { data: customersData } = useGetCustomersQuery({
-    is_active: 1 as any,  
+    is_active: 1 as any,
     per_page: 1000,
   });
   const customers = Array.isArray((customersData as any)?.data?.data)
     ? (customersData as any).data.data
     : [];
-    // console.log('customers', customersData);
+  // console.log('customers', customersData);
 
   // ─── Orders ───
   const { data: ordersData } = useGetOrdersQuery({ per_page: 1000 });
@@ -173,7 +173,7 @@ export default function CreateARPage() {
                     <option key={customer.id} value={customer.id}>
                       {customer.first_name ||
                         `${customer.first_name} ${customer.last_name || ''}`.trim()}{' '}
-                      
+
                     </option>
                   ))}
                 </select>

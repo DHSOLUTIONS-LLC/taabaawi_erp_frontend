@@ -46,13 +46,13 @@ export default function ARDetailPage() {
   });
 
   const ar = (data as any)?.data;
-  
+
   // Filter accounts - receipt should go to Cash/Bank accounts
   const accounts = (accountsData as any)?.data?.data || (accountsData as any)?.data || [];
-  
+
   // Filter only Asset accounts (Cash, Bank, etc.) for receipt
-  const receiptAccounts = accounts.filter((account: any) => 
-    account.account_type === 'Asset' && 
+  const receiptAccounts = accounts.filter((account: any) =>
+    account.account_type === 'Asset' &&
     account.is_active === true
   );
 
@@ -75,8 +75,8 @@ export default function ARDetailPage() {
 
     setIsRecording(true);
     try {
-      await recordReceipt({ 
-        id: arId, 
+      await recordReceipt({
+        id: arId,
         receipt_amount: amount,
         receipt_account_id: parseInt(selectedAccountId)
       }).unwrap();

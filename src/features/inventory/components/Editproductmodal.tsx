@@ -179,7 +179,7 @@ export default function EditProductModal({
 
           let width = img.width;
           let height = img.height;
-          const maxSize = 1200;
+          const maxSize = 3000;
 
           if (width > height && width > maxSize) {
             height = (height / width) * maxSize;
@@ -208,8 +208,8 @@ export default function EditProductModal({
               }
             },
             "image/jpeg",
-            0.8,
-          ); // 80% quality
+            0.95,
+          ); // 95% quality
         };
       };
       reader.onerror = (error) => reject(error);
@@ -225,7 +225,7 @@ export default function EditProductModal({
     const remainingSlots = 10 - images.length;
     const filesToProcess = Math.min(files.length, remainingSlots);
 
-    const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 2MB
 
     for (let i = 0; i < filesToProcess; i++) {
       try {
@@ -629,8 +629,9 @@ export default function EditProductModal({
               />
               <label
                 htmlFor="image-upload"
-                className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all ${isLoading ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
+                className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all ${
+                  isLoading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
               >
                 <svg
                   className="w-10 h-10 text-gray-400 mb-2"
@@ -652,7 +653,7 @@ export default function EditProductModal({
                   or drag and drop
                 </span>
                 <span className="text-xs text-gray-400 mt-1">
-                  PNG, JPG, JPEG (Max 2MB per image, up to 10 images)
+                  PNG, JPG, JPEG (Max 10 per image, up to 10 images)
                 </span>
               </label>
             </div>
@@ -1191,20 +1192,22 @@ export default function EditProductModal({
             <button
               onClick={onClose}
               disabled={isLoading}
-              className={`px-6 py-3 bg-[#1773CF33] text-gray-700 font-semibold rounded-lg transition-colors ${isLoading
+              className={`px-6 py-3 bg-[#1773CF33] text-gray-700 font-semibold rounded-lg transition-colors ${
+                isLoading
                   ? "opacity-50 cursor-not-allowed"
                   : "cursor-pointer hover:bg-gray-200"
-                }`}
+              }`}
             >
               Cancel
             </button>
             <button
               onClick={handleSaveProduct}
               disabled={isLoading}
-              className={`px-6 py-3 bg-[#1773CF] text-white font-semibold rounded-lg transition-colors flex items-center justify-center ${isLoading
+              className={`px-6 py-3 bg-[#1773CF] text-white font-semibold rounded-lg transition-colors flex items-center justify-center ${
+                isLoading
                   ? "opacity-50 cursor-not-allowed"
                   : "cursor-pointer hover:bg-blue-700"
-                }`}
+              }`}
             >
               {isLoading ? (
                 <>

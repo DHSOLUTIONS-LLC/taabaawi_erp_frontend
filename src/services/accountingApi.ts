@@ -95,11 +95,11 @@ export interface BankTransaction {
   bank_account_id: number;
   transaction_date: string;
   transaction_type:
-  | "Deposit"
-  | "Withdrawal"
-  | "Transfer"
-  | "Bank Charge"
-  | "Interest";
+    | "Deposit"
+    | "Withdrawal"
+    | "Transfer"
+    | "Bank Charge"
+    | "Interest";
   amount: number;
   reference_number: string | null;
   reference_type: string | null;
@@ -684,7 +684,10 @@ export const accountingApi = api.injectEndpoints({
     recordAPPayment: builder.mutation<
       { data: AccountsPayable },
       {
-        id: number; payment_amount: number, payment_account_id: number, payment_date?: string;
+        id: number;
+        payment_amount: number;
+        payment_account_id: number;
+        payment_date?: string;
         payment_reference?: string;
       }
     >({
@@ -756,7 +759,7 @@ export const accountingApi = api.injectEndpoints({
 
     recordARReceipt: builder.mutation<
       { data: AccountsReceivable },
-      { id: number; receipt_amount: number, receipt_account_id: number }
+      { id: number; receipt_amount: number; receipt_account_id: number }
     >({
       query: ({ id, ...body }) => ({
         url: `/accounts-receivable/${id}/record-receipt`,

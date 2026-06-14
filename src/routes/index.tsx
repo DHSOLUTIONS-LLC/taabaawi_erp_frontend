@@ -21,12 +21,14 @@ import InventoryReportPage from "../features/inventory/pages/InventoryReportPage
 import POSTerminalPage from "../features/pos/pages/posTerminalPage";
 import POSCashBoxPage from "../features/pos/pages/cashBoxPage";
 import POSOrders from "../features/pos/pages/posOrdersPage";
+import POSOrdersDetails from "../features/pos/pages/orderDetailsPage";
 import POSShiftReports from "../features/pos/pages/shiftReportsPage";
 import OpenPOSPage from "../features/pos/pages/openPosPage";
 
 // Sales
 
-import OrdersPage from "../features/sales/pages/orders/OrdersPage";
+import OrdersPage from "../features/sales/pages/orders/ManualOrdersPage";
+import OnlineOrdersPage from "../features/sales/pages/orders/OnlineOrdersPage";
 import ShippingMethodsPage from "../features/sales/pages/ShippingMethodsPage";
 
 // HR
@@ -46,7 +48,8 @@ import CreateInvoice from "../features/sales/pages/invoices/CreateInvoice";
 import InvoiceDetailPage from "../features/sales/pages/invoices/InvoiceDetails";
 import AddInvoiceProducts from "../features/sales/pages/invoices/AddInvoiceProducts";
 import EditInvoice from "../features/sales/pages/invoices/EditInvoice";
-import OrderDetailPage from "../features/sales/pages/orders/Orderdetailpage";
+import OrderDetailPage from "../features/sales/pages/orders/ManualOrderdetailpage";
+import OnlineOrderDetailPage from "../features/sales/pages/orders/OnlineOrderdetailpage";
 import CreateOrderPage from "../features/sales/pages/orders/CreateOrderPage";
 import AddOrderProducts from "../features/sales/pages/orders/AddOrderProducts";
 
@@ -392,7 +395,7 @@ export const router = createBrowserRouter([
             ),
           },
           {
-            path: "invoice",
+            path: "quotations",
             element: (
               <PermissionRoute
                 requiredPermissions={["process_sale", "create_invoice"]}
@@ -402,7 +405,7 @@ export const router = createBrowserRouter([
             ),
           },
           {
-            path: "invoices/:id",
+            path: "quotations/:id",
             element: (
               <PermissionRoute
                 requiredPermissions={["process_sale", "create_invoice"]}
@@ -437,6 +440,26 @@ export const router = createBrowserRouter([
                 requiredPermissions={["process_sale", "view_sales"]}
               >
                 <OrderDetailPage />
+              </PermissionRoute>
+            ),
+          },
+          {
+            path: "online_orders",
+            element: (
+              <PermissionRoute
+                requiredPermissions={["process_sale", "view_sales"]}
+              >
+                <OnlineOrdersPage />
+              </PermissionRoute>
+            ),
+          },
+          {
+            path: "online_orders/:id",
+            element: (
+              <PermissionRoute
+                requiredPermissions={["process_sale", "view_sales"]}
+              >
+                <OnlineOrdersPage />
               </PermissionRoute>
             ),
           },
@@ -1010,6 +1033,14 @@ export const router = createBrowserRouter([
             ),
           },
           {
+            path: "orders/:id",
+            element: (
+              <PermissionRoute requiredPermissions={["process_sale"]}>
+                <POSOrdersDetails />
+              </PermissionRoute>
+            ),
+          },
+          {
             path: "shift_reports",
             element: (
               <PermissionRoute requiredPermissions={["process_sale"]}>
@@ -1388,14 +1419,16 @@ export const router = createBrowserRouter([
         path: "sales",
         children: [
           { index: true, element: <SalesDashboard /> },
-          { path: "invoices", element: <InvoicePage /> },
-          { path: "invoices/:id", element: <InvoiceDetailPage /> },
+          { path: "quotations", element: <InvoicePage /> },
+          { path: "quotations/:id", element: <InvoiceDetailPage /> },
           { path: "create_invoice", element: <CreateInvoice /> },
           { path: "edit_invoice/:id", element: <EditInvoice /> },
           { path: "add_product", element: <AddInvoiceProducts /> },
           // ── NEW ──
           { path: "orders", element: <OrdersPage /> },
+          { path: "online_orders", element: <OnlineOrdersPage /> },
           { path: "orders/:id", element: <OrderDetailPage /> },
+          { path: "online_orders/:id", element: <OnlineOrderDetailPage /> },
           { path: "create-order", element: <CreateOrderPage /> },
           { path: "add_order_products", element: <AddOrderProducts /> },
           { path: "shipping-methods", element: <ShippingMethodsPage /> },
@@ -1536,6 +1569,7 @@ export const router = createBrowserRouter([
           { path: "terminal", element: <POSTerminalPage /> },
           { path: "cashbox", element: <POSCashBoxPage /> },
           { path: "orders", element: <POSOrders /> },
+          { path: "orders/:id", element: <POSOrdersDetails /> },
           { path: "shift_reports", element: <POSShiftReports /> },
           { path: "returns", element: <ReturnsPage /> },
           { path: "coupon", element: <CouponsPage /> },

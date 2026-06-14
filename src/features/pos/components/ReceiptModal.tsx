@@ -1,134 +1,269 @@
 // src/features/pos/components/ReceiptModal.tsx
-import { useRef } from 'react';
-import { useGetSaleReceiptQuery } from '../../../services/posApi';
+import { useRef, useEffect } from "react";
+import { useGetSaleReceiptQuery } from "../../../services/posApi";
+import { useGetSystemSettingsQuery } from "../../../services/systemApi";
+import JsBarcode from "jsbarcode";
 
 interface ReceiptModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    saleId: number;
-    onNewSale: () => void;
+  isOpen: boolean;
+  onClose: () => void;
+  saleId: number;
+  onNewSale: () => void;
 }
 
-export default function ReceiptModal({ isOpen, onClose, saleId, onNewSale }: ReceiptModalProps) {
-    const receiptRef = useRef<HTMLDivElement>(null);
-    const { data: receiptResponse, isLoading } = useGetSaleReceiptQuery(saleId, { skip: !isOpen || !saleId });
-    const receipt = receiptResponse?.data;
+export default function ReceiptModal({
+  isOpen,
+  onClose,
+  saleId,
+  onNewSale,
+}: ReceiptModalProps) {
+  const receiptRef = useRef<HTMLDivElement>(null);
+  const barcodeCanvasRef = useRef<HTMLCanvasElement>(null);
+  const printBarcodeCanvasRef = useRef<HTMLCanvasElement>(null);
+  const logoImgRef = useRef<HTMLImageElement>(null);
 
-    if (!isOpen) return null;
+  const { data: receiptResponse, isLoading } = useGetSaleReceiptQuery(saleId, {
+    skip: !isOpen || !saleId,
+  });
+  const { data: settingsData } = useGetSystemSettingsQuery();
 
-    const handlePrint = () => {
-        const content = receiptRef.current;
-        if (!content) {
-            console.error("Receipt content not found");
-            return;
-        }
+  const receipt = receiptResponse?.data;
+  const settings = settingsData?.data;
 
-        // Clone the content to avoid modifying the original
-        const cloneContent = content.cloneNode(true) as HTMLElement;
+  const companyLogo = settings?.logo
+    ? `${import.meta.env.VITE_API_URL?.replace("/api", "")}/storage/${settings.logo}`
+    : null;
+  const companyName = settings?.company_name || "ERP System";
+  const companyAddress = settings?.company_address || "";
+  const companyPhone = settings?.phone || "";
+  const companyEmail = settings?.email || "";
 
-        // Get all styles from the original page
-        const styles = document.querySelectorAll('style, link[rel="stylesheet"]');
-        let stylesHTML = '';
-        styles.forEach((style) => {
-            if (style.tagName === 'STYLE') {
-                stylesHTML += style.outerHTML;
-            } else if (style.tagName === 'LINK') {
-                stylesHTML += style.outerHTML;
-            }
+  // Generate barcode using JsBarcode library
+  useEffect(() => {
+    if (receipt?.sale_number && barcodeCanvasRef.current) {
+      try {
+        JsBarcode(barcodeCanvasRef.current, receipt.sale_number, {
+          format: "CODE128",
+          width: 1.5,
+          height: 40,
+          displayValue: true,
+          fontSize: 11,
+          margin: 5,
+          textMargin: 2,
+          font: "monospace",
         });
-
-        // Create print window
-        const printWindow = window.open('', '_blank');
-        if (!printWindow) {
-            alert("Please allow pop-ups to print the receipt");
-            return;
+      } catch (error) {
+        console.error("Barcode generation failed:", error);
+        // Fallback: Draw simple barcode
+        const ctx = barcodeCanvasRef.current.getContext("2d");
+        if (ctx) {
+          barcodeCanvasRef.current.width = 250;
+          barcodeCanvasRef.current.height = 50;
+          ctx.fillStyle = "#fff";
+          ctx.fillRect(0, 0, 250, 50);
+          ctx.fillStyle = "#000";
+          ctx.font = "10px monospace";
+          ctx.fillText(receipt.sale_number, 75, 45);
+          let x = 10;
+          for (let i = 0; i < receipt.sale_number.length; i++) {
+            const code = receipt.sale_number.charCodeAt(i);
+            const width = (code % 4) + 1;
+            ctx.fillRect(x, 5, width, 30);
+            x += width + 1;
+          }
         }
+      }
+    }
+  }, [receipt]);
 
-        // Write the print content
-        printWindow.document.write(`
+  // Generate barcode for print
+  useEffect(() => {
+    if (receipt?.sale_number && printBarcodeCanvasRef.current) {
+      try {
+        JsBarcode(printBarcodeCanvasRef.current, receipt.sale_number, {
+          format: "CODE128",
+          width: 1.5,
+          height: 40,
+          displayValue: true,
+          fontSize: 11,
+          margin: 5,
+          textMargin: 2,
+          font: "monospace",
+        });
+      } catch (error) {
+        console.error("Print barcode generation failed:", error);
+      }
+    }
+  }, [receipt]);
+
+  if (!isOpen) return null;
+
+  const handlePrint = () => {
+    const content = receiptRef.current;
+    if (!content) {
+      console.error("Receipt content not found");
+      return;
+    }
+
+    const cloneContent = content.cloneNode(true) as HTMLElement;
+
+    // Get logo HTML
+    const logoImg = cloneContent.querySelector(
+      "#company-logo-img",
+    ) as HTMLImageElement;
+    const logoSrc = logoImg?.src || companyLogo || "";
+
+    // Get barcode canvas from clone and regenerate
+    const cloneBarcodeCanvas = cloneContent.querySelector(
+      "#print-barcode-canvas",
+    ) as HTMLCanvasElement;
+    if (cloneBarcodeCanvas && receipt?.sale_number) {
+      try {
+        JsBarcode(cloneBarcodeCanvas, receipt.sale_number, {
+          format: "CODE128",
+          width: 1.5,
+          height: 40,
+          displayValue: true,
+          fontSize: 11,
+          margin: 5,
+          textMargin: 2,
+          font: "monospace",
+        });
+      } catch (error) {
+        console.error("Print barcode generation failed:", error);
+      }
+    }
+
+    const styles = document.querySelectorAll('style, link[rel="stylesheet"]');
+    let stylesHTML = "";
+    styles.forEach((style) => {
+      if (style.tagName === "STYLE") {
+        stylesHTML += style.outerHTML;
+      } else if (style.tagName === "LINK") {
+        stylesHTML += style.outerHTML;
+      }
+    });
+
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      alert("Please allow pop-ups to print the receipt");
+      return;
+    }
+
+    printWindow.document.write(`
             <!DOCTYPE html>
             <html>
                 <head>
-                    <title>Receipt - ${receipt?.sale_number || 'Print'}</title>
+                    <title>Receipt - ${receipt?.sale_number || "Print"}</title>
                     <meta charset="utf-8" />
                     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
                     ${stylesHTML}
                     <style>
-                        /* Print-specific styles */
-                        body {
-                            font-family: 'Courier New', monospace;
-                            font-size: 12px;
+                        * {
                             margin: 0;
-                            padding: 20px;
-                            background: white;
+                            padding: 0;
+                            box-sizing: border-box;
                         }
-                        .print-container {
+                        body {
+                            font-family: 'Courier New', 'Lucida Sans Typewriter', monospace;
+                            font-size: 11px;
+                            line-height: 1.4;
+                            background: white;
+                            padding: 20px;
+                        }
+                        .receipt {
                             max-width: 300px;
                             margin: 0 auto;
+                            background: white;
                         }
+                        .text-center { text-align: center; }
+                        .text-right { text-align: right; }
+                        .text-left { text-align: left; }
+                        .bold { font-weight: bold; }
                         .divider {
-                            border-top: 1px dashed #000;
+                            border-top: 1px dashed #333;
                             margin: 8px 0;
+                        }
+                        .divider-dotted {
+                            border-top: 1px dotted #999;
+                            margin: 6px 0;
                         }
                         .row {
                             display: flex;
                             justify-content: space-between;
-                            margin: 3px 0;
+                            margin: 4px 0;
                         }
-                        .center {
+                        .logo {
+                            max-width: 80px;
+                            max-height: 60px;
+                            margin: 0 auto 8px auto;
+                            display: block;
+                            object-fit: contain;
+                        }
+                        .company-name {
+                            font-size: 14px;
+                            font-weight: bold;
+                            margin-bottom: 4px;
+                        }
+                        .company-details {
+                            font-size: 9px;
+                            color: #555;
+                            margin-bottom: 2px;
+                        }
+                        .receipt-title {
+                            font-size: 10px;
+                            letter-spacing: 2px;
+                            margin: 5px 0;
+                        }
+                        .items-table {
+                            width: 100%;
+                            margin: 5px 0;
+                        }
+                        .item-name {
+                            width: 55%;
+                        }
+                        .item-qty {
+                            width: 20%;
                             text-align: center;
                         }
-                        .bold {
+                        .item-price {
+                            width: 25%;
+                            text-align: right;
+                        }
+                        .totals {
+                            margin-top: 5px;
+                        }
+                        .barcode {
+                            text-align: center;
+                            margin: 10px 0;
+                        }
+                        .barcode canvas {
+                            margin: 0 auto;
+                        }
+                        .footer {
+                            margin-top: 10px;
+                            text-align: center;
+                            font-size: 9px;
+                            color: #777;
+                        }
+                        .thankyou {
+                            font-size: 10px;
                             font-weight: bold;
+                            margin-top: 8px;
                         }
-                        .large {
-                            font-size: 16px;
-                        }
-                        .text-gray-500 { color: #6b7280; }
-                        .text-gray-600 { color: #4b5563; }
-                        .text-red-500 { color: #ef4444; }
-                        .text-red-600 { color: #dc2626; }
-                        .text-green-600 { color: #16a34a; }
-                        .text-purple-600 { color: #9333ea; }
-                        .text-pink-700 { color: #be185d; }
-                        .font-semibold { font-weight: 600; }
-                        .font-bold { font-weight: 700; }
-                        .text-xs { font-size: 11px; }
-                        .text-sm { font-size: 13px; }
-                        .text-base { font-size: 14px; }
-                        .border-t { border-top: 1px solid #e5e7eb; }
-                        .border-dashed { border-style: dashed; }
-                        .border-gray-200 { border-color: #e5e7eb; }
-                        .border-gray-300 { border-color: #d1d5db; }
-                        .bg-pink-100 { background-color: #fce7f3; }
-                        .rounded-full { border-radius: 9999px; }
-                        .px-3 { padding-left: 12px; padding-right: 12px; }
-                        .py-1 { padding-top: 4px; padding-bottom: 4px; }
-                        .mt-1 { margin-top: 4px; }
-                        .mb-3 { margin-bottom: 12px; }
-                        .my-2 { margin-top: 8px; margin-bottom: 8px; }
-                        .space-y-0\\.5 > * + * { margin-top: 2px; }
-                        .space-y-1 > * + * { margin-top: 4px; }
-                        .space-y-2 > * + * { margin-top: 8px; }
-                        .flex { display: flex; }
-                        .justify-between { justify-content: space-between; }
-                        .justify-center { justify-content: center; }
-                        .text-center { text-align: center; }
-                        .flex-1 { flex: 1; }
-                        .pr-2 { padding-right: 8px; }
                         @media print {
                             body {
-                                margin: 0;
                                 padding: 0;
+                                margin: 0;
                             }
-                            .no-print {
-                                display: none;
+                            .receipt {
+                                box-shadow: none;
                             }
                         }
                     </style>
                 </head>
                 <body>
-                    <div class="print-container">
+                    <div class="receipt">
                         ${cloneContent.innerHTML}
                     </div>
                     <script>
@@ -143,242 +278,358 @@ export default function ReceiptModal({ isOpen, onClose, saleId, onNewSale }: Rec
             </html>
         `);
 
-        printWindow.document.close();
-    };
+    printWindow.document.close();
+  };
 
-    const handlePrintAlternative = () => {
-        // Alternative method using iframe
-        const content = receiptRef.current;
-        if (!content) return;
-
-        const printFrame = document.createElement('iframe');
-        printFrame.style.position = 'absolute';
-        printFrame.style.width = '0px';
-        printFrame.style.height = '0px';
-        printFrame.style.border = '0';
-        document.body.appendChild(printFrame);
-
-        const frameDoc = printFrame.contentWindow?.document;
-        if (!frameDoc) return;
-
-        const cloneContent = content.cloneNode(true) as HTMLElement;
-
-        frameDoc.write(`
-            <!DOCTYPE html>
-            <html>
-                <head>
-                    <title>Receipt - ${receipt?.sale_number}</title>
-                    <style>
-                        body {
-                            font-family: 'Courier New', monospace;
-                            font-size: 12px;
-                            margin: 0;
-                            padding: 20px;
-                            max-width: 300px;
-                            margin: 0 auto;
-                        }
-                        .divider { border-top: 1px dashed #000; margin: 8px 0; }
-                        .row { display: flex; justify-content: space-between; margin: 3px 0; }
-                        .center { text-align: center; }
-                        .bold { font-weight: bold; }
-                        .large { font-size: 16px; }
-                        .text-gray-500 { color: #6b7280; }
-                        .text-gray-600 { color: #4b5563; }
-                        .text-red-600 { color: #dc2626; }
-                        .text-green-600 { color: #16a34a; }
-                        .border-t { border-top: 1px solid #e5e7eb; }
-                        .border-dashed { border-style: dashed; }
-                        .font-bold { font-weight: bold; }
-                        .font-semibold { font-weight: 600; }
-                        .text-xs { font-size: 11px; }
-                        .mb-3 { margin-bottom: 12px; }
-                        .my-2 { margin-top: 8px; margin-bottom: 8px; }
-                    </style>
-                </head>
-                <body>${cloneContent.innerHTML}</body>
-            </html>
-        `);
-
-        frameDoc.close();
-
-        setTimeout(() => {
-            printFrame.contentWindow?.print();
-            setTimeout(() => {
-                document.body.removeChild(printFrame);
-            }, 100);
-        }, 100);
-    };
-
-    return (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
-                {/* Header */}
-                <div className="bg-[#1773CF] px-6 py-5 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <h2 className="text-lg font-bold text-white">Sale Complete!</h2>
-                            <p className="text-blue-100 text-xs">Payment successful</p>
-                        </div>
-                    </div>
-                    <button onClick={onClose} className="text-white/70 hover:text-white">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-
-                {/* Receipt Body */}
-                <div className="p-6 max-h-[65vh] overflow-y-auto">
-                    {isLoading ? (
-                        <div className="flex items-center justify-center py-12">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                        </div>
-                    ) : receipt ? (
-                        <div ref={receiptRef} className="font-mono text-sm space-y-1">
-                            {/* Store Header */}
-                            <div className="text-center space-y-0.5 mb-3">
-                                <p className="font-bold text-base">{receipt.branch}</p>
-                                {receipt.branch_address && <p className="text-gray-600 text-xs">{receipt.branch_address}</p>}
-                                {receipt.branch_phone && <p className="text-gray-600 text-xs">{receipt.branch_phone}</p>}
-                            </div>
-
-                            <div className="border-t border-dashed border-gray-300 my-2" />
-
-                            {/* Sale Info */}
-                            <div className="space-y-1 text-xs">
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500">Receipt #</span>
-                                    <span className="font-semibold">{receipt.sale_number}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500">Date</span>
-                                    <span>{receipt.date}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500">Cashier</span>
-                                    <span>{receipt.cashier}</span>
-                                </div>
-                                {receipt.sales_staff && (
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-500">Sales Staff</span>
-                                        <span>{receipt.sales_staff}</span>
-                                    </div>
-                                )}
-                                {receipt.is_gift && (
-                                    <div className="flex justify-center mt-1">
-                                        <span className="bg-pink-100 text-pink-700 text-xs px-3 py-1 rounded-full font-medium">🎁 Gift Receipt</span>
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="border-t border-dashed border-gray-300 my-2" />
-
-                            {/* Items */}
-                            <div className="space-y-2">
-                                {receipt.items?.map((item: any, index: number) => (
-                                    <div key={index} className="text-xs">
-                                        <div className="flex justify-between">
-                                            <span className="font-medium flex-1 pr-2">
-                                                {item.product_name}
-                                                {item.variant && <span className="text-gray-500"> ({item.variant})</span>}
-                                            </span>
-                                            {!receipt.is_gift && (
-                                                <span className="font-semibold">KWD {parseFloat(item.total ?? '0')?.toFixed(3)}</span>
-                                            )}
-                                        </div>
-                                        <div className="flex justify-between text-gray-500">
-                                            <span>x{item.quantity}</span>
-                                            {!receipt.is_gift && (
-                                                <span>@ KWD {parseFloat(item.unit_price ?? '0')?.toFixed(3)}</span>
-                                            )}
-                                        </div>
-                                        {!receipt.is_gift && item.discount > 0 && (
-                                            <div className="flex justify-between text-red-500">
-                                                <span>Discount</span>
-                                                <span>-KWD {parseFloat(item.discount ?? '0')?.toFixed(3)}</span>
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-
-                            {/* Totals - hide if gift */}
-                            {!receipt.is_gift && (
-                                <>
-                                    <div className="border-t border-dashed border-gray-300 my-2" />
-                                    <div className="space-y-1 text-xs">
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-500">Subtotal</span>
-                                            <span>KWD {parseFloat(receipt.subtotal).toFixed(3)}</span>
-                                        </div>
-                                        {parseFloat(receipt.discount) > 0 && (
-                                            <div className="flex justify-between text-red-600">
-                                                <span>Discount</span>
-                                                <span>-KWD {parseFloat(receipt.discount).toFixed(3)}</span>
-                                            </div>
-                                        )}
-                                        {parseFloat(receipt.coupon_discount) > 0 && (
-                                            <div className="flex justify-between text-green-600">
-                                                <span>Coupon</span>
-                                                <span>-KWD {parseFloat(receipt.coupon_discount).toFixed(3)}</span>
-                                            </div>
-                                        )}
-                                        {parseFloat(receipt.employee_discount) > 0 && (
-                                            <div className="flex justify-between text-purple-600">
-                                                <span>Employee Disc.</span>
-                                                <span>-KWD {parseFloat(receipt.employee_discount).toFixed(3)}</span>
-                                            </div>
-                                        )}
-                                        <div className="flex justify-between font-bold text-sm border-t border-gray-200 pt-1">
-                                            <span>TOTAL</span>
-                                            <span>KWD {parseFloat(receipt.total).toFixed(3)}</span>
-                                        </div>
-                                        <div className="flex justify-between text-gray-500">
-                                            <span>{receipt.payment_method}</span>
-                                            {receipt.cash_received && <span>KWD {parseFloat(receipt.cash_received).toFixed(3)}</span>}
-                                        </div>
-                                        {parseFloat(receipt.change_given) > 0 && (
-                                            <div className="flex justify-between font-semibold text-green-600">
-                                                <span>Change</span>
-                                                <span>KWD {parseFloat(receipt.change_given).toFixed(3)}</span>
-                                            </div>
-                                        )}
-                                    </div>
-                                </>
-                            )}
-
-                            <div className="border-t border-dashed border-gray-300 my-2" />
-                            <p className="text-center text-gray-400 text-xs">Thank you for your purchase!</p>
-                        </div>
-                    ) : (
-                        <p className="text-center text-gray-500 py-8">Receipt not available</p>
-                    )}
-                </div>
-
-                {/* Actions */}
-                <div className="px-6 pb-6 space-y-2">
-                    <button
-                        onClick={handlePrint}
-                        className="w-full py-3 border-2 border-[#1773CF] text-[#1773CF] rounded-xl font-semibold hover:bg-blue-50 transition-colors flex items-center justify-center gap-2"
-                    >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                        </svg>
-                        Print Receipt
-                    </button>
-                    <button
-                        onClick={() => { onNewSale(); onClose(); }}
-                        className="w-full py-3 bg-[#1773CF] text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors"
-                    >
-                        New Sale
-                    </button>
-                </div>
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-blue-700 to-blue-600 px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+              <svg
+                className="w-5 h-5 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
             </div>
+            <div>
+              <h2 className="text-lg font-bold text-white">Sale Complete!</h2>
+              <p className="text-blue-100 text-xs">Payment successful</p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-white/70 hover:text-white transition-colors"
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
         </div>
-    );
+
+        {/* Receipt Body */}
+        <div className="p-5 max-h-[65vh] overflow-y-auto bg-gray-50">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            </div>
+          ) : receipt ? (
+            <div
+              ref={receiptRef}
+              className="receipt bg-white p-4 rounded-lg shadow-sm"
+            >
+              {/* Company Logo */}
+              <div className="text-center mb-3">
+                {companyLogo ? (
+                  <img
+                    id="company-logo-img"
+                    ref={logoImgRef}
+                    src={companyLogo}
+                    alt={companyName}
+                    className="mx-auto max-h-14 object-contain"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = "none";
+                    }}
+                  />
+                ) : (
+                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
+                    <svg
+                      className="w-6 h-6 text-blue-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M3 10h18M6 14h6m-6-4h12M5 4h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"
+                      />
+                    </svg>
+                  </div>
+                )}
+              </div>
+
+              {/* Company Header */}
+              <div className="text-center">
+                <div className="company-name text-base font-bold text-gray-800">
+                  {companyName}
+                </div>
+                {companyAddress && (
+                  <div className="company-details text-xs text-gray-500">
+                    {companyAddress}
+                  </div>
+                )}
+                {companyPhone && (
+                  <div className="company-details text-xs text-gray-500">
+                    Tel: {companyPhone}
+                  </div>
+                )}
+                {companyEmail && (
+                  <div className="company-details text-xs text-gray-500">
+                    {companyEmail}
+                  </div>
+                )}
+                <div className="receipt-title text-[10px] text-gray-400 tracking-wider mt-1">
+                  OFFICIAL RECEIPT
+                </div>
+              </div>
+
+              <div className="divider my-3" />
+
+              {/* Transaction Details */}
+              <div className="space-y-2">
+                <div className="row text-xs">
+                  <span className="text-gray-500">Receipt No:</span>
+                  <span className="font-semibold text-gray-800">
+                    {receipt.sale_number}
+                  </span>
+                </div>
+                <div className="row text-xs">
+                  <span className="text-gray-500">Date & Time:</span>
+                  <span className="text-gray-700">{receipt.date}</span>
+                </div>
+                <div className="row text-xs">
+                  <span className="text-gray-500">Cashier:</span>
+                  <span className="text-gray-700">{receipt.cashier}</span>
+                </div>
+                {receipt.sales_staff && (
+                  <div className="row text-xs">
+                    <span className="text-gray-500">Sales Staff:</span>
+                    <span className="text-gray-700">{receipt.sales_staff}</span>
+                  </div>
+                )}
+                {receipt.is_gift && (
+                  <div className="flex justify-center mt-2">
+                    <span className="bg-pink-100 text-pink-700 text-[10px] px-3 py-1 rounded-full font-medium">
+                      🎁 GIFT RECEIPT
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className="divider my-3" />
+
+              {/* Items Header */}
+              <div className="row text-[10px] font-bold text-gray-600 uppercase tracking-wide mb-1">
+                <span className="item-name">ITEM</span>
+                <span className="item-qty text-center">QTY</span>
+                <span className="item-price text-right">AMOUNT</span>
+              </div>
+
+              {/* Items List */}
+              <div className="items-table space-y-2">
+                {receipt.items?.map((item: any, index: number) => (
+                  <div key={index} className="text-xs">
+                    <div className="row">
+                      <span className="item-name text-gray-800">
+                        {item.product_name}
+                        {item.variant && (
+                          <span className="text-gray-400 text-[10px]">
+                            {" "}
+                            ({item.variant})
+                          </span>
+                        )}
+                      </span>
+                      <span className="item-qty text-center text-gray-600">
+                        {item.quantity}
+                      </span>
+                      {!receipt.is_gift && (
+                        <span className="item-price text-right font-semibold text-gray-800">
+                          KWD {parseFloat(item.total ?? "0")?.toFixed(3)}
+                        </span>
+                      )}
+                    </div>
+                    {!receipt.is_gift && parseFloat(item.unit_price) > 0 && (
+                      <div className="row text-[10px] text-gray-400">
+                        <span className="item-name">
+                          @{parseFloat(item.unit_price).toFixed(3)} KWD
+                        </span>
+                        {item.discount > 0 && (
+                          <span className="item-price text-right text-red-500">
+                            -{item.discount_percentage}%
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div className="divider my-3" />
+
+              {/* Totals */}
+              {!receipt.is_gift && (
+                <div className="totals space-y-1">
+                  <div className="row text-xs">
+                    <span className="text-gray-500">Subtotal</span>
+                    <span className="text-gray-800">
+                      KWD {parseFloat(receipt.subtotal).toFixed(3)}
+                    </span>
+                  </div>
+                  {parseFloat(receipt.discount) > 0 && (
+                    <div className="row text-xs text-red-600">
+                      <span>Discount</span>
+                      <span>
+                        - KWD {parseFloat(receipt.discount).toFixed(3)}
+                      </span>
+                    </div>
+                  )}
+                  {parseFloat(receipt.coupon_discount) > 0 && (
+                    <div className="row text-xs text-green-600">
+                      <span>Coupon</span>
+                      <span>
+                        - KWD {parseFloat(receipt.coupon_discount).toFixed(3)}
+                      </span>
+                    </div>
+                  )}
+                  {parseFloat(receipt.employee_discount) > 0 && (
+                    <div className="row text-xs text-purple-600">
+                      <span>Employee Disc.</span>
+                      <span>
+                        - KWD {parseFloat(receipt.employee_discount).toFixed(3)}
+                      </span>
+                    </div>
+                  )}
+                  <div className="divider-dotted my-2" />
+                  <div className="row text-sm font-bold">
+                    <span>TOTAL</span>
+                    <span className="text-blue-600">
+                      KWD {parseFloat(receipt.total).toFixed(3)}
+                    </span>
+                  </div>
+                  <div className="row text-xs">
+                    <span className="text-gray-500">Payment Method</span>
+                    <span className="text-gray-700 font-medium">
+                      {receipt.payment_method}
+                    </span>
+                  </div>
+                  {receipt.cash_received && (
+                    <div className="row text-xs">
+                      <span className="text-gray-500">Cash Received</span>
+                      <span className="text-gray-700">
+                        KWD {parseFloat(receipt.cash_received).toFixed(3)}
+                      </span>
+                    </div>
+                  )}
+                  {parseFloat(receipt.change_given) > 0 && (
+                    <div className="row text-xs text-green-600 font-semibold">
+                      <span>Change Given</span>
+                      <span>
+                        KWD {parseFloat(receipt.change_given).toFixed(3)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="divider my-3" />
+
+              {/* Barcode - Screen View */}
+              <div className="barcode">
+                <canvas
+                  ref={barcodeCanvasRef}
+                  id="barcode-canvas"
+                  style={{
+                    width: "100%",
+                    height: "auto",
+                    maxWidth: "250px",
+                    margin: "0 auto",
+                  }}
+                />
+                {/* Hidden canvas for print */}
+                <canvas
+                  ref={printBarcodeCanvasRef}
+                  id="print-barcode-canvas"
+                  style={{ display: "none" }}
+                />
+              </div>
+
+              {/* Footer */}
+              <div className="footer">
+                <div className="thankyou text-center text-gray-700 text-xs font-semibold">
+                  Thank You For Your Purchase!
+                </div>
+                <div className="text-center text-gray-400 text-[9px] mt-2">
+                  {companyName}
+                </div>
+                <div className="text-center text-gray-400 text-[8px] mt-1">
+                  This is a computer generated receipt
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center text-gray-500 py-8">
+              <svg
+                className="w-12 h-12 mx-auto text-gray-300 mb-3"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+              <p>Receipt not available</p>
+            </div>
+          )}
+        </div>
+
+        {/* Actions */}
+        <div className="px-5 pb-5 space-y-2 bg-white border-t border-gray-100 pt-4">
+          <button
+            onClick={handlePrint}
+            className="w-full py-2.5 border-2 border-blue-600 text-blue-600 rounded-xl font-semibold hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 text-sm"
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+              />
+            </svg>
+            Print Receipt
+          </button>
+          <button
+            onClick={() => {
+              onNewSale();
+              onClose();
+            }}
+            className="w-full py-2.5 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors text-sm"
+          >
+            New Sale
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }

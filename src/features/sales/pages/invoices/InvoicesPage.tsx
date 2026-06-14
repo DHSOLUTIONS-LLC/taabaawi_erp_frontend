@@ -83,10 +83,10 @@ export default function InvoicesPage() {
         <div className="flex flex-col sm:flex-row lg:flex-row items-start sm:items-center justify-between gap-4 mb-6">
           <div>
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
-              Invoices
+              Quotations
             </h1>
             <p className="text-xs sm:text-sm text-gray-500 mt-0.5 sm:mt-1">
-              Manage B2C, B2B invoices and quotations
+              Manage quotations
             </p>
           </div>
           <button
@@ -94,17 +94,14 @@ export default function InvoicesPage() {
             className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 text-blue-600 rounded-lg border border-blue-600 hover:bg-blue-100 transition-colors cursor-pointer font-medium text-sm sm:text-base"
           >
             <img src={add_icon} alt="" className="w-4 h-4" />
-            Create Invoice
+            Create Quotations
           </button>
         </div>
 
         {/* Stats Row - Responsive Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
           {stats.map((stat) => (
-            <div
-              key={stat.label}
-              className="bg-white rounded-xl p-4 sm:p-5"
-            >
+            <div key={stat.label} className="bg-white rounded-xl p-4 sm:p-5">
               <p className="text-xs sm:text-sm text-gray-500">{stat.label}</p>
               <p className={`text-xl sm:text-2xl font-bold mt-1 ${stat.color}`}>
                 {stat.value}
@@ -145,9 +142,7 @@ export default function InvoicesPage() {
               className="w-full sm:w-auto px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white cursor-pointer"
             >
               <option value="">All Types</option>
-              {/* Add your type options here */}
-              <option value="B2C">B2C</option>
-              <option value="B2B">B2B</option>
+
               <option value="Quotation">Quotation</option>
             </select>
 
@@ -287,13 +282,13 @@ export default function InvoicesPage() {
                           <div className="text-sm text-gray-700">
                             {invoice.created_at
                               ? new Date(invoice.created_at).toLocaleDateString(
-                                "en-GB",
-                                {
-                                  day: "2-digit",
-                                  month: "short",
-                                  year: "numeric",
-                                },
-                              )
+                                  "en-GB",
+                                  {
+                                    day: "2-digit",
+                                    month: "short",
+                                    year: "numeric",
+                                  },
+                                )
                               : "—"}
                           </div>
                         </td>
@@ -312,7 +307,7 @@ export default function InvoicesPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-center">
                           <Link
-                            to={`${basePath}/sales/invoices/${invoice.id}`}
+                            to={`${basePath}/sales/quotations/${invoice.id}`}
                             className="px-3 py-1.5 text-xs font-medium text-blue-600 border border-blue-300 rounded-lg hover:bg-blue-50 transition-colors"
                           >
                             View

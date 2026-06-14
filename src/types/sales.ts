@@ -26,6 +26,7 @@ export interface Order {
   tax_amount: number;
   shipping_fee: number;
   total_amount: number;
+  total_paid: number;
   payment_method: 'Cash on Delivery' | 'Credit Card' | 'Debit Card' | 'K-Net' | 'Online Payment' | 'Bank Transfer';
   payment_status: 'Pending' | 'Paid' | 'Partially Paid' | 'Refunded' | 'Failed';
   order_status: 'Pending' | 'Confirmed' | 'Processing' | 'Packed' | 'Shipped' | 'Out for Delivery' | 'Delivered' | 'Cancelled' | 'Returned';

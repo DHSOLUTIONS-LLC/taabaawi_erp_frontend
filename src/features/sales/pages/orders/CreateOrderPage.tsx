@@ -14,18 +14,18 @@ import {
   useCreateOrderMutation,
   useGetShippingMethodsQuery,
 } from "../../../../services/salesApi";
-import { useGetBranchesQuery, useGetUsersQuery } from "../../../../services/superAdminApi";
-
+import {
+  useGetBranchesQuery,
+  useGetUsersQuery,
+} from "../../../../services/superAdminApi";
 
 import { useGetCustomersQuery } from "../../../../services/crmApi";
-
 
 import { canSwitchBranch } from "../../../../utils/roleHelpers";
 
 import arrow_back_icon from "../../../../assets/icons/arrow_back_icon.svg";
 import dropdown_arrow_icon from "../../../../assets/icons/dropdown_arrow_icon.svg";
 import add_icon from "../../../../assets/icons/add.svg";
-// import search_icon from "../../../../assets/icons/search_icon.svg";
 import ProductSelectionModal from "../../components/OrderProductSelectionModel";
 
 export interface ShippingMethod {
@@ -79,8 +79,15 @@ export default function CreateOrderPage() {
   const [shippingFee, setShippingFee] = useState(2.0);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [search, _setSearch] = useState("");
-  const [salesPersonId, setSalesPersonId] = useState("");
-  // const [salesPersons, setSalesPersons] = useState<any[]>([]);
+
+  const [orderType, setOrderType] = useState<"B2C" | "B2B">("B2C");
+  const [showAddPaymentMethod, setShowAddPaymentMethod] = useState(false);
+  const [newPaymentMethod, setNewPaymentMethod] = useState("");
+
+  const [companyName, setCompanyName] = useState("");
+  const [contactPerson, setContactPerson] = useState("");
+  const [companyPhone, setCompanyPhone] = useState("");
+  const [companyAddress, setCompanyAddress] = useState("");
 
   // ─── APIs ─────────────────────────────────────────
   const [createOrder, { isLoading: isCreating }] = useCreateOrderMutation();
@@ -93,38 +100,28 @@ export default function CreateOrderPage() {
 
   console.log("customersResponse:", customersResponse);
 
-
-  const { data: salesPersonsResponse, isLoading: isLoadingSalesPersons } = useGetUsersQuery({
-    is_active: 1 as any,
-    per_page: 1000,
-  });
-
-  const allUsers =
-    salesPersonsResponse?.data?.data ||
-    salesPersonsResponse?.data ||
-    [];
-
-  const salesPersons = (Array.isArray(allUsers) ? allUsers : []).filter((u: any) => {
-    const roleName = u.role?.role_name || u.role_id?.role_name || "";
-    return roleName.toLowerCase().includes("sales");
-  });
-
-
   const branches = Array.isArray(branchesData) ? branchesData : [];
   const methods: ShippingMethod[] =
     methodsResponse?.data?.data || methodsResponse?.data || [];
 
-
-  const customers = customersResponse?.data?.data || customersResponse?.data || [];
-
-
+  const customers =
+    customersResponse?.data?.data || customersResponse?.data || [];
 
   console.log("customers", customers);
-  // ─── Calculations ─────────────────────────────────
-  const subtotal = selectedProducts.reduce(
-    (sum: number, p: any) => sum + p.price * p.quantity,
-    0,
-  );
+
+  // ─── Calculations with discounts ─────────────────────────────────
+  const subtotal = selectedProducts.reduce((sum: number, p: any) => {
+    const discountPercent = p.discount_percentage || 0;
+    const discountedPrice = p.price * (1 - discountPercent / 100);
+    return sum + discountedPrice * p.quantity;
+  }, 0);
+
+  const totalDiscount = selectedProducts.reduce((sum: number, p: any) => {
+    const discountPercent = p.discount_percentage || 0;
+    const discountAmount = ((p.price * discountPercent) / 100) * p.quantity;
+    return sum + discountAmount;
+  }, 0);
+
   const taxAmount = 0;
   const grandTotal = subtotal + shippingFee;
 
@@ -153,12 +150,24 @@ export default function CreateOrderPage() {
     const newErrors: Record<string, string> = {};
 
     if (!customerId) newErrors.customerId = "Please select a customer";
-    if (!customerName.trim())
-      newErrors.customerName = "Customer name is required";
-    if (!customerEmail.trim()) newErrors.customerEmail = "Email is required";
-    else if (!/\S+@\S+\.\S+/.test(customerEmail))
-      newErrors.customerEmail = "Email is invalid";
-    if (!customerPhone.trim()) newErrors.customerPhone = "Phone is required";
+
+    if (orderType === "B2C") {
+      if (!customerName.trim())
+        newErrors.customerName = "Customer name is required";
+      if (!customerEmail.trim()) newErrors.customerEmail = "Email is required";
+      else if (!/\S+@\S+\.\S+/.test(customerEmail))
+        newErrors.customerEmail = "Email is invalid";
+      if (!customerPhone.trim()) newErrors.customerPhone = "Phone is required";
+    } else {
+      if (!companyName.trim())
+        newErrors.companyName = "Company name is required";
+      if (!customerEmail.trim()) newErrors.customerEmail = "Email is required";
+      else if (!/\S+@\S+\.\S+/.test(customerEmail))
+        newErrors.customerEmail = "Email is invalid";
+      if (!companyPhone.trim())
+        newErrors.companyPhone = "Business phone is required";
+    }
+
     if (!shippingAddress.trim())
       newErrors.shippingAddress = "Shipping address is required";
     if (!shippingCity.trim())
@@ -183,29 +192,57 @@ export default function CreateOrderPage() {
     }
 
     try {
-      const items = selectedProducts.map((p: any) => ({
-        product_id: p.product_id,
-        variant_id: p.variant_id || null,
-        quantity: p.quantity,
-        unit_price: p.price,
-      }));
+      const items = selectedProducts.map((p: any) => {
+        const discountPercent = p.discount_percentage || 0;
+        const discountedPrice = p.price * (1 - discountPercent / 100);
+
+        return {
+          product_id: p.product_id,
+          variant_id: p.variant_id || null,
+          quantity: p.quantity,
+          unit_price: discountedPrice, // Send discounted price
+          original_price: p.price,
+          discount_percentage: discountPercent,
+        };
+      });
 
       const payload: any = {
         customer_id: parseInt(customerId),
         channel: channel,
-        customer_name: customerName,
-        customer_email: customerEmail,
-        customer_phone: customerPhone,
-        shipping_address: shippingAddress,
-        shipping_city: shippingCity,
-        shipping_state: shippingState || null,
-        shipping_country: shippingCountry,
-        shipping_postal_code: shippingPostalCode || null,
+        order_type: orderType,
         payment_method: paymentMethod,
         shipping_fee: shippingFee,
-        sales_person_id: parseInt(salesPersonId),
         items: items,
+        subtotal: subtotal,
+        discount_total: totalDiscount,
+        total_amount: grandTotal,
       };
+
+      // B2C fields
+      if (orderType === "B2C") {
+        payload.customer_name = customerName;
+        payload.customer_email = customerEmail;
+        payload.customer_phone = customerPhone;
+        payload.shipping_address = shippingAddress;
+        payload.shipping_city = shippingCity;
+        payload.shipping_state = shippingState || null;
+        payload.shipping_country = shippingCountry;
+        payload.shipping_postal_code = shippingPostalCode || null;
+      }
+
+      // B2B fields
+      if (orderType === "B2B") {
+        payload.company_name = companyName;
+        payload.contact_person = contactPerson || null;
+        payload.customer_email = customerEmail;
+        payload.company_phone = companyPhone;
+        payload.company_address = companyAddress || null;
+        payload.shipping_address = shippingAddress;
+        payload.shipping_city = shippingCity;
+        payload.shipping_state = shippingState || null;
+        payload.shipping_country = shippingCountry;
+        payload.shipping_postal_code = shippingPostalCode || null;
+      }
 
       if (branchId) payload.branch_id = parseInt(branchId);
       if (couponCode) payload.coupon_code = couponCode;
@@ -231,7 +268,7 @@ export default function CreateOrderPage() {
       } else {
         alert(
           err?.data?.message ||
-          "Failed to create order. Please check all fields and try again.",
+            "Failed to create order. Please check all fields and try again.",
         );
       }
     }
@@ -249,17 +286,13 @@ export default function CreateOrderPage() {
     dispatch(clearOrderForm());
   }, [dispatch]);
 
-  // Close dropdown when clicking outside
-  // useEffect(() => {
-  //   const handleClickOutside = () => {
-  //     setShowCustomerDropdown(false);
-  //   };
-  //   document.addEventListener("click", handleClickOutside);
-  //   return () => document.removeEventListener("click", handleClickOutside);
-  // }, []);
-
   const handleUpdateDiscount = (id: string, discountPercentage: number) => {
-    dispatch(updateOrderProductDiscount({ id, discount_percentage: discountPercentage }));
+    dispatch(
+      updateOrderProductDiscount({
+        id,
+        discount_percentage: discountPercentage,
+      }),
+    );
   };
 
   const CHANNELS = ["Phone", "Manual"];
@@ -271,6 +304,8 @@ export default function CreateOrderPage() {
     "Online Payment",
     "Bank Transfer",
   ];
+  const [paymentMethods, setPaymentMethods] = useState(PAYMENT_METHODS);
+
   const COUNTRIES = [
     "Kuwait",
     "UAE",
@@ -317,24 +352,54 @@ export default function CreateOrderPage() {
                 Order Information
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                {/* Order Type Toggle */}
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium text-gray-600 mb-1 sm:mb-2">
+                    Order Type <span className="text-red-500">*</span>
+                  </label>
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setOrderType("B2C")}
+                      className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${
+                        orderType === "B2C"
+                          ? "bg-blue-600 text-white"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                    >
+                      B2C (Customer)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setOrderType("B2B")}
+                      className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${
+                        orderType === "B2B"
+                          ? "bg-blue-600 text-white"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                    >
+                      B2B (Business)
+                    </button>
+                  </div>
+                </div>
+
                 {/* Customer Search */}
                 <div className="relative sm:col-span-1">
                   <label className="block text-sm font-medium text-gray-600 mb-1 sm:mb-2">
                     Select Customer <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
-
                     <select
                       value={customerId}
                       onChange={(e) => {
                         const selectedCustomer = customers.find(
-                          (c: any) => c.id.toString() === e.target.value
+                          (c: any) => c.id.toString() === e.target.value,
                         );
                         if (selectedCustomer) {
                           handleCustomerSelect(selectedCustomer);
                         }
                       }}
-                      className="w-full pl-4  pr-3 sm:pr-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none bg-white"
+                      className="w-full pl-4 pr-3 sm:pr-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none bg-white"
                     >
                       <option value="">Select a customer</option>
                       {customers.map((customer: any) => (
@@ -352,7 +417,9 @@ export default function CreateOrderPage() {
                     </div>
                   </div>
                   {errors.customerId && (
-                    <p className="text-xs text-red-500 mt-1">{errors.customerId}</p>
+                    <p className="text-xs text-red-500 mt-1">
+                      {errors.customerId}
+                    </p>
                   )}
                 </div>
 
@@ -422,105 +489,162 @@ export default function CreateOrderPage() {
                     </div>
                   )}
                 </div>
+              </div>
+            </div>
 
-                <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-gray-600 mb-1 sm:mb-2">
-                    Sales Person <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <select
-                      value={salesPersonId}
-                      onChange={(e) => setSalesPersonId(e.target.value)}
-                      className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10"
-                      required
-                    >
-                      <option value="">Select Sales Person</option>
-                      {salesPersons.map((person: any) => (
-                        <option key={person.id} value={person.id}>
-                          {person.name} ({person.employee_id || person.email})
-                        </option>
-                      ))}
-                    </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:pr-3 pointer-events-none">
-                      <img src={dropdown_arrow_icon} alt="" className="w-3 h-3 sm:w-4 sm:h-4" />
-                    </div>
+            {/* Customer Information - B2C */}
+            {orderType === "B2C" && (
+              <div className="bg-white rounded-xl p-4 sm:p-6">
+                <h2 className="text-base font-semibold text-gray-900 mb-3 sm:mb-4">
+                  Customer Information
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-600 mb-1 sm:mb-2">
+                      Full Name *
+                    </label>
+                    <input
+                      type="text"
+                      value={customerName}
+                      onChange={(e) => setCustomerName(e.target.value)}
+                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                        errors.customerName
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      }`}
+                      placeholder="Enter customer name"
+                    />
+                    {errors.customerName && (
+                      <p className="text-xs text-red-500 mt-1">
+                        {errors.customerName}
+                      </p>
+                    )}
                   </div>
-                  {errors.salesPerson && (
-                    <p className="text-xs text-red-500 mt-1">{errors.salesPerson}</p>
-                  )}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-600 mb-1 sm:mb-2">
+                      Email *
+                    </label>
+                    <input
+                      type="email"
+                      value={customerEmail}
+                      onChange={(e) => setCustomerEmail(e.target.value)}
+                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                        errors.customerEmail
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      }`}
+                      placeholder="customer@example.com"
+                    />
+                    {errors.customerEmail && (
+                      <p className="text-xs text-red-500 mt-1">
+                        {errors.customerEmail}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-600 mb-1 sm:mb-2">
+                      Phone *
+                    </label>
+                    <input
+                      type="text"
+                      value={customerPhone}
+                      onChange={(e) => setCustomerPhone(e.target.value)}
+                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                        errors.customerPhone
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      }`}
+                      placeholder="+965 XXXX XXXX"
+                    />
+                    {errors.customerPhone && (
+                      <p className="text-xs text-red-500 mt-1">
+                        {errors.customerPhone}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* Customer Info */}
-            <div className="bg-white rounded-xl p-4 sm:p-6">
-              <h2 className="text-base font-semibold text-gray-900 mb-3 sm:mb-4">
-                Customer Information
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-1 sm:mb-2">
-                    Full Name *
-                  </label>
-                  <input
-                    type="text"
-                    value={customerName}
-                    onChange={(e) => setCustomerName(e.target.value)}
-                    className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 bg-gray-50 ${errors.customerName ? "border-red-500" : "border-gray-300"
+            {/* Customer Information - B2B */}
+            {orderType === "B2B" && (
+              <div className="bg-white rounded-xl p-4 sm:p-6">
+                <h2 className="text-base font-semibold text-gray-900 mb-3 sm:mb-4">
+                  Business Information
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <div className="sm:col-span-2">
+                    <label className="block text-sm font-medium text-gray-600 mb-1 sm:mb-2">
+                      Company Name *
+                    </label>
+                    <input
+                      type="text"
+                      value={companyName}
+                      onChange={(e) => setCompanyName(e.target.value)}
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      placeholder="Enter company name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-600 mb-1 sm:mb-2">
+                      Contact Person
+                    </label>
+                    <input
+                      type="text"
+                      value={contactPerson}
+                      onChange={(e) => setContactPerson(e.target.value)}
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      placeholder="Contact person name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-600 mb-1 sm:mb-2">
+                      Business Email *
+                    </label>
+                    <input
+                      type="email"
+                      value={customerEmail}
+                      onChange={(e) => setCustomerEmail(e.target.value)}
+                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                        errors.customerEmail
+                          ? "border-red-500"
+                          : "border-gray-300"
                       }`}
-                    placeholder="Auto-filled from customer"
-                    readOnly
-                  />
-                  {errors.customerName && (
-                    <p className="text-xs text-red-500 mt-1">
-                      {errors.customerName}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-1 sm:mb-2">
-                    Email *
-                  </label>
-                  <input
-                    type="email"
-                    value={customerEmail}
-                    onChange={(e) => setCustomerEmail(e.target.value)}
-                    className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 bg-gray-50 ${errors.customerEmail
-                      ? "border-red-500"
-                      : "border-gray-300"
-                      }`}
-                    placeholder="Auto-filled from customer"
-                    readOnly
-                  />
-                  {errors.customerEmail && (
-                    <p className="text-xs text-red-500 mt-1">
-                      {errors.customerEmail}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-1 sm:mb-2">
-                    Phone *
-                  </label>
-                  <input
-                    type="text"
-                    value={customerPhone}
-                    onChange={(e) => setCustomerPhone(e.target.value)}
-                    className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 bg-gray-50 ${errors.customerPhone
-                      ? "border-red-500"
-                      : "border-gray-300"
-                      }`}
-                    placeholder="Auto-filled from customer"
-                    readOnly
-                  />
-                  {errors.customerPhone && (
-                    <p className="text-xs text-red-500 mt-1">
-                      {errors.customerPhone}
-                    </p>
-                  )}
+                      placeholder="info@company.com"
+                    />
+                    {errors.customerEmail && (
+                      <p className="text-xs text-red-500 mt-1">
+                        {errors.customerEmail}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-600 mb-1 sm:mb-2">
+                      Business Phone *
+                    </label>
+                    <input
+                      type="text"
+                      value={companyPhone}
+                      onChange={(e) => setCompanyPhone(e.target.value)}
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      placeholder="+965 XXXX XXXX"
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="block text-sm font-medium text-gray-600 mb-1 sm:mb-2">
+                      Business Address
+                    </label>
+                    <input
+                      type="text"
+                      value={companyAddress}
+                      onChange={(e) => setCompanyAddress(e.target.value)}
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      placeholder="Business address"
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Shipping Info */}
             <div className="bg-white rounded-xl p-4 sm:p-6">
@@ -536,10 +660,11 @@ export default function CreateOrderPage() {
                     type="text"
                     value={shippingAddress}
                     onChange={(e) => setShippingAddress(e.target.value)}
-                    className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 ${errors.shippingAddress
-                      ? "border-red-500"
-                      : "border-gray-300"
-                      }`}
+                    className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 ${
+                      errors.shippingAddress
+                        ? "border-red-500"
+                        : "border-gray-300"
+                    }`}
                     placeholder="Block, Street, House number, Area"
                   />
                   {errors.shippingAddress && (
@@ -556,10 +681,11 @@ export default function CreateOrderPage() {
                     <select
                       value={shippingCity}
                       onChange={(e) => setShippingCity(e.target.value)}
-                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10 ${errors.shippingCity
-                        ? "border-red-500"
-                        : "border-gray-300"
-                        }`}
+                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10 ${
+                        errors.shippingCity
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      }`}
                     >
                       <option value="">Select City</option>
                       {KUWAIT_CITIES.map((city) => (
@@ -602,10 +728,11 @@ export default function CreateOrderPage() {
                     <select
                       value={shippingCountry}
                       onChange={(e) => setShippingCountry(e.target.value)}
-                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10 ${errors.shippingCountry
-                        ? "border-red-500"
-                        : "border-gray-300"
-                        }`}
+                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10 ${
+                        errors.shippingCountry
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      }`}
                     >
                       {COUNTRIES.map((country) => (
                         <option key={country} value={country}>
@@ -679,11 +806,11 @@ export default function CreateOrderPage() {
                               Qty
                             </th>
                             <th className="px-3 sm:px-4 py-2 sm:py-3 text-right text-xs font-semibold text-gray-600 uppercase">
+                              Discount (%)
+                            </th>
+                            <th className="px-3 sm:px-4 py-2 sm:py-3 text-right text-xs font-semibold text-gray-600 uppercase">
                               Price
                             </th>
-                            {/* <th className="px-3 sm:px-4 py-2 sm:py-3 text-right text-xs font-semibold text-gray-600 uppercase">
-                Discount (%)
-              </th> */}
                             <th className="px-3 sm:px-4 py-2 sm:py-3 text-right text-xs font-semibold text-gray-600 uppercase">
                               Total
                             </th>
@@ -694,8 +821,10 @@ export default function CreateOrderPage() {
                         </thead>
                         <tbody className="divide-y divide-gray-100">
                           {selectedProducts.map((product: any) => {
-                            const discountPercent = product.discount_percentage || 0;
-                            const discountedPrice = product.price * (1 - discountPercent / 100);
+                            const discountPercent =
+                              product.discount_percentage || 0;
+                            const discountedPrice =
+                              product.price * (1 - discountPercent / 100);
                             const total = discountedPrice * product.quantity;
 
                             return (
@@ -704,10 +833,17 @@ export default function CreateOrderPage() {
                                   <div className="flex items-center gap-2 sm:gap-3">
                                     <img
                                       src={(() => {
-                                        const imgSrc = product.image_url || product.image;
-                                        if (imgSrc && imgSrc.startsWith("/storage/")) {
+                                        const imgSrc =
+                                          product.image_url || product.image;
+                                        if (
+                                          imgSrc &&
+                                          imgSrc.startsWith("/storage/")
+                                        ) {
                                           const API_BASE_URL =
-                                            import.meta.env.VITE_API_URL?.replace("/api", "") ||
+                                            import.meta.env.VITE_API_URL?.replace(
+                                              "/api",
+                                              "",
+                                            ) ||
                                             "https://erp-backend.ttexpresskw.com";
                                           return `${API_BASE_URL}${imgSrc}`;
                                         }
@@ -730,11 +866,12 @@ export default function CreateOrderPage() {
                                       <div className="text-xs text-gray-500 md:hidden mt-1">
                                         SKU: {product.sku}
                                       </div>
-                                      {product.size && product.size !== "Default" && (
-                                        <div className="text-xs text-gray-500">
-                                          Variant: {product.size}
-                                        </div>
-                                      )}
+                                      {product.size &&
+                                        product.size !== "Default" && (
+                                          <div className="text-xs text-gray-500">
+                                            Variant: {product.size}
+                                          </div>
+                                        )}
                                     </div>
                                   </div>
                                 </td>
@@ -744,67 +881,100 @@ export default function CreateOrderPage() {
                                 <td className="px-3 sm:px-4 py-3">
                                   <div className="flex items-center justify-center gap-1 sm:gap-2">
                                     <button
-                                      onClick={() => handleUpdateQuantity(product.id, product.quantity - 1)}
+                                      onClick={() =>
+                                        handleUpdateQuantity(
+                                          product.id,
+                                          product.quantity - 1,
+                                        )
+                                      }
                                       className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded"
                                     >
-                                      <span className="text-gray-600 font-semibold text-xs sm:text-sm">-</span>
+                                      <span className="text-gray-600 font-semibold text-xs sm:text-sm">
+                                        -
+                                      </span>
                                     </button>
                                     <input
                                       type="number"
                                       min="1"
                                       value={product.quantity}
                                       onChange={(e) => {
-                                        const newQuantity = parseInt(e.target.value) || 1;
+                                        const newQuantity =
+                                          parseInt(e.target.value) || 1;
                                         if (newQuantity > 0) {
-                                          handleUpdateQuantity(product.id, newQuantity);
+                                          handleUpdateQuantity(
+                                            product.id,
+                                            newQuantity,
+                                          );
                                         }
                                       }}
                                       className="w-12 sm:w-14 text-center font-medium text-sm border border-gray-300 rounded-md py-1 focus:outline-none focus:ring-1 focus:ring-blue-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                     />
                                     <button
-                                      onClick={() => handleUpdateQuantity(product.id, product.quantity + 1)}
+                                      onClick={() =>
+                                        handleUpdateQuantity(
+                                          product.id,
+                                          product.quantity + 1,
+                                        )
+                                      }
                                       className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white rounded"
                                     >
-                                      <span className="font-semibold text-xs sm:text-sm">+</span>
+                                      <span className="font-semibold text-xs sm:text-sm">
+                                        +
+                                      </span>
                                     </button>
+                                  </div>
+                                </td>
+                                <td className="px-3 sm:px-4 py-3">
+                                  <div className="flex items-center justify-end gap-1">
+                                    <input
+                                      type="number"
+                                      min="0"
+                                      max="100"
+                                      step="1"
+                                      value={product.discount_percentage || 0}
+                                      onChange={(e) => {
+                                        const discount =
+                                          parseFloat(e.target.value) || 0;
+                                        const finalDiscount = Math.min(
+                                          100,
+                                          Math.max(0, discount),
+                                        );
+                                        handleUpdateDiscount(
+                                          product.id,
+                                          finalDiscount,
+                                        );
+                                      }}
+                                      className="w-16 sm:w-20 text-right font-medium text-sm border border-gray-300 rounded-md py-1 px-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                      placeholder="0"
+                                    />
+                                    <span className="text-xs text-gray-500">
+                                      %
+                                    </span>
                                   </div>
                                 </td>
                                 <td className="px-3 sm:px-4 py-3 text-right text-xs sm:text-sm font-medium">
                                   KWD {product.price.toFixed(3)}
                                 </td>
-                                {/* <td className="px-3 sm:px-4 py-3">
-                    <div className="flex items-center justify-end gap-1">
-                      <input
-                        type="number"
-                        min="0"
-                        max="100"
-                        step="1"
-                        value={product.discount_percentage || 0}
-                        onChange={(e) => {
-                          const discount = parseFloat(e.target.value) || 0;
-                          const finalDiscount = Math.min(100, Math.max(0, discount));
-                          // You need to add this function to your parent component
-                          handleUpdateDiscount(product.id, finalDiscount);
-                        }}
-                        className="w-16 sm:w-20 text-right font-medium text-sm border border-gray-300 rounded-md py-1 px-2 focus:outline-none focus:ring-1 focus:ring-blue-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                        placeholder="0"
-                      />
-                      <span className="text-xs text-gray-500">%</span>
-                    </div>
-                   </td> */}
                                 <td className="px-3 sm:px-4 py-3 text-right text-xs sm:text-sm font-semibold">
                                   <div className="flex flex-col items-end">
-                                    <span className="text-green-600">KWD {total.toFixed(3)}</span>
+                                    <span className="text-green-600">
+                                      KWD {total.toFixed(3)}
+                                    </span>
                                     {discountPercent > 0 && (
                                       <span className="text-xs text-gray-400 line-through">
-                                        KWD {(product.price * product.quantity).toFixed(3)}
+                                        KWD{" "}
+                                        {(
+                                          product.price * product.quantity
+                                        ).toFixed(3)}
                                       </span>
                                     )}
                                   </div>
                                 </td>
                                 <td className="px-3 sm:px-4 py-3 text-center">
                                   <button
-                                    onClick={() => handleRemoveProduct(product.id)}
+                                    onClick={() =>
+                                      handleRemoveProduct(product.id)
+                                    }
                                     className="text-red-500 hover:text-red-700"
                                   >
                                     <svg
@@ -851,6 +1021,8 @@ export default function CreateOrderPage() {
                 Payment
               </h2>
               <div className="space-y-3 sm:space-y-4">
+                {/* Payment Method */}
+                {/* Payment Method */}
                 <div>
                   <label className="block text-sm font-medium text-gray-600 mb-1 sm:mb-2">
                     Payment Method *
@@ -858,14 +1030,26 @@ export default function CreateOrderPage() {
                   <div className="relative">
                     <select
                       value={paymentMethod}
-                      onChange={(e) => setPaymentMethod(e.target.value)}
+                      onChange={(e) => {
+                        const selectedValue = e.target.value;
+                        if (selectedValue === "add_new") {
+                          setShowAddPaymentMethod(true);
+                        } else {
+                          setPaymentMethod(selectedValue);
+                          setShowAddPaymentMethod(false);
+                          setNewPaymentMethod("");
+                        }
+                      }}
                       className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10"
                     >
-                      {PAYMENT_METHODS.map((m) => (
+                      {paymentMethods.map((m) => (
                         <option key={m} value={m}>
                           {m}
                         </option>
                       ))}
+                      <option value="add_new" className="text-blue-600">
+                        + Add New Payment Method
+                      </option>
                     </select>
                     <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:pr-3 pointer-events-none">
                       <img
@@ -875,24 +1059,56 @@ export default function CreateOrderPage() {
                       />
                     </div>
                   </div>
+
+                  {/* Input field for adding new payment method */}
+                  {showAddPaymentMethod && (
+                    <div className="mt-2 flex gap-2">
+                      <input
+                        type="text"
+                        value={newPaymentMethod}
+                        onChange={(e) => setNewPaymentMethod(e.target.value)}
+                        placeholder="Enter new payment method name"
+                        className="flex-1 px-3 sm:px-4 py-2 sm:py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        autoFocus
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (newPaymentMethod.trim()) {
+                            // Add the new method to the paymentMethods array
+                            const updatedMethods = [
+                              ...paymentMethods,
+                              newPaymentMethod.trim(),
+                            ];
+                            setPaymentMethods(updatedMethods);
+                            setPaymentMethod(newPaymentMethod.trim());
+                            setShowAddPaymentMethod(false);
+                            setNewPaymentMethod("");
+                          }
+                        }}
+                        className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                      >
+                        Add
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowAddPaymentMethod(false);
+                          setNewPaymentMethod("");
+                        }}
+                        className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  )}
+
                   {errors.paymentMethod && (
                     <p className="text-xs text-red-500 mt-1">
                       {errors.paymentMethod}
                     </p>
                   )}
                 </div>
-                {/* <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-1 sm:mb-2">
-                    Coupon Code
-                  </label>
-                  <input
-                    type="text"
-                    value={couponCode}
-                    onChange={(e) => setCouponCode(e.target.value)}
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter coupon code"
-                  />
-                </div> */}
               </div>
             </div>
 
@@ -921,10 +1137,11 @@ export default function CreateOrderPage() {
                           );
                         }
                       }}
-                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10 ${errors.shippingMethod
-                        ? "border-red-500"
-                        : "border-gray-300"
-                        }`}
+                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10 ${
+                        errors.shippingMethod
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      }`}
                     >
                       <option value="">Select a shipping method</option>
                       {methods.map((method: ShippingMethod) => (
@@ -980,6 +1197,12 @@ export default function CreateOrderPage() {
                     KWD {subtotal.toFixed(3)}
                   </span>
                 </div>
+                {totalDiscount > 0 && (
+                  <div className="flex justify-between text-sm text-red-600">
+                    <span>Discount</span>
+                    <span>- KWD {totalDiscount.toFixed(3)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-500">Shipping</span>
                   <span className="font-medium text-gray-900">

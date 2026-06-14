@@ -223,7 +223,7 @@ export const CustomerProfilePage = () => {
                     { label: "Phone", value: customer.phone },
                     { label: "Alt Phone", value: customer.alternative_phone },
                     { label: "Gender", value: customer.gender },
-                    { label: "DOB", value: customer.date_of_birth },
+                   { label: "Date of creation", value: new Date(customer.created_at).toLocaleString() },
                     { label: "Nationality", value: customer.nationality },
                     { label: "ID Type", value: customer.id_type },
                     { label: "ID Number", value: customer.id_number },

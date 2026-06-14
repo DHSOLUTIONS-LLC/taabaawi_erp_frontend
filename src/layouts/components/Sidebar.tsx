@@ -99,16 +99,15 @@ export default function Sidebar({
   const companyName = settings?.company_name || "ERP";
   const companyTagline = settings?.company_tagline || "Enterprise Suite";
 
-
   const menuItems: MenuItem[] = isSuperAdmin
     ? [
-      {
-        id: "dashboard",
-        label: "Dashboard",
-        icon: dashboard,
-        path: `${basePath}/dashboard`,
-      },
-    ]
+        {
+          id: "dashboard",
+          label: "Dashboard",
+          icon: dashboard,
+          path: `${basePath}/dashboard`,
+        },
+      ]
     : [];
 
   const posSubmenus: SubMenuItem[] = [
@@ -176,8 +175,13 @@ export default function Sidebar({
         },
         {
           id: "sales-orders",
-          label: "Orders",
+          label: "Manual Orders",
           path: `${basePath}/sales/orders`,
+        },
+        {
+          id: "online-sales-orders",
+          label: "Online Orders",
+          path: `${basePath}/sales/online_orders`,
         },
         {
           id: "sales-shipping",
@@ -186,8 +190,8 @@ export default function Sidebar({
         },
         {
           id: "sales-invoices",
-          label: "Invoices",
-          path: `${basePath}/sales/invoices`,
+          label: "Quotations",
+          path: `${basePath}/sales/quotations`,
         },
       ],
     },
@@ -646,10 +650,11 @@ export default function Sidebar({
             <div key={menu.id}>
               <button
                 onClick={() => handleMenuClick(menu)}
-                className={`w-full flex items-center rounded-lg transition-all duration-200 cursor-pointer px-4 py-3 space-x-3 ${isActive || isParentActive
+                className={`w-full flex items-center rounded-lg transition-all duration-200 cursor-pointer px-4 py-3 space-x-3 ${
+                  isActive || isParentActive
                     ? "bg-gray-200 text-blue-600"
                     : "text-gray-700 hover:bg-gray-100 hover:text-blue-600"
-                  }`}
+                }`}
               >
                 <div
                   className={`shrink-0 ${isActive || isParentActive ? "text-blue-500" : "text-gray-500"}`}
@@ -688,10 +693,11 @@ export default function Sidebar({
                       <button
                         key={submenu.id}
                         onClick={() => handleSubmenuClick(submenu, menu.label)}
-                        className={`w-full flex items-center rounded-lg transition-all duration-200 px-4 py-2.5 cursor-pointer ${isSubmenuActive
+                        className={`w-full flex items-center rounded-lg transition-all duration-200 px-4 py-2.5 cursor-pointer ${
+                          isSubmenuActive
                             ? "bg-blue-50 text-blue-600 font-medium"
                             : "text-gray-600 hover:bg-gray-50 hover:text-blue-600"
-                          }`}
+                        }`}
                       >
                         <span className="text-base truncate">
                           {submenu.label}
@@ -736,7 +742,9 @@ export default function Sidebar({
                 <img src={companyLogo} alt={companyName} className="w-8 h-8" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-gray-900">{companyName}</h2>
+                <h2 className="text-xl font-bold text-gray-900">
+                  {companyName}
+                </h2>
                 <p className="text-sm text-gray-400">{companyTagline}</p>
               </div>
             </div>
@@ -774,10 +782,11 @@ export default function Sidebar({
                   <button
                     key={menu.id}
                     onClick={() => handleMenuClick(menu)}
-                    className={`w-full flex items-center rounded-lg transition-all duration-200 px-4 py-3 space-x-3 ${isActive
+                    className={`w-full flex items-center rounded-lg transition-all duration-200 px-4 py-3 space-x-3 ${
+                      isActive
                         ? "bg-gray-200 text-blue-600 font-bold"
                         : "text-gray-700 hover:bg-gray-100 hover:text-blue-600"
-                      }`}
+                    }`}
                   >
                     <div
                       className={`shrink-0 ${isActive ? "text-blue-500" : "text-gray-500"}`}

@@ -281,7 +281,7 @@ export default function ProductPopup({
             alt=""
             className="w-4 h-4 sm:w-5 sm:h-5"
           />
-          <span>{product.outOfStock ? "Out of Stock" : "Add to Invoice"}</span>
+          <span>{product.outOfStock ? "Out of Stock" : "Add"}</span>
         </button>
       </div>
 

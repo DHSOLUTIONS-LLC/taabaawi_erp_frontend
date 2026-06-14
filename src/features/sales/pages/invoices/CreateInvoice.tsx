@@ -75,28 +75,19 @@ export default function CreateInvoice({
       alert("Please add at least one product.");
       return;
     }
-    if (form.invoiceType === "b2c" && !form.customerName.trim()) {
-      alert("Customer name is required for B2C invoice.");
-      return;
-    }
-    if (form.invoiceType === "b2b" && !form.companyName.trim()) {
-      alert("Company name is required for B2B invoice.");
-      return;
-    }
-    if (form.invoiceType === "quotation" && !form.quotationCustomer.trim()) {
+
+    if (!form.quotationCustomer.trim()) {
       alert("Customer is required for Quotation.");
       return;
     }
 
     try {
       const payload: any = {
-        invoice_type: form.invoiceType,
-        source: form.source,
+        invoice_type: "quotation",
+        source: form.source || "Manual",
         branch_id: form.branchId ? parseInt(form.branchId) : undefined,
-        payment_method:
-          form.invoiceType === "quotation" ? "CASH" : form.paymentMethod,
-        payment_status:
-          form.invoiceType === "quotation" ? "Unpaid" : form.paymentStatus,
+        payment_method: "CASH",
+        payment_status: "Unpaid",
         items: selectedProducts.map((p) => ({
           product_id: p.product_id,
           variant_id: p.variant_id ?? undefined,
@@ -109,60 +100,39 @@ export default function CreateInvoice({
           discount_percentage: 0,
           tax_percentage: 5,
         })),
+        customer_name: form.quotationCustomer,
+        valid_till: form.validTill,
+        quotation_status: form.quotationStatus,
+        inco_terms: form.incoTerms,
       };
-
-      if (form.invoiceType === "b2c") {
-        payload.customer_name = form.customerName;
-        payload.customer_phone = form.customerPhone;
-        payload.customer_type = form.customerType;
-      }
-      if (form.invoiceType === "b2b") {
-        payload.company_name = form.companyName;
-        payload.contact_person = form.contactPerson;
-        payload.company_phone = form.companyPhone;
-        payload.company_address = form.companyAddress;
-      }
-      if (form.invoiceType === "quotation") {
-        payload.customer_name = form.quotationCustomer;
-        payload.valid_till = form.validTill;
-        payload.quotation_status = form.quotationStatus;
-        payload.inco_terms = form.incoTerms;
-      }
 
       let result;
       if (isEditMode && invoiceId) {
         // Update existing invoice
         result = await updateInvoice({ id: invoiceId, data: payload }).unwrap();
-        alert("Invoice updated successfully!");
+        alert("Quotation updated successfully!");
       } else {
-        // Create new invoice
+        // Create new quotation
         result = await createInvoice(payload).unwrap();
-        alert("Invoice created successfully!");
+        alert("Quotation created successfully!");
       }
 
-      console.log("Invoice saved:", result);
+      console.log("Quotation saved:", result);
       dispatch(clearInvoiceForm());
-      navigate(`${basePath}/sales/invoices/${result.data.id || invoiceId}`);
+      navigate(`${basePath}/sales/quotations/${result.data.id || invoiceId}`);
     } catch (error: any) {
-      console.error("Failed to save invoice:", error);
+      console.error("Failed to save quotation:", error);
       alert(
-        error?.data?.message || "Failed to save invoice. Please try again.",
+        error?.data?.message || "Failed to save quotation. Please try again.",
       );
     }
   };
-
-  //   useEffect(() => {
-
-  //   if (!isEditMode) {
-  //     dispatch(clearInvoiceForm());
-  //   }
-  // }, [isEditMode, dispatch]);
 
   return (
     <DashboardLayout>
       <div className="space-y-4 sm:space-y-6 sm:p-0">
         {/* Header */}
-        <div className="flex flex-row justify-between items-center gap-4 mb-4 sm:mb-8">
+        <div className="flex flex-row gap-4 mb-4 sm:mb-8">
           <Link to={`${basePath}/sales`} className="flex-shrink-0">
             <img
               src={arrow_back_icon}
@@ -170,360 +140,30 @@ export default function CreateInvoice({
               className="w-6 h-6 sm:w-8 sm:h-8"
             />
           </Link>
-          <h1 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 text-center">
-            {isEditMode ? "Edit Invoice" : "Create New Invoice"}
+          <h1 className="text-base sm:text-lg md:text-xl font-bold text-gray-900">
+            {isEditMode ? "Edit Quotation" : "Create New Quotation"}
           </h1>
-          <div className="w-6 sm:w-8"></div> {/* Spacer for alignment */}
+          <div className="w-6 sm:w-8"></div>
         </div>
 
         <div className="space-y-4 sm:space-y-6">
-          {/* ── Invoice Type ── */}
-          <div className="bg-white space-y-4 sm:space-y-6 lg:p-4  rounded-xl">
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-              {(["b2c", "b2b", "quotation"] as const).map((type) => (
-                <button
-                  key={type}
-                  onClick={() => setField({ invoiceType: type })}
-                  disabled={isEditMode}
-                  className={`w-full sm:flex-1 px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg border-2 transition-all ${
-                    form.invoiceType === type
-                      ? "border-blue-500 bg-blue-50"
-                      : "border-gray-300 bg-white"
-                  } ${isEditMode ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span
-                      className={`text-xs sm:text-sm font-medium ${form.invoiceType === type ? "text-blue-700" : "text-gray-700"}`}
-                    >
-                      {type === "b2c"
-                        ? "B2C Sales Invoice"
-                        : type === "b2b"
-                          ? "B2B Sales Invoice"
-                          : "Quotation"}
-                    </span>
-                    <div
-                      className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center ${form.invoiceType === type ? "border-blue-500" : "border-gray-300"}`}
-                    >
-                      {form.invoiceType === type && (
-                        <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-blue-500" />
-                      )}
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* ── B2C Form ── */}
-          {form.invoiceType === "b2c" && (
-            <>
-              <div className="space-y-3 sm:space-y-4 bg-white rounded-xl lg:p-4 sm:p-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                  <div>
-                    <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">
-                      Source
-                    </label>
-                    <div className="relative">
-                      <select
-                        value={form.source}
-                        onChange={(e) => setField({ source: e.target.value })}
-                        className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10"
-                      >
-                        <option value="Manual">Manual</option>
-                        <option value="POS">POS</option>
-                        <option value="Website">Website</option>
-                        <option value="Mobile App">Mobile App</option>
-                      </select>
-                      <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:pr-3 pointer-events-none">
-                        <img
-                          src={dropdown_arrow_icon}
-                          alt=""
-                          className="w-3 h-3 sm:w-4 sm:h-4"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">
-                      Branch
-                    </label>
-                    <div className="relative">
-                      <select
-                        value={form.branchId}
-                        onChange={(e) => setField({ branchId: e.target.value })}
-                        className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10"
-                      >
-                        <option value="">Select Branch</option>
-                        {branches.map((b: any) => (
-                          <option key={b.id} value={b.id}>
-                            {b.branch_name}
-                          </option>
-                        ))}
-                      </select>
-                      <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:pr-3 pointer-events-none">
-                        <img
-                          src={dropdown_arrow_icon}
-                          alt=""
-                          className="w-3 h-3 sm:w-4 sm:h-4"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">
-                    Cashier
-                  </label>
-                  <input
-                    type="text"
-                    value={user?.name || ""}
-                    readOnly
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-200 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">
-                    Date
-                  </label>
-                  <input
-                    type="text"
-                    readOnly
-                    value={new Date().toLocaleDateString("en-GB", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    })}
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-200 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-3 sm:space-y-4 bg-white rounded-xl p-4 sm:p-6">
-                <div>
-                  <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">
-                    Customer Name
-                  </label>
-                  <input
-                    type="text"
-                    value={form.customerName}
-                    onChange={(e) => setField({ customerName: e.target.value })}
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter customer name"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">
-                    Phone
-                  </label>
-                  <input
-                    type="text"
-                    value={form.customerPhone}
-                    onChange={(e) =>
-                      setField({ customerPhone: e.target.value })
-                    }
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    placeholder="+965 XXXX XXXX"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">
-                    Customer Type
-                  </label>
-                  <input
-                    type="text"
-                    value={form.customerType}
-                    readOnly
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-200 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed"
-                    placeholder="B2C"
-                  />
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* ── B2B Form ── */}
-          {form.invoiceType === "b2b" && (
-            <>
-              <div className="space-y-3 sm:space-y-4 bg-white rounded-lg p-4 sm:p-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                  <div>
-                    <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">
-                      Source
-                    </label>
-                    <div className="relative">
-                      <select
-                        value={form.source}
-                        onChange={(e) => setField({ source: e.target.value })}
-                        className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10"
-                      >
-                        <option value="Manual">Manual</option>
-                        <option value="POS">POS</option>
-                        <option value="Website">Website</option>
-                        <option value="Mobile App">Mobile App</option>
-                      </select>
-                      <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:pr-3 pointer-events-none">
-                        <img
-                          src={dropdown_arrow_icon}
-                          alt=""
-                          className="w-3 h-3 sm:w-4 sm:h-4"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">
-                      Branch
-                    </label>
-                    <div className="relative">
-                      <select
-                        value={form.branchId}
-                        onChange={(e) => setField({ branchId: e.target.value })}
-                        className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10"
-                      >
-                        <option value="">Select Branch</option>
-                        {branches.map((b: any) => (
-                          <option key={b.id} value={b.id}>
-                            {b.branch_name}
-                          </option>
-                        ))}
-                      </select>
-                      <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:pr-3 pointer-events-none">
-                        <img
-                          src={dropdown_arrow_icon}
-                          alt=""
-                          className="w-3 h-3 sm:w-4 sm:h-4"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">
-                    Bank Account (Auto)
-                  </label>
-                  <input
-                    type="text"
-                    readOnly
-                    value="Qurain – Main Account"
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-200 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">
-                    Sales Rep
-                  </label>
-                  <input
-                    type="text"
-                    value={user?.name || ""}
-                    readOnly
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-200 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-3 sm:space-y-4 bg-white rounded-lg p-4 sm:p-6">
-                <div>
-                  <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">
-                    Company Name
-                  </label>
-                  <input
-                    type="text"
-                    value={form.companyName}
-                    onChange={(e) => setField({ companyName: e.target.value })}
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter company name"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">
-                    Contact Person
-                  </label>
-                  <input
-                    type="text"
-                    value={form.contactPerson}
-                    onChange={(e) =>
-                      setField({ contactPerson: e.target.value })
-                    }
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    placeholder="Shahzad Diyal"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">
-                    Phone
-                  </label>
-                  <input
-                    type="text"
-                    value={form.companyPhone}
-                    onChange={(e) => setField({ companyPhone: e.target.value })}
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    placeholder="+965 55 213 445"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">
-                    Address
-                  </label>
-                  <input
-                    type="text"
-                    value={form.companyAddress}
-                    onChange={(e) =>
-                      setField({ companyAddress: e.target.value })
-                    }
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    placeholder="Kuwait City"
-                  />
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* ── Quotation Form ── */}
-          {form.invoiceType === "quotation" && (
-            <div className="space-y-3 sm:space-y-4 bg-white rounded-xl p-4 sm:p-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                <div>
-                  <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">
-                    Customer / Company
-                  </label>
-                  <input
-                    type="text"
-                    value={form.quotationCustomer}
-                    onChange={(e) =>
-                      setField({ quotationCustomer: e.target.value })
-                    }
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    placeholder="BlueTech LLC"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">
-                    Valid Till
-                  </label>
-                  <input
-                    type="date"
-                    value={form.validTill}
-                    onChange={(e) => setField({ validTill: e.target.value })}
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
+          {/* Quotation Header Section */}
+          <div className="bg-white space-y-4 sm:space-y-6 lg:p-4 rounded-xl">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">
-                  Status
+                  Source
                 </label>
                 <div className="relative">
                   <select
-                    value={form.quotationStatus}
-                    onChange={(e) =>
-                      setField({ quotationStatus: e.target.value })
-                    }
+                    value={form.source}
+                    onChange={(e) => setField({ source: e.target.value })}
                     className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10"
                   >
-                    <option value="Draft">Draft</option>
-                    <option value="Sent">Sent</option>
-                    <option value="Accepted">Accepted</option>
-                    <option value="Rejected">Rejected</option>
+                    <option value="Manual">Manual</option>
+                    <option value="POS">POS</option>
+                    <option value="Website">Website</option>
+                    <option value="Mobile App">Mobile App</option>
                   </select>
                   <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:pr-3 pointer-events-none">
                     <img
@@ -536,20 +176,129 @@ export default function CreateInvoice({
               </div>
               <div>
                 <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">
-                  IncoTerms
+                  Branch
+                </label>
+                <div className="relative">
+                  <select
+                    value={form.branchId}
+                    onChange={(e) => setField({ branchId: e.target.value })}
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10"
+                  >
+                    <option value="">Select Branch</option>
+                    {branches.map((b: any) => (
+                      <option key={b.id} value={b.id}>
+                        {b.branch_name}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:pr-3 pointer-events-none">
+                    <img
+                      src={dropdown_arrow_icon}
+                      alt=""
+                      className="w-3 h-3 sm:w-4 sm:h-4"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">
+                Cashier
+              </label>
+              <input
+                type="text"
+                value={user?.name || ""}
+                readOnly
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-200 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed"
+              />
+            </div>
+            <div>
+              <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">
+                Date
+              </label>
+              <input
+                type="text"
+                readOnly
+                value={new Date().toLocaleDateString("en-GB", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                })}
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-200 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed"
+              />
+            </div>
+          </div>
+
+          {/* Customer Information Section */}
+          <div className="space-y-3 sm:space-y-4 bg-white rounded-xl p-4 sm:p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              <div>
+                <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">
+                  Customer / Company
                 </label>
                 <input
                   type="text"
-                  value={form.incoTerms}
-                  onChange={(e) => setField({ incoTerms: e.target.value })}
+                  value={form.quotationCustomer}
+                  onChange={(e) =>
+                    setField({ quotationCustomer: e.target.value })
+                  }
                   className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  placeholder="CIF"
+                  placeholder="Enter customer or company name"
+                />
+              </div>
+              <div>
+                <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">
+                  Valid Till
+                </label>
+                <input
+                  type="date"
+                  value={form.validTill}
+                  onChange={(e) => setField({ validTill: e.target.value })}
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>
-          )}
+            <div>
+              <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">
+                Status
+              </label>
+              <div className="relative">
+                <select
+                  value={form.quotationStatus}
+                  onChange={(e) =>
+                    setField({ quotationStatus: e.target.value })
+                  }
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10"
+                >
+                  <option value="Draft">Draft</option>
+                  <option value="Sent">Sent</option>
+                  <option value="Accepted">Accepted</option>
+                  <option value="Rejected">Rejected</option>
+                </select>
+                <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:pr-3 pointer-events-none">
+                  <img
+                    src={dropdown_arrow_icon}
+                    alt=""
+                    className="w-3 h-3 sm:w-4 sm:h-4"
+                  />
+                </div>
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">
+                IncoTerms
+              </label>
+              <input
+                type="text"
+                value={form.incoTerms}
+                onChange={(e) => setField({ incoTerms: e.target.value })}
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                placeholder="e.g., CIF, FOB, EXW"
+              />
+            </div>
+          </div>
 
-          {/* ── Products Section ── */}
+          {/* Products Section */}
           <div className="space-y-4 sm:space-y-6">
             <div>
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white p-4 sm:p-6">
@@ -661,9 +410,28 @@ export default function CreateInvoice({
                                           -
                                         </span>
                                       </button>
-                                      <span className="w-8 sm:w-10 text-center font-medium text-gray-900 text-sm">
-                                        {product.quantity}
-                                      </span>
+                                      <input
+                                        type="text"
+                                        value={product.quantity}
+                                        onChange={(e) => {
+                                          const value = e.target.value;
+                                          if (value === "") {
+                                            handleUpdateQuantity(product.id, 0);
+                                            return;
+                                          }
+                                          const numValue = parseInt(value, 10);
+                                          if (
+                                            !isNaN(numValue) &&
+                                            numValue >= 0
+                                          ) {
+                                            handleUpdateQuantity(
+                                              product.id,
+                                              numValue,
+                                            );
+                                          }
+                                        }}
+                                        className="w-12 sm:w-16 text-center font-medium text-gray-900 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent px-1 py-1"
+                                      />
                                       <button
                                         onClick={() =>
                                           handleUpdateQuantity(
@@ -799,67 +567,6 @@ export default function CreateInvoice({
               </div>
             </div>
 
-            {/* Payment — hidden for quotation */}
-            {selectedProducts.length > 0 &&
-              form.invoiceType !== "quotation" && (
-                <div className="bg-white rounded-lg p-4 sm:p-6 space-y-4 sm:space-y-6">
-                  <div>
-                    <h4 className="text-sm sm:text-base font-semibold mb-3 sm:mb-4">
-                      Payment Method
-                    </h4>
-                    <div className="space-y-2 sm:space-y-3">
-                      {(["CASH", "CARD", "KNET"] as const).map((method) => (
-                        <label
-                          key={method}
-                          className="flex items-center justify-between cursor-pointer"
-                        >
-                          <span className="text-xs sm:text-sm text-gray-700">
-                            {method}
-                          </span>
-                          <input
-                            type="radio"
-                            name="paymentMethod"
-                            value={method}
-                            checked={form.paymentMethod === method}
-                            onChange={() => setField({ paymentMethod: method })}
-                            className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600"
-                          />
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <h4 className="text-sm sm:text-base font-semibold mb-3 sm:mb-4">
-                      Payment Status
-                    </h4>
-                    <div className="space-y-2 sm:space-y-3">
-                      {(["Paid", "Unpaid", "Partially Paid"] as const).map(
-                        (status) => (
-                          <label
-                            key={status}
-                            className="flex items-center justify-between cursor-pointer"
-                          >
-                            <span className="text-xs sm:text-sm text-gray-700">
-                              {status}
-                            </span>
-                            <input
-                              type="radio"
-                              name="paymentStatus"
-                              value={status}
-                              checked={form.paymentStatus === status}
-                              onChange={() =>
-                                setField({ paymentStatus: status })
-                              }
-                              className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600"
-                            />
-                          </label>
-                        ),
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
-
             {/* Action Buttons */}
             {selectedProducts.length > 0 && (
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 pt-4">
@@ -877,8 +584,8 @@ export default function CreateInvoice({
                   {isSaving
                     ? "Saving..."
                     : isEditMode
-                      ? "Update Invoice"
-                      : "Save Invoice"}
+                      ? "Update Quotation"
+                      : "Save Quotation"}
                 </button>
                 <button
                   onClick={() => window.print()}

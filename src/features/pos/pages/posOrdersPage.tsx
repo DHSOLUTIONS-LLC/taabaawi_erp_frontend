@@ -1,5 +1,6 @@
 // src/features/pos/pages/POSOrdersPage.tsx
 import { useState, useMemo, useEffect } from "react";
+import { Link } from "react-router-dom";
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import { useGetSalesQuery } from "../../../services/posApi";
 import { useGetBranchesQuery } from "../../../services/superAdminApi";
@@ -7,6 +8,8 @@ import { useAppSelector } from "../../../app/hooks";
 import type { RootState } from "../../../app/store";
 import { canSwitchBranch } from "../../../utils/roleHelpers";
 import CreateReturnModal from "../components/CreateReturnModal";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 import search_icon from "../../../assets/icons/search_icon.svg";
 import export_pdf from "../../../assets/icons/export_pdf.svg";
@@ -17,7 +20,7 @@ import date_icon from "../../../assets/icons/date_icon.svg";
 import market_icon from "../../../assets/icons/market_icon.svg";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-import jsPDF from "jspdf";
+// import jsPDF from "jspdf";
 
 import {
   useReactTable,
@@ -35,6 +38,8 @@ import { ChevronUp, ChevronDown } from "lucide-react";
 export default function POSOrdersPage() {
   const { user } = useAppSelector((state: RootState) => state.auth);
   const userCanSwitchBranch = canSwitchBranch(user?.role?.role_name);
+  const isSuperAdmin = user?.role?.role_name === "Super Admin";
+  const basePath = isSuperAdmin ? "/admin" : "";
 
   const [returnSaleId, setReturnSaleId] = useState<number | null>(null);
   const [showReturnModal, setShowReturnModal] = useState(false);
@@ -136,152 +141,199 @@ export default function POSOrdersPage() {
     return pages;
   };
 
-  // Export Excel
-  const handleExportToExcel = () => {
-    try {
-      const exportData = sales.map((s: any) => ({
-        Order: s.sale_number,
-        Branch: s.branch?.branch_name,
-        Cashier: s.cashier?.name,
-        "Payment Method": s.payment_method,
-        Status: s.status,
-        "Total (KD)": parseFloat(s.total_amount).toFixed(3),
-        Date: new Date(s.sale_date).toLocaleDateString(),
-      }));
-      const ws = XLSX.utils.json_to_sheet(exportData);
-      ws["!cols"] = Object.keys(exportData[0] || {}).map(() => ({ wch: 22 }));
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Orders Report");
-      const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-      saveAs(
-        new Blob([buf], {
-          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        }),
-        `orders_report_${new Date().toISOString().split("T")[0]}.xlsx`,
-      );
-    } catch (e) {
-      console.error("Excel export failed:", e);
-    }
-  };
-
-  // Export PDF
-  const handleExportToPDF = () => {
-    if (!sales.length) {
-      alert("No orders to export");
-      return;
-    }
-    try {
-      const doc = new jsPDF("portrait", "mm", "a4");
-      const marginLeft = 10;
-      let yPos = 20;
-
-      doc.setFontSize(18);
-      doc.setFont("helvetica", "bold");
-      doc.text("ORDERS REPORT", 105, yPos, { align: "center" });
-      yPos += 10;
-
-      doc.setFontSize(10);
-      doc.setFont("helvetica", "normal");
-      doc.setTextColor(100);
-      doc.text(
-        `Generated: ${new Date().toLocaleDateString()}`,
-        marginLeft,
-        yPos,
-      );
-      doc.text(
-        `Total Orders: ${pagination?.total || sales.length}`,
-        200,
-        yPos,
-        { align: "right" },
-      );
-      yPos += 5;
-      doc.text(
-        `Total Revenue: KWD ${totalRevenue.toFixed(3)}`,
-        marginLeft,
-        yPos,
-      );
-      yPos += 8;
-
-      doc.setDrawColor(200, 200, 200);
-      doc.line(marginLeft, yPos, 200, yPos);
-      yPos += 10;
-
-      const colWidths = [35, 40, 35, 35, 40];
-      const headers = ["Sale #", "Branch", "Cashier", "Payment", "Total (KD)"];
-
-      doc.setFontSize(10);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(255);
-      doc.setFillColor(23, 115, 207);
-      let xPos = marginLeft;
-      headers.forEach((h, i) => {
-        doc.rect(xPos, yPos, colWidths[i], 8, "F");
-        doc.text(h, xPos + colWidths[i] / 2, yPos + 5.5, { align: "center" });
-        xPos += colWidths[i];
-      });
-      yPos += 8;
-
-      doc.setTextColor(0);
-      doc.setFont("helvetica", "normal");
-      sales.forEach((s: any, rowIndex: number) => {
-        if (yPos > 270) {
-          doc.addPage("portrait");
-          yPos = 20;
-        }
-        if (rowIndex % 2 === 0) {
-          doc.setFillColor(248, 248, 248);
-          xPos = marginLeft;
-          colWidths.forEach((w) => {
-            doc.rect(xPos, yPos, w, 8, "F");
-            xPos += w;
-          });
-        }
-        xPos = marginLeft;
-        const row = [
-          s.sale_number,
-          s.branch?.branch_name || "",
-          s.cashier?.name || "",
-          s.payment_method,
-          `KWD ${parseFloat(s.total_amount).toFixed(3)}`,
-        ];
-        doc.setFontSize(9);
-        row.forEach((cell, i) => {
-          let text = String(cell);
-          const maxW = colWidths[i] - 4;
-          while (doc.getTextWidth(text) > maxW && text.length > 3) {
-            text = text.substring(0, text.length - 4) + "...";
-          }
-          doc.text(text, xPos + colWidths[i] / 2, yPos + 5.5, {
-            align: "center",
-          });
-          xPos += colWidths[i];
-        });
-        yPos += 8;
-      });
-
-      const pageCount = (doc.internal as any).pages.length;
-      for (let i = 1; i <= pageCount; i++) {
-        doc.setPage(i);
-        doc.setFontSize(8);
-        doc.setTextColor(150);
-        doc.text(`Page ${i} of ${pageCount}`, 105, 290, { align: "center" });
-      }
-      doc.save(`orders_report_${new Date().toISOString().split("T")[0]}.pdf`);
-    } catch (e) {
-      console.error("PDF export failed:", e);
-    }
-  };
-
-  const paymentBadge = (method: string) => {
-    const map: Record<string, string> = {
-      Cash: "bg-green-100 text-green-800",
-      Card: "bg-blue-100 text-blue-800",
-      "K-Net": "bg-purple-100 text-purple-800",
-      "Mobile Payment": "bg-orange-100 text-orange-800",
-      Mixed: "bg-gray-100 text-gray-800",
+// Export Excel with all details
+const handleExportToExcel = () => {
+  if (!sales.length) {
+    alert("No orders to export");
+    return;
+  }
+  
+  try {
+    const exportData = sales.map((s: any) => ({
+      "Order #": s.sale_number,
+      "Date": new Date(s.sale_date).toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      }),
+      "Time": new Date(s.sale_date).toLocaleTimeString("en-GB", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      "Branch": s.branch?.branch_name || "—",
+      "Cashier": s.cashier?.name || "—",
+      "Sales Staff": s.sales_staff?.name || "—",
+      "Payment Method": s.payment_method || "—",
+      "Status": s.status || "—",
+      "Subtotal (KD)": parseFloat(s.subtotal || "0").toFixed(3),
+      "Discount (KD)": parseFloat(s.discount_amount || "0").toFixed(3),
+      "Coupon Discount (KD)": parseFloat(s.coupon_discount || "0").toFixed(3),
+      "Employee Discount (KD)": parseFloat(s.employee_discount_amount || "0").toFixed(3),
+      "Total (KD)": parseFloat(s.total_amount || "0").toFixed(3),
+      "Cash Received (KD)": s.cash_received ? parseFloat(s.cash_received).toFixed(3) : "—",
+      "Change Given (KD)": s.change_given ? parseFloat(s.change_given).toFixed(3) : "—",
+      "Card Reference": s.card_reference || "—",
+      "Coupon Code": s.coupon_code || "—",
+      "Items Count": s.items?.length || 0,
+      "Is Gift": s.is_gift ? "Yes" : "No",
+      "Is Employee Purchase": s.is_employee_purchase ? "Yes" : "No",
+      "Notes": s.notes || "—",
+    }));
+    
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    
+    // Set column widths
+    const colWidths = {
+      "Order #": 20,
+      "Date": 15,
+      "Time": 12,
+      "Branch": 20,
+      "Cashier": 20,
+      "Sales Staff": 20,
+      "Payment Method": 18,
+      "Status": 15,
+      "Subtotal (KD)": 15,
+      "Discount (KD)": 15,
+      "Coupon Discount (KD)": 20,
+      "Employee Discount (KD)": 22,
+      "Total (KD)": 15,
+      "Cash Received (KD)": 18,
+      "Change Given (KD)": 18,
+      "Card Reference": 20,
+      "Coupon Code": 18,
+      "Items Count": 12,
+      "Is Gift": 10,
+      "Is Employee Purchase": 20,
+      "Notes": 30,
     };
-    return map[method] || "bg-gray-100 text-gray-600";
-  };
+    
+    ws["!cols"] = Object.keys(exportData[0] || {}).map(key => ({ 
+      wch: colWidths[key as keyof typeof colWidths] || 15 
+    }));
+    
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Orders Report");
+    
+    const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    saveAs(
+      new Blob([buf], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      }),
+      `orders_report_${new Date().toISOString().split("T")[0]}.xlsx`,
+    );
+  } catch (e) {
+    console.error("Excel export failed:", e);
+    alert("Failed to export Excel. Please try again.");
+  }
+};
+
+// Export PDF with all details
+
+const handleExportToPDF = () => {
+  if (!sales.length) {
+    alert("No orders to export");
+    return;
+  }
+  
+  try {
+    const doc = new jsPDF("landscape", "mm", "a4");
+    const pageWidth = doc.internal.pageSize.getWidth();
+    
+    // Title - Centered
+    doc.setFontSize(18);
+    doc.setFont("helvetica", "bold");
+    doc.text("ORDERS REPORT", pageWidth / 2, 15, { align: "center" });
+    
+    // Report info
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(100);
+    doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 25);
+    
+    const totalRevenue = sales.reduce(
+      (sum: number, s: any) => sum + parseFloat(s.total_amount || "0"),
+      0,
+    );
+    doc.text(`Total Orders: ${pagination?.total || sales.length}`, pageWidth - 14, 25, { align: "right" });
+    doc.text(`Total Revenue: KWD ${totalRevenue.toFixed(3)}`, 14, 32);
+    
+    // Calculate table width to center it
+    const tableColumns = [
+      "Order #", "Date", "Branch", "Cashier", "Sales Staff",
+      "Payment", "Status", "Subtotal", "Discount", "Total"
+    ];
+    
+    // Prepare table data
+    const tableData = sales.map((s: any) => [
+      s.sale_number || "-",
+      new Date(s.sale_date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }),
+      s.branch?.branch_name || "-",
+      s.cashier?.name || "-",
+      s.sales_staff?.name || "-",
+      s.payment_method || "-",
+      s.status || "-",
+      parseFloat(s.subtotal || "0").toFixed(3),
+      parseFloat(s.discount_amount || "0").toFixed(3),
+      parseFloat(s.total_amount || "0").toFixed(3),
+    ]);
+    
+    // Create centered table
+    autoTable(doc, {
+      startY: 40,
+      head: [tableColumns],
+      body: tableData,
+      theme: 'striped',
+      headStyles: {
+        fillColor: [23, 115, 207],
+        textColor: [255, 255, 255],
+        fontSize: 8,
+        fontStyle: 'bold',
+        halign: 'center',
+        valign: 'middle',
+      },
+      bodyStyles: {
+        fontSize: 7,
+        cellPadding: 2,
+        valign: 'middle',
+      },
+      alternateRowStyles: {
+        fillColor: [248, 248, 248],
+      },
+      columnStyles: {
+        0: { cellWidth: 30, halign: 'left' },
+        1: { cellWidth: 25, halign: 'center' },
+        2: { cellWidth: 35, halign: 'left' },
+        3: { cellWidth: 25, halign: 'left' },
+        4: { cellWidth: 30, halign: 'left' },
+        5: { cellWidth: 30, halign: 'center' },
+        6: { cellWidth: 25, halign: 'center' },
+        7: { cellWidth: 25, halign: 'right' },
+        8: { cellWidth: 20, halign: 'right' },
+        9: { cellWidth: 20, halign: 'right' },
+      },
+      margin: { left: 10, right: 10 },
+      horizontalPageBreak: false,
+      pageBreak: 'auto',
+      showHead: 'everyPage',
+      tableWidth: 'auto',
+    });
+    
+    // Add page numbers centered
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setTextColor(150);
+      doc.text(`Page ${i} of ${pageCount}`, pageWidth / 2, 205, { align: "center" });
+    }
+    
+    doc.save(`orders_report_${new Date().toISOString().split("T")[0]}.pdf`);
+  } catch (e) {
+    console.error("PDF export failed:", e);
+    alert("Failed to export PDF. Please try again.");
+  }
+};
+  
 
   const columns: ColumnDef<any>[] = useMemo(
     () => [
@@ -484,16 +536,25 @@ export default function POSOrdersPage() {
         id: "actions",
         header: "Action",
         cell: ({ row }) => (
-          <button
-            onClick={() => {
-              setReturnSaleId(row.original.id);
-              setShowReturnModal(true);
-            }}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors"
-          >
-            <img src={returns} alt="" className="w-3.5 h-3.5" />
-            <span>Return</span>
-          </button>
+          <div className="flex justify-between gap-2">
+            <Link
+              to={`${basePath}/pos/orders/${row.original.id}`}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-blue-100 text-black-700 cursor-pointer rounded-lg hover:bg-blue-200 transition-colors"
+            >
+              <img src={returns} alt="" className="w-3.5 h-3.5" />
+              <span>View</span>
+            </Link>
+            <button
+              onClick={() => {
+                setReturnSaleId(row.original.id);
+                setShowReturnModal(true);
+              }}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-orange-100 text-orange-700 rounded-lg  cursor-pointer hover:bg-orange-200 transition-colors"
+            >
+              <img src={returns} alt="" className="w-3.5 h-3.5" />
+              <span>Return</span>
+            </button>
+          </div>
         ),
       },
     ],

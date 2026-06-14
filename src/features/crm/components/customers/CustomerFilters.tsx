@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { Search, X, Filter } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { setCustomerFilters, resetCustomerFilters } from '../../../../features/crm/crmSlice';
 import type { RootState } from '../../../../app/store';
 
@@ -9,7 +9,72 @@ export const CustomerFilters = () => {
   const filters = useSelector((s: RootState) => s.crm.customerFilters);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
-  const set = (patch: any) => dispatch(setCustomerFilters(patch));
+  // Sync URL params with Redux on mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const search = urlParams.get("search") || "";
+    const tier = urlParams.get("tier") || "";
+    const status = urlParams.get("status") || "";
+    const start_date = urlParams.get("start_date") || null;
+    const end_date = urlParams.get("end_date") || null;
+    
+    // Only update if there are URL params
+    if (search || tier || status || start_date || end_date) {
+      dispatch(setCustomerFilters({ 
+        search, 
+        tier, 
+        status, 
+        start_date, 
+        end_date,
+        page: 1 
+      }));
+    }
+  }, [dispatch]);
+
+  const updateUrlParams = (patch: any) => {
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    // Update URL params based on patch
+    Object.keys(patch).forEach(key => {
+      const value = patch[key];
+      if (value && value !== "" && value !== null) {
+        urlParams.set(key, value);
+      } else {
+        urlParams.delete(key);
+      }
+    });
+    
+    // Always reset to page 1 when filtering
+    urlParams.set("page", "1");
+    
+    const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+    window.history.pushState({}, "", newUrl);
+    
+    // Dispatch popstate event to notify main component
+    window.dispatchEvent(new PopStateEvent("popstate"));
+  };
+
+  const set = (patch: any) => {
+    // Update Redux
+    dispatch(setCustomerFilters(patch));
+    // Update URL
+    updateUrlParams(patch);
+  };
+
+  const handleReset = () => {
+    // Reset Redux
+    dispatch(resetCustomerFilters());
+    
+    // Clear URL params
+    const urlParams = new URLSearchParams(window.location.search);
+    const filterKeys = ["search", "status", "tier", "start_date", "end_date", "min_spent", "max_spent"];
+    filterKeys.forEach(key => urlParams.delete(key));
+    urlParams.set("page", "1");
+    
+    const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+    window.history.pushState({}, "", newUrl);
+    window.dispatchEvent(new PopStateEvent("popstate"));
+  };
 
   const hasActiveFilters = filters.search || filters.status || filters.tier || filters.start_date || filters.end_date;
 
@@ -97,7 +162,7 @@ export const CustomerFilters = () => {
 
           {/* Reset */}
           <button
-            onClick={() => dispatch(resetCustomerFilters())}
+            onClick={handleReset}
             className="flex items-center justify-center gap-1 px-3 py-2 text-sm text-gray-500 hover:text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors w-full sm:w-auto"
           >
             <X className="h-3.5 w-3.5" /> Reset

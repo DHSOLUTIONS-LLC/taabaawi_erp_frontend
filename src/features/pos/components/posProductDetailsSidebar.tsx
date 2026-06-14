@@ -8,7 +8,8 @@ import PaymentModal from "./PaymentModal";
 import ReceiptModal from "./ReceiptModal";
 import { useAppSelector } from "../../../app/hooks";
 import type { RootState } from "../../../app/store";
-// import BarcodeScanner from './BarcodeScanner';
+import { useGetUsersQuery } from "../../../services/superAdminApi";
+import dropdown_arrow_icon from "../../../assets/icons/dropdown_arrow_icon.svg";
 
 interface CartItem {
   id: string;
@@ -64,6 +65,14 @@ export default function CartSidebar({
   const [showPayment, setShowPayment] = useState(false);
   const [completedSaleId, setCompletedSaleId] = useState<number | null>(null);
 
+  // New states for sales person and customer details
+  const [salesPersonId, setSalesPersonId] = useState("");
+  const [isDPPR, setIsDPPR] = useState(false);
+  const [customerName, setCustomerName] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
+  const [customerAddress, setCustomerAddress] = useState("");
+
   const [validateCoupon, { isLoading: validatingCoupon }] =
     useValidateCouponMutation();
   const [validateDiscount] = useValidateDiscountMutation();
@@ -71,13 +80,22 @@ export default function CartSidebar({
     {},
   );
 
-  // DEBUG - remove after fixing
+  // Fetch sales persons
+  const { data: usersResponse } = useGetUsersQuery({
+    is_active: 1 as any,
+    per_page: 1000,
+  });
+
+  const allUsers = usersResponse?.data?.data || usersResponse?.data || [];
+  const salesPersons = (Array.isArray(allUsers) ? allUsers : []).filter(
+    (u: any) => {
+      const roleName = u.role?.role_name || u.role_id?.role_name || "";
+      return roleName.toLowerCase().includes("sales");
+    },
+  );
+
   console.log("CartSidebar props:", { registerId, branchId });
   console.log("localStorage pos_session:", localStorage.getItem("pos_session"));
-  console.log(
-    "Parsed session:",
-    JSON.parse(localStorage.getItem("pos_session") || "{}"),
-  );
 
   const subtotal = cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -116,13 +134,12 @@ export default function CartSidebar({
     setAppliedCoupon(null);
     if (!promoCode.trim()) return;
 
-     console.log("Sending coupon request:", {
-    coupon_code: promoCode.trim(),
-    total_amount: subtotal - itemDiscountTotal,
-    branch_id: branchId,
-  });
+    console.log("Sending coupon request:", {
+      coupon_code: promoCode.trim(),
+      total_amount: subtotal - itemDiscountTotal,
+      branch_id: branchId,
+    });
 
-  
     try {
       const result = await validateCoupon({
         coupon_code: promoCode.trim(),
@@ -205,6 +222,12 @@ export default function CartSidebar({
     setIsEmployeePurchase(false);
     setItemDiscounts({});
     setCompletedSaleId(null);
+    setSalesPersonId("");
+    setIsDPPR(false);
+    setCustomerName("");
+    setCustomerPhone("");
+    setCustomerEmail("");
+    setCustomerAddress("");
     onClose();
   };
 
@@ -213,51 +236,19 @@ export default function CartSidebar({
     discount_percentage: itemDiscounts[item.id] || 0,
   }));
 
-  const handleBarcodeProductFound = (product: any) => {
-    console.log("✅ Barcode Product Received:", product);
-
-    const existingItem = cartItems.find(
-      (item) =>
-        item.product_id === product.product_id &&
-        (item.variant_id || null) === (product.variant_id || null),
-    );
-
-    if (existingItem) {
-      // Increase quantity if already in cart
-      onUpdateQuantity(existingItem.id, existingItem.quantity + 1);
-    } else {
-      const newItem: CartItem = {
-        id: `${product.product_id}-${product.variant_id || "default"}-${Date.now()}`,
-        product_id: product.product_id,
-        variant_id: product.variant_id,
-        name: product.product_name || product.name || "Unknown Product",
-        sku: product.sku || "",
-        price: parseFloat(
-          product.selling_price || product.sale_price || product.price || "0",
-        ),
-        quantity: 1,
-        image: product.image_url || "",
-      };
-
-      // ACTUALLY ADD TO CART - Use the onAddToCart prop
-      if (onAddToCart) {
-        onAddToCart(newItem);
-      } else {
-        // Fallback: Try to use a custom event or direct modification
-        console.error(
-          "onAddToCart prop is missing! Please pass it from parent component.",
-        );
-
-        // Temporary workaround: If you have access to the parent's cart state setter
-        // You'll need to pass a function from parent
-      }
+  // Handle manual quantity input
+  const handleManualQuantityChange = (itemId: string, value: string) => {
+    const newQuantity = parseInt(value) || 1;
+    if (newQuantity > 0 && newQuantity <= 999) {
+      onUpdateQuantity(itemId, newQuantity);
     }
   };
+
   return (
     <>
       {/* Overlay */}
       <div
-        className={`fixed inset-0   transition-opacity duration-300 z-40 ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+        className={`fixed inset-0 transition-opacity duration-300 z-40 ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
         onClick={onClose}
       />
 
@@ -267,7 +258,7 @@ export default function CartSidebar({
       >
         <div className="h-full flex flex-col">
           {/* Header */}
-          <div className="p-5 border-b  border-gray-300  bg-white">
+          <div className="p-5 border-b border-gray-300 bg-white">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 bg-blue-100 rounded-full flex items-center justify-center">
@@ -411,7 +402,7 @@ export default function CartSidebar({
                           </div>
 
                           <div className="flex items-center justify-between mt-2">
-                            {/* Qty */}
+                            {/* Qty with manual input */}
                             <div className="flex items-center gap-1.5 bg-gray-100 rounded-lg p-0.5">
                               <button
                                 onClick={() =>
@@ -421,9 +412,19 @@ export default function CartSidebar({
                               >
                                 −
                               </button>
-                              <span className="w-6 text-center font-semibold text-sm text-gray-900">
-                                {item.quantity}
-                              </span>
+                              <input
+                                type="number"
+                                min="1"
+                                max="999"
+                                value={item.quantity}
+                                onChange={(e) =>
+                                  handleManualQuantityChange(
+                                    item.id,
+                                    e.target.value,
+                                  )
+                                }
+                                className="w-12 text-center font-semibold text-sm text-gray-900 bg-transparent border-none focus:outline-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                              />
                               <button
                                 onClick={() =>
                                   onUpdateQuantity(item.id, item.quantity + 1)
@@ -464,30 +465,7 @@ export default function CartSidebar({
                                         parseFloat(e.target.value) || 0;
                                       if (value > 100) value = 100;
                                       if (value < 0) value = 0;
-
                                       handleSetItemDiscount(item.id, value);
-                                    }}
-                                    onKeyDown={(e) => {
-                                      if (e.key === "Enter") {
-                                        let value =
-                                          parseFloat(
-                                            (e.target as HTMLInputElement)
-                                              .value,
-                                          ) || 0;
-                                        if (value > 100) value = 100;
-                                        if (value < 0) value = 0;
-
-                                        handleSetItemDiscount(item.id, value);
-                                      }
-                                    }}
-                                    onInput={(e) => {
-                                      const input =
-                                        e.target as HTMLInputElement;
-                                      let value = parseFloat(input.value);
-
-                                      if (value > 100) {
-                                        input.value = "100";
-                                      }
                                     }}
                                     className="w-16 px-2 py-0.5 border rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
                                     placeholder="%"
@@ -496,7 +474,6 @@ export default function CartSidebar({
                                     % off
                                   </span>
                                 </div>
-
                                 {discountError[item.id] && (
                                   <p className="text-xs text-red-500">
                                     {discountError[item.id]}
@@ -532,8 +509,106 @@ export default function CartSidebar({
 
           {/* Footer */}
           {cartItems.length > 0 && (
-            <div className="border-t border-gray-200 bg-gray-50 p-5 space-y-4">
-              {/* Toggles */}
+            <div className="border-t border-gray-200 bg-gray-50 p-5 space-y-4 overflow-y-auto max-h-[60%]">
+              {/* Sales Person Dropdown */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Sales Person
+                </label>
+                <div className="relative">
+                  <select
+                    value={salesPersonId}
+                    onChange={(e) => setSalesPersonId(e.target.value)}
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg appearance-none bg-white pr-8 focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Select Sales Person</option>
+                    {salesPersons.map((person: any) => (
+                      <option key={person.id} value={person.id}>
+                        {person.name} ({person.employee_id || person.email})
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                    <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
+                  </div>
+                </div>
+              </div>
+
+              {/* DPPR Check Button */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setIsDPPR(!isDPPR)}
+                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${isDPPR ? "bg-blue-600" : "bg-gray-300"}`}
+                  >
+                    <span
+                      className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${isDPPR ? "translate-x-4.5" : "translate-x-0.5"}`}
+                    />
+                  </button>
+                  <span className="text-sm text-gray-700 font-medium">
+                    DPPR (No Customer Details)
+                  </span>
+                </div>
+              </div>
+
+              {/* Customer Details Fields - Show only if DPPR is NOT checked */}
+              {!isDPPR && (
+                <div className="space-y-3 pt-2 border-t border-gray-200">
+                  <p className="text-xs font-semibold text-gray-500 uppercase">
+                    Customer Details
+                  </p>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">
+                      Name
+                    </label>
+                    <input
+                      type="text"
+                      value={customerName}
+                      onChange={(e) => setCustomerName(e.target.value)}
+                      placeholder="Customer name"
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">
+                      Phone
+                    </label>
+                    <input
+                      type="tel"
+                      value={customerPhone}
+                      onChange={(e) => setCustomerPhone(e.target.value)}
+                      placeholder="+965 XXXX XXXX"
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      value={customerEmail}
+                      onChange={(e) => setCustomerEmail(e.target.value)}
+                      placeholder="customer@example.com"
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">
+                      Address
+                    </label>
+                    <input
+                      type="text"
+                      value={customerAddress}
+                      onChange={(e) => setCustomerAddress(e.target.value)}
+                      placeholder="Shipping address"
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Gift Receipt & Employee Toggles */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <button
@@ -623,7 +698,7 @@ export default function CartSidebar({
                 )}
                 {employeeDiscount > 0 && (
                   <div className="flex justify-between text-purple-600">
-                    <span>Employee (20%)</span>
+                    <span>Employee (30%)</span>
                     <span>-KWD {employeeDiscount.toFixed(3)}</span>
                   </div>
                 )}
@@ -638,7 +713,6 @@ export default function CartSidebar({
               {/* Pay Button */}
               <button
                 onClick={() => {
-                  // Add validation before opening payment modal
                   if (!branchId || branchId === 0) {
                     alert(
                       "No active branch found. Please reopen the POS session.",
@@ -677,6 +751,19 @@ export default function CartSidebar({
         isEmployeePurchase={isEmployeePurchase}
         registerId={registerId}
         branchId={branchId || 0}
+        salesStaffId={salesPersonId ? parseInt(salesPersonId) : undefined}
+        customerId={undefined}
+        customerDetails={
+          !isDPPR && (customerName || customerPhone)
+            ? {
+                name: customerName,
+                phone: customerPhone,
+                email: customerEmail,
+                address: customerAddress,
+              }
+            : undefined
+        }
+        isDPPR={isDPPR}
         onSuccess={handleSaleSuccess}
       />
 
@@ -692,6 +779,3 @@ export default function CartSidebar({
     </>
   );
 }
-// function onAddToCart(newItem: CartItem) {
-//   throw new Error("Function not implemented.");
-// }

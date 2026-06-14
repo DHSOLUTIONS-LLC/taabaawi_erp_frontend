@@ -52,6 +52,7 @@ export default function ProductPopup({
   const [showSuccess, setShowSuccess] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [variants, setVariants] = useState<Variant[]>([]);
+  const [inputValue, setInputValue] = useState("1");
 
   // ─── Fetch full product detail to get variants ────────────────
   const { data: productsResponse } = useGetProductsQuery();
@@ -115,6 +116,41 @@ export default function ProductPopup({
     const newQty = quantity + change;
     if (newQty >= 1 && newQty <= product.stock) {
       setQuantity(newQty);
+      setInputValue(newQty.toString());
+    }
+  };
+
+  const handleQuantityInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value;
+    
+    // Allow empty string for typing
+    if (value === "") {
+      setInputValue("");
+      return;
+    }
+    
+    // Remove leading zeros
+    if (value.startsWith("0") && value.length > 1) {
+      value = value.replace(/^0+/, "");
+    }
+    
+    // Only allow positive integers
+    if (/^\d+$/.test(value)) {
+      const numValue = parseInt(value, 10);
+      if (numValue >= 1 && numValue <= product.stock) {
+        setQuantity(numValue);
+        setInputValue(value);
+      } else if (numValue > product.stock) {
+        setQuantity(product.stock);
+        setInputValue(product.stock.toString());
+      }
+    }
+  };
+
+  const handleQuantityBlur = () => {
+    if (inputValue === "" || parseInt(inputValue, 10) < 1) {
+      setQuantity(1);
+      setInputValue("1");
     }
   };
 
@@ -248,9 +284,13 @@ export default function ProductPopup({
               >
                 −
               </button>
-              <span className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center bg-[#74ABE2] text-black font-bold text-lg rounded-lg">
-                {quantity}
-              </span>
+              <input
+                type="text"
+                value={inputValue}
+                onChange={handleQuantityInput}
+                onBlur={handleQuantityBlur}
+                className="w-12 h-12 sm:w-14 sm:h-14 text-center bg-[#74ABE2] text-black font-bold text-lg rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
+              />
               <button
                 onClick={() => handleQuantityChange(1)}
                 disabled={quantity >= product.stock}
@@ -281,7 +321,7 @@ export default function ProductPopup({
             alt=""
             className="w-4 h-4 sm:w-5 sm:h-5"
           />
-          <span>{product.outOfStock ? "Out of Stock" : "Add to Invoice"}</span>
+          <span>{product.outOfStock ? "Out of Stock" : "Add"}</span>
         </button>
       </div>
 

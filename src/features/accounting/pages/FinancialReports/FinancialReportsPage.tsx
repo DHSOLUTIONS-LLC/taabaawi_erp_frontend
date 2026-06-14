@@ -704,13 +704,13 @@ export default function FinancialReportsPage() {
         <div className="mt-8 pt-4 border-t-2 border-gray-300">
           <div className="flex flex-col sm:flex-row justify-end gap-4 sm:gap-8">
             <div className="text-right">
-              <p className="text-sm text-gray-500">Total Debit</p>
+              <p className="text-sm text-gray-500">Total Opening</p>
               <p className="text-lg font-bold text-blue-600 whitespace-nowrap">
                 KWD {num(report?.total_debit).toFixed(3)}
               </p>
             </div>
             <div className="text-right">
-              <p className="text-sm text-gray-500">Total Credit</p>
+              <p className="text-sm text-gray-500">Total Closing</p>
               <p className="text-lg font-bold text-blue-600 whitespace-nowrap">
                 KWD {num(report?.total_credit).toFixed(3)}
               </p>

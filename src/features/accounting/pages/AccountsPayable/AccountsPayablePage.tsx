@@ -81,6 +81,7 @@ export default function AccountsPayablePage() {
     return dateB.getTime() - dateA.getTime();
   });
 
+  console.log('sorted items:', sortedItems)
   const pagination = (data as any)?.data;
 
   // Calculate totals using sortedItems

@@ -785,8 +785,8 @@ export default function EditProductModal({
             <button
               onClick={() => setActiveTab("single")}
               className={`px-6 py-3 text-sm font-medium transition-colors ${activeTab === "single"
-                  ? "text-blue-600 border-b-2 border-blue-600"
-                  : "text-gray-500 hover:text-gray-700"
+                ? "text-blue-600 border-b-2 border-blue-600"
+                : "text-gray-500 hover:text-gray-700"
                 }`}
             >
               Single Product
@@ -794,8 +794,8 @@ export default function EditProductModal({
             <button
               onClick={() => setActiveTab("bulk")}
               className={`px-6 py-3 text-sm font-medium transition-colors ${activeTab === "bulk"
-                  ? "text-blue-600 border-b-2 border-blue-600"
-                  : "text-gray-500 hover:text-gray-700"
+                ? "text-blue-600 border-b-2 border-blue-600"
+                : "text-gray-500 hover:text-gray-700"
                 }`}
             >
               Bulk Upload
@@ -1453,8 +1453,8 @@ export default function EditProductModal({
                 onClick={handleBulkUpload}
                 disabled={!bulkFile || isUploading}
                 className={`w-full py-3 rounded-lg font-semibold transition-colors ${!bulkFile || isUploading
-                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                    : "bg-blue-600 text-white hover:bg-blue-700"
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-blue-600 text-white hover:bg-blue-700"
                   }`}
               >
                 {isUploading ? "Uploading..." : "Upload Products"}
@@ -1470,8 +1470,8 @@ export default function EditProductModal({
               onClick={onClose}
               disabled={isLoading}
               className={`px-6 py-3 bg-[#1773CF33] text-gray-700 font-semibold rounded-lg transition-colors ${isLoading
-                  ? "opacity-50 cursor-not-allowed"
-                  : "cursor-pointer hover:bg-gray-200"
+                ? "opacity-50 cursor-not-allowed"
+                : "cursor-pointer hover:bg-gray-200"
                 }`}
             >
               Cancel
@@ -1480,8 +1480,8 @@ export default function EditProductModal({
               onClick={activeTab === "single" ? handleSaveProduct : handleBulkUpload}
               disabled={isLoading || (activeTab === "bulk" && !bulkFile)}
               className={`px-6 py-3 bg-[#1773CF] text-white font-semibold rounded-lg transition-colors flex items-center justify-center ${isLoading || (activeTab === "bulk" && !bulkFile)
-                  ? "opacity-50 cursor-not-allowed"
-                  : "cursor-pointer hover:bg-blue-700"
+                ? "opacity-50 cursor-not-allowed"
+                : "cursor-pointer hover:bg-blue-700"
                 }`}
             >
               {isLoading ? (

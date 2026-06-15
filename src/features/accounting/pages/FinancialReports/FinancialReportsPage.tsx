@@ -4,6 +4,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import DashboardLayout from "../../../../layouts/DashboardLayout";
 import { useAppSelector } from "../../../../app/hooks";
 import type { RootState } from "../../../../app/store";
+import { useGetBranchesQuery } from "../../../../services/superAdminApi";
+
 import {
   useGetTrialBalanceQuery,
   useGetProfitLossQuery,
@@ -55,6 +57,20 @@ export default function FinancialReportsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAppSelector((state: RootState) => state.auth);
 
+  const [netProfitLoss, setNetProfitLoss] = useState<number>(0);
+  const [isProfitLossDataLoaded, setIsProfitLossDataLoaded] = useState<boolean>(false);
+
+  const [selectedBranch, setSelectedBranch] = useState(
+    searchParams.get("branch_id") || "",
+  );
+
+
+  const { data: branchesData } = useGetBranchesQuery();
+
+  const branches = Array.isArray(branchesData) ? branchesData : [];
+
+
+
   const [activeTab, setActiveTab] = useState<ReportTab>(
     (searchParams.get("tab") as ReportTab) || "trial-balance",
   );
@@ -95,35 +111,48 @@ export default function FinancialReportsPage() {
       params.end_date = endDate;
       if (selectedAccount) params.account_id = selectedAccount;
     }
+    if (selectedBranch) params.branch_id = selectedBranch; // Add this line
     setSearchParams(params);
-  }, [activeTab, asOfDate, startDate, endDate, selectedAccount]);
+  }, [activeTab, asOfDate, startDate, endDate, selectedAccount, selectedBranch]);
+
 
   const {
     data: trialBalanceData,
     isLoading: trialLoading,
     refetch: refetchTrial,
   } = useGetTrialBalanceQuery(
-    { as_of_date: asOfDate },
+    { as_of_date: asOfDate }, // Add branch_id
     { skip: activeTab !== "trial-balance" },
   );
+  console.log("Trial Balance Data:", trialBalanceData);
 
   const {
     data: profitLossData,
     isLoading: plLoading,
     refetch: refetchPL,
   } = useGetProfitLossQuery(
-    { start_date: startDate, end_date: endDate },
+    { start_date: startDate, end_date: endDate, branch_id: selectedBranch }, // Add branch_id
     { skip: activeTab !== "profit-loss" },
   );
+  console.log("Profit & Loss Data:", profitLossData);
+
+  useEffect(() => {
+    if (profitLossData?.data?.net_profit !== undefined) {
+      const netProfit = num(profitLossData.data.net_profit);
+      setNetProfitLoss(netProfit);
+      setIsProfitLossDataLoaded(true);
+    }
+  }, [profitLossData]);
 
   const {
     data: balanceSheetData,
     isLoading: bsLoading,
     refetch: refetchBS,
   } = useGetBalanceSheetQuery(
-    { as_of_date: asOfDate },
+    { as_of_date: asOfDate, branch_id: selectedBranch }, // Add branch_id
     { skip: activeTab !== "balance-sheet" },
   );
+  console.log("Balance Sheet Data:", balanceSheetData);
 
   const {
     data: glData,
@@ -134,18 +163,22 @@ export default function FinancialReportsPage() {
       account_id: selectedAccount ? parseInt(selectedAccount) : 0,
       start_date: startDate,
       end_date: endDate,
+      branch_id: selectedBranch, // Add branch_id
     },
     { skip: activeTab !== "general-ledger" || !selectedAccount },
   );
+  console.log("General Ledger Data:", glData);
 
   const {
     data: cashFlowData,
     isLoading: cfLoading,
     refetch: refetchCF,
   } = useGetCashFlowQuery(
-    { start_date: startDate, end_date: endDate },
+    { start_date: startDate, end_date: endDate, branch_id: selectedBranch }, // Add branch_id
     { skip: activeTab !== "cash-flow" },
   );
+  console.log("Cash Flow Data:", cashFlowData);
+
 
   const { data: accountsData } = useGetChartOfAccountsQuery({
     is_active: 1 as any,
@@ -474,120 +507,196 @@ export default function FinancialReportsPage() {
   };
 
   const renderDateFilters = () => {
-    switch (activeTab) {
-      case "trial-balance":
-      case "balance-sheet":
-        return (
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-            <div className="relative w-full sm:w-auto">
-              <input
-                type="date"
-                value={asOfDate}
-                onChange={(e) => setAsOfDate(e.target.value)}
-                className="w-full sm:w-auto pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-              />
-              <img
-                src={calendar_icon}
-                alt=""
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
-              />
-            </div>
-            <span className="text-sm text-gray-500">As of this date</span>
-          </div>
-        );
-
-      case "profit-loss":
-      case "cash-flow":
-        return (
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-            <div className="relative w-full sm:w-auto">
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="w-full sm:w-auto pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-              />
-              <img
-                src={calendar_icon}
-                alt=""
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
-              />
-            </div>
-            <span className="text-gray-500">to</span>
-            <div className="relative w-full sm:w-auto">
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                min={startDate}
-                max={new Date().toISOString().split("T")[0]}
-                className="w-full sm:w-auto pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-              />
-              <img
-                src={calendar_icon}
-                alt=""
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
-              />
+  switch (activeTab) {
+    case "trial-balance":
+    case "balance-sheet":
+      return (
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+          {/* Branch Filter */}
+          <div className="relative w-full sm:min-w-[200px]">
+            <select
+              value={selectedBranch}
+              onChange={(e) => setSelectedBranch(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 text-sm"
+            >
+              <option value="">All Branches</option>
+              {branches.map((branch: any) => (
+                <option key={branch.id} value={branch.id}>
+                  {branch.branch_name}
+                </option>
+              ))}
+            </select>
+            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+              <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
             </div>
           </div>
-        );
 
-      case "general-ledger":
-        return (
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 flex-wrap">
-            <div className="relative w-full sm:min-w-[250px]">
-              <select
-                value={selectedAccount}
-                onChange={(e) => setSelectedAccount(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 text-sm"
-              >
-                <option value="">Select Account</option>
-                {accounts.map((acc: any) => (
-                  <option key={acc.id} value={acc.id}>
-                    {acc.account_code} - {acc.account_name} ({acc.account_type})
-                  </option>
-                ))}
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="relative w-full sm:w-auto">
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="w-full sm:w-auto pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-              />
-              <img
-                src={calendar_icon}
-                alt=""
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
-              />
-            </div>
-            <span className="text-gray-500">to</span>
-            <div className="relative w-full sm:w-auto">
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                min={startDate}
-                max={new Date().toISOString().split("T")[0]}
-                className="w-full sm:w-auto pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-              />
-              <img
-                src={calendar_icon}
-                alt=""
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
-              />
+          {/* From Date */}
+          <div className="relative w-full sm:w-auto">
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="w-full sm:w-auto pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+            />
+            <img
+              src={calendar_icon}
+              alt=""
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+            />
+          </div>
+          <span className="text-sm text-gray-500">to</span>
+          {/* To Date */}
+          <div className="relative w-full sm:w-auto">
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              min={startDate}
+              max={new Date().toISOString().split("T")[0]}
+              className="w-full sm:w-auto pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+            />
+            <img
+              src={calendar_icon}
+              alt=""
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+            />
+          </div>
+          <span className="text-sm text-gray-500">Date Range</span>
+        </div>
+      );
+
+    case "profit-loss":
+    case "cash-flow":
+      return (
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+          {/* Branch Filter */}
+          <div className="relative w-full sm:min-w-[200px]">
+            <select
+              value={selectedBranch}
+              onChange={(e) => setSelectedBranch(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 text-sm"
+            >
+              <option value="">All Branches</option>
+              {branches.map((branch: any) => (
+                <option key={branch.id} value={branch.id}>
+                  {branch.branch_name}
+                </option>
+              ))}
+            </select>
+            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+              <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
             </div>
           </div>
-        );
 
-      default:
-        return null;
-    }
-  };
+          <div className="relative w-full sm:w-auto">
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="w-full sm:w-auto pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+            />
+            <img
+              src={calendar_icon}
+              alt=""
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+            />
+          </div>
+          <span className="text-gray-500">to</span>
+          <div className="relative w-full sm:w-auto">
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              min={startDate}
+              max={new Date().toISOString().split("T")[0]}
+              className="w-full sm:w-auto pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+            />
+            <img
+              src={calendar_icon}
+              alt=""
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+            />
+          </div>
+        </div>
+      );
+
+    case "general-ledger":
+      return (
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 flex-wrap">
+          {/* Branch Filter */}
+          <div className="relative w-full sm:min-w-[200px]">
+            <select
+              value={selectedBranch}
+              onChange={(e) => setSelectedBranch(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 text-sm"
+            >
+              <option value="">All Branches</option>
+              {branches.map((branch: any) => (
+                <option key={branch.id} value={branch.id}>
+                  {branch.branch_name}
+                </option>
+              ))}
+            </select>
+            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+              <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
+            </div>
+          </div>
+
+          <div className="relative w-full sm:min-w-[250px]">
+            <select
+              value={selectedAccount}
+              onChange={(e) => setSelectedAccount(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 text-sm"
+            >
+              <option value="">Select Account</option>
+              {accounts.map((acc: any) => (
+                <option key={acc.id} value={acc.id}>
+                  {acc.account_code} - {acc.account_name} ({acc.account_type})
+                </option>
+              ))}
+            </select>
+            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+              <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
+            </div>
+          </div>
+
+          <div className="relative w-full sm:w-auto">
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="w-full sm:w-auto pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+            />
+            <img
+              src={calendar_icon}
+              alt=""
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+            />
+          </div>
+          <span className="text-gray-500">to</span>
+          <div className="relative w-full sm:w-auto">
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              min={startDate}
+              max={new Date().toISOString().split("T")[0]}
+              className="w-full sm:w-auto pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+            />
+            <img
+              src={calendar_icon}
+              alt=""
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+            />
+          </div>
+        </div>
+      );
+
+    default:
+      return null;
+  }
+};
 
   const renderReport = () => {
     if (isLoading()) {
@@ -612,7 +721,7 @@ export default function FinancialReportsPage() {
       case "profit-loss":
         return renderProfitLoss();
       case "balance-sheet":
-        return renderBalanceSheet();
+        return renderBalanceSheet(netProfitLoss);
       case "general-ledger":
         return renderGeneralLedger();
       case "cash-flow":
@@ -630,11 +739,26 @@ export default function FinancialReportsPage() {
       return acc;
     }, {});
 
+    // Function to calculate totals for an account type
+    const calculateTypeTotals = (typeAccounts: any[]) => {
+      return typeAccounts.reduce(
+        (totals, account) => {
+          totals.debit += Number(account.debit) || 0;
+          totals.credit += Number(account.credit) || 0;
+          return totals;
+        },
+        { debit: 0, credit: 0 }
+      );
+    };
+
     return (
       <div className="overflow-x-auto">
         {ACCOUNT_TYPE_ORDER.map((type) => {
           const typeAccounts = groupedAccounts[type] || [];
           if (typeAccounts.length === 0) return null;
+
+          const totals = calculateTypeTotals(typeAccounts);
+
           console.log(`Rendering ${type} accounts:`, typeAccounts);
 
           return (
@@ -680,19 +804,29 @@ export default function FinancialReportsPage() {
                             {account.account_name}
                           </td>
                           <td className="px-4 py-2 text-sm text-gray-900 break-words">
-                            {account.account_name}
+                            {num(account.opening_balance || 0)}
                           </td>
                           <td className="px-4 py-2 text-right text-sm font-mono text-gray-900 whitespace-nowrap">
-                            {num(account.debit).toFixed(3)}
+                            {num(account.debit)}
                           </td>
                           <td className="px-4 py-2 text-right text-sm font-mono text-gray-900 whitespace-nowrap">
-                            {num(account.credit).toFixed(3)}
+                            {num(account.credit)}
                           </td>
                           <td className="px-4 py-2 text-right text-sm font-mono text-gray-900 whitespace-nowrap">
-                            {num(account.credit).toFixed(3)}
+                            {num(account.current_balance)}
                           </td>
                         </tr>
                       ))}
+                      {/* Subtotal row for this account type - only debit and credit */}
+                      <tr className="border-t-2 border-gray-300">
+                        <td colSpan={4} className="px-4 py-2"></td>
+                        <td className="px-4 py-2 text-right text-sm font-bold text-gray-900">
+                          Total Debit: {num(totals.debit)}
+                        </td>
+                        <td className="px-4 py-2 text-right text-sm font-bold text-gray-900">
+                          Total Credit: {num(totals.credit)}
+                        </td>
+                      </tr>
                     </tbody>
                   </table>
                 </div>
@@ -701,6 +835,7 @@ export default function FinancialReportsPage() {
           );
         })}
 
+        {/* Grand Total Section */}
         <div className="mt-8 pt-4 border-t-2 border-gray-300">
           <div className="flex flex-col sm:flex-row justify-end gap-4 sm:gap-8">
             <div className="text-right">
@@ -716,17 +851,7 @@ export default function FinancialReportsPage() {
               </p>
             </div>
           </div>
-          <div className="mt-2 text-center">
-            {/* <span
-              className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm ${
-                report?.is_balanced
-                  ? "bg-green-100 text-green-700"
-                  : "bg-red-100 text-red-700"
-              }`}
-            >
-              {report?.is_balanced ? "✓ Balanced" : "✗ Not Balanced"}
-            </span> */}
-          </div>
+
         </div>
       </div>
     );
@@ -824,7 +949,7 @@ export default function FinancialReportsPage() {
                 KWD {num(report.gross_profit).toFixed(3)}
               </span>
               <p className="text-xs text-gray-500 mt-1">
-                Margin: {grossProfitMargin}%
+                {/* Margin: {grossProfitMargin}% */}
               </p>
             </div>
           </div>
@@ -882,7 +1007,7 @@ export default function FinancialReportsPage() {
                 KWD {num(report.net_profit).toFixed(3)}
               </span>
               <p className="text-xs text-gray-500 mt-1">
-                Margin: {netProfitMargin}%
+                {/* Margin: {netProfitMargin}% */}
               </p>
             </div>
           </div>
@@ -892,108 +1017,166 @@ export default function FinancialReportsPage() {
   };
 
   const renderBalanceSheet = () => {
+    // Helper: make amounts positive for display
+    const transformAmount = (amount: number) => Math.abs(amount);
+
+    // Group assets by sub-type
     const assetsByType =
       report?.assets?.details?.reduce((acc: any, item: any) => {
         const type = item.account_sub_type || "Current Assets";
         if (!acc[type]) acc[type] = [];
-        acc[type].push(item);
+        acc[type].push({
+          ...item,
+          displayAmount: transformAmount(item.amount),
+        });
         return acc;
       }, {}) || {};
 
+    // Group liabilities by sub-type
     const liabilitiesByType =
       report?.liabilities?.details?.reduce((acc: any, item: any) => {
         const type = item.account_sub_type || "Current Liabilities";
         if (!acc[type]) acc[type] = [];
-        acc[type].push(item);
+        acc[type].push({
+          ...item,
+          displayAmount: transformAmount(item.amount),
+        });
         return acc;
       }, {}) || {};
 
+    // Use equity details AS IS from backend, but rename "Current Period Net Income" to "Retained Balance"
+    const equityDetails =
+      report?.equity?.details?.map((item: any) => ({
+        ...item,
+        displayName: item.account_name === "Current Period Net Income"
+          ? "Retained Balance"
+          : item.account_name,
+        displayAmount: transformAmount(item.amount),
+        isRetainedEarnings: item.account_sub_type === "Retained Earnings" ||
+          item.account_name === "Current Period Net Income",
+      })) || [];
+
+    // Calculate totals using displayed amounts
+    const assetsTotal = Object.values(assetsByType).reduce(
+      (sum: number, items: any) =>
+        sum + items.reduce((s: number, i: any) => s + i.displayAmount, 0),
+      0
+    );
+
+    const liabilitiesTotal = Object.values(liabilitiesByType).reduce(
+      (sum: number, items: any) =>
+        sum + items.reduce((s: number, i: any) => s + i.displayAmount, 0),
+      0
+    );
+
+    const equityTotal = equityDetails.reduce(
+      (sum, item) => sum + item.displayAmount,
+      0
+    );
+
+    const totalLiabilitiesAndEquity = liabilitiesTotal + equityTotal;
+    const isBalanced = report?.is_balanced || false;
+
     return (
       <div className="flex flex-col lg:flex-row lg:gap-8 gap-6 overflow-x-auto">
-        {/* Assets */}
+        {/* ========== ASSETS SECTION ========== */}
         <div className="flex-1 min-w-[280px]">
           <h3 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b-2 border-gray-200">
             ASSETS
           </h3>
-
           {Object.entries(assetsByType).map(([type, items]: [string, any]) => (
             <div key={type} className="mb-4">
-              <h4 className="text-sm font-semibold text-gray-700 mb-2">
-                {type}
-              </h4>
+              <h4 className="text-sm font-semibold text-gray-700 mb-2">{type}</h4>
               <div className="space-y-1">
-                {(items as any[]).map((item, index) => (
-                  <div key={index} className="flex justify-between text-sm">
+                {items.map((item: any, idx: number) => (
+                  <div key={idx} className="flex justify-between text-sm">
                     <span className="text-gray-600 break-words">
                       {item.account_name}
                     </span>
                     <span className="font-mono whitespace-nowrap ml-2">
-                      KWD {num(item.amount).toFixed(3)}
+                      KWD {item.displayAmount.toFixed(3)}
                     </span>
                   </div>
                 ))}
               </div>
             </div>
           ))}
-
           <div className="mt-4 pt-2 border-t-2 border-gray-200">
             <div className="flex justify-between text-base font-bold">
               <span>Total Assets</span>
               <span className="text-blue-600 whitespace-nowrap">
-                KWD {num(report?.assets?.total).toFixed(3)}
+                KWD {assetsTotal.toFixed(3)}
               </span>
             </div>
           </div>
         </div>
 
-        {/* Liabilities & Equity */}
+        {/* ========== LIABILITIES & EQUITY SECTION ========== */}
         <div className="flex-1 min-w-[280px]">
+          {/* Liabilities */}
           <h3 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b-2 border-gray-200">
             LIABILITIES
           </h3>
-
-          {Object.entries(liabilitiesByType).map(
-            ([type, items]: [string, any]) => (
-              <div key={type} className="mb-4">
-                <h4 className="text-sm font-semibold text-gray-700 mb-2">
-                  {type}
-                </h4>
-                <div className="space-y-1">
-                  {(items as any[]).map((item, index) => (
-                    <div key={index} className="flex justify-between text-sm">
-                      <span className="text-gray-600 break-words">
-                        {item.account_name}
-                      </span>
-                      <span className="font-mono whitespace-nowrap ml-2">
-                        KWD {num(item.amount).toFixed(3)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+          {Object.entries(liabilitiesByType).map(([type, items]: [string, any]) => (
+            <div key={type} className="mb-4">
+              <h4 className="text-sm font-semibold text-gray-700 mb-2">{type}</h4>
+              <div className="space-y-1">
+                {items.map((item: any, idx: number) => (
+                  <div key={idx} className="flex justify-between text-sm">
+                    <span className="text-gray-600 break-words">
+                      {item.account_name}
+                    </span>
+                    <span className="font-mono whitespace-nowrap ml-2">
+                      KWD {item.displayAmount.toFixed(3)}
+                    </span>
+                  </div>
+                ))}
               </div>
-            ),
-          )}
-
+            </div>
+          ))}
           <div className="mt-4 pt-2 border-t-2 border-gray-200">
             <div className="flex justify-between text-base font-bold">
               <span>Total Liabilities</span>
               <span className="text-orange-600 whitespace-nowrap">
-                KWD {num(report?.liabilities?.total).toFixed(3)}
+                KWD {liabilitiesTotal.toFixed(3)}
               </span>
             </div>
           </div>
 
+          {/* Equity (including Retained Balance) */}
           <h3 className="text-lg font-bold text-gray-900 mt-6 mb-4 pb-2 border-b-2 border-gray-200">
             EQUITY
           </h3>
-
-          {report?.equity?.details?.map((item: any, index: number) => (
-            <div key={index} className="flex justify-between text-sm mb-2">
-              <span className="text-gray-600 break-words">
-                {item.account_name}
+          {equityDetails.map((item: any, idx: number) => (
+            <div
+              key={idx}
+              className={`flex justify-between text-sm mb-2 ${item.isRetainedEarnings ? "pt-2 border-t border-gray-200" : ""
+                }`}
+            >
+              <span className="flex items-center gap-2">
+                <span className="text-gray-600 break-words">{item.displayName}</span>
+                {item.isRetainedEarnings && (
+                  <span
+                    className={`text-xs px-2 py-0.5 rounded ${item.displayAmount > 0
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-700"
+                      }`}
+                  >
+                    {item.displayAmount > 0 ? "Profit" : "Loss"}
+                  </span>
+                )}
               </span>
-              <span className="font-mono whitespace-nowrap ml-2">
-                KWD {num(item.amount).toFixed(3)}
+              <span
+                className={`font-mono whitespace-nowrap ml-2 ${item.isRetainedEarnings ? "font-semibold" : ""
+                  } ${item.isRetainedEarnings && item.displayAmount > 0
+                    ? "text-green-600"
+                    : ""
+                  } ${item.isRetainedEarnings && item.displayAmount < 0
+                    ? "text-red-600"
+                    : ""
+                  }`}
+              >
+                KWD {item.displayAmount.toFixed(3)}
               </span>
             </div>
           ))}
@@ -1002,30 +1185,38 @@ export default function FinancialReportsPage() {
             <div className="flex justify-between text-base font-bold">
               <span>Total Equity</span>
               <span className="text-green-600 whitespace-nowrap">
-                KWD {num(report?.equity?.total).toFixed(3)}
+                KWD {equityTotal.toFixed(3)}
               </span>
             </div>
           </div>
 
+          {/* Grand total */}
           <div className="mt-6 pt-4 border-t-4 border-gray-300">
             <div className="flex justify-between text-lg font-bold">
               <span>Total Liabilities & Equity</span>
               <span className="text-purple-600 whitespace-nowrap">
-                KWD {num(report?.total_liabilities_and_equity).toFixed(3)}
+                KWD {totalLiabilitiesAndEquity.toFixed(3)}
               </span>
             </div>
             {/* <div className="mt-2 text-center">
-              <span
-                className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm ${
-                  report?.is_balanced
-                    ? "bg-green-100 text-green-700"
-                    : "bg-red-100 text-red-700"
-                }`}
-              >
-                {report?.is_balanced ? "✓ Balanced" : "✗ Not Balanced"}
-              </span>
-            </div> */}
+            <span
+              className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm ${
+                isBalanced
+                  ? "bg-green-100 text-green-700"
+                  : "bg-red-100 text-red-700"
+              }`}
+            >
+              {isBalanced ? "✓ Balanced" : "✗ Not Balanced"}
+            </span>
+          </div> */}
           </div>
+
+          {/* Optional footnote */}
+          {/* {equityDetails.some((e: any) => e.isRetainedEarnings) && (
+          <div className="mt-4 text-xs text-gray-500 text-center border-t border-gray-100 pt-3">
+            <p>* Retained Balance represents Net Profit/Loss from current period</p>
+          </div>
+        )} */}
         </div>
       </div>
     );
@@ -1062,8 +1253,8 @@ export default function FinancialReportsPage() {
             <p className="text-xs text-gray-500">Net Change</p>
             <p
               className={`text-base sm:text-lg font-bold whitespace-nowrap ${num(report.closing_balance - report.opening_balance) >= 0
-                  ? "text-green-600"
-                  : "text-red-600"
+                ? "text-green-600"
+                : "text-red-600"
                 }`}
             >
               KWD{" "}
@@ -1245,8 +1436,8 @@ export default function FinancialReportsPage() {
 
           <div
             className={`bg-gradient-to-br rounded-xl p-4 border ${netCashFlow >= 0
-                ? "from-green-50 to-green-100 border-green-200"
-                : "from-red-50 to-red-100 border-red-200"
+              ? "from-green-50 to-green-100 border-green-200"
+              : "from-red-50 to-red-100 border-red-200"
               }`}
           >
             <div className="flex items-center justify-between">
@@ -1504,8 +1695,8 @@ export default function FinancialReportsPage() {
         {/* Net Cash Flow Summary */}
         <div
           className={`rounded-xl overflow-hidden shadow-lg ${netCashFlow >= 0
-              ? "bg-gradient-to-r from-green-500 to-emerald-600"
-              : "bg-gradient-to-r from-red-500 to-rose-600"
+            ? "bg-gradient-to-r from-green-500 to-emerald-600"
+            : "bg-gradient-to-r from-red-500 to-rose-600"
             }`}
         >
           <div className="px-6 py-5">
@@ -1779,6 +1970,11 @@ export default function FinancialReportsPage() {
               {activeTab === "general-ledger" &&
                 selectedAccount &&
                 `${new Date(startDate).toLocaleDateString()} - ${new Date(endDate).toLocaleDateString()}`}
+              {selectedBranch && branches.find(b => b.id == selectedBranch) && (
+                <span className="ml-2 text-blue-600">
+                  • Branch: {branches.find(b => b.id == selectedBranch)?.branch_name}
+                </span>
+              )}
             </p>
           </div>
 

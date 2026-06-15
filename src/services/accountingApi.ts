@@ -95,11 +95,11 @@ export interface BankTransaction {
   bank_account_id: number;
   transaction_date: string;
   transaction_type:
-    | "Deposit"
-    | "Withdrawal"
-    | "Transfer"
-    | "Bank Charge"
-    | "Interest";
+  | "Deposit"
+  | "Withdrawal"
+  | "Transfer"
+  | "Bank Charge"
+  | "Interest";
   amount: number;
   reference_number: string | null;
   reference_type: string | null;

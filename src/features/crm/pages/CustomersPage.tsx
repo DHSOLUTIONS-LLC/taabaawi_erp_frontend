@@ -34,7 +34,7 @@ import autoTable from "jspdf-autotable";
 const fetchLastOrderForCustomer = async (customerId: number, token: string) => {
   try {
     const response = await fetch(
-      `https://prearticulate-nonsymbiotically-mira.ngrok-free.dev/api/customers/${customerId}/purchase-history?per_page=1&page=1`,
+      `https://puristic-filmily-bula.ngrok-free.dev/api/customers/${customerId}/purchase-history?per_page=1&page=1`,
       {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -219,6 +219,7 @@ export const CustomersPage = () => {
   useEffect(() => {
     if (allCustomersData?.data?.data) {
       const customers = allCustomersData.data.data;
+      console.log("Fetched customers:", customers);
       setCustomersList(customers);
       fetchLastOrdersForAllCustomers(customers);
     }
@@ -534,8 +535,8 @@ export const CustomersPage = () => {
                     <th className="px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Invoice #</th>
                     <th className="px-3 sm:px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Invoice Value</th>
                     <th className="px-3 sm:px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Last Order Date</th>
-                    <th className="px-3 sm:px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total Spent</th>
-                    <th className="px-3 sm:px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Tier</th>
+                    {/* <th className="px-3 sm:px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total Spent</th> */}
+                    {/* <th className="px-3 sm:px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Tier</th> */}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -593,12 +594,10 @@ export const CustomersPage = () => {
                             ? new Date(customer.last_order_date).toLocaleDateString() 
                             : "No orders"}
                         </td>
-                        <td className="px-3 sm:px-4 py-3 text-right text-gray-700 font-semibold">
+                        {/* <td className="px-3 sm:px-4 py-3 text-right text-gray-700 font-semibold">
                           {customer.total_spent ? `${Number(customer.total_spent).toFixed(3)} KWD` : "0.000 KWD"}
-                        </td>
-                        <td className="px-3 sm:px-4 py-3 text-center">
-                          <TierBadge tier={customer.loyalty_tier} />
-                        </td>
+                        </td> */}
+                        
                       </tr>
                     ))
                   )}

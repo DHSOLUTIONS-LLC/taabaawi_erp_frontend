@@ -101,6 +101,19 @@ export const inventoryApi = createApi({
       invalidatesTags: ["Products"],
     }),
 
+
+    bulkUploadProducts: builder.mutation({
+      query: (productsData) => ({
+        url: '/products/bulk',
+        method: 'POST',
+        body: productsData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }),
+      invalidatesTags: ['Products'],
+    }),
+
     // Add this endpoint to inventoryApi:
     getProducts: builder.query<any, void>({
       query: () => ({
@@ -293,7 +306,7 @@ export const inventoryApi = createApi({
         // Changed from damagedItemsData to damagedItemData
         url: "/damaged-items",
         method: "POST",
-        body: damagedItemData, 
+        body: damagedItemData,
         headers: {
           "Content-Type": "application/json",
         },
@@ -564,4 +577,5 @@ export const {
   useGetBulkDiscountStatisticsQuery,
   useGetActiveBulkDiscountsQuery,
   useExportBulkDiscountQuery,
+  useBulkUploadProductsMutation
 } = inventoryApi;

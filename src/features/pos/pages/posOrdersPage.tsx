@@ -1095,17 +1095,25 @@ export default function POSOrdersPage() {
 
   // Sort orders: those with customer details first, then those without
   const sortedSales = useMemo(() => {
-    return [...sales].sort((a: any, b: any) => {
-      const aHasCustomer = a.customer_name || a.customer_email || a.customer_phone;
-      const bHasCustomer = b.customer_name || b.customer_email || b.customer_phone;
-      
-      // If both have customer details or both don't, maintain original order
-      if (aHasCustomer === bHasCustomer) return 0;
-      
-      // Put orders with customer details first
-      return aHasCustomer ? -1 : 1;
-    });
-  }, [sales]);
+  return [...sales].sort((a: any, b: any) => {
+    // DPPR orders should go to the bottom
+    const aIsDPPR = a.is_dppr === 1 || a.is_dppr === true;
+    const bIsDPPR = b.is_dppr === 1 || b.is_dppr === true;
+    
+    // If one is DPPR and the other isn't, put DPPR at bottom
+    if (aIsDPPR && !bIsDPPR) return 1;
+    if (!aIsDPPR && bIsDPPR) return -1;
+    
+    // For non-DPPR orders, sort by customer details
+    const aHasCustomer = a.customer_name || a.customer_email || a.customer_phone || a.customer;
+    const bHasCustomer = b.customer_name || b.customer_email || b.customer_phone || b.customer;
+    
+    if (aHasCustomer && !bHasCustomer) return -1;
+    if (!aHasCustomer && bHasCustomer) return 1;
+    
+    return 0;
+  });
+}, [sales]);
 
   const totalRevenue = sortedSales.reduce(
     (sum: number, s: any) => sum + parseFloat(s.total_amount || "0"),
@@ -1169,145 +1177,183 @@ export default function POSOrdersPage() {
   };
 
   // Export Excel with all details - with customer details first
-  const handleExportToExcel = () => {
-    if (!sortedSales.length) {
-      alert("No orders to export");
-      return;
+  // Export Excel with proper sorting - Customer orders first, DPPR at bottom
+const handleExportToExcel = () => {
+  if (!sortedSales.length) {
+    alert("No orders to export");
+    return;
+  }
+  
+  try {
+    // Separate orders into two groups
+    const nonDPPROrders = sortedSales.filter((s: any) => s.is_dppr !== 1 && s.is_dppr !== true);
+    const dpprOrders = sortedSales.filter((s: any) => s.is_dppr === 1 || s.is_dppr === true);
+    
+    // Prepare data for non-DPPR orders
+    const nonDPPRData = nonDPPROrders.map((s: any) => ({
+      "Order #": s.sale_number,
+      "Date": new Date(s.sale_date).toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      }),
+      "Time": new Date(s.sale_date).toLocaleTimeString("en-GB", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      "Customer Name": s.customer_name || s.customer?.first_name + ' ' + s.customer?.last_name || "—",
+      "Customer Email": s.customer_email || "—",
+      "Customer Phone": s.customer_phone || "—",
+      "Branch": s.branch?.branch_name || "—",
+      "Cashier": s.cashier?.name || "—",
+      "Sales Staff": s.sales_staff?.name || "—",
+      "Payment Method": s.payment_method || "—",
+      "Status": s.status || "—",
+      "Subtotal (KD)": parseFloat(s.subtotal || "0").toFixed(3),
+      "Discount (KD)": parseFloat(s.discount_amount || "0").toFixed(3),
+      "Coupon Discount (KD)": parseFloat(s.coupon_discount || "0").toFixed(3),
+      "Employee Discount (KD)": parseFloat(s.employee_discount_amount || "0").toFixed(3),
+      "Total (KD)": parseFloat(s.total_amount || "0").toFixed(3),
+      "Cash Received (KD)": s.cash_received ? parseFloat(s.cash_received).toFixed(3) : "—",
+      "Change Given (KD)": s.change_given ? parseFloat(s.change_given).toFixed(3) : "—",
+      "Card Reference": s.card_reference || "—",
+      "Coupon Code": s.coupon_code || "—",
+      "Items Count": s.items?.length || 0,
+      "Is Gift": s.is_gift ? "Yes" : "No",
+      "Is Employee Purchase": s.is_employee_purchase ? "Yes" : "No",
+      "Notes": s.notes || "—",
+    }));
+
+    // Prepare data for DPPR orders (fewer columns)
+    const dpprData = dpprOrders.map((s: any) => ({
+      "Order #": s.sale_number,
+      "Date": new Date(s.sale_date).toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      }),
+      "Time": new Date(s.sale_date).toLocaleTimeString("en-GB", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      "Branch": s.branch?.branch_name || "—",
+      "Cashier": s.cashier?.name || "—",
+      "Sales Staff": s.sales_staff?.name || "—",
+      "Payment Method": s.payment_method || "—",
+      "Status": s.status || "—",
+      "Total (KD)": parseFloat(s.total_amount || "0").toFixed(3),
+      "Items Count": s.items?.length || 0,
+      "Is Gift": s.is_gift ? "Yes" : "No",
+      "Notes": s.notes || "—",
+    }));
+    
+    const wb = XLSX.utils.book_new();
+    
+    // Sheet 1: Non-DPPR Orders (Customer Orders)
+    if (nonDPPRData.length > 0) {
+      const ws1 = XLSX.utils.json_to_sheet(nonDPPRData);
+      ws1["!cols"] = Object.keys(nonDPPRData[0] || {}).map(key => ({ wch: 20 }));
+      XLSX.utils.book_append_sheet(wb, ws1, "Customer Orders");
     }
     
-    try {
-      const exportData = sortedSales.map((s: any) => ({
-        "Order #": s.sale_number,
-        "Date": new Date(s.sale_date).toLocaleDateString("en-GB", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        }),
-        "Time": new Date(s.sale_date).toLocaleTimeString("en-GB", {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-        "Customer Name": s.customer_name || "—",
-        "Customer Email": s.customer_email || "—",
-        "Customer Phone": s.customer_phone || "—",
-        "Branch": s.branch?.branch_name || "—",
-        "Cashier": s.cashier?.name || "—",
-        "Sales Staff": s.sales_staff?.name || "—",
-        "Payment Method": s.payment_method || "—",
-        "Status": s.status || "—",
-        "Subtotal (KD)": parseFloat(s.subtotal || "0").toFixed(3),
-        "Discount (KD)": parseFloat(s.discount_amount || "0").toFixed(3),
-        "Coupon Discount (KD)": parseFloat(s.coupon_discount || "0").toFixed(3),
-        "Employee Discount (KD)": parseFloat(s.employee_discount_amount || "0").toFixed(3),
-        "Total (KD)": parseFloat(s.total_amount || "0").toFixed(3),
-        "Cash Received (KD)": s.cash_received ? parseFloat(s.cash_received).toFixed(3) : "—",
-        "Change Given (KD)": s.change_given ? parseFloat(s.change_given).toFixed(3) : "—",
-        "Card Reference": s.card_reference || "—",
-        "Coupon Code": s.coupon_code || "—",
-        "Items Count": s.items?.length || 0,
-        "Is Gift": s.is_gift ? "Yes" : "No",
-        "Is Employee Purchase": s.is_employee_purchase ? "Yes" : "No",
-        "Notes": s.notes || "—",
-      }));
-      
-      const ws = XLSX.utils.json_to_sheet(exportData);
-      
-      // Set column widths
-      const colWidths = {
-        "Order #": 20,
-        "Date": 15,
-        "Time": 12,
-        "Customer Name": 25,
-        "Customer Email": 30,
-        "Customer Phone": 18,
-        "Branch": 20,
-        "Cashier": 20,
-        "Sales Staff": 20,
-        "Payment Method": 18,
-        "Status": 15,
-        "Subtotal (KD)": 15,
-        "Discount (KD)": 15,
-        "Coupon Discount (KD)": 20,
-        "Employee Discount (KD)": 22,
-        "Total (KD)": 15,
-        "Cash Received (KD)": 18,
-        "Change Given (KD)": 18,
-        "Card Reference": 20,
-        "Coupon Code": 18,
-        "Items Count": 12,
-        "Is Gift": 10,
-        "Is Employee Purchase": 20,
-        "Notes": 30,
-      };
-      
-      ws["!cols"] = Object.keys(exportData[0] || {}).map(key => ({ 
-        wch: colWidths[key as keyof typeof colWidths] || 15 
-      }));
-      
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Orders Report");
-      
-      const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-      saveAs(
-        new Blob([buf], {
-          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        }),
-        `orders_report_${new Date().toISOString().split("T")[0]}.xlsx`,
-      );
-    } catch (e) {
-      console.error("Excel export failed:", e);
-      alert("Failed to export Excel. Please try again.");
+    // Sheet 2: DPPR Orders
+    if (dpprData.length > 0) {
+      const ws2 = XLSX.utils.json_to_sheet(dpprData);
+      ws2["!cols"] = Object.keys(dpprData[0] || {}).map(key => ({ wch: 20 }));
+      XLSX.utils.book_append_sheet(wb, ws2, "DPPR Orders");
     }
-  };
+    
+    // Sheet 3: Summary
+    const summaryData = [
+      ["=== REPORT SUMMARY ==="],
+      [],
+      ["Total Orders", sortedSales.length],
+      ["Customer Orders (Non-DPPR)", nonDPPROrders.length],
+      ["DPPR Orders", dpprOrders.length],
+      [],
+      ["Total Revenue", `KWD ${sortedSales.reduce((sum: number, s: any) => sum + parseFloat(s.total_amount || "0"), 0).toFixed(3)}`],
+      ["Generated On", new Date().toLocaleString()],
+      ["Branch", selectedBranchId ? branches.find((b: any) => b.id === parseInt(selectedBranchId))?.branch_name : "All Branches"],
+    ];
+    const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
+    XLSX.utils.book_append_sheet(wb, wsSummary, "Summary");
+    
+    const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    saveAs(
+      new Blob([buf], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      }),
+      `orders_report_${new Date().toISOString().split("T")[0]}.xlsx`,
+    );
+  } catch (e) {
+    console.error("Excel export failed:", e);
+    alert("Failed to export Excel. Please try again.");
+  }
+};
 
   // Export PDF with all details - with customer details first
-  const handleExportToPDF = () => {
-    if (!sortedSales.length) {
-      alert("No orders to export");
-      return;
-    }
+const handleExportToPDF = () => {
+  if (!sortedSales.length) {
+    alert("No orders to export");
+    return;
+  }
+  
+  try {
+    const doc = new jsPDF("landscape", "mm", "a4");
+    const pageWidth = doc.internal.pageSize.getWidth();
     
-    try {
-      const doc = new jsPDF("landscape", "mm", "a4");
-      const pageWidth = doc.internal.pageSize.getWidth();
-      
-      // Title - Centered
-      doc.setFontSize(18);
+    // Separate orders into two groups
+    const nonDPPROrders = sortedSales.filter((s: any) => s.is_dppr !== 1 && s.is_dppr !== true);
+    const dpprOrders = sortedSales.filter((s: any) => s.is_dppr === 1 || s.is_dppr === true);
+    
+    // Title - Centered
+    doc.setFontSize(18);
+    doc.setFont("helvetica", "bold");
+    doc.text("ORDERS REPORT", pageWidth / 2, 15, { align: "center" });
+    
+    // Report info
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(100);
+    doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 25);
+    doc.text(`Branch: ${selectedBranchId ? branches.find((b: any) => b.id === parseInt(selectedBranchId))?.branch_name : "All Branches"}`, 14, 32);
+    
+    const totalRevenue = sortedSales.reduce(
+      (sum: number, s: any) => sum + parseFloat(s.total_amount || "0"),
+      0,
+    );
+    doc.text(`Total Orders: ${sortedSales.length}`, pageWidth - 14, 25, { align: "right" });
+    doc.text(`Total Revenue: KWD ${totalRevenue.toFixed(3)}`, pageWidth - 14, 32, { align: "right" });
+    
+    let currentY = 40;
+
+    // ===== SECTION 1: CUSTOMER ORDERS (Non-DPPR) =====
+    if (nonDPPROrders.length > 0) {
+      doc.setFontSize(12);
       doc.setFont("helvetica", "bold");
-      doc.text("ORDERS REPORT", pageWidth / 2, 15, { align: "center" });
+      doc.setTextColor(0);
+      doc.text(`CUSTOMER ORDERS (${nonDPPROrders.length} orders)`, 14, currentY);
+      currentY += 7;
       
-      // Report info
-      doc.setFontSize(10);
+      doc.setFontSize(8);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(100);
-      doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 25);
+      doc.text("Orders with customer details", 14, currentY);
+      currentY += 5;
       
-      const totalRevenue = sortedSales.reduce(
-        (sum: number, s: any) => sum + parseFloat(s.total_amount || "0"),
-        0,
-      );
-      doc.text(`Total Orders: ${pagination?.total || sortedSales.length}`, pageWidth - 14, 25, { align: "right" });
-      doc.text(`Total Revenue: KWD ${totalRevenue.toFixed(3)}`, 14, 32);
-      
-      // Count orders with and without customer details
-      const ordersWithCustomer = sortedSales.filter((s: any) => s.customer_name || s.customer_email || s.customer_phone);
-      const ordersWithoutCustomer = sortedSales.filter((s: any) => !(s.customer_name || s.customer_email || s.customer_phone));
-      
-      doc.text(`Orders with Customer Details: ${ordersWithCustomer.length}`, 14, 39);
-      doc.text(`Orders without Customer Details: ${ordersWithoutCustomer.length}`, 14, 46);
-      
-      // Table columns including customer info
-      const tableColumns = [
-        "Order #", "Date", "Customer Name", "Customer Email", "Customer Phone",
+      const nonDPPRColumns = [
+        "Order #", "Date", "Customer Name", "Customer Phone",
         "Branch", "Cashier", "Payment", "Status", "Total"
       ];
       
-      // Prepare table data - sorted with customer details first
-      const tableData = sortedSales.map((s: any) => [
+      const nonDPPRData = nonDPPROrders.map((s: any) => [
         s.sale_number || "-",
-        new Date(s.sale_date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }),
-        s.customer_name || "—",
-        s.customer_email || "—",
+        new Date(s.sale_date).toLocaleDateString("en-GB", { 
+          day: "2-digit", 
+          month: "short", 
+          year: "numeric" 
+        }),
+        s.customer_name || s.customer?.first_name + ' ' + s.customer?.last_name || "—",
         s.customer_phone || "—",
         s.branch?.branch_name || "-",
         s.cashier?.name || "-",
@@ -1316,11 +1362,10 @@ export default function POSOrdersPage() {
         parseFloat(s.total_amount || "0").toFixed(3),
       ]);
       
-      // Create centered table
       autoTable(doc, {
-        startY: 55,
-        head: [tableColumns],
-        body: tableData,
+        startY: currentY,
+        head: [nonDPPRColumns],
+        body: nonDPPRData,
         theme: 'striped',
         headStyles: {
           fillColor: [23, 115, 207],
@@ -1339,39 +1384,134 @@ export default function POSOrdersPage() {
           fillColor: [248, 248, 248],
         },
         columnStyles: {
-          0: { cellWidth: 25, halign: 'left' },
-          1: { cellWidth: 20, halign: 'center' },
-          2: { cellWidth: 30, halign: 'left' },
-          3: { cellWidth: 35, halign: 'left' },
-          4: { cellWidth: 25, halign: 'left' },
-          5: { cellWidth: 30, halign: 'left' },
-          6: { cellWidth: 25, halign: 'left' },
-          7: { cellWidth: 25, halign: 'center' },
-          8: { cellWidth: 20, halign: 'center' },
-          9: { cellWidth: 20, halign: 'right' },
+          0: { cellWidth: 28, halign: 'left' },
+          1: { cellWidth: 22, halign: 'center' },
+          2: { cellWidth: 35, halign: 'left' },
+          3: { cellWidth: 25, halign: 'left' },
+          4: { cellWidth: 30, halign: 'left' },
+          5: { cellWidth: 25, halign: 'left' },
+          6: { cellWidth: 28, halign: 'center' },
+          7: { cellWidth: 22, halign: 'center' },
+          8: { cellWidth: 20, halign: 'right' },
         },
-        margin: { left: 10, right: 10 },
-        horizontalPageBreak: false,
-        pageBreak: 'auto',
+        margin: { left: 8, right: 8 },
         showHead: 'everyPage',
         tableWidth: 'auto',
       });
       
-      // Add page numbers centered
-      const pageCount = doc.internal.getNumberOfPages();
-      for (let i = 1; i <= pageCount; i++) {
-        doc.setPage(i);
-        doc.setFontSize(8);
-        doc.setTextColor(150);
-        doc.text(`Page ${i} of ${pageCount}`, pageWidth / 2, 205, { align: "center" });
+      currentY = (doc as any).lastAutoTable?.finalY || 180;
+      currentY += 8;
+    }
+
+    // ===== SECTION 2: DPPR ORDERS =====
+    if (dpprOrders.length > 0) {
+      // Add a new page if needed
+      if (currentY > 180) {
+        doc.addPage();
+        currentY = 20;
       }
       
-      doc.save(`orders_report_${new Date().toISOString().split("T")[0]}.pdf`);
-    } catch (e) {
-      console.error("PDF export failed:", e);
-      alert("Failed to export PDF. Please try again.");
+      // DPPR Section Header with background
+      doc.setFillColor(255, 240, 220);
+      doc.rect(8, currentY - 3, pageWidth - 16, 10, 'F');
+      
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(200, 100, 0);
+      doc.text(`DPPR ORDERS (${dpprOrders.length} orders)`, 14, currentY + 3);
+      currentY += 12;
+      
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(100);
+      doc.text("DPPR = Don't Print Personal Receipt (No customer details)", 14, currentY);
+      currentY += 5;
+      
+      const dpprColumns = [
+        "Order #", "Date", "Branch", "Cashier", 
+        "Payment", "Status", "Total", "Items"
+      ];
+      
+      const dpprData = dpprOrders.map((s: any) => [
+        s.sale_number || "-",
+        new Date(s.sale_date).toLocaleDateString("en-GB", { 
+          day: "2-digit", 
+          month: "short", 
+          year: "numeric" 
+        }),
+        s.branch?.branch_name || "-",
+        s.cashier?.name || "-",
+        s.payment_method || "-",
+        s.status || "-",
+        parseFloat(s.total_amount || "0").toFixed(3),
+        s.items?.length || 0,
+      ]);
+      
+      autoTable(doc, {
+        startY: currentY,
+        head: [dpprColumns],
+        body: dpprData,
+        theme: 'striped',
+        headStyles: {
+          fillColor: [255, 165, 0],
+          textColor: [255, 255, 255],
+          fontSize: 7,
+          fontStyle: 'bold',
+          halign: 'center',
+          valign: 'middle',
+        },
+        bodyStyles: {
+          fontSize: 6,
+          cellPadding: 2,
+          valign: 'middle',
+        },
+        alternateRowStyles: {
+          fillColor: [255, 248, 240],
+        },
+        columnStyles: {
+          0: { cellWidth: 35, halign: 'left' },
+          1: { cellWidth: 25, halign: 'center' },
+          2: { cellWidth: 35, halign: 'left' },
+          3: { cellWidth: 30, halign: 'left' },
+          4: { cellWidth: 30, halign: 'center' },
+          5: { cellWidth: 25, halign: 'center' },
+          6: { cellWidth: 25, halign: 'right' },
+          7: { cellWidth: 20, halign: 'center' },
+        },
+        margin: { left: 8, right: 8 },
+        showHead: 'everyPage',
+        tableWidth: 'auto',
+      });
+      
+      currentY = (doc as any).lastAutoTable?.finalY || 180;
+      currentY += 8;
     }
-  };
+
+    // ===== FOOTER =====
+    // Add summary footer on last page
+    const lastPage = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= lastPage; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setTextColor(150);
+      doc.text(`Page ${i} of ${lastPage}`, pageWidth / 2, 205, { align: "center" });
+      
+      // Only add summary on last page
+      if (i === lastPage) {
+        doc.setFontSize(7);
+        doc.setTextColor(100);
+        const summaryY = 195;
+        doc.text(`Total Orders: ${sortedSales.length} | Customer Orders: ${nonDPPROrders.length} | DPPR Orders: ${dpprOrders.length}`, pageWidth / 2, summaryY, { align: "center" });
+        doc.text(`Total Revenue: KWD ${totalRevenue.toFixed(3)}`, pageWidth / 2, summaryY + 5, { align: "center" });
+      }
+    }
+    
+    doc.save(`orders_report_${new Date().toISOString().split("T")[0]}.pdf`);
+  } catch (e) {
+    console.error("PDF export failed:", e);
+    alert("Failed to export PDF. Please try again.");
+  }
+};
 
   const columns: ColumnDef<any>[] = useMemo(
     () => [
@@ -1824,11 +1964,29 @@ export default function POSOrdersPage() {
                     className="pl-3 pr-7 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm appearance-none bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[110px]"
                   >
                     <option value="">All Payments</option>
-                    <option value="Cash">Cash</option>
-                    <option value="Card">Card</option>
-                    <option value="K-Net">K-Net</option>
-                    <option value="Mobile Payment">Mobile Payment</option>
-                    <option value="Mixed">Mixed</option>
+    <option value="Cash">Cash</option>
+    <option value="Card">Card</option>
+    <option value="K-Net">K-Net</option>
+    <option value="Visa">Visa</option>
+    <option value="Mastercard">Mastercard</option>
+    <option value="American Express">American Express</option>
+    <option value="Bank Transfer">Bank Transfer</option>
+    <option value="Kuwait Finance House">Kuwait Finance House</option>
+    <option value="NBK">NBK (National Bank of Kuwait)</option>
+    <option value="CBK">CBK (Commercial Bank of Kuwait)</option>
+    <option value="GBK">GBK (Gulf Bank of Kuwait)</option>
+    <option value="Boubyan Bank">Boubyan Bank</option>
+    <option value="Al Ahli Bank">Al Ahli Bank</option>
+    <option value="Burgan Bank">Burgan Bank</option>
+    <option value="KIB">KIB (Kuwait International Bank)</option>
+    <option value="Wallet">Wallet</option>
+    <option value="Kuwait Wallet">Kuwait Wallet</option>
+    <option value="Apple Pay">Apple Pay</option>
+    <option value="Samsung Pay">Samsung Pay</option>
+    <option value="Google Pay">Google Pay</option>
+    <option value="Mobile Payment">Mobile Payment</option>
+    <option value="Mixed">Mixed</option>
+    <option value="Other">Other</option>
                   </select>
                   <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
                     <img
@@ -1904,18 +2062,18 @@ export default function POSOrdersPage() {
             <h2 className="text-base sm:text-lg md:text-xl font-bold text-gray-900">
               Orders
             </h2>
-            <div className="flex flex-wrap gap-3 mt-1">
+            {/* <div className="flex flex-wrap gap-3 mt-1">
               <p className="text-xs sm:text-sm text-gray-600">
                 Showing {pagination?.total || sortedSales.length} orders
                 {searchQuery && ` for "${searchQuery}"`}
               </p>
               <p className="text-xs sm:text-sm text-green-600">
-                ✅ Orders with customer details: {sortedSales.filter((s: any) => s.customer_name || s.customer_email || s.customer_phone).length}
+                 Orders with customer details: {sortedSales.filter((s: any) => s.customer_name || s.customer_email || s.customer_phone).length}
               </p>
               <p className="text-xs sm:text-sm text-orange-600">
-                👤 Guest orders: {sortedSales.filter((s: any) => !(s.customer_name || s.customer_email || s.customer_phone)).length}
+                 Guest orders: {sortedSales.filter((s: any) => !(s.customer_name || s.customer_email || s.customer_phone)).length}
               </p>
-            </div>
+            </div> */}
           </div>
 
           {/* Table Area with Horizontal Scroll Only */}

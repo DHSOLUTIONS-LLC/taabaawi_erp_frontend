@@ -12,12 +12,64 @@ interface CreatePaymentModalProps {
   onSuccess: () => void;
 }
 
-const PAYMENT_METHODS = ["Cash", "Bank Transfer", "Cheque", "Credit Card", "Online Payment"];
+const DEFAULT_PAYMENT_METHODS = ["Cash",
+  
+  // Kuwaiti Local Payment Systems
+  "KNET",
+  "WAMD (Instant Transfer)",
+  "Mobile Payment (Kuwait Mobile)",
+  
+  // Local Kuwaiti Banks
+  "NBK (National Bank of Kuwait)",
+  "KFH (Kuwait Finance House)",
+  "CBK (Commercial Bank of Kuwait)",
+  "GIB (Gulf Bank)",
+  "ABK (Ahli United Bank)",
+  "Burgan Bank",
+  "KIB (Kuwait International Bank)",
+  "Boubyan Bank",
+  "Warba Bank",
+  "Al Ahli Bank of Kuwait",
+  
+  // Kuwaiti Digital Wallets
+  "My KNET Mobile",
+  "Tam (Boubyan Bank)",
+  "WeYak (KFH)",
+  "Gulf Pay (GIB)",
+  "NBK Mobile Banking",
+  "KFH Go",
+  "CBK Mobile",
+  
+  // International Cards
+  "Visa Card",
+  "Mastercard",
+  "American Express",
+  "Debit Card",
+  
+  // Mobile Wallets
+  "Apple Pay",
+  "Google Pay",
+  "Samsung Pay",
+  
+  // Other Methods
+  "Bank Transfer",
+  "Cheque",
+  "Gift Card",
+  "Voucher",
+  "Tabby (Buy Now Pay Later)",
+  "Tamara (Buy Now Pay Later)",
+  "Postal Order",
+  "Government Payment",
+  "Corporate Account",
+  "Other"];
 
 export default function CreatePaymentModal({ po, onClose, onSuccess }: CreatePaymentModalProps) {
   const outstanding = po.outstanding_amount ?? po.total_amount - (po.total_paid ?? 0);
   const [selectedAccountId, setSelectedAccountId] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("");
+  const [paymentMethods, setPaymentMethods] = useState<string[]>(DEFAULT_PAYMENT_METHODS);
+  const [showAddPaymentMethod, setShowAddPaymentMethod] = useState(false);
+  const [newPaymentMethod, setNewPaymentMethod] = useState("");
 
   const { data: accountsData } = useGetChartOfAccountsQuery({
     is_active: 1 as any,
@@ -31,7 +83,7 @@ export default function CreatePaymentModal({ po, onClose, onSuccess }: CreatePay
 
   const [formData, setFormData] = useState({
     amount: outstanding > 0 ? outstanding.toFixed(3) : '',
-    payment_method: 'Bank Transfer' as typeof PAYMENT_METHODS[number],
+    payment_method: 'Bank Transfer' as string,
     payment_date: new Date().toISOString().split('T')[0],
     reference_number: '',
     notes: '',
@@ -46,6 +98,16 @@ export default function CreatePaymentModal({ po, onClose, onSuccess }: CreatePay
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }));
+  };
+
+  const handleAddPaymentMethod = () => {
+    if (newPaymentMethod.trim() && !paymentMethods.includes(newPaymentMethod.trim())) {
+      setPaymentMethods([...paymentMethods, newPaymentMethod.trim()]);
+      setPaymentMethod(newPaymentMethod.trim());
+      setFormData(prev => ({ ...prev, payment_method: newPaymentMethod.trim() }));
+      setNewPaymentMethod("");
+      setShowAddPaymentMethod(false);
+    }
   };
 
   const validate = () => {
@@ -167,23 +229,66 @@ export default function CreatePaymentModal({ po, onClose, onSuccess }: CreatePay
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
               Payment Method <span className="text-red-500">*</span>
             </label>
-            <div className="relative">
-              <select
-                value={paymentMethod}
-                onChange={(e) => setPaymentMethod(e.target.value)}
-                className={`w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-md appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 text-sm sm:text-base ${errors.payment_method ? 'border-red-400' : 'border-gray-300'
-                  }`}
-              >
-                <option value="">Select Payment Method</option>
-                {PAYMENT_METHODS.map((method) => (
-                  <option key={method} value={method}>{method}</option>
-                ))}
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <select
+                  value={paymentMethod}
+                  onChange={(e) => {
+                    setPaymentMethod(e.target.value);
+                    setFormData(prev => ({ ...prev, payment_method: e.target.value }));
+                  }}
+                  className={`w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-md appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 text-sm sm:text-base ${errors.payment_method ? 'border-red-400' : 'border-gray-300'
+                    }`}
+                >
+                  <option value="">Select Payment Method</option>
+                  {paymentMethods.map((method) => (
+                    <option key={method} value={method}>{method}</option>
+                  ))}
+                </select>
+                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                  <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
+                </div>
               </div>
+               
             </div>
             {errors.payment_method && <p className="text-xs text-red-500 mt-1">{errors.payment_method}</p>}
+
+            {/* Add New Payment Method Input */}
+            {showAddPaymentMethod && (
+              <div className="mt-2 flex gap-2">
+                <input
+                  type="text"
+                  value={newPaymentMethod}
+                  onChange={(e) => setNewPaymentMethod(e.target.value)}
+                  placeholder="Enter new payment method"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleAddPaymentMethod();
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={handleAddPaymentMethod}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 transition-colors"
+                >
+                  Add
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAddPaymentMethod(false);
+                    setNewPaymentMethod("");
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Payment Account */}

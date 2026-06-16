@@ -1,3 +1,4 @@
+// src/features/reports/components/PreBuiltReportViewer.tsx
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Play, ChevronDown, ChevronUp, FileSpreadsheet } from 'lucide-react';
@@ -28,7 +29,7 @@ const REPORT_CONFIG: Record<ReportKey, { label: string; description: string }> =
 const fetchCustomerPurchaseHistory = async (customerId: number, token: string) => {
   try {
     const response = await fetch(
-      `https://puristic-filmily-bula.ngrok-free.dev/api/customers/${customerId}/purchase-history?per_page=100`,
+      `https://prearticulate-nonsymbiotically-mira.ngrok-free.dev/api/customers/${customerId}/purchase-history?per_page=100`,
       {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -62,19 +63,20 @@ const exportToExcel = (data: any[], reportKey: string, reportLabel: string, date
   if (reportKey === 'customers') {
     exportData = data.map(customer => ({
       'Customer ID': customer.customer_id || customer.id || 'N/A',
-      'Customer Name': customer.customer_name || customer.name || customer.full_name || 'Anonymous Customer',
+      'Customer Name': customer.full_name || customer.customer_name || customer.name || 'Anonymous Customer',
       'Email': customer.email || 'N/A',
       'Phone': customer.phone || customer.mobile || 'N/A',
-      'Total Orders': customer.total_orders || customer.order_count || 0,
-      'Total Spent (KWD)': customer.total_spent || customer.amount_spent || 0,
-      'Average Order Value (KWD)': customer.average_order_value || 0,
-      'Last Order Date': customer.last_order_date || 'No orders yet',
+      'Total Orders': customer.period_orders || customer.total_orders || customer.order_count || 0,
+      'Total Spent (KWD)': customer.period_spent || customer.total_spent || customer.amount_spent || 0,
+      'Average Order Value (KWD)': customer.period_average_order_value || customer.average_order_value || 0,
+      'Last Order Date': customer.period_last_purchase_date || customer.last_order_date || 'No orders yet',
       'Last Invoice Number': customer.last_invoice_number || 'N/A',
       'Last Invoice Value (KWD)': customer.last_invoice_value || 0,
       'Date of Creation': customer.created_at || customer.registration_date || 'N/A',
       'Customer Status': customer.status || customer.customer_status || 'Active',
       'Customer Tier': customer.tier || customer.loyalty_tier || 'N/A',
       'Lifetime Points': customer.lifetime_points || customer.points || 0,
+      'Customer Type': customer.type || 'registered',
     }));
   }
 
@@ -149,16 +151,17 @@ const ResultTable = ({ data, reportKey, loading }: { data: any[]; reportKey: Rep
   let columns: string[] = [];
   
   if (reportKey === 'customers') {
-    columns = ['customer_name', 'email', 'phone', 'total_orders', 'total_spent', 'last_invoice_number', 'last_invoice_value', 'last_order_date'];
+    columns = ['customer_name', 'email', 'phone', 'total_orders', 'total_spent', 'last_invoice_number', 'last_invoice_value', 'last_order_date', 'customer_type'];
     displayData = data.map(customer => ({
-      customer_name: customer.customer_name || customer.name || customer.full_name || 'Anonymous Customer',
-      email: customer.email || 'N/A',
-      phone: customer.phone || customer.mobile || 'N/A',
-      total_orders: customer.total_orders || 0,
-      total_spent: customer.total_spent ? `${parseFloat(customer.total_spent).toFixed(3)} KWD` : '0.000 KWD',
-      last_invoice_number: customer.last_invoice_number || 'N/A',
+      customer_name: customer.full_name || customer.customer_name || customer.name || (customer.type === 'walk_in' ? 'Walk-in / Guest' : 'Anonymous Customer'),
+      email: customer.email || customer.customer_email || 'N/A',
+      phone: customer.phone || customer.customer_phone || customer.mobile || 'N/A',
+      total_orders: customer.period_orders || customer.total_orders || 0,
+      total_spent: customer.period_spent || customer.total_spent ? `${parseFloat(customer.period_spent || customer.total_spent || 0).toFixed(3)} KWD` : '0.000 KWD',
+      last_invoice_number: customer.last_invoice_number || customer.sale_number || 'N/A',
       last_invoice_value: customer.last_invoice_value ? `${parseFloat(customer.last_invoice_value).toFixed(3)} KWD` : '0.000 KWD',
-      last_order_date: customer.last_order_date ? new Date(customer.last_order_date).toLocaleDateString() : 'No orders',
+      last_order_date: customer.period_last_purchase_date || customer.last_order_date ? new Date(customer.period_last_purchase_date || customer.last_order_date).toLocaleDateString() : 'No orders',
+      customer_type: customer.type || 'registered',
     }));
   } else if (reportKey === 'sales') {
     columns = ['date', 'total_sales', 'total_revenue', 'average_sale'];
@@ -236,6 +239,7 @@ const ReportPanel = ({
   const [open, setOpen] = useState(false);
   const [enrichedCustomerData, setEnrichedCustomerData] = useState<any[]>([]);
   const [isFetchingOrders, setIsFetchingOrders] = useState(false);
+  const [posOrdersData, setPosOrdersData] = useState<any[]>([]);
 
   const params = { start_date: dates.start_date, end_date: dates.end_date };
 
@@ -265,6 +269,40 @@ const ReportPanel = ({
 
   const extractedData = extractData(rawData);
 
+  // Fetch POS orders for the date range
+  useEffect(() => {
+    const fetchPOSOrders = async () => {
+      if (reportKey !== 'customers') return;
+      
+      try {
+        const token = localStorage.getItem('token') || '';
+        const response = await fetch(
+          `https://prearticulate-nonsymbiotically-mira.ngrok-free.dev/api/sales?start_date=${dates.start_date}&end_date=${dates.end_date}&per_page=1000`,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+              'ngrok-skip-browser-warning': 'true',
+            },
+          }
+        );
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch POS orders');
+        }
+        
+        const result = await response.json();
+        const orders = result?.data?.data || [];
+        setPosOrdersData(orders);
+      } catch (error) {
+        console.error('Error fetching POS orders:', error);
+        setPosOrdersData([]);
+      }
+    };
+    
+    fetchPOSOrders();
+  }, [dates, reportKey]);
+
   // Fetch purchase history for customers to get invoice details
   useEffect(() => {
     const fetchCustomerOrders = async () => {
@@ -274,10 +312,95 @@ const ReportPanel = ({
       if (Array.isArray(extractedData)) {
         customersList = extractedData;
       } else {
-        customersList = extractedData.customers || extractedData.data || extractedData.top_customers || [];
+        customersList = extractedData.top_customers || 
+                        extractedData.data || 
+                        extractedData.customers || [];
       }
       
-      if (customersList.length === 0) return;
+      // If no customers data, use empty array
+      if (!customersList || customersList.length === 0) {
+        customersList = extractedData?.top_customers || [];
+      }
+
+      // Ensure all customers have proper names
+      customersList = customersList.map((customer: any) => ({
+        ...customer,
+        full_name: customer.full_name || 
+                   customer.customer_name || 
+                   customer.name || 
+                   (customer.type === 'walk_in' ? 'Walk-in / Guest' : 'Anonymous Customer'),
+        customer_name: customer.full_name || 
+                      customer.customer_name || 
+                      customer.name || 
+                      (customer.type === 'walk_in' ? 'Walk-in / Guest' : 'Anonymous Customer'),
+      }));
+
+      // Also include all POS orders with customer information
+      const posOrders = posOrdersData || [];
+      const posCustomers = posOrders.map((order: any) => ({
+        customer_id: order.customer_id || null,
+        customer_name: order.customer_name || 
+                      (order.customer?.full_name) || 
+                      (order.customer?.first_name + ' ' + order.customer?.last_name) ||
+                      'Walk-in / Guest',
+        full_name: order.customer_name || 
+                  (order.customer?.full_name) || 
+                  (order.customer?.first_name + ' ' + order.customer?.last_name) ||
+                  'Walk-in / Guest',
+        email: order.customer_email || order.customer?.email || null,
+        phone: order.customer_phone || order.customer?.phone || null,
+        type: order.customer_id ? 'registered' : 'walk_in',
+        period_orders: 1,
+        period_spent: parseFloat(order.total_amount || 0),
+        period_last_purchase_date: order.sale_date || order.created_at,
+        sale_number: order.sale_number,
+        payment_method: order.payment_method,
+        order_status: order.status,
+        is_from_pos: true,
+      }));
+      
+      // Merge customers from both sources, deduplicate
+      const allCustomersMap = new Map();
+      
+      // Add POS customers first to ensure all are included
+      posCustomers.forEach((posCustomer: any) => {
+        const key = posCustomer.customer_id || posCustomer.customer_name || `walkin_${Date.now()}_${Math.random()}`;
+        if (!allCustomersMap.has(key)) {
+          allCustomersMap.set(key, posCustomer);
+        }
+      });
+      
+      // Add customer analysis data (merge with existing if same customer)
+      customersList.forEach((customer: any) => {
+        const key = customer.id || customer.customer_id || customer.full_name;
+        if (key) {
+          if (allCustomersMap.has(key)) {
+            const existing = allCustomersMap.get(key);
+            existing.period_orders = (existing.period_orders || 0) + (customer.period_orders || customer.total_orders || 0);
+            existing.period_spent = (existing.period_spent || 0) + (customer.period_spent || customer.total_spent || 0);
+            existing.period_last_purchase_date = customer.period_last_purchase_date || 
+                                               customer.last_order_date || 
+                                               existing.period_last_purchase_date;
+            // Keep the best name
+            existing.full_name = customer.full_name || existing.full_name || 'Walk-in / Guest';
+            existing.customer_name = customer.full_name || existing.customer_name || 'Walk-in / Guest';
+          } else {
+            allCustomersMap.set(key, {
+              ...customer,
+              full_name: customer.full_name || customer.customer_name || customer.name || 'Walk-in / Guest',
+              customer_name: customer.full_name || customer.customer_name || customer.name || 'Walk-in / Guest',
+              type: customer.type || 'registered',
+            });
+          }
+        }
+      });
+      
+      customersList = Array.from(allCustomersMap.values());
+      
+      if (customersList.length === 0) {
+        setEnrichedCustomerData([]);
+        return;
+      }
       
       setIsFetchingOrders(true);
       const token = localStorage.getItem('token') || '';
@@ -286,18 +409,61 @@ const ReportPanel = ({
         const enrichedCustomers = await Promise.all(
           customersList.map(async (customer: any) => {
             const customerId = customer.customer_id || customer.id;
-            if (!customerId) return customer;
             
+            // If no customer ID, this is an anonymous/guest customer
+            if (!customerId) {
+              // Check if we have POS order details for this customer
+              const posOrdersForCustomer = posOrders.filter(
+                (order: any) => order.customer_name === customer.customer_name ||
+                               order.customer?.full_name === customer.full_name
+              );
+              const lastPOSOrder = posOrdersForCustomer.length > 0 ? posOrdersForCustomer[0] : null;
+              
+              return {
+                ...customer,
+                full_name: customer.full_name || customer.customer_name || 'Walk-in / Guest',
+                customer_name: customer.full_name || customer.customer_name || 'Walk-in / Guest',
+                last_invoice_number: lastPOSOrder?.sale_number || 'N/A',
+                last_invoice_value: lastPOSOrder?.total_amount ? parseFloat(lastPOSOrder.total_amount) : 0,
+                last_order_date: lastPOSOrder?.sale_date || customer.period_last_purchase_date || customer.last_order_date || 'No orders yet',
+                total_orders: customer.period_orders || customer.total_orders || posOrdersForCustomer.length,
+                total_spent: customer.period_spent || customer.total_spent || posOrdersForCustomer.reduce((sum: number, order: any) => sum + parseFloat(order.total_amount || 0), 0),
+                sale_number: lastPOSOrder?.sale_number,
+                payment_method: lastPOSOrder?.payment_method,
+                order_status: lastPOSOrder?.status,
+                type: 'walk_in',
+              };
+            }
+            
+            // Fetch orders for customers with ID
             const orders = await fetchCustomerPurchaseHistory(customerId, token);
             const lastOrder = orders.length > 0 ? orders[0] : null;
             
+            // Also check POS orders for this customer
+            const posOrdersForCustomer = posOrders.filter(
+              (order: any) => order.customer_id === customerId
+            );
+            const lastPOSOrder = posOrdersForCustomer.length > 0 ? posOrdersForCustomer[0] : null;
+            
+            // Use the most recent order between POS and purchase history
+            const mostRecentOrder = lastOrder || lastPOSOrder;
+            
+            // Calculate total spent from both sources
+            const totalFromOrders = orders.reduce((sum: number, order: any) => sum + parseFloat(order.total_amount || 0), 0);
+            const totalFromPOS = posOrdersForCustomer.reduce((sum: number, order: any) => sum + parseFloat(order.total_amount || 0), 0);
+            
             return {
               ...customer,
-              last_invoice_number: lastOrder?.order_number || 'N/A',
-              last_invoice_value: lastOrder?.total_amount ? parseFloat(lastOrder.total_amount) : 0,
-              last_order_date: lastOrder?.created_at || customer.last_order_date || 'No orders yet',
-              total_orders: customer.total_orders || orders.length,
-              total_spent: customer.total_spent || orders.reduce((sum: number, order: any) => sum + parseFloat(order.total_amount || 0), 0),
+              full_name: customer.full_name || customer.customer_name || customer.name || 'Anonymous Customer',
+              customer_name: customer.full_name || customer.customer_name || customer.name || 'Anonymous Customer',
+              last_invoice_number: mostRecentOrder?.order_number || mostRecentOrder?.sale_number || 'N/A',
+              last_invoice_value: mostRecentOrder?.total_amount ? parseFloat(mostRecentOrder.total_amount) : 0,
+              last_order_date: mostRecentOrder?.created_at || mostRecentOrder?.sale_date || customer.last_order_date || 'No orders yet',
+              total_orders: customer.period_orders || customer.total_orders || orders.length + posOrdersForCustomer.length,
+              total_spent: customer.period_spent || customer.total_spent || totalFromOrders + totalFromPOS,
+              sale_number: mostRecentOrder?.sale_number,
+              payment_method: mostRecentOrder?.payment_method,
+              order_status: mostRecentOrder?.status,
             };
           })
         );
@@ -311,7 +477,7 @@ const ReportPanel = ({
     };
     
     fetchCustomerOrders();
-  }, [extractedData, reportKey]);
+  }, [extractedData, reportKey, posOrdersData]);
 
   const config = REPORT_CONFIG[reportKey];
 
@@ -358,10 +524,29 @@ const ReportPanel = ({
 
   // Define getSummary inside the component
   const getSummary = () => {
-    if (!extractedData) return null;
+    if (!extractedData && enrichedCustomerData.length === 0) return null;
     
     if (reportKey === 'sales') {
       return extractedData.totals || null;
+    }
+    
+    if (reportKey === 'customers' && enrichedCustomerData.length > 0) {
+      const totalCustomers = enrichedCustomerData.length;
+      const totalOrders = enrichedCustomerData.reduce((sum, c) => sum + (c.period_orders || c.total_orders || 0), 0);
+      const totalSpent = enrichedCustomerData.reduce((sum, c) => sum + (c.period_spent || c.total_spent || 0), 0);
+      const posOrdersCount = posOrdersData.length;
+      const registeredCustomers = enrichedCustomerData.filter((c: any) => c.type === 'registered' || c.type === 'customer').length;
+      const walkInCustomers = enrichedCustomerData.filter((c: any) => c.type === 'walk_in' || c.type === 'guest').length;
+      
+      return {
+        'Total Customers': totalCustomers,
+        'Registered Customers': registeredCustomers,
+        'Walk-in Customers': walkInCustomers,
+        'Total Orders (All)': totalOrders,
+        'POS Orders Count': posOrdersCount,
+        'Total Revenue': `${totalSpent.toFixed(3)} KWD`,
+        'Average Order Value': `${(totalOrders > 0 ? totalSpent / totalOrders : 0).toFixed(3)} KWD`,
+      };
     }
     
     if (reportKey === 'financial') {
@@ -464,20 +649,20 @@ const ReportPanel = ({
               <div className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs">
                 <p className="text-gray-400">Total Orders</p>
                 <p className="font-semibold text-gray-800">
-                  {rows.reduce((sum, c) => sum + (c.total_orders || 0), 0)}
+                  {rows.reduce((sum, c) => sum + (c.period_orders || c.total_orders || 0), 0)}
                 </p>
               </div>
               <div className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs">
                 <p className="text-gray-400">Total Revenue</p>
                 <p className="font-semibold text-gray-800">
-                  KWD {rows.reduce((sum, c) => sum + (c.total_spent || 0), 0).toFixed(3)}
+                  KWD {rows.reduce((sum, c) => sum + (c.period_spent || c.total_spent || 0), 0).toFixed(3)}
                 </p>
               </div>
               <div className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs">
                 <p className="text-gray-400">Avg Order Value</p>
                 <p className="font-semibold text-gray-800">
-                  KWD {(rows.reduce((sum, c) => sum + (c.total_spent || 0), 0) / 
-                        (rows.reduce((sum, c) => sum + (c.total_orders || 0), 0) || 1)).toFixed(3)}
+                  KWD {(rows.reduce((sum, c) => sum + (c.period_spent || c.total_spent || 0), 0) / 
+                        (rows.reduce((sum, c) => sum + (c.period_orders || c.total_orders || 0), 0) || 1)).toFixed(3)}
                 </p>
               </div>
             </div>

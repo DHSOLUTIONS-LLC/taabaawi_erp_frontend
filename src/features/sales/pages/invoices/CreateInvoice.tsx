@@ -162,8 +162,8 @@ export default function CreateInvoice({
                   >
                     <option value="Manual">Manual</option>
                     <option value="POS">POS</option>
-                    <option value="Website">Website</option>
-                    <option value="Mobile App">Mobile App</option>
+                    {/* <option value="Website">Website</option>
+                    <option value="Mobile App">Mobile App</option> */}
                   </select>
                   <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:pr-3 pointer-events-none">
                     <img

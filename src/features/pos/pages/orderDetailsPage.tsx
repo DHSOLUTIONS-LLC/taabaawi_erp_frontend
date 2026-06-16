@@ -6,6 +6,7 @@ import { useGetSaleByIdQuery } from "../../../services/posApi";
 import { useAppSelector } from "../../../app/hooks";
 import type { RootState } from "../../../app/store";
 import CreateReturnModal from "../components/CreateReturnModal";
+import JsBarcode from "jsbarcode";
 
 import arrow_back_icon from "../../../assets/icons/arrow_back_icon.svg";
 import print_icon from "../../../assets/icons/print_svg.png";
@@ -33,6 +34,7 @@ export default function OrderDetailsPage() {
   const { user } = useAppSelector((state: RootState) => state.auth);
   const [showReturnModal, setShowReturnModal] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
+  const barcodeCanvasRef = useRef<HTMLCanvasElement>(null);
 
   const isSuperAdmin = user?.role?.role_name === "Super Admin";
   const basePath = isSuperAdmin ? "/admin" : "";
@@ -42,6 +44,26 @@ export default function OrderDetailsPage() {
   });
 
   const sale = saleResponse?.data;
+
+  // Generate barcode for sale number
+  const generateBarcode = (saleNumber: string) => {
+    try {
+      // Create a temporary canvas element
+      const canvas = document.createElement("canvas");
+      JsBarcode(canvas, saleNumber, {
+        format: "CODE128",
+        width: 1.5,
+        height: 40,
+        displayValue: true,
+        fontSize: 12,
+        margin: 10,
+      });
+      return canvas.toDataURL();
+    } catch (error) {
+      console.error("Barcode generation failed:", error);
+      return null;
+    }
+  };
 
   const formatCurrency = (value: string | number) => {
     return `KWD ${parseFloat(value?.toString() || "0").toFixed(3)}`;
@@ -62,6 +84,9 @@ export default function OrderDetailsPage() {
     const printContent = printRef.current;
     if (!printContent) return;
 
+    // Generate barcode image for the receipt
+    const barcodeImage = generateBarcode(sale?.sale_number || `SALE-${sale?.id}`);
+    
     const printWindow = window.open("", "_blank");
     if (!printWindow) {
       alert("Please allow pop-ups to print");
@@ -161,6 +186,24 @@ export default function OrderDetailsPage() {
               font-weight: bold;
               margin-top: 8px;
             }
+            .barcode-container {
+              text-align: center;
+              margin: 10px 0;
+              padding: 8px 0;
+            }
+            .barcode-image {
+              max-width: 100%;
+              height: auto;
+            }
+            .dummy-barcode {
+              font-family: 'Courier New', monospace;
+              font-size: 18px;
+              letter-spacing: 2px;
+              background: #f5f5f5;
+              padding: 8px;
+              margin: 5px 0;
+              text-align: center;
+            }
             @media print {
               body {
                 padding: 0;
@@ -172,6 +215,23 @@ export default function OrderDetailsPage() {
         <body>
           <div class="receipt">
             ${printContent.innerHTML}
+            
+            <!-- Barcode Section -->
+            <div class="barcode-container">
+              <div class="divider"></div>
+              ${barcodeImage ? 
+                `<img src="${barcodeImage}" alt="Barcode" class="barcode-image" />` : 
+                `<div class="dummy-barcode">
+                   <div>✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦</div>
+                   <div style="font-size: 10px; margin-top: 5px;">${sale?.sale_number || `SALE-${sale?.id}`}</div>
+                   <div style="font-size: 8px; margin-top: 3px;">SCAN FOR RETURNS</div>
+                 </div>`
+              }
+              <div style="font-size: 9px; margin-top: 5px; color: #666;">
+                ${sale?.sale_number || `Order #${sale?.id}`}
+              </div>
+              <div class="divider"></div>
+            </div>
           </div>
           <script>
             window.onload = () => {
@@ -258,7 +318,7 @@ export default function OrderDetailsPage() {
               className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-sm"
             >
               <img src={print_icon} alt="Print" className="w-4 h-4" />
-              Print Receipt
+              Print
             </button>
             {canReturn && (
               <button
@@ -314,6 +374,13 @@ export default function OrderDetailsPage() {
               <div className="row text-xs">
                 <span>Sales Staff</span>
                 <span>{sale.sales_staff?.name}</span>
+              </div>
+            )}
+            {/* Customer Info - Show if available */}
+            {(sale.customer || sale.customer_details) && (
+              <div className="row text-xs">
+                <span>Customer</span>
+                <span>{sale.customer?.full_name || sale.customer_details?.name || "—"}</span>
               </div>
             )}
           </div>
@@ -427,8 +494,11 @@ export default function OrderDetailsPage() {
               This is a computer generated receipt
             </div>
           </div>
+
+          {/* Barcode will be added dynamically in print function */}
         </div>
 
+        {/* Rest of the page content remains the same */}
         <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Left Column - 2/3 width */}
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">

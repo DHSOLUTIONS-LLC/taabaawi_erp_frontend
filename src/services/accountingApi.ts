@@ -664,6 +664,14 @@ export const accountingApi = api.injectEndpoints({
       },
     }),
 
+    getSupplierPaymentAccounts: builder.query({
+  query: (supplierId) => ({
+    url: `/supplier-payments/${supplierId}/payment-account`,
+    method: 'GET',
+  }),
+  providesTags: ['SupplierPaymentAccount'],
+}),
+
     getAPById: builder.query<{ data: AccountsPayable }, number>({
       query: (id) => `/accounts-payable/${id}`,
       providesTags: (_r, _e, id) => [{ type: "AccountsPayable", id }],
@@ -883,7 +891,7 @@ export const accountingApi = api.injectEndpoints({
     // ==================== FINANCIAL REPORTS ====================
     getTrialBalance: builder.query<
       { data: TrialBalance },
-      { as_of_date?: string }
+      { period_start?: string, period_end?: string }
     >({
       query: (params) => ({ url: "/financial-reports/trial-balance", params }),
     }),
@@ -1202,4 +1210,5 @@ export const {
   useGetExpenseSummaryQuery,
   useDownloadExpenseReceiptQuery,
   useDeleteExpenseReceiptMutation,
+  useGetSupplierPaymentAccountsQuery
 } = accountingApi;

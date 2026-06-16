@@ -1,8 +1,7 @@
 // src/features/pos/components/ReceiptModal.tsx
-import { useRef, useEffect } from "react";
+import { useRef } from "react";
 import { useGetSaleReceiptQuery } from "../../../services/posApi";
 import { useGetSystemSettingsQuery } from "../../../services/systemApi";
-import JsBarcode from "jsbarcode";
 
 interface ReceiptModalProps {
   isOpen: boolean;
@@ -18,9 +17,6 @@ export default function ReceiptModal({
   onNewSale,
 }: ReceiptModalProps) {
   const receiptRef = useRef<HTMLDivElement>(null);
-  const barcodeCanvasRef = useRef<HTMLCanvasElement>(null);
-  const printBarcodeCanvasRef = useRef<HTMLCanvasElement>(null);
-  const logoImgRef = useRef<HTMLImageElement>(null);
 
   const { data: receiptResponse, isLoading } = useGetSaleReceiptQuery(saleId, {
     skip: !isOpen || !saleId,
@@ -28,73 +24,40 @@ export default function ReceiptModal({
   const { data: settingsData } = useGetSystemSettingsQuery();
 
   const receipt = receiptResponse?.data;
+  console.log("receipt data:", receipt);
   const settings = settingsData?.data;
 
   const companyLogo = settings?.logo
     ? `${import.meta.env.VITE_API_URL?.replace("/api", "")}/storage/${settings.logo}`
     : null;
   const companyName = settings?.company_name || "ERP System";
-  const companyAddress = settings?.company_address || "";
-  const companyPhone = settings?.phone || "";
-  const companyEmail = settings?.email || "";
+  // const companyAddress = settings?.company_address || "";
+  // const companyPhone = settings?.phone || "";
+  // const companyEmail = settings?.email || "";
 
-  // Generate barcode using JsBarcode library
-  useEffect(() => {
-    if (receipt?.sale_number && barcodeCanvasRef.current) {
-      try {
-        JsBarcode(barcodeCanvasRef.current, receipt.sale_number, {
-          format: "CODE128",
-          width: 1.5,
-          height: 40,
-          displayValue: true,
-          fontSize: 11,
-          margin: 5,
-          textMargin: 2,
-          font: "monospace",
-        });
-      } catch (error) {
-        console.error("Barcode generation failed:", error);
-        // Fallback: Draw simple barcode
-        const ctx = barcodeCanvasRef.current.getContext("2d");
-        if (ctx) {
-          barcodeCanvasRef.current.width = 250;
-          barcodeCanvasRef.current.height = 50;
-          ctx.fillStyle = "#fff";
-          ctx.fillRect(0, 0, 250, 50);
-          ctx.fillStyle = "#000";
-          ctx.font = "10px monospace";
-          ctx.fillText(receipt.sale_number, 75, 45);
-          let x = 10;
-          for (let i = 0; i < receipt.sale_number.length; i++) {
-            const code = receipt.sale_number.charCodeAt(i);
-            const width = (code % 4) + 1;
-            ctx.fillRect(x, 5, width, 30);
-            x += width + 1;
-          }
-        }
-      }
+  // Get barcode from backend response
+  const barcodeValue = receipt?.barcode || receipt?.sale_number || "";
+  localStorage.setItem("barcodeValue", barcodeValue);
+  let barcodeImageUrl = null;
+  if (receipt?.barcode_image) {
+    if (receipt.barcode_image.startsWith("http")) {
+      barcodeImageUrl = receipt.barcode_image;
+      console.log("barcodeurl", barcodeImageUrl);
+    } else if (receipt.barcode_image.startsWith("/")) {
+      barcodeImageUrl = `${import.meta.env.VITE_API_URL?.replace("/api", "")}${receipt.barcode_image}`;
+    } else {
+      barcodeImageUrl = `${import.meta.env.VITE_API_URL?.replace("/api", "")}/storage/${receipt.barcode_image}`;
     }
-  }, [receipt]);
+  } else if (receipt?.barcode_image_url) {
+    barcodeImageUrl = receipt.barcode_image_url;
+  } else if (receipt?.barcode) {
+    // Try common patterns
+    barcodeImageUrl = `${import.meta.env.VITE_API_URL?.replace("/api", "")}/storage/barcodes/${receipt.barcode}.png`;
+  }
 
-  // Generate barcode for print
-  useEffect(() => {
-    if (receipt?.sale_number && printBarcodeCanvasRef.current) {
-      try {
-        JsBarcode(printBarcodeCanvasRef.current, receipt.sale_number, {
-          format: "CODE128",
-          width: 1.5,
-          height: 40,
-          displayValue: true,
-          fontSize: 11,
-          margin: 5,
-          textMargin: 2,
-          font: "monospace",
-        });
-      } catch (error) {
-        console.error("Print barcode generation failed:", error);
-      }
-    }
-  }, [receipt]);
+  console.log("Barcode Value:", barcodeValue);
+  console.log("Barcode Image URL:", barcodeImageUrl);
+  console.log("Receipt Data:", receipt);
 
   if (!isOpen) return null;
 
@@ -106,33 +69,6 @@ export default function ReceiptModal({
     }
 
     const cloneContent = content.cloneNode(true) as HTMLElement;
-
-    // Get logo HTML
-    const logoImg = cloneContent.querySelector(
-      "#company-logo-img",
-    ) as HTMLImageElement;
-    const logoSrc = logoImg?.src || companyLogo || "";
-
-    // Get barcode canvas from clone and regenerate
-    const cloneBarcodeCanvas = cloneContent.querySelector(
-      "#print-barcode-canvas",
-    ) as HTMLCanvasElement;
-    if (cloneBarcodeCanvas && receipt?.sale_number) {
-      try {
-        JsBarcode(cloneBarcodeCanvas, receipt.sale_number, {
-          format: "CODE128",
-          width: 1.5,
-          height: 40,
-          displayValue: true,
-          fontSize: 11,
-          margin: 5,
-          textMargin: 2,
-          font: "monospace",
-        });
-      } catch (error) {
-        console.error("Print barcode generation failed:", error);
-      }
-    }
 
     const styles = document.querySelectorAll('style, link[rel="stylesheet"]');
     let stylesHTML = "";
@@ -151,132 +87,142 @@ export default function ReceiptModal({
     }
 
     printWindow.document.write(`
-            <!DOCTYPE html>
-            <html>
-                <head>
-                    <title>Receipt - ${receipt?.sale_number || "Print"}</title>
-                    <meta charset="utf-8" />
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-                    ${stylesHTML}
-                    <style>
-                        * {
-                            margin: 0;
-                            padding: 0;
-                            box-sizing: border-box;
-                        }
-                        body {
-                            font-family: 'Courier New', 'Lucida Sans Typewriter', monospace;
-                            font-size: 11px;
-                            line-height: 1.4;
-                            background: white;
-                            padding: 20px;
-                        }
-                        .receipt {
-                            max-width: 300px;
-                            margin: 0 auto;
-                            background: white;
-                        }
-                        .text-center { text-align: center; }
-                        .text-right { text-align: right; }
-                        .text-left { text-align: left; }
-                        .bold { font-weight: bold; }
-                        .divider {
-                            border-top: 1px dashed #333;
-                            margin: 8px 0;
-                        }
-                        .divider-dotted {
-                            border-top: 1px dotted #999;
-                            margin: 6px 0;
-                        }
-                        .row {
-                            display: flex;
-                            justify-content: space-between;
-                            margin: 4px 0;
-                        }
-                        .logo {
-                            max-width: 80px;
-                            max-height: 60px;
-                            margin: 0 auto 8px auto;
-                            display: block;
-                            object-fit: contain;
-                        }
-                        .company-name {
-                            font-size: 14px;
-                            font-weight: bold;
-                            margin-bottom: 4px;
-                        }
-                        .company-details {
-                            font-size: 9px;
-                            color: #555;
-                            margin-bottom: 2px;
-                        }
-                        .receipt-title {
-                            font-size: 10px;
-                            letter-spacing: 2px;
-                            margin: 5px 0;
-                        }
-                        .items-table {
-                            width: 100%;
-                            margin: 5px 0;
-                        }
-                        .item-name {
-                            width: 55%;
-                        }
-                        .item-qty {
-                            width: 20%;
-                            text-align: center;
-                        }
-                        .item-price {
-                            width: 25%;
-                            text-align: right;
-                        }
-                        .totals {
-                            margin-top: 5px;
-                        }
-                        .barcode {
-                            text-align: center;
-                            margin: 10px 0;
-                        }
-                        .barcode canvas {
-                            margin: 0 auto;
-                        }
-                        .footer {
-                            margin-top: 10px;
-                            text-align: center;
-                            font-size: 9px;
-                            color: #777;
-                        }
-                        .thankyou {
-                            font-size: 10px;
-                            font-weight: bold;
-                            margin-top: 8px;
-                        }
-                        @media print {
-                            body {
-                                padding: 0;
-                                margin: 0;
-                            }
-                            .receipt {
-                                box-shadow: none;
-                            }
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="receipt">
-                        ${cloneContent.innerHTML}
-                    </div>
-                    <script>
-                        window.onload = () => {
-                            window.print();
-                            window.onafterprint = () => {
-                                window.close();
-                            };
-                        };
-                    </script>
-                </body>
-            </html>
-        `);
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Receipt - ${receipt?.sale_number || "Print"}</title>
+          <meta charset="utf-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          ${stylesHTML}
+          <style>
+            * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+            }
+            body {
+              font-family: 'Courier New', 'Lucida Sans Typewriter', monospace;
+              font-size: 11px;
+              line-height: 1.4;
+              background: white;
+              padding: 20px;
+            }
+            .receipt {
+              max-width: 300px;
+              margin: 0 auto;
+              background: white;
+            }
+            .text-center { text-align: center; }
+            .text-right { text-align: right; }
+            .text-left { text-align: left; }
+            .bold { font-weight: bold; }
+            .divider {
+              border-top: 1px dashed #333;
+              margin: 8px 0;
+            }
+            .divider-dotted {
+              border-top: 1px dotted #999;
+              margin: 6px 0;
+            }
+            .row {
+              display: flex;
+              justify-content: space-between;
+              margin: 4px 0;
+            }
+            .logo {
+              max-width: 80px;
+              max-height: 60px;
+              margin: 0 auto 8px auto;
+              display: block;
+              object-fit: contain;
+            }
+            .company-name {
+              font-size: 14px;
+              font-weight: bold;
+              margin-bottom: 4px;
+            }
+            .company-details {
+              font-size: 9px;
+              color: #555;
+              margin-bottom: 2px;
+            }
+            .receipt-title {
+              font-size: 10px;
+              letter-spacing: 2px;
+              margin: 5px 0;
+            }
+            .items-table {
+              width: 100%;
+              margin: 5px 0;
+            }
+            .item-name {
+              width: 55%;
+            }
+            .item-qty {
+              width: 20%;
+              text-align: center;
+            }
+            .item-price {
+              width: 25%;
+              text-align: right;
+            }
+            .totals {
+              margin-top: 5px;
+            }
+            .barcode {
+              text-align: center;
+              margin: 10px 0;
+            }
+            .barcode img {
+              max-width: 100%;
+              height: auto;
+            }
+            .barcode-text {
+              font-family: 'Courier New', monospace;
+              font-size: 14px;
+              letter-spacing: 3px;
+              padding: 8px;
+              background: #f5f5f5;
+              display: inline-block;
+              font-weight: bold;
+            }
+            .footer {
+              margin-top: 10px;
+              text-align: center;
+              font-size: 9px;
+              color: #777;
+            }
+            .thankyou {
+              font-size: 10px;
+              font-weight: bold;
+              margin-top: 8px;
+            }
+            @media print {
+              body {
+                padding: 0;
+                margin: 0;
+              }
+              .receipt {
+                box-shadow: none;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="receipt">
+            ${cloneContent.innerHTML}
+          </div>
+          <script>
+            window.onload = () => {
+              window.print();
+              window.onafterprint = () => {
+                window.close();
+              };
+            };
+          </script>
+        </body>
+      </html>
+    `);
 
     printWindow.document.close();
   };
@@ -342,8 +288,6 @@ export default function ReceiptModal({
               <div className="text-center mb-3">
                 {companyLogo ? (
                   <img
-                    id="company-logo-img"
-                    ref={logoImgRef}
                     src={companyLogo}
                     alt={companyName}
                     className="mx-auto max-h-14 object-contain"
@@ -375,19 +319,19 @@ export default function ReceiptModal({
                 <div className="company-name text-base font-bold text-gray-800">
                   {companyName}
                 </div>
-                {companyAddress && (
+                {receipt.branch && (
                   <div className="company-details text-xs text-gray-500">
-                    {companyAddress}
+                    {receipt.branch}
                   </div>
                 )}
-                {companyPhone && (
+                {receipt.branch_address && (
                   <div className="company-details text-xs text-gray-500">
-                    Tel: {companyPhone}
+                    {receipt.branch_address}
                   </div>
                 )}
-                {companyEmail && (
+                {receipt.branch_phone && (
                   <div className="company-details text-xs text-gray-500">
-                    {companyEmail}
+                    Tel: {receipt.branch_phone}
                   </div>
                 )}
                 <div className="receipt-title text-[10px] text-gray-400 tracking-wider mt-1">
@@ -397,26 +341,46 @@ export default function ReceiptModal({
 
               <div className="divider my-3" />
 
-              {/* Transaction Details */}
+              {/* Transaction Details - ALL FIELDS from backend */}
               <div className="space-y-2">
                 <div className="row text-xs">
-                  <span className="text-gray-500">Receipt No:</span>
+                  <span className="text-gray-500">Receipt No: </span>
                   <span className="font-semibold text-gray-800">
                     {receipt.sale_number}
                   </span>
                 </div>
                 <div className="row text-xs">
-                  <span className="text-gray-500">Date & Time:</span>
+                  <span className="text-gray-500">Barcode: </span>
+                  <span className="font-mono text-gray-700 text-[10px]">
+                    {barcodeValue}
+                  </span>
+                </div>
+                <div className="row text-xs">
+                  <span className="text-gray-500">Date & Time: </span>
                   <span className="text-gray-700">{receipt.date}</span>
                 </div>
                 <div className="row text-xs">
-                  <span className="text-gray-500">Cashier:</span>
+                  <span className="text-gray-500">Cashier: </span>
                   <span className="text-gray-700">{receipt.cashier}</span>
                 </div>
+                {receipt.cashier_id && (
+                  <div className="row text-xs">
+                    <span className="text-gray-500">Cashier ID: </span>
+                    <span className="text-gray-700">{receipt.cashier_id}</span>
+                  </div>
+                )}
                 {receipt.sales_staff && (
                   <div className="row text-xs">
-                    <span className="text-gray-500">Sales Staff:</span>
+                    <span className="text-gray-500">Sales Staff: </span>
                     <span className="text-gray-700">{receipt.sales_staff}</span>
+                  </div>
+                )}
+                {receipt.sales_staff_id && (
+                  <div className="row text-xs">
+                    <span className="text-gray-500">Staff ID: </span>
+                    <span className="text-gray-700">
+                      {receipt.sales_staff_id}
+                    </span>
                   </div>
                 )}
                 {receipt.is_gift && (
@@ -456,18 +420,18 @@ export default function ReceiptModal({
                       </span>
                       {!receipt.is_gift && (
                         <span className="item-price text-right font-semibold text-gray-800">
-                          KWD {parseFloat(item.total ?? "0")?.toFixed(3)}
+                          KWD {parseFloat(item.total || "0").toFixed(3)}
                         </span>
                       )}
                     </div>
                     {!receipt.is_gift && parseFloat(item.unit_price) > 0 && (
                       <div className="row text-[10px] text-gray-400">
                         <span className="item-name">
-                          @{parseFloat(item.unit_price).toFixed(3)} KWD
+                          @ {parseFloat(item.unit_price).toFixed(3)} KWD
                         </span>
-                        {item.discount > 0 && (
+                        {parseFloat(item.discount) > 0 && (
                           <span className="item-price text-right text-red-500">
-                            -{item.discount_percentage}%
+                            -{item.discount_percentage || 0}%
                           </span>
                         )}
                       </div>
@@ -478,18 +442,18 @@ export default function ReceiptModal({
 
               <div className="divider my-3" />
 
-              {/* Totals */}
+              {/* Totals - ALL fields */}
               {!receipt.is_gift && (
                 <div className="totals space-y-1">
                   <div className="row text-xs">
-                    <span className="text-gray-500">Subtotal</span>
+                    <span className="text-gray-500">Subtotal: </span>
                     <span className="text-gray-800">
-                      KWD {parseFloat(receipt.subtotal).toFixed(3)}
+                      KWD {parseFloat(receipt.subtotal || "0").toFixed(3)}
                     </span>
                   </div>
                   {parseFloat(receipt.discount) > 0 && (
                     <div className="row text-xs text-red-600">
-                      <span>Discount</span>
+                      <span>Discount:</span>
                       <span>
                         - KWD {parseFloat(receipt.discount).toFixed(3)}
                       </span>
@@ -497,7 +461,7 @@ export default function ReceiptModal({
                   )}
                   {parseFloat(receipt.coupon_discount) > 0 && (
                     <div className="row text-xs text-green-600">
-                      <span>Coupon</span>
+                      <span>Coupon:</span>
                       <span>
                         - KWD {parseFloat(receipt.coupon_discount).toFixed(3)}
                       </span>
@@ -505,36 +469,43 @@ export default function ReceiptModal({
                   )}
                   {parseFloat(receipt.employee_discount) > 0 && (
                     <div className="row text-xs text-purple-600">
-                      <span>Employee Disc.</span>
+                      <span>Employee Disc.:</span>
                       <span>
                         - KWD {parseFloat(receipt.employee_discount).toFixed(3)}
                       </span>
                     </div>
                   )}
+                  {parseFloat(receipt.tax) > 0 && (
+                    <div className="row text-xs text-orange-600">
+                      <span>Tax:</span>
+                      <span>+ KWD {parseFloat(receipt.tax).toFixed(3)}</span>
+                    </div>
+                  )}
                   <div className="divider-dotted my-2" />
                   <div className="row text-sm font-bold">
-                    <span>TOTAL</span>
+                    <span>TOTAL: </span>
                     <span className="text-blue-600">
-                      KWD {parseFloat(receipt.total).toFixed(3)}
+                      KWD {parseFloat(receipt.total || "0").toFixed(3)}
                     </span>
                   </div>
                   <div className="row text-xs">
-                    <span className="text-gray-500">Payment Method</span>
+                    <span className="text-gray-500">Payment Method: </span>
                     <span className="text-gray-700 font-medium">
                       {receipt.payment_method}
                     </span>
                   </div>
-                  {receipt.cash_received && (
-                    <div className="row text-xs">
-                      <span className="text-gray-500">Cash Received</span>
-                      <span className="text-gray-700">
-                        KWD {parseFloat(receipt.cash_received).toFixed(3)}
-                      </span>
-                    </div>
-                  )}
+                  {receipt.cash_received &&
+                    parseFloat(receipt.cash_received) > 0 && (
+                      <div className="row text-xs">
+                        <span className="text-gray-500">Cash Received: </span>
+                        <span className="text-gray-700">
+                          KWD {parseFloat(receipt.cash_received).toFixed(3)}
+                        </span>
+                      </div>
+                    )}
                   {parseFloat(receipt.change_given) > 0 && (
                     <div className="row text-xs text-green-600 font-semibold">
-                      <span>Change Given</span>
+                      <span>Change Given: </span>
                       <span>
                         KWD {parseFloat(receipt.change_given).toFixed(3)}
                       </span>
@@ -545,24 +516,59 @@ export default function ReceiptModal({
 
               <div className="divider my-3" />
 
-              {/* Barcode - Screen View */}
+              {/* BARCODE SECTION - Using actual backend barcode */}
+              {/* BARCODE SECTION */}
               <div className="barcode">
-                <canvas
-                  ref={barcodeCanvasRef}
-                  id="barcode-canvas"
-                  style={{
-                    width: "100%",
-                    height: "auto",
-                    maxWidth: "250px",
-                    margin: "0 auto",
-                  }}
-                />
-                {/* Hidden canvas for print */}
-                <canvas
-                  ref={printBarcodeCanvasRef}
-                  id="print-barcode-canvas"
-                  style={{ display: "none" }}
-                />
+                {barcodeImageUrl ? (
+                  <img
+                    src={barcodeImageUrl}
+                    alt="Barcode"
+                    className="mx-auto"
+                    style={{ maxWidth: "100%", height: "auto" }}
+                    onError={(e) => {
+                      console.error(
+                        "Failed to load barcode image:",
+                        barcodeImageUrl,
+                      );
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = "none";
+                      // Show text barcode fallback
+                      const parent = target.parentElement;
+                      if (parent) {
+                        const textBarcode = document.createElement("div");
+                        textBarcode.className = "text-center";
+                        textBarcode.innerHTML = `
+            <div class="barcode-text" style="font-family: 'Courier New', monospace; font-size: 14px; letter-spacing: 3px; padding: 8px; background: #f5f5f5; display: inline-block; font-weight: bold;">
+              ${barcodeValue}
+            </div>
+            <div class="text-[9px] text-gray-400 mt-1">Scan this code for returns</div>
+          `;
+                        parent.appendChild(textBarcode);
+                      }
+                    }}
+                  />
+                ) : (
+                  // Show text barcode as primary fallback
+                  <div className="text-center">
+                    <div
+                      className="barcode-text"
+                      style={{
+                        fontFamily: "'Courier New', monospace",
+                        fontSize: "14px",
+                        letterSpacing: "3px",
+                        padding: "8px",
+                        background: "#f5f5f5",
+                        display: "inline-block",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {barcodeValue}
+                    </div>
+                    <div className="text-[9px] text-gray-400 mt-1">
+                      Scan this code for returns
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Footer */}

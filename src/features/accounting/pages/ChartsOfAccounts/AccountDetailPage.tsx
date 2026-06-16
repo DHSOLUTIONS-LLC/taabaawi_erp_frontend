@@ -46,6 +46,7 @@ export default function AccountDetailPage() {
   });
 
   const account = (data as any)?.data;
+  console.log("AccountDetailPage data:", data);
   const balance = (balanceData as any)?.data;
   // console.log("AccountDetailPage account:", account);
   console.log("AccountDetailPage balance:", balance);
@@ -247,13 +248,13 @@ export default function AccountDetailPage() {
                   <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
                     <p className="text-xs text-gray-500">Total Debit</p>
                     <p className="text-base sm:text-lg font-bold text-blue-600 mt-1 break-all">
-                      {account.currency} {num(balance.total_debit).toFixed(3)}
+                      {account.currency} {num(account.total_paid).toFixed(3)}
                     </p>
                   </div>
                   <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
                     <p className="text-xs text-gray-500">Total Credit</p>
                     <p className="text-base sm:text-lg font-bold text-orange-600 mt-1 break-all">
-                      {account.currency} {num(balance.total_credit).toFixed(3)}
+                      {account.currency} {num(account.total_received).toFixed(3)}
                     </p>
                   </div>
                   <div className="bg-gray-50 rounded-lg p-3 sm:p-4">

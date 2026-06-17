@@ -31,9 +31,6 @@ export default function ReceiptModal({
     ? `${import.meta.env.VITE_API_URL?.replace("/api", "")}/storage/${settings.logo}`
     : null;
   const companyName = settings?.company_name || "ERP System";
-  // const companyAddress = settings?.company_address || "";
-  // const companyPhone = settings?.phone || "";
-  // const companyEmail = settings?.email || "";
 
   // Get barcode from backend response
   const barcodeValue = receipt?.barcode || receipt?.sale_number || "";
@@ -70,7 +67,7 @@ export default function ReceiptModal({
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Receipt - ${receipt?.sale_number || "Print"}</title>
+          <title >Receipt</title>
           <meta charset="utf-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
           ${stylesHTML}
@@ -177,6 +174,12 @@ export default function ReceiptModal({
               font-weight: bold;
               margin-top: 8px;
             }
+            .header-row {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-top: 4px;
+            }
             @media print {
               body {
                 padding: 0;
@@ -189,18 +192,18 @@ export default function ReceiptModal({
           </style>
         </head>
         <body>
-          <div class="receipt">
-            ${cloneContent.innerHTML}
-          </div>
-          <script>
-            window.onload = () => {
-              window.print();
-              window.onafterprint = () => {
-                window.close();
-              };
-            };
-          </script>
-        </body>
+      <div class="receipt">
+        ${cloneContent.innerHTML}
+      </div>
+      <script>
+        window.onload = () => {
+          window.print();
+          window.onafterprint = () => {
+            window.close();
+          };
+        };
+      </script>
+    </body>
       </html>
     `);
 
@@ -314,30 +317,31 @@ export default function ReceiptModal({
                     Tel: {receipt.branch_phone}
                   </div>
                 )}
-                <div className="receipt-title text-[10px] text-gray-400 tracking-wider mt-1">
-                  OFFICIAL RECEIPT
+                
+                {/* Receipt Title with Receipt No on the right */}
+                <div className="header-row">
+                  <span className="receipt-title text-[10px] text-gray-400 tracking-wider">
+                    OFFICIAL RECEIPT
+                  </span>
+                  <span className="text-[10px] font-semibold text-gray-700">
+                    #{receipt.sale_number}
+                  </span>
                 </div>
               </div>
 
               <div className="divider my-3" />
 
-              {/* Transaction Details - ALL FIELDS from backend */}
+              {/* Transaction Details */}
               <div className="space-y-2">
                 <div className="row text-xs">
-                  <span className="text-gray-500">Receipt No: </span>
-                  <span className="font-semibold text-gray-800">
-                    {receipt.sale_number}
-                  </span>
+                  <span className="text-gray-500">Date & Time: </span>
+                  <span className="text-gray-700">{receipt.date}</span>
                 </div>
                 <div className="row text-xs">
                   <span className="text-gray-500">Barcode: </span>
                   <span className="font-mono text-gray-700 text-[10px]">
                     {barcodeValue}
                   </span>
-                </div>
-                <div className="row text-xs">
-                  <span className="text-gray-500">Date & Time: </span>
-                  <span className="text-gray-700">{receipt.date}</span>
                 </div>
                 <div className="row text-xs">
                   <span className="text-gray-500">Cashier: </span>
@@ -419,7 +423,7 @@ export default function ReceiptModal({
 
               <div className="divider my-3" />
 
-              {/* Totals - ALL fields */}
+              {/* Totals */}
               {!receipt.is_gift && (
                 <div className="totals space-y-1">
                   <div className="row text-xs">
@@ -444,12 +448,6 @@ export default function ReceiptModal({
                     <div className="row text-xs text-purple-600">
                       <span>Employee Disc.:</span>
                       <span>- KWD {parseFloat(receipt.employee_discount).toFixed(3)}</span>
-                    </div>
-                  )}
-                  {parseFloat(receipt.tax) > 0 && (
-                    <div className="row text-xs text-orange-600">
-                      <span>Tax:</span>
-                      <span>+ KWD {parseFloat(receipt.tax).toFixed(3)}</span>
                     </div>
                   )}
                   {parseFloat(receipt.tax) > 0 && (
@@ -490,17 +488,15 @@ export default function ReceiptModal({
 
               <div className="divider my-3" />
 
-              {/* BARCODE SECTION - Using actual backend barcode */}
+              {/* BARCODE SECTION */}
               <div className="barcode">
                 {barcodeImageUrl ? (
-                  // Show actual barcode image from backend
                   <img
                     src={barcodeImageUrl}
                     alt="Barcode"
                     className="mx-auto"
                     style={{ maxWidth: "100%", height: "auto" }}
                     onError={(e) => {
-                      // If image fails to load, show text barcode
                       const target = e.target as HTMLImageElement;
                       target.style.display = "none";
                       const parent = target.parentElement;
@@ -516,7 +512,6 @@ export default function ReceiptModal({
                     }}
                   />
                 ) : (
-                  // Fallback: Show text barcode
                   <div className="text-center">
                     <div className="barcode-text">{barcodeValue}</div>
                     <div className="text-[9px] text-gray-400 mt-1">Scan this code for returns</div>

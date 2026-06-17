@@ -1,12 +1,13 @@
 // src/features/accounting/pages/accounts-payable/APDetailPage.tsx
 import { useParams, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
 import { useAppSelector } from '../../../../app/hooks';
 import type { RootState } from '../../../../app/store';
 import {
   useGetAPByIdQuery,
-  useRecordAPPaymentMutation
+  useRecordAPPaymentMutation,
+  useGetSupplierPaymentAccountsQuery, // ADD THIS
 } from '../../../../services/accountingApi';
 import { useGetChartOfAccountsQuery } from '../../../../services/accountingApi';
 
@@ -39,23 +40,30 @@ export default function APDetailPage() {
   const { data, isLoading, refetch } = useGetAPByIdQuery(apId);
   const [recordPayment] = useRecordAPPaymentMutation();
 
-  const { data: accountsData } = useGetChartOfAccountsQuery({
-    is_active: 1 as any,
-    per_page: 1000,
+  const ap = (data as any)?.data;
+  console.log('AP Data:', ap);
+
+  // Fetch payment accounts for this supplier
+  const { 
+    data: paymentAccountsData, 
+    isLoading: paymentAccountsLoading 
+  } = useGetSupplierPaymentAccountsQuery(ap?.supplier_id, {
+    skip: !ap?.supplier_id,
   });
 
-  const ap = (data as any)?.data;
-  
-  const accounts = (accountsData as any)?.data?.data || (accountsData as any)?.data || [];
-  
-  const paymentAccounts = accounts.filter((account: any) => 
-    account.account_type === 'Asset' && 
-    account.is_active === true
-  );
+  // The API returns: { success: true, data: [...] }
+  const paymentAccounts = (paymentAccountsData as any)?.data || [];
+
+  // Auto-select current payment account when available
+  useEffect(() => {
+    if (ap?.payment_account_id) {
+      setSelectedAccountId(String(ap.payment_account_id));
+    }
+  }, [ap]);
 
   const handleRecordPayment = async () => {
     const amount = parseFloat(paymentAmount);
-    
+
     if (!amount || amount <= 0) {
       alert('Please enter a valid amount');
       return;
@@ -73,19 +81,18 @@ export default function APDetailPage() {
 
     setIsRecording(true);
     try {
-      const payload = { 
-        id: apId, 
+      const payload = {
+        id: apId,
         payment_amount: amount,
         payment_account_id: parseInt(selectedAccountId),
       };
       console.log('Sending payload:', payload);
-      
+
       await recordPayment(payload).unwrap();
-      
+
       refetch();
       setShowPaymentModal(false);
       setPaymentAmount('');
-      setSelectedAccountId('');
       alert('Payment recorded successfully!');
     } catch (err: any) {
       console.error('Payment error:', err);
@@ -338,7 +345,7 @@ export default function APDetailPage() {
                 </label>
                 <div className="relative">
                   <select
-                    value={selectedAccountId}
+                    value={selectedAccountId || ap.payment_account_id || ''}
                     onChange={(e) => setSelectedAccountId(e.target.value)}
                     className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                     required
@@ -346,7 +353,8 @@ export default function APDetailPage() {
                     <option value="">Select Payment Account</option>
                     {paymentAccounts.map((account: any) => (
                       <option key={account.id} value={account.id}>
-                        {account.account_code} - {account.account_name}
+                        {account.account_code} - {account.account_name} 
+                        {ap.payment_account_id === account.id && ' (Current)'}
                       </option>
                     ))}
                   </select>
@@ -354,9 +362,16 @@ export default function APDetailPage() {
                     <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
                   </div>
                 </div>
-                <p className="text-xs text-gray-400 mt-1">
-                  Select the cash/bank account used for this payment
-                </p>
+                {ap.payment_account && (
+                  <p className="text-xs text-blue-600 mt-1">
+                    Current: {ap.payment_account.account_code} - {ap.payment_account.account_name}
+                  </p>
+                )}
+                {paymentAccounts.length === 0 && !paymentAccountsLoading && (
+                  <p className="text-xs text-yellow-600 mt-1">
+                    No payment accounts found for this supplier. Please add a payment account first.
+                  </p>
+                )}
               </div>
 
               <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-4">
@@ -368,7 +383,7 @@ export default function APDetailPage() {
                 </button>
                 <button
                   onClick={handleRecordPayment}
-                  disabled={isRecording}
+                  disabled={isRecording || paymentAccounts.length === 0}
                   className="w-full sm:w-auto px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 text-sm sm:text-base"
                 >
                   {isRecording ? 'Recording...' : 'Record Payment'}

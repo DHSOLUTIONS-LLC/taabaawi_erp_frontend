@@ -34,7 +34,7 @@ import autoTable from "jspdf-autotable";
 const fetchLastOrderForCustomer = async (customerId: number, token: string) => {
   try {
     const response = await fetch(
-      `https://puristic-filmily-bula.ngrok-free.dev/api/customers/${customerId}/purchase-history?per_page=1&page=1`,
+      `https://prearticulate-nonsymbiotically-mira.ngrok-free.dev/api/customers/${customerId}/purchase-history?per_page=1&page=1`,
       {
         headers: {
           'Authorization': `Bearer ${token}`,

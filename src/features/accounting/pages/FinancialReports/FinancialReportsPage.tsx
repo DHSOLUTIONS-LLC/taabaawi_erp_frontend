@@ -58,18 +58,16 @@ export default function FinancialReportsPage() {
   const { user } = useAppSelector((state: RootState) => state.auth);
 
   const [netProfitLoss, setNetProfitLoss] = useState<number>(0);
-  const [isProfitLossDataLoaded, setIsProfitLossDataLoaded] = useState<boolean>(false);
+  const [isProfitLossDataLoaded, setIsProfitLossDataLoaded] =
+    useState<boolean>(false);
 
   const [selectedBranch, setSelectedBranch] = useState(
     searchParams.get("branch_id") || "",
   );
 
-
   const { data: branchesData } = useGetBranchesQuery();
 
   const branches = Array.isArray(branchesData) ? branchesData : [];
-
-
 
   const [activeTab, setActiveTab] = useState<ReportTab>(
     (searchParams.get("tab") as ReportTab) || "trial-balance",
@@ -81,9 +79,9 @@ export default function FinancialReportsPage() {
 
   const [startDate, setStartDate] = useState(
     searchParams.get("start_date") ||
-    new Date(new Date().setMonth(new Date().getMonth() - 1))
-      .toISOString()
-      .split("T")[0],
+      new Date(new Date().setMonth(new Date().getMonth() - 1))
+        .toISOString()
+        .split("T")[0],
   );
 
   const [endDate, setEndDate] = useState(
@@ -102,7 +100,8 @@ export default function FinancialReportsPage() {
   useEffect(() => {
     const params: any = { tab: activeTab };
     if (activeTab === "trial-balance" || activeTab === "balance-sheet") {
-      params.as_of_date = asOfDate;
+      params.start_date = startDate; // CHANGE: from as_of_date to start_date
+      params.end_date = endDate;
     } else if (activeTab === "profit-loss" || activeTab === "cash-flow") {
       params.start_date = startDate;
       params.end_date = endDate;
@@ -113,15 +112,21 @@ export default function FinancialReportsPage() {
     }
     if (selectedBranch) params.branch_id = selectedBranch; // Add this line
     setSearchParams(params);
-  }, [activeTab, asOfDate, startDate, endDate, selectedAccount, selectedBranch]);
-
+  }, [
+    activeTab,
+    asOfDate,
+    startDate,
+    endDate,
+    selectedAccount,
+    selectedBranch,
+  ]);
 
   const {
     data: trialBalanceData,
     isLoading: trialLoading,
     refetch: refetchTrial,
   } = useGetTrialBalanceQuery(
-    { as_of_date: asOfDate }, // Add branch_id
+    { start_date: startDate, end_date: endDate, branch_id: selectedBranch }, // Add branch_id
     { skip: activeTab !== "trial-balance" },
   );
   console.log("Trial Balance Data:", trialBalanceData);
@@ -178,7 +183,6 @@ export default function FinancialReportsPage() {
     { skip: activeTab !== "cash-flow" },
   );
   console.log("Cash Flow Data:", cashFlowData);
-
 
   const { data: accountsData } = useGetChartOfAccountsQuery({
     is_active: 1 as any,
@@ -407,7 +411,7 @@ export default function FinancialReportsPage() {
             [
               "Investing Activities - Purchase of Assets",
               report.investing_activities?.purchase_assets?.toFixed(3) ||
-              "0.000",
+                "0.000",
             ],
             [
               "Investing Activities - Sale of Assets",
@@ -507,196 +511,196 @@ export default function FinancialReportsPage() {
   };
 
   const renderDateFilters = () => {
-  switch (activeTab) {
-    case "trial-balance":
-    case "balance-sheet":
-      return (
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-          {/* Branch Filter */}
-          <div className="relative w-full sm:min-w-[200px]">
-            <select
-              value={selectedBranch}
-              onChange={(e) => setSelectedBranch(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 text-sm"
-            >
-              <option value="">All Branches</option>
-              {branches.map((branch: any) => (
-                <option key={branch.id} value={branch.id}>
-                  {branch.branch_name}
-                </option>
-              ))}
-            </select>
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-              <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
+    switch (activeTab) {
+      case "trial-balance":
+      case "balance-sheet":
+        return (
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+            {/* Branch Filter */}
+            <div className="relative w-full sm:min-w-[200px]">
+              <select
+                value={selectedBranch}
+                onChange={(e) => setSelectedBranch(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 text-sm"
+              >
+                <option value="">All Branches</option>
+                {branches.map((branch: any) => (
+                  <option key={branch.id} value={branch.id}>
+                    {branch.branch_name}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
+              </div>
+            </div>
+
+            {/* From Date */}
+            <div className="relative w-full sm:w-auto">
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="w-full sm:w-auto pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+              />
+              <img
+                src={calendar_icon}
+                alt=""
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+              />
+            </div>
+            <span className="text-sm text-gray-500">to</span>
+            {/* To Date */}
+            <div className="relative w-full sm:w-auto">
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                min={startDate}
+                max={new Date().toISOString().split("T")[0]}
+                className="w-full sm:w-auto pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+              />
+              <img
+                src={calendar_icon}
+                alt=""
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+              />
+            </div>
+            <span className="text-sm text-gray-500">Date Range</span>
+          </div>
+        );
+
+      case "profit-loss":
+      case "cash-flow":
+        return (
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+            {/* Branch Filter */}
+            <div className="relative w-full sm:min-w-[200px]">
+              <select
+                value={selectedBranch}
+                onChange={(e) => setSelectedBranch(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 text-sm"
+              >
+                <option value="">All Branches</option>
+                {branches.map((branch: any) => (
+                  <option key={branch.id} value={branch.id}>
+                    {branch.branch_name}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
+              </div>
+            </div>
+
+            <div className="relative w-full sm:w-auto">
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="w-full sm:w-auto pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+              />
+              <img
+                src={calendar_icon}
+                alt=""
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+              />
+            </div>
+            <span className="text-gray-500">to</span>
+            <div className="relative w-full sm:w-auto">
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                min={startDate}
+                max={new Date().toISOString().split("T")[0]}
+                className="w-full sm:w-auto pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+              />
+              <img
+                src={calendar_icon}
+                alt=""
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+              />
             </div>
           </div>
+        );
 
-          {/* From Date */}
-          <div className="relative w-full sm:w-auto">
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="w-full sm:w-auto pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-            />
-            <img
-              src={calendar_icon}
-              alt=""
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
-            />
-          </div>
-          <span className="text-sm text-gray-500">to</span>
-          {/* To Date */}
-          <div className="relative w-full sm:w-auto">
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              min={startDate}
-              max={new Date().toISOString().split("T")[0]}
-              className="w-full sm:w-auto pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-            />
-            <img
-              src={calendar_icon}
-              alt=""
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
-            />
-          </div>
-          <span className="text-sm text-gray-500">Date Range</span>
-        </div>
-      );
+      case "general-ledger":
+        return (
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 flex-wrap">
+            {/* Branch Filter */}
+            <div className="relative w-full sm:min-w-[200px]">
+              <select
+                value={selectedBranch}
+                onChange={(e) => setSelectedBranch(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 text-sm"
+              >
+                <option value="">All Branches</option>
+                {branches.map((branch: any) => (
+                  <option key={branch.id} value={branch.id}>
+                    {branch.branch_name}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
+              </div>
+            </div>
 
-    case "profit-loss":
-    case "cash-flow":
-      return (
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-          {/* Branch Filter */}
-          <div className="relative w-full sm:min-w-[200px]">
-            <select
-              value={selectedBranch}
-              onChange={(e) => setSelectedBranch(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 text-sm"
-            >
-              <option value="">All Branches</option>
-              {branches.map((branch: any) => (
-                <option key={branch.id} value={branch.id}>
-                  {branch.branch_name}
-                </option>
-              ))}
-            </select>
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-              <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
+            <div className="relative w-full sm:min-w-[250px]">
+              <select
+                value={selectedAccount}
+                onChange={(e) => setSelectedAccount(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 text-sm"
+              >
+                <option value="">Select Account</option>
+                {accounts.map((acc: any) => (
+                  <option key={acc.id} value={acc.id}>
+                    {acc.account_code} - {acc.account_name} ({acc.account_type})
+                  </option>
+                ))}
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
+              </div>
+            </div>
+
+            <div className="relative w-full sm:w-auto">
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="w-full sm:w-auto pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+              />
+              <img
+                src={calendar_icon}
+                alt=""
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+              />
+            </div>
+            <span className="text-gray-500">to</span>
+            <div className="relative w-full sm:w-auto">
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                min={startDate}
+                max={new Date().toISOString().split("T")[0]}
+                className="w-full sm:w-auto pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+              />
+              <img
+                src={calendar_icon}
+                alt=""
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+              />
             </div>
           </div>
+        );
 
-          <div className="relative w-full sm:w-auto">
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="w-full sm:w-auto pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-            />
-            <img
-              src={calendar_icon}
-              alt=""
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
-            />
-          </div>
-          <span className="text-gray-500">to</span>
-          <div className="relative w-full sm:w-auto">
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              min={startDate}
-              max={new Date().toISOString().split("T")[0]}
-              className="w-full sm:w-auto pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-            />
-            <img
-              src={calendar_icon}
-              alt=""
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
-            />
-          </div>
-        </div>
-      );
-
-    case "general-ledger":
-      return (
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 flex-wrap">
-          {/* Branch Filter */}
-          <div className="relative w-full sm:min-w-[200px]">
-            <select
-              value={selectedBranch}
-              onChange={(e) => setSelectedBranch(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 text-sm"
-            >
-              <option value="">All Branches</option>
-              {branches.map((branch: any) => (
-                <option key={branch.id} value={branch.id}>
-                  {branch.branch_name}
-                </option>
-              ))}
-            </select>
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-              <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
-            </div>
-          </div>
-
-          <div className="relative w-full sm:min-w-[250px]">
-            <select
-              value={selectedAccount}
-              onChange={(e) => setSelectedAccount(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 text-sm"
-            >
-              <option value="">Select Account</option>
-              {accounts.map((acc: any) => (
-                <option key={acc.id} value={acc.id}>
-                  {acc.account_code} - {acc.account_name} ({acc.account_type})
-                </option>
-              ))}
-            </select>
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-              <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
-            </div>
-          </div>
-
-          <div className="relative w-full sm:w-auto">
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="w-full sm:w-auto pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-            />
-            <img
-              src={calendar_icon}
-              alt=""
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
-            />
-          </div>
-          <span className="text-gray-500">to</span>
-          <div className="relative w-full sm:w-auto">
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              min={startDate}
-              max={new Date().toISOString().split("T")[0]}
-              className="w-full sm:w-auto pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-            />
-            <img
-              src={calendar_icon}
-              alt=""
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
-            />
-          </div>
-        </div>
-      );
-
-    default:
-      return null;
-  }
-};
+      default:
+        return null;
+    }
+  };
 
   const renderReport = () => {
     if (isLoading()) {
@@ -747,7 +751,7 @@ export default function FinancialReportsPage() {
           totals.credit += Number(account.credit) || 0;
           return totals;
         },
-        { debit: 0, credit: 0 }
+        { debit: 0, credit: 0 },
       );
     };
 
@@ -851,7 +855,6 @@ export default function FinancialReportsPage() {
               </p>
             </div>
           </div>
-
         </div>
       </div>
     );
@@ -1048,11 +1051,13 @@ export default function FinancialReportsPage() {
     const equityDetails =
       report?.equity?.details?.map((item: any) => ({
         ...item,
-        displayName: item.account_name === "Current Period Net Income"
-          ? "Retained Balance"
-          : item.account_name,
+        displayName:
+          item.account_name === "Current Period Net Income"
+            ? "Retained Balance"
+            : item.account_name,
         displayAmount: transformAmount(item.amount),
-        isRetainedEarnings: item.account_sub_type === "Retained Earnings" ||
+        isRetainedEarnings:
+          item.account_sub_type === "Retained Earnings" ||
           item.account_name === "Current Period Net Income",
       })) || [];
 
@@ -1060,18 +1065,18 @@ export default function FinancialReportsPage() {
     const assetsTotal = Object.values(assetsByType).reduce(
       (sum: number, items: any) =>
         sum + items.reduce((s: number, i: any) => s + i.displayAmount, 0),
-      0
+      0,
     );
 
     const liabilitiesTotal = Object.values(liabilitiesByType).reduce(
       (sum: number, items: any) =>
         sum + items.reduce((s: number, i: any) => s + i.displayAmount, 0),
-      0
+      0,
     );
 
     const equityTotal = equityDetails.reduce(
       (sum, item) => sum + item.displayAmount,
-      0
+      0,
     );
 
     const totalLiabilitiesAndEquity = liabilitiesTotal + equityTotal;
@@ -1086,7 +1091,9 @@ export default function FinancialReportsPage() {
           </h3>
           {Object.entries(assetsByType).map(([type, items]: [string, any]) => (
             <div key={type} className="mb-4">
-              <h4 className="text-sm font-semibold text-gray-700 mb-2">{type}</h4>
+              <h4 className="text-sm font-semibold text-gray-700 mb-2">
+                {type}
+              </h4>
               <div className="space-y-1">
                 {items.map((item: any, idx: number) => (
                   <div key={idx} className="flex justify-between text-sm">
@@ -1117,23 +1124,27 @@ export default function FinancialReportsPage() {
           <h3 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b-2 border-gray-200">
             LIABILITIES
           </h3>
-          {Object.entries(liabilitiesByType).map(([type, items]: [string, any]) => (
-            <div key={type} className="mb-4">
-              <h4 className="text-sm font-semibold text-gray-700 mb-2">{type}</h4>
-              <div className="space-y-1">
-                {items.map((item: any, idx: number) => (
-                  <div key={idx} className="flex justify-between text-sm">
-                    <span className="text-gray-600 break-words">
-                      {item.account_name}
-                    </span>
-                    <span className="font-mono whitespace-nowrap ml-2">
-                      KWD {item.displayAmount.toFixed(3)}
-                    </span>
-                  </div>
-                ))}
+          {Object.entries(liabilitiesByType).map(
+            ([type, items]: [string, any]) => (
+              <div key={type} className="mb-4">
+                <h4 className="text-sm font-semibold text-gray-700 mb-2">
+                  {type}
+                </h4>
+                <div className="space-y-1">
+                  {items.map((item: any, idx: number) => (
+                    <div key={idx} className="flex justify-between text-sm">
+                      <span className="text-gray-600 break-words">
+                        {item.account_name}
+                      </span>
+                      <span className="font-mono whitespace-nowrap ml-2">
+                        KWD {item.displayAmount.toFixed(3)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            ),
+          )}
           <div className="mt-4 pt-2 border-t-2 border-gray-200">
             <div className="flex justify-between text-base font-bold">
               <span>Total Liabilities</span>
@@ -1150,31 +1161,38 @@ export default function FinancialReportsPage() {
           {equityDetails.map((item: any, idx: number) => (
             <div
               key={idx}
-              className={`flex justify-between text-sm mb-2 ${item.isRetainedEarnings ? "pt-2 border-t border-gray-200" : ""
-                }`}
+              className={`flex justify-between text-sm mb-2 ${
+                item.isRetainedEarnings ? "pt-2 border-t border-gray-200" : ""
+              }`}
             >
               <span className="flex items-center gap-2">
-                <span className="text-gray-600 break-words">{item.displayName}</span>
+                <span className="text-gray-600 break-words">
+                  {item.displayName}
+                </span>
                 {item.isRetainedEarnings && (
                   <span
-                    className={`text-xs px-2 py-0.5 rounded ${item.displayAmount > 0
+                    className={`text-xs px-2 py-0.5 rounded ${
+                      item.displayAmount > 0
                         ? "bg-green-100 text-green-700"
                         : "bg-red-100 text-red-700"
-                      }`}
+                    }`}
                   >
                     {item.displayAmount > 0 ? "Profit" : "Loss"}
                   </span>
                 )}
               </span>
               <span
-                className={`font-mono whitespace-nowrap ml-2 ${item.isRetainedEarnings ? "font-semibold" : ""
-                  } ${item.isRetainedEarnings && item.displayAmount > 0
+                className={`font-mono whitespace-nowrap ml-2 ${
+                  item.isRetainedEarnings ? "font-semibold" : ""
+                } ${
+                  item.isRetainedEarnings && item.displayAmount > 0
                     ? "text-green-600"
                     : ""
-                  } ${item.isRetainedEarnings && item.displayAmount < 0
+                } ${
+                  item.isRetainedEarnings && item.displayAmount < 0
                     ? "text-red-600"
                     : ""
-                  }`}
+                }`}
               >
                 KWD {item.displayAmount.toFixed(3)}
               </span>
@@ -1252,10 +1270,11 @@ export default function FinancialReportsPage() {
           <div className="bg-gray-50 rounded-lg p-3">
             <p className="text-xs text-gray-500">Net Change</p>
             <p
-              className={`text-base sm:text-lg font-bold whitespace-nowrap ${num(report.closing_balance - report.opening_balance) >= 0
-                ? "text-green-600"
-                : "text-red-600"
-                }`}
+              className={`text-base sm:text-lg font-bold whitespace-nowrap ${
+                num(report.closing_balance - report.opening_balance) >= 0
+                  ? "text-green-600"
+                  : "text-red-600"
+              }`}
             >
               KWD{" "}
               {(
@@ -1435,10 +1454,11 @@ export default function FinancialReportsPage() {
           </div>
 
           <div
-            className={`bg-gradient-to-br rounded-xl p-4 border ${netCashFlow >= 0
-              ? "from-green-50 to-green-100 border-green-200"
-              : "from-red-50 to-red-100 border-red-200"
-              }`}
+            className={`bg-gradient-to-br rounded-xl p-4 border ${
+              netCashFlow >= 0
+                ? "from-green-50 to-green-100 border-green-200"
+                : "from-red-50 to-red-100 border-red-200"
+            }`}
           >
             <div className="flex items-center justify-between">
               <div>
@@ -1450,19 +1470,22 @@ export default function FinancialReportsPage() {
                   Net Change
                 </p>
                 <p
-                  className={`text-xl sm:text-2xl font-bold mt-1 ${netCashFlow >= 0 ? "text-green-700" : "text-red-700"
-                    }`}
+                  className={`text-xl sm:text-2xl font-bold mt-1 ${
+                    netCashFlow >= 0 ? "text-green-700" : "text-red-700"
+                  }`}
                 >
                   KWD {netCashFlow.toFixed(3)}
                 </p>
               </div>
               <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center ${netCashFlow >= 0 ? "bg-green-200" : "bg-red-200"
-                  }`}
+                className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                  netCashFlow >= 0 ? "bg-green-200" : "bg-red-200"
+                }`}
               >
                 <svg
-                  className={`w-5 h-5 ${netCashFlow >= 0 ? "text-green-600" : "text-red-600"
-                    }`}
+                  className={`w-5 h-5 ${
+                    netCashFlow >= 0 ? "text-green-600" : "text-red-600"
+                  }`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -1694,10 +1717,11 @@ export default function FinancialReportsPage() {
 
         {/* Net Cash Flow Summary */}
         <div
-          className={`rounded-xl overflow-hidden shadow-lg ${netCashFlow >= 0
-            ? "bg-gradient-to-r from-green-500 to-emerald-600"
-            : "bg-gradient-to-r from-red-500 to-rose-600"
-            }`}
+          className={`rounded-xl overflow-hidden shadow-lg ${
+            netCashFlow >= 0
+              ? "bg-gradient-to-r from-green-500 to-emerald-600"
+              : "bg-gradient-to-r from-red-500 to-rose-600"
+          }`}
         >
           <div className="px-6 py-5">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -1712,8 +1736,9 @@ export default function FinancialReportsPage() {
 
               <div className="flex items-center gap-3">
                 <div
-                  className={`px-4 py-2 rounded-lg ${netCashFlow >= 0 ? "bg-white/20" : "bg-white/20"
-                    }`}
+                  className={`px-4 py-2 rounded-lg ${
+                    netCashFlow >= 0 ? "bg-white/20" : "bg-white/20"
+                  }`}
                 >
                   <div className="flex items-center gap-2">
                     {netCashFlow >= 0 ? (
@@ -1767,8 +1792,9 @@ export default function FinancialReportsPage() {
             {/* Mini trend indicator */}
             <div className="mt-4 h-1.5 w-full bg-white/20 rounded-full overflow-hidden">
               <div
-                className={`h-full rounded-full transition-all duration-500 ${netCashFlow >= 0 ? "bg-white" : "bg-white"
-                  }`}
+                className={`h-full rounded-full transition-all duration-500 ${
+                  netCashFlow >= 0 ? "bg-white" : "bg-white"
+                }`}
                 style={{
                   width: `${Math.min(Math.abs(netCashFlow) / 1000, 100)}%`,
                 }}
@@ -1903,10 +1929,11 @@ export default function FinancialReportsPage() {
                   onClick={() => handleTabChange(tab.id as ReportTab)}
                   className={`
             py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 whitespace-nowrap
-            ${activeTab === tab.id
-                      ? "border-blue-500 text-blue-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                    }
+            ${
+              activeTab === tab.id
+                ? "border-blue-500 text-blue-600"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+            }
           `}
                 >
                   <span className="text-base">{tab.icon}</span>
@@ -1970,11 +1997,13 @@ export default function FinancialReportsPage() {
               {activeTab === "general-ledger" &&
                 selectedAccount &&
                 `${new Date(startDate).toLocaleDateString()} - ${new Date(endDate).toLocaleDateString()}`}
-              {selectedBranch && branches.find(b => b.id == selectedBranch) && (
-                <span className="ml-2 text-blue-600">
-                  • Branch: {branches.find(b => b.id == selectedBranch)?.branch_name}
-                </span>
-              )}
+              {selectedBranch &&
+                branches.find((b) => b.id == selectedBranch) && (
+                  <span className="ml-2 text-blue-600">
+                    • Branch:{" "}
+                    {branches.find((b) => b.id == selectedBranch)?.branch_name}
+                  </span>
+                )}
             </p>
           </div>
 

@@ -749,11 +749,13 @@ export default function CartSidebar({
         couponCode={appliedCoupon?.code || ""}
         isGift={giftReceipt}
         isEmployeePurchase={isEmployeePurchase}
+        isDPPR={isDPPR}
         registerId={registerId}
         branchId={branchId || 0}
         salesStaffId={salesPersonId ? parseInt(salesPersonId) : undefined}
         customerId={undefined}
         customerDetails={
+          // ADD THIS
           !isDPPR && (customerName || customerPhone)
             ? {
                 name: customerName,
@@ -763,7 +765,6 @@ export default function CartSidebar({
               }
             : undefined
         }
-        isDPPR={isDPPR}
         onSuccess={handleSaleSuccess}
       />
 

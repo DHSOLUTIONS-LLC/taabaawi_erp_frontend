@@ -24,10 +24,17 @@ interface PaymentModalProps {
   couponCode: string;
   isGift: boolean;
   isEmployeePurchase: boolean;
+  isDPPR: boolean;
   registerId?: number;
   branchId: number;
   salesStaffId?: number;
   customerId?: number;
+  customerDetails?: {
+    name: string;
+    phone: string;
+    email: string;
+    address: string;
+  };
   onSuccess: (sale: any) => void;
 }
 
@@ -45,10 +52,12 @@ export default function PaymentModal({
   couponCode,
   isGift,
   isEmployeePurchase,
+  isDPPR, // ADDED - destructured from props
   registerId,
   branchId,
   salesStaffId,
   customerId,
+  customerDetails, // ADDED - destructured from props
   onSuccess,
 }: PaymentModalProps) {
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([
@@ -70,20 +79,6 @@ export default function PaymentModal({
     paymentMethod === "Cash" && cashReceived
       ? parseFloat(cashReceived) - total
       : 0;
-
-  // For other payment methods: check if amount is valid
-  const isOtherPaymentValid = () => {
-    if (
-      paymentMethod !== "Cash" &&
-      paymentMethod !== "Card" &&
-      paymentMethod !== "K-Net"
-    ) {
-      if (!otherPaymentAmount || parseFloat(otherPaymentAmount) < total) {
-        return false;
-      }
-    }
-    return true;
-  };
 
   const [createSale, { isLoading }] = useCreateSaleMutation();
 
@@ -133,45 +128,62 @@ export default function PaymentModal({
     try {
       const items = cartItems.map((item) => ({
         product_id: item.product_id || parseInt(item.id),
-        variant_id: item.variant_id,
+        variant_id: item.variant_id || null,
         quantity: item.quantity,
         unit_price: item.price,
         discount_percentage: item.discount_percentage || 0,
       }));
 
+      // Build the payload
       const payload: any = {
         branch_id: branchId,
         cash_register_id: registerId,
-        sales_staff_id: salesStaffId,
-        customer_id: customerId,
-        payment_method: paymentMethod,
+        sales_staff_id: salesStaffId || null,
+        customer_id: customerId || null,
+        is_dppr: isDPPR, // Now works - isDPPR is defined
         is_gift: isGift,
         is_employee_purchase: isEmployeePurchase,
-        notes,
+        payment_method: paymentMethod,
+        notes: notes || null,
         items,
       };
 
-      if (couponCode) payload.coupon_code = couponCode;
+      // Add customer details ONLY if DPPR is false AND customer details are provided
+      if (!isDPPR && customerDetails) {
+        // Now works - both are defined
+        payload.customer_details = {
+          name: customerDetails.name || null,
+          phone: customerDetails.phone || null,
+          email: customerDetails.email || null,
+          address: customerDetails.address || null,
+        };
+      }
 
+      // Add coupon code if applied
+      if (couponCode) {
+        payload.coupon_code = couponCode;
+      }
+
+      // Add payment-specific fields
       if (paymentMethod === "Cash") {
         payload.cash_received = parseFloat(cashReceived) || 0;
         payload.change_due = change;
-      }
-
-      if (paymentMethod === "Card" || paymentMethod === "K-Net") {
+        payload.card_reference = null;
+        payload.amount_paid = null;
+      } else if (paymentMethod === "Card" || paymentMethod === "K-Net") {
+        payload.cash_received = null;
+        payload.change_due = null;
         payload.card_reference = cardReference;
-      }
-
-      // For other payment methods, send the amount paid
-      if (
-        paymentMethod !== "Cash" &&
-        paymentMethod !== "Card" &&
-        paymentMethod !== "K-Net"
-      ) {
+        payload.amount_paid = null;
+      } else {
+        // Other payment methods (Bank Transfer, Wallet, etc.)
+        payload.cash_received = null;
+        payload.change_due = null;
+        payload.card_reference = null;
         payload.amount_paid = parseFloat(otherPaymentAmount) || 0;
       }
 
-      console.log("Payment payload:", JSON.stringify(payload, null, 2));
+      console.log("Final Payment Payload:", JSON.stringify(payload, null, 2));
 
       const result = await createSale(payload).unwrap();
       onSuccess(result.data);
@@ -331,7 +343,7 @@ export default function PaymentModal({
             </div>
           )}
 
-          {/* Payment Amount - For Other Payment Methods (Bank Transfer, Wallet, etc.) */}
+          {/* Payment Amount - For Other Payment Methods */}
           {paymentMethod !== "Cash" &&
             paymentMethod !== "Card" &&
             paymentMethod !== "K-Net" && (
@@ -358,7 +370,7 @@ export default function PaymentModal({
               </div>
             )}
 
-          {/* Notes - Always visible */}
+          {/* Notes */}
           <div>
             <label className="text-sm font-medium text-gray-700 mb-1 block">
               Notes (Optional)

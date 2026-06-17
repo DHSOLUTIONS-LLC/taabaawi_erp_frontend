@@ -499,36 +499,43 @@ export default function EditProductModal({
 
       // Step 2: Transform Excel data to match backend expected format
       const transformedProducts = productsData.map((row: any) => {
-        // Handle variants if present
-        let variants = [];
-        if (row["Has Variants"] === "Yes" && row["Variant Name"]) {
-          variants = [{
-            variant_name: row["Variant Name"],
-            variant_value: row["Variant Value"],
-            cost_price: parseFloat(row["Variant Cost Price (KWD)"]) || parseFloat(row["Cost Price (KWD)"]),
-            selling_price: parseFloat(row["Variant Selling Price (KWD)"]) || parseFloat(row["Selling Price (KWD)"]),
-            additional_price: (parseFloat(row["Variant Selling Price (KWD)"]) || parseFloat(row["Selling Price (KWD)"])) -
-              (parseFloat(row["Variant Cost Price (KWD)"]) || parseFloat(row["Cost Price (KWD)"])),
-          }];
-        }
+  // Handle variants if present
+  let variants = [];
+  if (row["Has Variants"] === "Yes" && row["Variant Name"]) {
+    variants = [{
+      variant_name: row["Variant Name"],
+      variant_value: row["Variant Value"],
+      cost_price: parseFloat(row["Variant Cost Price (KWD)"]) || parseFloat(row["Cost Price (KWD)"]),
+      selling_price: parseFloat(row["Variant Selling Price (KWD)"]) || parseFloat(row["Selling Price (KWD)"]),
+      additional_price: (parseFloat(row["Variant Selling Price (KWD)"]) || parseFloat(row["Selling Price (KWD)"])) -
+        (parseFloat(row["Variant Cost Price (KWD)"]) || parseFloat(row["Cost Price (KWD)"])),
+    }];
+  }
 
-        return {
-          product_name: row["Product Name"],
-          sku: row["SKU"] || undefined,
-          category_id: row["Category ID"] ? parseInt(row["Category ID"]) : null,
-          description: row["Description"] || "",
-          unit: row["Unit"] || "piece",
-          weight: row["Weight (kg)"] ? parseFloat(row["Weight (kg)"]) : null,
-          dimensions: row["Dimensions"] || null,
-          color: row["Color"] || null,
-          cost_price: parseFloat(row["Cost Price (KWD)"]),
-          selling_price: parseFloat(row["Selling Price (KWD)"]),
-          has_variants: row["Has Variants"] === "Yes",
-          low_stock_alert: row["Low Stock Alert"] ? parseInt(row["Low Stock Alert"]) : 10,
-          is_active: row["Is Active"]?.toLowerCase() !== "no",
-          variants: variants,
-        };
-      });
+  const product: any = {
+    product_name: row["Product Name"],
+    category_id: row["Category ID"] ? parseInt(row["Category ID"]) : null,
+    description: row["Description"] || "",
+    unit: row["Unit"] || "piece",
+    weight: row["Weight (kg)"] ? parseFloat(row["Weight (kg)"]) : null,
+    dimensions: row["Dimensions"] || null,
+    color: row["Color"] || null,
+    cost_price: parseFloat(row["Cost Price (KWD)"]),
+    selling_price: parseFloat(row["Selling Price (KWD)"]),
+    has_variants: row["Has Variants"] === "Yes",
+    low_stock_alert: row["Low Stock Alert"] ? parseInt(row["Low Stock Alert"]) : 10,
+    is_active: row["Is Active"]?.toLowerCase() !== "no",
+    variants: variants,
+  };
+
+  // IMPORTANT: Only add SKU if it has a value, and always send as string
+  if (row["SKU"] && row["SKU"].toString().trim() !== "") {
+    product.sku = row["SKU"].toString().trim();
+  }
+  // If no SKU, don't send the field at all (backend will auto-generate)
+
+  return product;
+});
 
       // Step 3: Validate transformed data
       const invalidProducts = transformedProducts.filter(p => !p.product_name || !p.cost_price || !p.selling_price);

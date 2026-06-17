@@ -38,11 +38,11 @@ const fetchCustomerPurchaseHistory = async (customerId: number, token: string) =
         },
       }
     );
-    
+
     if (!response.ok) {
       throw new Error('Failed to fetch orders');
     }
-    
+
     const result = await response.json();
     return result?.data?.orders?.data || [];
   } catch (error) {
@@ -59,7 +59,7 @@ const exportToExcel = (data: any[], reportKey: string, reportLabel: string, date
   }
 
   let exportData = [...data];
-  
+
   if (reportKey === 'customers') {
     exportData = data.map(customer => ({
       'Customer ID': customer.customer_id || customer.id || 'N/A',
@@ -118,7 +118,7 @@ const exportToExcel = (data: any[], reportKey: string, reportLabel: string, date
   }
 
   const ws = XLSX.utils.json_to_sheet(exportData);
-  
+
   const colWidths: { [key: string]: number } = {};
   exportData.forEach(row => {
     Object.keys(row).forEach(key => {
@@ -126,9 +126,9 @@ const exportToExcel = (data: any[], reportKey: string, reportLabel: string, date
       colWidths[key] = Math.min(50, Math.max(colWidths[key] || 0, value.length, key.length));
     });
   });
-  
+
   ws['!cols'] = Object.keys(exportData[0]).map(key => ({ wch: colWidths[key] + 2 }));
-  
+
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, reportLabel);
   XLSX.writeFile(wb, `${reportLabel.replace(/\s/g, '_')}_${dateRange}.xlsx`);
@@ -142,14 +142,14 @@ const ResultTable = ({ data, reportKey, loading }: { data: any[]; reportKey: Rep
       </div>
     );
   }
-  
+
   if (!data?.length) {
     return <p className="text-sm text-gray-400 py-4 text-center">Click "Run" to generate report</p>;
   }
-  
+
   let displayData = [...data];
   let columns: string[] = [];
-  
+
   if (reportKey === 'customers') {
     columns = ['customer_name', 'email', 'phone', 'total_orders', 'total_spent', 'last_invoice_number', 'last_invoice_value', 'last_order_date', 'customer_type'];
     displayData = data.map(customer => ({
@@ -196,7 +196,7 @@ const ResultTable = ({ data, reportKey, loading }: { data: any[]; reportKey: Rep
   } else {
     columns = Object.keys(data[0]);
   }
-  
+
   return (
     <div className="overflow-x-auto mt-3 max-w-full">
       <table className="text-xs border border-gray-200 rounded-lg overflow-hidden min-w-max w-full">
@@ -273,7 +273,7 @@ const ReportPanel = ({
   useEffect(() => {
     const fetchPOSOrders = async () => {
       if (reportKey !== 'customers') return;
-      
+
       try {
         const token = localStorage.getItem('token') || '';
         const response = await fetch(
@@ -286,11 +286,11 @@ const ReportPanel = ({
             },
           }
         );
-        
+
         if (!response.ok) {
           throw new Error('Failed to fetch POS orders');
         }
-        
+
         const result = await response.json();
         const orders = result?.data?.data || [];
         setPosOrdersData(orders);
@@ -299,7 +299,7 @@ const ReportPanel = ({
         setPosOrdersData([]);
       }
     };
-    
+
     fetchPOSOrders();
   }, [dates, reportKey]);
 
@@ -307,16 +307,16 @@ const ReportPanel = ({
   useEffect(() => {
     const fetchCustomerOrders = async () => {
       if (reportKey !== 'customers' || !extractedData) return;
-      
+
       let customersList = [];
       if (Array.isArray(extractedData)) {
         customersList = extractedData;
       } else {
-        customersList = extractedData.top_customers || 
-                        extractedData.data || 
-                        extractedData.customers || [];
+        customersList = extractedData.top_customers ||
+          extractedData.data ||
+          extractedData.customers || [];
       }
-      
+
       // If no customers data, use empty array
       if (!customersList || customersList.length === 0) {
         customersList = extractedData?.top_customers || [];
@@ -325,28 +325,28 @@ const ReportPanel = ({
       // Ensure all customers have proper names
       customersList = customersList.map((customer: any) => ({
         ...customer,
-        full_name: customer.full_name || 
-                   customer.customer_name || 
-                   customer.name || 
-                   (customer.type === 'walk_in' ? 'Walk-in / Guest' : 'Anonymous Customer'),
-        customer_name: customer.full_name || 
-                      customer.customer_name || 
-                      customer.name || 
-                      (customer.type === 'walk_in' ? 'Walk-in / Guest' : 'Anonymous Customer'),
+        full_name: customer.full_name ||
+          customer.customer_name ||
+          customer.name ||
+          (customer.type === 'walk_in' ? 'Walk-in / Guest' : 'Anonymous Customer'),
+        customer_name: customer.full_name ||
+          customer.customer_name ||
+          customer.name ||
+          (customer.type === 'walk_in' ? 'Walk-in / Guest' : 'Anonymous Customer'),
       }));
 
       // Also include all POS orders with customer information
       const posOrders = posOrdersData || [];
       const posCustomers = posOrders.map((order: any) => ({
         customer_id: order.customer_id || null,
-        customer_name: order.customer_name || 
-                      (order.customer?.full_name) || 
-                      (order.customer?.first_name + ' ' + order.customer?.last_name) ||
-                      'Walk-in / Guest',
-        full_name: order.customer_name || 
-                  (order.customer?.full_name) || 
-                  (order.customer?.first_name + ' ' + order.customer?.last_name) ||
-                  'Walk-in / Guest',
+        customer_name: order.customer_name ||
+          (order.customer?.full_name) ||
+          (order.customer?.first_name + ' ' + order.customer?.last_name) ||
+          'Walk-in / Guest',
+        full_name: order.customer_name ||
+          (order.customer?.full_name) ||
+          (order.customer?.first_name + ' ' + order.customer?.last_name) ||
+          'Walk-in / Guest',
         email: order.customer_email || order.customer?.email || null,
         phone: order.customer_phone || order.customer?.phone || null,
         type: order.customer_id ? 'registered' : 'walk_in',
@@ -358,10 +358,10 @@ const ReportPanel = ({
         order_status: order.status,
         is_from_pos: true,
       }));
-      
+
       // Merge customers from both sources, deduplicate
       const allCustomersMap = new Map();
-      
+
       // Add POS customers first to ensure all are included
       posCustomers.forEach((posCustomer: any) => {
         const key = posCustomer.customer_id || posCustomer.customer_name || `walkin_${Date.now()}_${Math.random()}`;
@@ -369,7 +369,7 @@ const ReportPanel = ({
           allCustomersMap.set(key, posCustomer);
         }
       });
-      
+
       // Add customer analysis data (merge with existing if same customer)
       customersList.forEach((customer: any) => {
         const key = customer.id || customer.customer_id || customer.full_name;
@@ -378,9 +378,9 @@ const ReportPanel = ({
             const existing = allCustomersMap.get(key);
             existing.period_orders = (existing.period_orders || 0) + (customer.period_orders || customer.total_orders || 0);
             existing.period_spent = (existing.period_spent || 0) + (customer.period_spent || customer.total_spent || 0);
-            existing.period_last_purchase_date = customer.period_last_purchase_date || 
-                                               customer.last_order_date || 
-                                               existing.period_last_purchase_date;
+            existing.period_last_purchase_date = customer.period_last_purchase_date ||
+              customer.last_order_date ||
+              existing.period_last_purchase_date;
             // Keep the best name
             existing.full_name = customer.full_name || existing.full_name || 'Walk-in / Guest';
             existing.customer_name = customer.full_name || existing.customer_name || 'Walk-in / Guest';
@@ -394,31 +394,31 @@ const ReportPanel = ({
           }
         }
       });
-      
+
       customersList = Array.from(allCustomersMap.values());
-      
+
       if (customersList.length === 0) {
         setEnrichedCustomerData([]);
         return;
       }
-      
+
       setIsFetchingOrders(true);
       const token = localStorage.getItem('token') || '';
-      
+
       try {
         const enrichedCustomers = await Promise.all(
           customersList.map(async (customer: any) => {
             const customerId = customer.customer_id || customer.id;
-            
+
             // If no customer ID, this is an anonymous/guest customer
             if (!customerId) {
               // Check if we have POS order details for this customer
               const posOrdersForCustomer = posOrders.filter(
                 (order: any) => order.customer_name === customer.customer_name ||
-                               order.customer?.full_name === customer.full_name
+                  order.customer?.full_name === customer.full_name
               );
               const lastPOSOrder = posOrdersForCustomer.length > 0 ? posOrdersForCustomer[0] : null;
-              
+
               return {
                 ...customer,
                 full_name: customer.full_name || customer.customer_name || 'Walk-in / Guest',
@@ -434,24 +434,24 @@ const ReportPanel = ({
                 type: 'walk_in',
               };
             }
-            
+
             // Fetch orders for customers with ID
             const orders = await fetchCustomerPurchaseHistory(customerId, token);
             const lastOrder = orders.length > 0 ? orders[0] : null;
-            
+
             // Also check POS orders for this customer
             const posOrdersForCustomer = posOrders.filter(
               (order: any) => order.customer_id === customerId
             );
             const lastPOSOrder = posOrdersForCustomer.length > 0 ? posOrdersForCustomer[0] : null;
-            
+
             // Use the most recent order between POS and purchase history
             const mostRecentOrder = lastOrder || lastPOSOrder;
-            
+
             // Calculate total spent from both sources
             const totalFromOrders = orders.reduce((sum: number, order: any) => sum + parseFloat(order.total_amount || 0), 0);
             const totalFromPOS = posOrdersForCustomer.reduce((sum: number, order: any) => sum + parseFloat(order.total_amount || 0), 0);
-            
+
             return {
               ...customer,
               full_name: customer.full_name || customer.customer_name || customer.name || 'Anonymous Customer',
@@ -475,7 +475,7 @@ const ReportPanel = ({
         setIsFetchingOrders(false);
       }
     };
-    
+
     fetchCustomerOrders();
   }, [extractedData, reportKey, posOrdersData]);
 
@@ -486,17 +486,17 @@ const ReportPanel = ({
     if (reportKey === 'customers') {
       return enrichedCustomerData.length > 0 ? enrichedCustomerData : [];
     }
-    
+
     if (!extractedData) return [];
-    
+
     if (reportKey === 'sales') {
       return extractedData.daily_data || extractedData.data || [];
     }
-    
+
     if (reportKey === 'products') {
       return extractedData.top_products || extractedData.products || extractedData.data || [];
     }
-    
+
     if (reportKey === 'financial') {
       return [{
         start_date: extractedData.period?.start_date,
@@ -510,26 +510,26 @@ const ReportPanel = ({
         net_margin: extractedData.net_margin,
       }];
     }
-    
+
     if (reportKey === 'inventory') {
       return extractedData.products || extractedData.data || [];
     }
-    
+
     if (reportKey === 'employees') {
       return extractedData.employees || extractedData.data || [];
     }
-    
+
     return [];
   };
 
   // Define getSummary inside the component
   const getSummary = () => {
     if (!extractedData && enrichedCustomerData.length === 0) return null;
-    
+
     if (reportKey === 'sales') {
       return extractedData.totals || null;
     }
-    
+
     if (reportKey === 'customers' && enrichedCustomerData.length > 0) {
       const totalCustomers = enrichedCustomerData.length;
       const totalOrders = enrichedCustomerData.reduce((sum, c) => sum + (c.period_orders || c.total_orders || 0), 0);
@@ -537,7 +537,7 @@ const ReportPanel = ({
       const posOrdersCount = posOrdersData.length;
       const registeredCustomers = enrichedCustomerData.filter((c: any) => c.type === 'registered' || c.type === 'customer').length;
       const walkInCustomers = enrichedCustomerData.filter((c: any) => c.type === 'walk_in' || c.type === 'guest').length;
-      
+
       return {
         'Total Customers': totalCustomers,
         'Registered Customers': registeredCustomers,
@@ -548,7 +548,7 @@ const ReportPanel = ({
         'Average Order Value': `${(totalOrders > 0 ? totalSpent / totalOrders : 0).toFixed(3)} KWD`,
       };
     }
-    
+
     if (reportKey === 'financial') {
       return {
         'Total Revenue': `${parseFloat(extractedData.revenue || 0).toFixed(3)} KWD`,
@@ -558,7 +558,7 @@ const ReportPanel = ({
         'Net Margin': `${(extractedData.net_margin || 0).toFixed(2)}%`,
       };
     }
-    
+
     return extractedData.totals ?? extractedData.summary ?? null;
   };
 
@@ -639,7 +639,7 @@ const ReportPanel = ({
               ))}
             </div>
           )}
-          
+
           {reportKey === 'customers' && rows.length > 0 && (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3">
               <div className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs">
@@ -661,15 +661,15 @@ const ReportPanel = ({
               <div className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs">
                 <p className="text-gray-400">Avg Order Value</p>
                 <p className="font-semibold text-gray-800">
-                  KWD {(rows.reduce((sum, c) => sum + (c.period_spent || c.total_spent || 0), 0) / 
-                        (rows.reduce((sum, c) => sum + (c.period_orders || c.total_orders || 0), 0) || 1)).toFixed(3)}
+                  KWD {(rows.reduce((sum, c) => sum + (c.period_spent || c.total_spent || 0), 0) /
+                    (rows.reduce((sum, c) => sum + (c.period_orders || c.total_orders || 0), 0) || 1)).toFixed(3)}
                 </p>
               </div>
             </div>
           )}
-          
+
           <ResultTable data={rows} reportKey={reportKey} loading={isCustomerLoading} />
-          
+
           {reportKey === 'customers' && isFetchingOrders && (
             <p className="text-xs text-blue-600 text-center mt-2">Fetching invoice details...</p>
           )}

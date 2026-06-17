@@ -20,61 +20,53 @@ const API_BASE_URL =
 
 interface Product {
   id: number;
-  name: string;
-  description: string;
+  product_name: string;
+  name_en: string;
+  name_ar?: string | null;
+  title_en?: string | null;
+  title_ar?: string | null;
+  brand_en?: string | null;
+  brand_ar?: string | null;
+  category_en?: string | null;
+  category_ar?: string | null;
+  sub_category_en?: string | null;
+  sub_category_ar?: string | null;
+  description?: string | null;
+  description_en?: string | null;
+  description_ar?: string | null;
+  slug?: string | null;
   sku: string;
-  barcode?: string;
-  barcode_image?: string;
-  category: string | { category_name: string };
+  barcode?: string | null;
+  barcode_image?: string | null;
+  category: string | { category_name: string } | null;
   branch: string;
   quantity: number;
-  cost: number;
-  price: number;
+  cost_price: number;
+  selling_price: number;
+  average_cost_price?: number | null;
   status: string;
   image: string;
-  weight?: number;
-  dimensions?: string;
-  color?: string;
-  unit?: string;
-  low_stock_alert?: number;
-  is_active?: boolean;
+  weight?: number | null;
+  dimensions?: string | null;
+  color?: string | null;
+  unit?: string | null;
+  size?: string | null;
+  low_stock_alert?: number | null;
+  is_active?: boolean | null;
   images?: Array<{
     id: number;
     image_path: string;
     is_primary: boolean;
     sort_order: number;
   }>;
-  variants?: Array<{
-    id: number;
-    variant_name: string;
-    variant_value: string;
-    sku: string;
-    barcode: string;
-    cost_price: number;
-    selling_price: number;
-    additional_price: number;
-    is_active: boolean;
-    inventory?: Array<{
-      quantity: number;
-      available_quantity: number;
-      reserved_quantity?: number;
-      branch?: {
-        id: number;
-        branch_name: string;
-      };
-    }>;
-  }>;
-  inventory?: Array<{
-    quantity: number;
-    available_quantity: number;
-    reserved_quantity?: number;
-    branch?: {
-      id: number;
-      branch_name: string;
-    };
-  }>;
+  variants?: Array<any>;
+  inventory?: Array<any>;
   created_at?: string;
   updated_at?: string;
+  // For backward compatibility with old component props
+  name?: string;
+  cost?: number;
+  price?: number;
 }
 
 interface ProductDetailsSidebarProps {
@@ -113,6 +105,34 @@ export default function ProductDetailsSidebar({
 
   if (!product) return null;
 
+  // Helper functions to get product data with fallbacks
+  const getProductName = () => {
+    return product.product_name || product.name || "Unknown Product";
+  };
+
+  const getProductDescription = () => {
+    return product.description_en || product.description || "No description available";
+  };
+
+  const getCostPrice = () => {
+    return product.cost_price || product.cost || 0;
+  };
+
+  const getSellingPrice = () => {
+    return product.selling_price || product.price || 0;
+  };
+
+  const getCategoryName = () => {
+    if (product.category_en) return product.category_en;
+    if (product.category) {
+      if (typeof product.category === "object" && product.category.category_name) {
+        return product.category.category_name;
+      }
+      return product.category as string;
+    }
+    return "Not specified";
+  };
+
   // ============ PROCESS PRODUCT IMAGES ============
   const productImages = (() => {
     if (
@@ -130,38 +150,30 @@ export default function ProductDetailsSidebar({
     ];
   })();
 
-  // ============ GET CATEGORY NAME ============
-  const categoryName = (() => {
-    if (!product.category) return "Not specified";
-    if (
-      typeof product.category === "object" &&
-      product.category.category_name
-    ) {
-      return product.category.category_name;
-    }
-    return product.category as string;
-  })();
-
   // ============ DYNAMIC SPECIFICATIONS FROM API ============
   const specifications = [
-    { label: "Category", value: categoryName },
+    // { label: "English Name", value: product.name_en || product.product_name || "Not specified" },
+    // { label: "Arabic Name", value: product.name_ar || "Not specified" },
+    // { label: "English Title", value: product.title_en || "Not specified" },
+    // { label: "Arabic Title", value: product.title_ar || "Not specified" },
+    // { label: "English Brand", value: product.brand_en || "Not specified" },
+    // { label: "Arabic Brand", value: product.brand_ar || "Not specified" },
+    // { label: "English Category", value: product.category_en || "Not specified" },
+    // { label: "Arabic Category", value: product.category_ar || "Not specified" },
+    // { label: "English Sub Category", value: product.sub_category_en || "Not specified" },
+    // { label: "Arabic Sub Category", value: product.sub_category_ar || "Not specified" },
+    { label: "Description", value: product.description_en || product.description || "Not specified" },
+    // { label: "Arabic Description", value: product.description_ar || "Description not available" },
+    // { label: "Slug", value: product.slug || "Not specified" },
+    { label: "SKU", value: product.sku || "N/A" },
+    { label: "Barcode", value: product.barcode || "N/A", image: product.barcode_image },
     { label: "Unit", value: product.unit || "Piece" },
-    {
-      label: "Weight",
-      value: product.weight ? `${product.weight} kg` : "Not specified",
-    },
+    { label: "Weight", value: product.weight ? `${product.weight} kg` : "Not specified" },
     { label: "Dimensions", value: product.dimensions || "Not specified" },
     { label: "Color", value: product.color || "Not specified" },
-    { label: "SKU", value: product.sku || "N/A" },
-    {
-      label: "Barcode",
-      value: product.barcode || "N/A",
-      image: product.barcode_image,
-    },
-    {
-      label: "Low Stock Alert",
-      value: product.low_stock_alert?.toString() || "10",
-    },
+    { label: "Size", value: product.size || "Not specified" },
+    // { label: "Average Cost Price", value: product.average_cost_price  },
+    { label: "Low Stock Alert", value: product.low_stock_alert?.toString() || "10" },
     { label: "Status", value: product.is_active ? "Active" : "Inactive" },
   ];
 
@@ -182,7 +194,6 @@ export default function ProductDetailsSidebar({
         is_active: variant.is_active,
       }));
 
-  // console.log('varian spec:', variantSpecifications)
   // ============ BRANCH STOCK DATA FROM API ============
   const branchStock =
     !product.inventory || product.inventory.length === 0
@@ -202,7 +213,6 @@ export default function ProductDetailsSidebar({
         total: inv.quantity || 0,
         is_low_stock: inv.quantity <= (product.low_stock_alert || 10),
       }));
-console.log("branch stock:", branchStock);
 
   // ============ VARIANT BRANCH STOCK ============
   const variantBranchStock = !product.variants
@@ -223,22 +233,22 @@ console.log("branch stock:", branchStock);
       };
     });
 
-  // console.log("variant branch stock:", variantBranchStock);
   // ============ PROFIT CALCULATIONS ============
+  const costPrice = getCostPrice();
+  const sellingPrice = getSellingPrice();
+
   const profitMargin = (() => {
-    if (product.price && product.cost && product.cost > 0) {
-      return (((product.price - product.cost) / product.cost) * 100).toFixed(1);
+    if (sellingPrice && costPrice && costPrice > 0) {
+      return (((sellingPrice - costPrice) / costPrice) * 100).toFixed(1);
     }
     return "0.0";
   })();
 
-  const profit = (product.price || 0) - (product.cost || 0);
+  const profit = sellingPrice - costPrice;
 
   const totalStock = product.inventory
     ? product.inventory.reduce((sum, inv) => sum + (inv.quantity || 0), 0)
     : product.quantity || 0;
-
-    console.log("Total Stock:", totalStock);
 
   // ============ HANDLERS ============
   const handleThumbnailClick = (index: number) => {
@@ -260,7 +270,7 @@ console.log("branch stock:", branchStock);
   const handleReportDamageClick = () => {
     setSelectedProductForDamage({
       id: product.id,
-      name: product.name,
+      name: getProductName(),
       branch: branchStock[0]?.name || "Main Warehouse",
       branch_id: product.inventory?.[0]?.branch?.id || 1,
       quantity: totalStock,
@@ -294,11 +304,9 @@ console.log("branch stock:", branchStock);
   };
 
   // Generate barcode visualization
-  // Generate barcode visualization
   const renderBarcode = (barcodeValue: string, barcodeImage?: string) => {
     if (!barcodeValue) return null;
 
-    // If we have a barcode image from backend, show it
     if (barcodeImage) {
       return (
         <div className="flex flex-col items-center">
@@ -307,7 +315,6 @@ console.log("branch stock:", branchStock);
             alt={`Barcode ${barcodeValue}`}
             className="h-8 w-auto object-contain"
             onError={(e) => {
-              // Fallback to text if image fails to load
               e.currentTarget.style.display = "none";
             }}
           />
@@ -316,18 +323,8 @@ console.log("branch stock:", branchStock);
       );
     }
 
-    // Fallback to simulated barcode if no image
     return (
       <div className="flex flex-col items-center">
-        <div className="flex space-x-0.5 mb-1">
-          {[...Array(30)].map((_, i) => (
-            <div
-              key={i}
-              className="w-0.5 bg-black"
-              style={{ height: `${Math.random() * 20 + 20}px` }}
-            />
-          ))}
-        </div>
         <span className="text-xs font-mono">{barcodeValue}</span>
       </div>
     );
@@ -338,7 +335,7 @@ console.log("branch stock:", branchStock);
       {/* Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 transition-opacity duration-300  bg-opacity-30"
+          className="fixed inset-0 z-40 transition-opacity duration-300 bg-opacity-30"
           onClick={onClose}
         />
       )}
@@ -385,7 +382,7 @@ console.log("branch stock:", branchStock);
                 <div className="relative bg-gray-50 border border-[#0000001A] rounded-xl h-full min-h-125 md:min-h-100 lg:min-h-125 flex items-center justify-center overflow-hidden">
                   <img
                     src={productImages[selectedImageIndex]}
-                    alt={product.name}
+                    alt={getProductName()}
                     className="w-full h-full object-contain"
                     onError={(e) => {
                       e.currentTarget.src =
@@ -410,14 +407,14 @@ console.log("branch stock:", branchStock);
                       key={index}
                       onClick={() => handleThumbnailClick(index)}
                       className={`shrink-0 w-20 h-20 md:w-full md:h-24 rounded-lg overflow-hidden border-2 transition-all ${selectedImageIndex === index
-                          ? "border-blue-500 ring-2 ring-blue-200"
-                          : "border-gray-200 hover:border-gray-300"
+                        ? "border-blue-500 ring-2 ring-blue-200"
+                        : "border-gray-200 hover:border-gray-300"
                         }`}
                     >
                       <div className="w-full h-full bg-gray-50 p-2">
                         <img
                           src={img}
-                          alt={`${product.name || "Product"} ${index + 1}`}
+                          alt={`${getProductName()} ${index + 1}`}
                           className="w-full h-full object-contain"
                         />
                       </div>
@@ -432,37 +429,39 @@ console.log("branch stock:", branchStock);
                   {/* Product Title */}
                   <div className="bg-gray-50 rounded-xl p-3">
                     <h2 className="text-2xl font-bold text-gray-900">
-                      {(product.name || "").toUpperCase()}
+                      {getProductName().toUpperCase()}
                     </h2>
                     <p className="text-sm text-gray-600 mt-2 leading-relaxed">
-                      {product.description || "No description available"}
+                      {getProductDescription()}
                     </p>
                   </div>
 
                   {/* Specifications */}
-                  {specifications.map((spec, index) => (
-                    <div key={index} className="flex flex-col items-start">
-                      <span className="text-sm text-gray-500 min-w-30">
-                        {spec.label}
-                      </span>
-                      {spec.label === "Barcode" && spec.image ? (
-                        <div className="flex flex-col">
-                          <img
-                            src={`${API_BASE_URL}/storage/${spec.image}`}
-                            alt="Barcode"
-                            className="h-8 w-auto object-contain mb-1"
-                          />
+                  <div className="space-y-3">
+                    {specifications.map((spec, index) => (
+                      <div key={index} className="flex flex-col items-start">
+                        <span className="text-sm text-gray-500 min-w-30">
+                          {spec.label}
+                        </span>
+                        {spec.label === "Barcode" && spec.image ? (
+                          <div className="flex flex-col">
+                            <img
+                              src={`${API_BASE_URL}/storage/${spec.image}`}
+                              alt="Barcode"
+                              className="h-8 w-auto object-contain mb-1"
+                            />
+                            <span className="text-sm text-gray-900 font-semibold">
+                              {spec.value}
+                            </span>
+                          </div>
+                        ) : (
                           <span className="text-sm text-gray-900 font-semibold">
                             {spec.value}
                           </span>
-                        </div>
-                      ) : (
-                        <span className="text-sm text-gray-900 font-semibold">
-                          {spec.value}
-                        </span>
-                      )}
-                    </div>
-                  ))}
+                        )}
+                      </div>
+                    ))}
+                  </div>
 
                   {/* Variant Specifications - Only show if product has variants */}
                   {variantSpecifications.length > 0 && (
@@ -481,7 +480,10 @@ console.log("branch stock:", branchStock);
                                 {variant.name}: {variant.value}
                               </span>
                               <span
-                                className={`text-xs px-2 py-1 rounded-full ${variant.is_active ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}`}
+                                className={`text-xs px-2 py-1 rounded-full ${variant.is_active
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-gray-100 text-gray-800"
+                                  }`}
                               >
                                 {variant.is_active ? "Active" : "Inactive"}
                               </span>
@@ -536,7 +538,7 @@ console.log("branch stock:", branchStock);
                   Cost Price
                 </p>
                 <p className="text-xl font-semibold text-gray-900 border border-[#0088FF] p-2 rounded-md text-center">
-                  KWD {product.cost?.toFixed(3) || "0.000"}
+                  KWD {costPrice.toFixed(3)}
                 </p>
               </div>
               <div className="bg-white rounded-lg p-4">
@@ -544,7 +546,7 @@ console.log("branch stock:", branchStock);
                   Selling Price
                 </p>
                 <p className="text-xl font-semibold text-gray-900 border border-[#0088FF] p-2 rounded-md text-center">
-                  KWD {product.price?.toFixed(3) || "0.000"}
+                  KWD {sellingPrice.toFixed(3)}
                 </p>
               </div>
               <div className="bg-white rounded-lg p-4">
@@ -566,15 +568,14 @@ console.log("branch stock:", branchStock);
             </div>
 
             {/* Action Buttons */}
-            {/* Action Buttons */}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 bg-white px-4 py-8 rounded-xl">
               {/* Edit Product - Admin Only */}
               <button
                 onClick={handleEditProductClick}
                 disabled={!isSuperAdmin}
                 className={`flex flex-col items-center justify-center px-4 py-10 rounded-lg border transition-colors ${isSuperAdmin
-                    ? "border-[#0088FF] hover:bg-blue-50 cursor-pointer"
-                    : "border-gray-300 opacity-50 cursor-not-allowed"
+                  ? "border-[#0088FF] hover:bg-blue-50 cursor-pointer"
+                  : "border-gray-300 opacity-50 cursor-not-allowed"
                   }`}
               >
                 <div className="w-14 h-14 bg-gray-200 rounded-xl flex items-center justify-center mb-2">
@@ -624,8 +625,8 @@ console.log("branch stock:", branchStock);
                 onClick={handleTransferStockClick}
                 disabled={!isSuperAdmin}
                 className={`flex flex-col items-center justify-center px-4 py-10 rounded-lg border transition-colors ${isSuperAdmin
-                    ? "border-[#0088FF] hover:bg-blue-50 cursor-pointer"
-                    : "border-gray-300 opacity-50 cursor-not-allowed"
+                  ? "border-[#0088FF] hover:bg-blue-50 cursor-pointer"
+                  : "border-gray-300 opacity-50 cursor-not-allowed"
                   }`}
               >
                 <div className="w-14 h-14 bg-gray-200 rounded-xl flex items-center justify-center mb-2">
@@ -723,10 +724,10 @@ console.log("branch stock:", branchStock);
                             <td className="px-6 py-4 whitespace-nowrap">
                               <span
                                 className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${branch.is_low_stock
-                                    ? "bg-yellow-100 text-yellow-800"
-                                    : branch.total > 0
-                                      ? "bg-green-100 text-green-800"
-                                      : "bg-red-100 text-red-800"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : branch.total > 0
+                                    ? "bg-green-100 text-green-800"
+                                    : "bg-red-100 text-red-800"
                                   }`}
                               >
                                 {branch.is_low_stock
@@ -766,80 +767,6 @@ console.log("branch stock:", branchStock);
                 </div>
               )}
             </div>
-
-            {/* Variant Stock By Branch - Only show if product has variants */}
-            {/* {variantBranchStock.length > 0 && (
-              <div className="shadow bg-white rounded-xl">
-                <div className="px-4 py-3 border-b border-gray-200">
-                  <h3 className="text-xl font-bold text-gray-900">
-                    Variant Stock By Branch
-                  </h3>
-                </div>
-                <div className="p-4 space-y-4">
-                  {variantBranchStock.map((variant, index) => (
-                    <div
-                      key={index}
-                      className="border border-gray-200 rounded-lg overflow-hidden"
-                    >
-                      <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
-                        <div className="flex justify-between items-center">
-                          <span className="font-semibold text-gray-900">
-                            {variant.variant_name}
-                          </span>
-                          <span className="text-sm text-gray-600 font-mono">
-                            SKU: {variant.sku}
-                          </span>
-                        </div>
-                      </div>
-                      {variant.stock.length > 0 ? (
-                        <div className="overflow-x-auto">
-                          <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-white">
-                              <tr>
-                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                                  Branch
-                                </th>
-                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                                  Available
-                                </th>
-                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                                  Reserved
-                                </th>
-                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                                  Total
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                              {variant.stock.map((stock, sIndex) => (
-                                <tr key={sIndex}>
-                                  <td className="px-4 py-2 text-sm text-gray-900">
-                                    {stock.branch_name}
-                                  </td>
-                                  <td className="px-4 py-2 text-sm text-gray-900">
-                                    {stock.available}
-                                  </td>
-                                  <td className="px-4 py-2 text-sm text-gray-900">
-                                    {stock.reserved}
-                                  </td>
-                                  <td className="px-4 py-2 text-sm font-semibold text-gray-900">
-                                    {stock.quantity}
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      ) : (
-                        <p className="text-sm text-gray-500 p-4">
-                          No stock data for this variant
-                        </p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )} */}
           </div>
         </div>
       </div>
@@ -852,7 +779,7 @@ console.log("branch stock:", branchStock);
           product
             ? {
               id: product.id,
-              name: product.name,
+              name: getProductName(),
               sku: product.sku,
             }
             : null
@@ -867,7 +794,6 @@ console.log("branch stock:", branchStock);
             setSelectedProductForDamage(null);
           }}
           onSuccess={() => {
-            // Optional: refresh data
             console.log("Damage reported successfully");
           }}
           product={selectedProductForDamage}
@@ -882,25 +808,33 @@ console.log("branch stock:", branchStock);
           product
             ? {
               id: product.id,
-              name: product.name,
+              name: getProductName(),
+              name_ar: product.name_ar,
+              title_en: product.title_en,
+              title_ar: product.title_ar,
+              brand_en: product.brand_en,
+              brand_ar: product.brand_ar,
+              category: getCategoryName(),
+              category_ar: product.category_ar,
+              sub_category_en: product.sub_category_en,
+              sub_category_ar: product.sub_category_ar,
+              description: getProductDescription(),
+              description_ar: product.description_ar,
+              slug: product.slug,
               sku: product.sku,
-              category:
-                typeof product.category === "object"
-                  ? (product.category as any)?.category_name ||
-                  "Uncategorized"
-                  : product.category || "Uncategorized",
-              quantity: product.quantity,
-              cost: product.cost,
-              price: product.price,
-              status: product.status,
-              image: product.image,
-              description: product.description,
               barcode: product.barcode,
               barcode_image: product.barcode_image,
+              quantity: totalStock,
+              cost: costPrice,
+              price: sellingPrice,
+              status: product.is_active ? "In Stock" : "Out of Stock",
+              image: product.image,
               unit: product.unit,
               weight: product.weight,
               dimensions: product.dimensions,
               color: product.color,
+              size: product.size,
+              average_cost_price: product.average_cost_price,
               low_stock_alert: product.low_stock_alert,
               is_active: product.is_active,
             }
@@ -915,7 +849,7 @@ console.log("branch stock:", branchStock);
           product
             ? {
               id: product.id,
-              name: product.name,
+              name: getProductName(),
               sku: product.sku,
             }
             : null
@@ -928,7 +862,7 @@ console.log("branch stock:", branchStock);
         product={
           product
             ? {
-              name: product.name,
+              name: getProductName(),
               sku: product.sku,
             }
             : null

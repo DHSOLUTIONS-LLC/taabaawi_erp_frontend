@@ -1,10 +1,12 @@
 // src/features/purchase/pages/SupplierPayments/CreatePaymentModal.tsx
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { useCreateSupplierPaymentMutation } from '../../../../services/purchaseApi';
 import type { PurchaseOrder } from '../../../../services/purchaseApi';
 import { useGetChartOfAccountsQuery } from "../../../../services/accountingApi";
 import dropdown_arrow_icon from "../../../../assets/icons/dropdown_arrow_icon.svg";
+import { useGetActivePaymentMethodsQuery } from '../../../../services/paymentMethodApi';
+
 
 interface CreatePaymentModalProps {
   po: PurchaseOrder;
@@ -12,64 +14,83 @@ interface CreatePaymentModalProps {
   onSuccess: () => void;
 }
 
-const DEFAULT_PAYMENT_METHODS = ["Cash",
-  
-  // Kuwaiti Local Payment Systems
-  "KNET",
-  "WAMD (Instant Transfer)",
-  "Mobile Payment (Kuwait Mobile)",
-  
-  // Local Kuwaiti Banks
-  "NBK (National Bank of Kuwait)",
-  "KFH (Kuwait Finance House)",
-  "CBK (Commercial Bank of Kuwait)",
-  "GIB (Gulf Bank)",
-  "ABK (Ahli United Bank)",
-  "Burgan Bank",
-  "KIB (Kuwait International Bank)",
-  "Boubyan Bank",
-  "Warba Bank",
-  "Al Ahli Bank of Kuwait",
-  
-  // Kuwaiti Digital Wallets
-  "My KNET Mobile",
-  "Tam (Boubyan Bank)",
-  "WeYak (KFH)",
-  "Gulf Pay (GIB)",
-  "NBK Mobile Banking",
-  "KFH Go",
-  "CBK Mobile",
-  
-  // International Cards
-  "Visa Card",
-  "Mastercard",
-  "American Express",
-  "Debit Card",
-  
-  // Mobile Wallets
-  "Apple Pay",
-  "Google Pay",
-  "Samsung Pay",
-  
-  // Other Methods
-  "Bank Transfer",
-  "Cheque",
-  "Gift Card",
-  "Voucher",
-  "Tabby (Buy Now Pay Later)",
-  "Tamara (Buy Now Pay Later)",
-  "Postal Order",
-  "Government Payment",
-  "Corporate Account",
-  "Other"];
+// const DEFAULT_PAYMENT_METHODS = ["Cash",
+
+//   // Kuwaiti Local Payment Systems
+//   "KNET",
+//   "WAMD (Instant Transfer)",
+//   "Mobile Payment (Kuwait Mobile)",
+
+//   // Local Kuwaiti Banks
+//   "NBK (National Bank of Kuwait)",
+//   "KFH (Kuwait Finance House)",
+//   "CBK (Commercial Bank of Kuwait)",
+//   "GIB (Gulf Bank)",
+//   "ABK (Ahli United Bank)",
+//   "Burgan Bank",
+//   "KIB (Kuwait International Bank)",
+//   "Boubyan Bank",
+//   "Warba Bank",
+//   "Al Ahli Bank of Kuwait",
+
+//   // Kuwaiti Digital Wallets
+//   "My KNET Mobile",
+//   "Tam (Boubyan Bank)",
+//   "WeYak (KFH)",
+//   "Gulf Pay (GIB)",
+//   "NBK Mobile Banking",
+//   "KFH Go",
+//   "CBK Mobile",
+
+//   // International Cards
+//   "Visa Card",
+//   "Mastercard",
+//   "American Express",
+//   "Debit Card",
+
+//   // Mobile Wallets
+//   "Apple Pay",
+//   "Google Pay",
+//   "Samsung Pay",
+
+//   // Other Methods
+//   "Bank Transfer",
+//   "Cheque",
+//   "Gift Card",
+//   "Voucher",
+//   "Tabby (Buy Now Pay Later)",
+//   "Tamara (Buy Now Pay Later)",
+//   "Postal Order",
+//   "Government Payment",
+//   "Corporate Account",
+//   "Other"];
 
 export default function CreatePaymentModal({ po, onClose, onSuccess }: CreatePaymentModalProps) {
   const outstanding = po.outstanding_amount ?? po.total_amount - (po.total_paid ?? 0);
   const [selectedAccountId, setSelectedAccountId] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("");
-  const [paymentMethods, setPaymentMethods] = useState<string[]>(DEFAULT_PAYMENT_METHODS);
   const [showAddPaymentMethod, setShowAddPaymentMethod] = useState(false);
   const [newPaymentMethod, setNewPaymentMethod] = useState("");
+  const [paymentMethods, setPaymentMethods] = useState<string[]>([]);
+
+
+  const { data: paymentMethodsData, isLoading: isLoadingPaymentMethods } =
+    useGetActivePaymentMethodsQuery();
+
+  useEffect(() => {
+    if (paymentMethodsData?.data) {
+      const methods = paymentMethodsData.data.map(
+        (method: any) => method.method_name
+      );
+      setPaymentMethods(methods);
+      // Set default payment method if available
+      if (methods.length > 0 && !paymentMethod) {
+        setPaymentMethod(methods[0]);
+        setFormData(prev => ({ ...prev, payment_method: methods[0] }));
+      }
+    }
+  }, [paymentMethodsData]);
+
 
   const { data: accountsData } = useGetChartOfAccountsQuery({
     is_active: 1 as any,
@@ -231,29 +252,35 @@ export default function CreatePaymentModal({ po, onClose, onSuccess }: CreatePay
             </label>
             <div className="flex gap-2">
               <div className="relative flex-1">
-                <select
-                  value={paymentMethod}
-                  onChange={(e) => {
-                    setPaymentMethod(e.target.value);
-                    setFormData(prev => ({ ...prev, payment_method: e.target.value }));
-                  }}
-                  className={`w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-md appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 text-sm sm:text-base ${errors.payment_method ? 'border-red-400' : 'border-gray-300'
-                    }`}
-                >
-                  <option value="">Select Payment Method</option>
-                  {paymentMethods.map((method) => (
-                    <option key={method} value={method}>{method}</option>
-                  ))}
-                </select>
+                {isLoadingPaymentMethods ? (
+                  <div className="flex items-center justify-center py-2.5 px-4 border border-gray-300 rounded-md bg-gray-50">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600" />
+                    <span className="ml-2 text-sm text-gray-500">Loading...</span>
+                  </div>
+                ) : (
+                  <select
+                    value={paymentMethod}
+                    onChange={(e) => {
+                      setPaymentMethod(e.target.value);
+                      setFormData(prev => ({ ...prev, payment_method: e.target.value }));
+                    }}
+                    className={`w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-md appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 text-sm sm:text-base ${errors.payment_method ? 'border-red-400' : 'border-gray-300'
+                      }`}
+                  >
+                    <option value="">Select Payment Method</option>
+                    {paymentMethods.map((method) => (
+                      <option key={method} value={method}>{method}</option>
+                    ))}
+                  </select>
+                )}
                 <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                   <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
                 </div>
               </div>
-               
             </div>
             {errors.payment_method && <p className="text-xs text-red-500 mt-1">{errors.payment_method}</p>}
 
-            {/* Add New Payment Method Input */}
+            {/* Add New Payment Method Input - Keep this as is */}
             {showAddPaymentMethod && (
               <div className="mt-2 flex gap-2">
                 <input

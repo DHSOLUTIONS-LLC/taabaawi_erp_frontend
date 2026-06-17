@@ -34,8 +34,6 @@ import dropdown_arrow_icon from "../../../assets/icons/dropdown_arrow_icon.svg";
 import export_excel from "../../../assets/icons/export_excel.svg";
 import export_pdf from "../../../assets/icons/export_pdf.svg";
 import search_icon from "../../../assets/icons/search_icon.svg";
-// import sort_asc from "../../../assets/icons/sort_icon.png";
-// import sort_desc from "../../../assets/icons/sort_icon.png";
 import { useAppSelector } from "../../../app/hooks";
 import type { RootState } from "../../../app/store";
 
@@ -141,6 +139,9 @@ interface SidebarProduct {
   }>;
   variants?: any[];
   inventory?: Array<{
+    id: number;
+    product_id: number;
+    branch_id: number;
     quantity: number;
     available_quantity: number;
     reserved_quantity?: number;
@@ -267,13 +268,78 @@ export default function DashboardPage() {
   const products = productsResponse?.data?.data || [];
   const totalProductCount = productsResponse?.data?.total || 0;
 
+  // Get inventory items from response
+  const inventoryItems = allInventoryResponse?.data?.data || [];
+
+  // Create a map of product_id to product data for quick lookup
+  const productMap = useMemo(() => {
+    const map = new Map<number, Product>();
+    products.forEach((product: Product) => {
+      map.set(product.id, product);
+    });
+    return map;
+  }, [products]);
+
+  // Create a map of product_id to inventory items
+  const inventoryByProduct = useMemo(() => {
+    const map = new Map<number, any[]>();
+    inventoryItems.forEach((item: any) => {
+      if (!map.has(item.product_id)) {
+        map.set(item.product_id, []);
+      }
+      map.get(item.product_id).push(item);
+    });
+    return map;
+  }, [inventoryItems]);
+
+  // Build products with inventory for the inventory tab
+  const productsWithInventory = useMemo(() => {
+    const result: Product[] = [];
+
+    inventoryByProduct.forEach((inventoryItems, productId) => {
+      const product = productMap.get(productId);
+
+      if (product) {
+        // Product exists in products list
+        const totalStock = inventoryItems.reduce((sum: number, inv: any) => sum + (inv.quantity || 0), 0);
+        result.push({
+          ...product,
+          inventory: inventoryItems,
+          quantity: totalStock,
+          stock_quantity: totalStock,
+          // Ensure category name is set
+          category_name: product.category?.category_name || product.category_name || "Uncategorized",
+        });
+      } else {
+        // Product doesn't exist in products list (shouldn't happen but handle gracefully)
+        const totalStock = inventoryItems.reduce((sum: number, inv: any) => sum + (inv.quantity || 0), 0);
+        result.push({
+          id: productId,
+          product_name: `Product #${productId}`,
+          name: `Product #${productId}`,
+          sku: 'N/A',
+          category_name: 'Uncategorized',
+          cost_price: 0,
+          selling_price: 0,
+          is_active: true,
+          inventory: inventoryItems,
+          quantity: totalStock,
+          stock_quantity: totalStock,
+          created_at: inventoryItems[0]?.created_at || new Date().toISOString(),
+        } as Product);
+      }
+    });
+
+    return result;
+  }, [inventoryByProduct, productMap]);
+
+  // Statistics calculation using inventory data
   const statistics = useMemo(() => {
-    const allInventoryItems = allInventoryResponse?.data?.data || [];
     const uniqueProductIds = new Set(
-      allInventoryItems.map((item: any) => item.product_id),
+      inventoryItems.map((item: any) => item.product_id),
     );
     const totalProducts = uniqueProductIds.size;
-    const totalStockUnits = allInventoryItems.reduce(
+    const totalStockUnits = inventoryItems.reduce(
       (sum: number, item: any) => sum + (item.quantity || 0),
       0,
     );
@@ -281,70 +347,95 @@ export default function DashboardPage() {
     const lowStockCount = lowStockData.length;
 
     return { totalProducts, totalStockUnits, lowStockCount };
-  }, [allInventoryResponse, lowStockResponse]);
+  }, [inventoryItems, lowStockResponse]);
 
-  const filteredProducts = products.filter((p: Product) => {
-    const matchesSearch =
-      searchQuery === "" ||
-      p.product_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.sku?.toLowerCase().includes(searchQuery.toLowerCase());
+  // Filter products based on search, category, etc.
+  const filteredProducts = useMemo(() => {
+    if (activeTab === "products") {
+      return products.filter((p: Product) => {
+        const matchesSearch =
+          searchQuery === "" ||
+          p.product_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          p.sku?.toLowerCase().includes(searchQuery.toLowerCase());
 
-    if (!matchesSearch) return false;
+        if (!matchesSearch) return false;
 
-    let matchesBranch = true;
-    if (activeTab === "inventory" && branchId) {
-      matchesBranch =
-        p.inventory?.some((inv) => inv.branch_id === branchId) || false;
+        const matchesCategory =
+          !selectedCategory ||
+          (p.category && p.category.id?.toString() === selectedCategory) ||
+          p.category_id?.toString() === selectedCategory;
+
+        if (!matchesCategory) return false;
+
+        let matchesStockStatus = true;
+        if (selectedStockStatus) {
+          const totalStock =
+            p.inventory?.reduce((sum, inv) => sum + (inv.quantity || 0), 0) || 0;
+          switch (selectedStockStatus) {
+            case "In Stock":
+              matchesStockStatus = totalStock > (p.low_stock_threshold || 10);
+              break;
+            case "Low Stock":
+              matchesStockStatus =
+                totalStock > 0 && totalStock <= (p.low_stock_threshold || 10);
+              break;
+            case "Out of Stock":
+              matchesStockStatus = totalStock === 0;
+              break;
+            default:
+              matchesStockStatus = true;
+          }
+        }
+
+        return matchesStockStatus;
+      });
+    } else {
+      // For inventory tab, filter productsWithInventory
+      return productsWithInventory.filter((p: Product) => {
+        const matchesSearch =
+          searchQuery === "" ||
+          p.product_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          p.sku?.toLowerCase().includes(searchQuery.toLowerCase());
+
+        if (!matchesSearch) return false;
+
+        const matchesCategory =
+          !selectedCategory ||
+          (p.category && p.category.id?.toString() === selectedCategory) ||
+          p.category_id?.toString() === selectedCategory;
+
+        if (!matchesCategory) return false;
+
+        // Branch filter
+        if (branchId) {
+          const hasBranch = p.inventory?.some((inv) => inv.branch_id === branchId);
+          if (!hasBranch) return false;
+        }
+
+        let matchesStockStatus = true;
+        if (selectedStockStatus) {
+          const totalStock =
+            p.inventory?.reduce((sum, inv) => sum + (inv.quantity || 0), 0) || 0;
+          switch (selectedStockStatus) {
+            case "In Stock":
+              matchesStockStatus = totalStock > (p.low_stock_threshold || 10);
+              break;
+            case "Low Stock":
+              matchesStockStatus =
+                totalStock > 0 && totalStock <= (p.low_stock_threshold || 10);
+              break;
+            case "Out of Stock":
+              matchesStockStatus = totalStock === 0;
+              break;
+            default:
+              matchesStockStatus = true;
+          }
+        }
+
+        return matchesStockStatus;
+      });
     }
-
-    if (!matchesBranch) return false;
-
-    const matchesCategory =
-      !selectedCategory ||
-      (p.category && p.category.id?.toString() === selectedCategory) ||
-      p.category_id?.toString() === selectedCategory;
-
-    if (!matchesCategory) return false;
-
-    let matchesStockStatus = true;
-    if (selectedStockStatus) {
-      const totalStock =
-        p.inventory?.reduce((sum, inv) => sum + (inv.quantity || 0), 0) || 0;
-      switch (selectedStockStatus) {
-        case "In Stock":
-          matchesStockStatus = totalStock > (p.low_stock_threshold || 10);
-          break;
-        case "Low Stock":
-          matchesStockStatus =
-            totalStock > 0 && totalStock <= (p.low_stock_threshold || 10);
-          break;
-        case "Out of Stock":
-          matchesStockStatus = totalStock === 0;
-          break;
-        default:
-          matchesStockStatus = true;
-      }
-    }
-
-    if (!matchesStockStatus) return false;
-
-    let matchesDateRange = true;
-    if (
-      dateRange !== "Date" &&
-      p.created_at &&
-      isCustomDateSelected &&
-      customStartDate &&
-      customEndDate
-    ) {
-      const productDate = new Date(p.created_at);
-      const start = new Date(customStartDate);
-      const end = new Date(customEndDate);
-      end.setHours(23, 59, 59, 999);
-      matchesDateRange = productDate >= start && productDate <= end;
-    }
-
-    return matchesDateRange;
-  });
+  }, [activeTab, products, productsWithInventory, searchQuery, selectedCategory, selectedStockStatus, branchId]);
 
   const getCurrentBranch = () => {
     const posSession = localStorage.getItem("pos_session");
@@ -446,18 +537,10 @@ export default function DashboardPage() {
     });
   };
 
-  const productsWithInventory = filteredProducts.filter((product: Product) => {
-    return (
-      product.inventory &&
-      Array.isArray(product.inventory) &&
-      product.inventory.length > 0
-    );
-  });
-
   const handleViewProduct = (product: Product) => {
     const sidebarProduct: SidebarProduct = {
       id: product.id,
-      name: product.product_name || "",
+      name: product.product_name || product.name || "",
       description: product.description || "",
       sku: product.sku || "N/A",
       barcode: product.barcode,
@@ -467,8 +550,14 @@ export default function DashboardPage() {
         product.category?.category_name ||
         product.category_name ||
         "Uncategorized",
-      branch: product.branch || product.branch_name || "Main Warehouse",
-      quantity: product.stock_quantity || product.quantity || 0,
+      branch: product.inventory?.[0]?.branch?.branch_name ||
+        product.branch ||
+        product.branch_name ||
+        "Main Warehouse",
+      quantity: product.inventory?.reduce((sum, inv) => sum + (inv.quantity || 0), 0) ||
+        product.stock_quantity ||
+        product.quantity ||
+        0,
       cost:
         typeof product.cost_price === "string"
           ? parseFloat(product.cost_price)
@@ -499,22 +588,23 @@ export default function DashboardPage() {
     setShowProductDetails(true);
   };
 
-  const productsToDisplay =
-    activeTab === "products"
-      ? sortProducts(filteredProducts)
-      : sortProducts(productsWithInventory);
+  const productsToDisplay = activeTab === "products"
+    ? sortProducts(filteredProducts)
+    : sortProducts(filteredProducts);
+
   const shouldPaginate = activeTab === "products";
 
   const indexOfLastProduct = shouldPaginate
     ? currentPage * productsPerPage
-    : productsWithInventory.length;
+    : productsToDisplay.length;
   const indexOfFirstProduct = shouldPaginate
     ? indexOfLastProduct - productsPerPage
     : 0;
   const currentProducts = shouldPaginate
     ? productsToDisplay.slice(indexOfFirstProduct, indexOfLastProduct)
-    : productsWithInventory;
-    console.log("Products to Display:", currentProducts);
+    : productsToDisplay;
+
+  console.log("current products", currentProducts);
   const totalPages = Math.ceil(productsToDisplay.length / productsPerPage);
 
   const getPageNumbers = () => {
@@ -602,9 +692,9 @@ export default function DashboardPage() {
   const statCards = [
     {
       label: "Total Products",
-      value: String(totalProductCount),
+      value: String(totalProductCount || statistics.totalProducts),
       icon: icon_3,
-      sub: `${totalProductCount} products in catalog`,
+      sub: `${totalProductCount || statistics.totalProducts} products in catalog`,
       onClick: null,
     },
     {
@@ -638,7 +728,7 @@ export default function DashboardPage() {
   return (
     <DashboardLayout>
       <div className="space-y-4 md:space-y-6 overflow-x-hidden min-w-0">
-        {/* Stat Cards - Same UI as first dashboard */}
+        {/* Stat Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4">
           <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-2 gap-2 xl:gap-4">
             {statCards.map((card) => (
@@ -662,7 +752,10 @@ export default function DashboardPage() {
                 </div>
                 <div className="flex items-center mt-2 gap-1">
                   <p
-                    className={`text-xs md:text-sm font-semibold truncate ${card.label === "Low Stock Products" && statistics.lowStockCount > 0 ? "text-red-600" : "text-gray-600"}`}
+                    className={`text-xs md:text-sm font-semibold truncate ${card.label === "Low Stock Products" && statistics.lowStockCount > 0
+                      ? "text-red-600"
+                      : "text-gray-600"
+                      }`}
                   >
                     {card.sub}
                   </p>
@@ -671,10 +764,9 @@ export default function DashboardPage() {
             ))}
           </div>
 
-          {/* Quick Actions Row */}
+          {/* Quick Actions */}
           <div className="grid grid-cols-1 xl:grid-cols-1 gap-4 md:gap-6">
-            {/* Quick Actions Card */}
-            <div className="bg-white rounded-2xl p-5 md:p-6 ">
+            <div className="bg-white rounded-2xl p-5 md:p-6">
               <div className="space-y-6">
                 <div className="text-center">
                   <p className="text-xl md:text-2xl font-semibold text-gray-900">
@@ -688,11 +780,7 @@ export default function DashboardPage() {
                     className="flex items-center gap-4 bg-white rounded-2xl p-5 border-2 border-[#0088FF] hover:border-blue-700 hover:shadow-md transition-all w-full group"
                   >
                     <div className="w-12 h-12 rounded-2xl bg-[#ECF0F4] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                      <img
-                        src={addIcon}
-                        alt="Add Product"
-                        className="w-6 h-6"
-                      />
+                      <img src={addIcon} alt="Add Product" className="w-6 h-6" />
                     </div>
                     <div className="text-left">
                       <span className="text-lg font-medium text-gray-900">
@@ -703,9 +791,8 @@ export default function DashboardPage() {
 
                   <button
                     onClick={() => setShowBulkTransfer(!showBulkTransfer)}
-                    className={`flex items-center gap-4 bg-white rounded-2xl p-5 border-2 border-[#0088FF] hover:border-blue-700 hover:shadow-md transition-all w-full group ${
-                      showBulkTransfer ? "border-blue-700 bg-blue-50" : ""
-                    }`}
+                    className={`flex items-center gap-4 bg-white rounded-2xl p-5 border-2 border-[#0088FF] hover:border-blue-700 hover:shadow-md transition-all w-full group ${showBulkTransfer ? "border-blue-700 bg-blue-50" : ""
+                      }`}
                   >
                     <div className="w-12 h-12 rounded-2xl bg-[#ECF0F4] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                       <img
@@ -762,7 +849,6 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Empty space for layout balance - can be removed if not needed */}
             <div className="hidden xl:block"></div>
           </div>
         </div>
@@ -779,11 +865,10 @@ export default function DashboardPage() {
                   setCurrentPage(1);
                   setBranchId(null);
                 }}
-                className={`px-6 py-3 text-base font-medium transition-all relative ${
-                  activeTab === "products"
-                    ? "text-blue-600 border-b-2 border-blue-600 font-semibold"
-                    : "text-gray-500 hover:text-gray-700"
-                }`}
+                className={`px-6 py-3 text-base font-medium transition-all relative ${activeTab === "products"
+                  ? "text-blue-600 border-b-2 border-blue-600 font-semibold"
+                  : "text-gray-500 hover:text-gray-700"
+                  }`}
               >
                 Products
               </button>
@@ -793,11 +878,10 @@ export default function DashboardPage() {
                   setShowBulkTransfer(false);
                   setCurrentPage(1);
                 }}
-                className={`px-6 py-3 text-base font-medium transition-all relative ${
-                  activeTab === "inventory"
-                    ? "text-blue-600 border-b-2 border-blue-600 font-semibold"
-                    : "text-gray-500 hover:text-gray-700"
-                }`}
+                className={`px-6 py-3 text-base font-medium transition-all relative ${activeTab === "inventory"
+                  ? "text-blue-600 border-b-2 border-blue-600 font-semibold"
+                  : "text-gray-500 hover:text-gray-700"
+                  }`}
               >
                 Inventory Details
               </button>
@@ -892,9 +976,7 @@ export default function DashboardPage() {
                   <select
                     value={branchId ?? ""}
                     onChange={(e) =>
-                      setBranchId(
-                        e.target.value ? Number(e.target.value) : null,
-                      )
+                      setBranchId(e.target.value ? Number(e.target.value) : null)
                     }
                     className="w-full px-4 py-3 bg-white border border-gray-300 rounded-2xl focus:border-blue-500 text-sm md:text-base appearance-none"
                     disabled={branchesLoading || !!branchesError}
@@ -941,9 +1023,7 @@ export default function DashboardPage() {
                   value={selectedStockStatus}
                   onChange={(e) =>
                     setSelectedStockStatus(
-                      e.target.value === selectedStockStatus
-                        ? ""
-                        : e.target.value,
+                      e.target.value === selectedStockStatus ? "" : e.target.value,
                     )
                   }
                   className="w-full px-4 py-3 bg-white border border-gray-300 rounded-2xl focus:border-blue-500 text-sm md:text-base appearance-none"
@@ -975,9 +1055,7 @@ export default function DashboardPage() {
 
             <div className="flex flex-wrap gap-3 mt-6">
               <button
-                onClick={() =>
-                  exportToPDF(filteredProducts, "inventory_products")
-                }
+                onClick={() => exportToPDF(filteredProducts, "inventory_products")}
                 disabled={productsLoading || filteredProducts.length === 0}
                 className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3 border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-50 transition-colors"
               >
@@ -985,9 +1063,7 @@ export default function DashboardPage() {
                 <span className="font-medium">Export PDF</span>
               </button>
               <button
-                onClick={() =>
-                  exportToExcel(filteredProducts, "inventory_products")
-                }
+                onClick={() => exportToExcel(filteredProducts, "inventory_products")}
                 disabled={productsLoading || filteredProducts.length === 0}
                 className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3 border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-50 transition-colors"
               >
@@ -999,11 +1075,8 @@ export default function DashboardPage() {
 
           {/* Table Area */}
           <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
-            <div className="xl:col-span-4  w-full overflow-x-auto">
-              <table
-                className="w-full divide-y divide-gray-200"
-                style={{ minWidth: "680px" }}
-              >
+            <div className="xl:col-span-4 w-full overflow-x-auto">
+              <table className="w-full divide-y divide-gray-200" style={{ minWidth: "680px" }}>
                 <thead className="bg-gray-50">
                   <tr>
                     {showBulkTransfer && activeTab === "products" && (
@@ -1011,8 +1084,7 @@ export default function DashboardPage() {
                         <input
                           type="checkbox"
                           checked={
-                            selectedProductIds.length ===
-                              productsToDisplay.length &&
+                            selectedProductIds.length === productsToDisplay.length &&
                             productsToDisplay.length > 0
                           }
                           onChange={handleSelectAll}
@@ -1068,7 +1140,7 @@ export default function DashboardPage() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-100">
-                  {productsLoading ? (
+                  {productsLoading || allInventoryLoading ? (
                     <tr>
                       <td
                         colSpan={
@@ -1076,9 +1148,7 @@ export default function DashboardPage() {
                             ? showBulkTransfer
                               ? 10
                               : 9
-                            : showBulkTransfer
-                              ? 8
-                              : 7
+                            : 7
                         }
                         className="py-12 text-center"
                       >
@@ -1095,25 +1165,16 @@ export default function DashboardPage() {
                             ? showBulkTransfer
                               ? 10
                               : 9
-                            : showBulkTransfer
-                              ? 8
-                              : 7
+                            : 7
                         }
                         className="py-12 text-center text-gray-500 text-sm"
                       >
-                        No{" "}
-                        {activeTab === "products"
-                          ? "products"
-                          : "inventory items"}{" "}
-                        found
+                        No {activeTab === "products" ? "products" : "inventory items"} found
                       </td>
                     </tr>
                   ) : (
                     currentProducts.map((product: Product) => (
-                      <tr
-                        key={product.id}
-                        className="hover:bg-gray-50 transition-colors"
-                      >
+                      <tr key={product.id} className="hover:bg-gray-50 transition-colors">
                         {showBulkTransfer && activeTab === "products" && (
                           <td className="px-4 md:px-5 py-3 md:py-4 whitespace-nowrap">
                             <input
@@ -1131,7 +1192,7 @@ export default function DashboardPage() {
                                 image: product.image,
                                 primary_image: product.primary_image,
                               })}
-                              alt={product.product_name}
+                              alt={product.product_name || product.name}
                               className="w-full h-full object-cover"
                               onError={(e) => {
                                 e.currentTarget.src =
@@ -1142,7 +1203,7 @@ export default function DashboardPage() {
                         </td>
                         <td className="px-4 md:px-5 py-3 md:py-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-gray-900">
-                            {product.name || product.product_name}
+                            {product.product_name || product.name || `Product #${product.id}`}
                           </div>
                           <div className="text-xs text-gray-400 mt-0.5">
                             SKU: {product.sku || "N/A"}
@@ -1150,7 +1211,7 @@ export default function DashboardPage() {
                         </td>
                         <td className="px-4 md:px-5 py-3 md:py-4 whitespace-nowrap">
                           <span className="inline-flex px-2.5 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded-full">
-                            {product.category?.category_name ||
+                            {product.category_en ||
                               product.category_name ||
                               "Uncategorized"}
                           </span>
@@ -1166,36 +1227,26 @@ export default function DashboardPage() {
                             <td className="px-4 md:px-5 py-3 md:py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                               {typeof product.cost_price === "string"
                                 ? parseFloat(product.cost_price).toFixed(3)
-                                : (product.cost_price as number)?.toFixed(3) ||
-                                  "0.000"}
+                                : (product.cost_price as number)?.toFixed(3) || "0.000"}
                             </td>
                             <td className="px-4 md:px-5 py-3 md:py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
                               {typeof product.selling_price === "string"
                                 ? parseFloat(product.selling_price).toFixed(3)
-                                : (product.selling_price as number)?.toFixed(
-                                    3,
-                                  ) || "0.000"}
+                                : (product.selling_price as number)?.toFixed(3) || "0.000"}
                             </td>
                           </>
                         ) : (
                           <>
                             <td className="px-4 md:px-5 py-3 md:py-4 text-sm text-gray-600">
                               {product.inventory?.map((inv, idx) => (
-                                <div
-                                  key={idx}
-                                  className="mb-1 whitespace-nowrap"
-                                >
-                                  {inv.branch?.branch_name ||
-                                    `Branch #${inv.branch_id}`}
+                                <div key={idx} className="mb-1 whitespace-nowrap">
+                                  {inv.branch?.branch_name || `Branch #${inv.branch_id}`}
                                 </div>
                               )) || "—"}
                             </td>
                             <td className="px-4 md:px-5 py-3 md:py-4 text-sm font-medium text-gray-900">
                               {product.inventory?.map((inv, idx) => (
-                                <div
-                                  key={idx}
-                                  className="mb-1 whitespace-nowrap"
-                                >
+                                <div key={idx} className="mb-1 whitespace-nowrap">
                                   {inv.quantity || 0} units
                                 </div>
                               )) || "—"}
@@ -1208,12 +1259,8 @@ export default function DashboardPage() {
                                       (sum, inv) => sum + (inv.quantity || 0),
                                       0,
                                     ) || 0;
-                                  if (totalStock === 0)
-                                    return "bg-red-100 text-red-700";
-                                  else if (
-                                    totalStock <=
-                                    (product.low_stock_threshold || 10)
-                                  )
+                                  if (totalStock === 0) return "bg-red-100 text-red-700";
+                                  else if (totalStock <= (product.low_stock_threshold || 10))
                                     return "bg-yellow-100 text-yellow-700";
                                   else return "bg-green-100 text-green-700";
                                 })()}`}
@@ -1226,10 +1273,7 @@ export default function DashboardPage() {
                                       0,
                                     ) || 0;
                                   if (totalStock === 0) return "Out of Stock";
-                                  else if (
-                                    totalStock <=
-                                    (product.low_stock_threshold || 10)
-                                  )
+                                  else if (totalStock <= (product.low_stock_threshold || 10))
                                     return "Low Stock";
                                   else return "In Stock";
                                 })()}
@@ -1257,23 +1301,21 @@ export default function DashboardPage() {
                   )}
                 </tbody>
               </table>
-              {showBulkTransfer &&
-                selectedProductIds.length > 0 &&
-                activeTab === "products" && (
-                  <div className="px-6 py-4 bg-blue-50 border-t border-blue-200">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-700">
-                        {selectedProductIds.length} product(s) selected
-                      </span>
-                      <button
-                        onClick={handleBulkTransfer}
-                        className="px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
-                      >
-                        Transfer Selected Products
-                      </button>
-                    </div>
+              {showBulkTransfer && selectedProductIds.length > 0 && activeTab === "products" && (
+                <div className="px-6 py-4 bg-blue-50 border-t border-blue-200">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-700">
+                      {selectedProductIds.length} product(s) selected
+                    </span>
+                    <button
+                      onClick={handleBulkTransfer}
+                      className="px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      Transfer Selected Products
+                    </button>
                   </div>
-                )}
+                </div>
+              )}
             </div>
           </div>
 
@@ -1300,19 +1342,19 @@ export default function DashboardPage() {
                     <button
                       key={index}
                       onClick={() =>
-                        typeof pageNumber === "number" &&
-                        setCurrentPage(pageNumber)
+                        typeof pageNumber === "number" && setCurrentPage(pageNumber)
                       }
                       disabled={typeof pageNumber !== "number"}
-                      className={`px-4 py-2 text-sm font-medium rounded-xl ${currentPage === pageNumber ? "bg-blue-600 text-white" : "border border-gray-300 hover:bg-gray-50"}`}
+                      className={`px-4 py-2 text-sm font-medium rounded-xl ${currentPage === pageNumber
+                        ? "bg-blue-600 text-white"
+                        : "border border-gray-300 hover:bg-gray-50"
+                        }`}
                     >
                       {pageNumber}
                     </button>
                   ))}
                   <button
-                    onClick={() =>
-                      setCurrentPage((p) => Math.min(totalPages, p + 1))
-                    }
+                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                     disabled={currentPage === totalPages}
                     className="px-4 py-2 text-sm font-medium rounded-xl border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
                   >

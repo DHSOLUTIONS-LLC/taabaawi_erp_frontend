@@ -20,7 +20,7 @@ export default function CreateSupplierModal({
     is_active: 1,
     per_page: 1000,
   });
-  
+
   const accounts = accountsData?.data?.data || accountsData?.data || [];
 
   // Filter active accounts
@@ -70,7 +70,7 @@ export default function CreateSupplierModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate chart of account is selected
     if (!formData.chart_of_account_id) {
       alert("Please select a Chart of Account");
@@ -251,7 +251,7 @@ export default function CreateSupplierModal({
             <p className="text-xs text-gray-500 mb-3">
               Select the Chart of Account for this supplier. This account will be automatically used in all Purchase Orders.
             </p>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-2">
                 Chart of Account <span className="text-red-500">*</span>

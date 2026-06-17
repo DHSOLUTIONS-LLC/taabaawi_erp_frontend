@@ -16,20 +16,32 @@ interface EditProductModalProps {
   product?: {
     id: number;
     name: string;
-    sku: string;
+    name_ar?: string;
+    title_en?: string;
+    title_ar?: string;
+    brand_en?: string;
+    brand_ar?: string;
     category: string;
+    category_ar?: string;
+    sub_category_en?: string;
+    sub_category_ar?: string;
+    description?: string;
+    description_ar?: string;
+    slug?: string;
+    sku: string;
+    barcode?: string;
+    barcode_image?: string;
     quantity: number;
     cost: number;
     price: number;
     status: string;
     image?: string;
-    barcode?: string;
-    barcode_image?: string;
-    description?: string;
     unit?: string;
     weight?: number;
     dimensions?: string;
     color?: string;
+    size?: string;
+    average_cost_price?: number;
     low_stock_alert?: number;
     is_active?: boolean;
   } | null;
@@ -86,16 +98,32 @@ export default function EditProductModal({
 }: EditProductModalProps) {
   const [activeTab, setActiveTab] = useState<"single" | "bulk">("single");
 
-  // Single Product States
-  const [productName, setProductName] = useState(product?.name || "");
+  // Single Product States - Updated to match API
+  const [nameEn, setNameEn] = useState(product?.name || "");
+  const [nameAr, setNameAr] = useState("");
+  const [titleEn, setTitleEn] = useState("");
+  const [titleAr, setTitleAr] = useState("");
+  const [brandEn, setBrandEn] = useState("");
+  const [brandAr, setBrandAr] = useState("");
+  const [categoryEn, setCategoryEn] = useState(product?.category || "");
+  const [categoryAr, setCategoryAr] = useState("");
+  const [subCategoryEn, setSubCategoryEn] = useState("");
+  const [subCategoryAr, setSubCategoryAr] = useState("");
+  const [descriptionEn, setDescriptionEn] = useState(product?.description || "");
+  const [descriptionAr, setDescriptionAr] = useState("");
+  const [slug, setSlug] = useState("");
   const [sku] = useState(product?.sku || "");
-  const [category, setCategory] = useState(product?.category || "");
-  const [description, setDescription] = useState(product?.description || "");
+  const [barcode] = useState(product?.barcode || "");
   const [unit, setUnit] = useState(product?.unit || "piece");
   const [weight, setWeight] = useState(product?.weight?.toString() || "");
   const [dimensions, setDimensions] = useState(product?.dimensions || "");
   const [color, setColor] = useState(product?.color || "");
+  const [size, setSize] = useState("");
   const [costPrice, setCostPrice] = useState(product?.cost.toString() || "");
+  const [averageCostPrice, setAverageCostPrice] = useState("");
+  const [bulkImageFiles, setBulkImageFiles] = useState<File[]>([]);
+  const [isBulkImageUploading, setIsBulkImageUploading] = useState(false);
+  const fileInputRefBulkImages = useRef<HTMLInputElement>(null);
   const [sellingPrice, setSellingPrice] = useState(
     product?.price.toString() || "",
   );
@@ -318,24 +346,85 @@ export default function EditProductModal({
   const downloadTemplate = () => {
     const template = [
       {
-        "Product Name": "Example Product",
-        "Category ID": "1",
-        "Description": "Product description here",
-        "Unit": "piece",
-        "Cost Price (KWD)": "10.000",
-        "Selling Price (KWD)": "15.000",
-        "SKU": "PRD-001",
-        "Weight (kg)": "1.5",
-        "Dimensions": "10x5x2 cm",
+        "ID": "",
+        "SKU": " ",
+        "Barcode": " ",
+        "Image(s)": "https://plus.unsplash.com/premium_photo-1717529138199-4560ef38fb32?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwyfHx8ZW58MHx8fHx8",
+        "English Title": "Premium Black Coffee",
+        "Arabic Title": "قهوة سوداء فاخرة",
+        "English Name": "Black Coffee",
+        "Arabic Name": "قهوة سوداء",
+        "English Brand": "Mountain Brew",
+        "Arabic Brand": "ماونتن برو",
+        "English Category": "Food & Beverage",
+        "Arabic Category": "طعام و مشروبات",
+        "English Sub Category": "Hot Beverages",
+        "Arabic Sub Category": "مشروبات ساخنة",
+        "English Description": "Premium roasted black coffee beans with rich flavor and aroma. Perfect for morning brew.",
+        "Arabic Description": "حبوب القهوة السوداء المحمصة الفاخرة بنكهة غنية ورائحة عطرة. مثالية لتحضير القهوة الصباحية.",
+        "Slug": "premium-black-coffee",
+        "Unit": "kg",
+        "Weight (KG)": "1.00",
+        "Dimensions": "20x15x10 cm",
         "Color": "Black",
-        "Low Stock Alert": "10",
-        "Is Active": "Yes",
-        "Stock Status": "In Stock",
-        "Has Variants": "No",
-        "Variant Name": "",
-        "Variant Value": "",
-        "Variant Cost Price (KWD)": "",
-        "Variant Selling Price (KWD)": "",
+        "Size": "",
+        "Cost Price": "47.000",
+        "Average Cost Price": "45.500",
+        "Selling Price": "67.000",
+      },
+      {
+        "ID": "",
+        "SKU": " ",
+        "Barcode": " ",
+        "Image(s)": "https://images.unsplash.com/photo-1763307411452-43cfd9f516ce?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwzfHx8ZW58MHx8fHx8",
+        "English Title": "Red Coffee Special Blend",
+        "Arabic Title": "قهوة حمراء ممزوجة خاصة",
+        "English Name": "Red Coffee",
+        "Arabic Name": "قهوة حمراء",
+        "English Brand": "Red Roast",
+        "Arabic Brand": "ريد روست",
+        "English Category": "Food & Beverage",
+        "Arabic Category": "طعام و مشروبات",
+        "English Sub Category": "Specialty Coffee",
+        "Arabic Sub Category": "قهوة متخصصة",
+        "English Description": "Special blend of red coffee beans with a smooth, balanced flavor. Notes of chocolate and caramel.",
+        "Arabic Description": "مزيج خاص من حبوب القهوة الحمراء بنكهة متوازنة وناعمة. نكهات الشوكولاتة والكراميل.",
+        "Slug": "red-coffee-special-blend",
+        "Unit": "kg",
+        "Weight (KG)": "1.00",
+        "Dimensions": "18x14x8 cm",
+        "Color": "Red",
+        "Size": "",
+        "Cost Price": "55.000",
+        "Average Cost Price": "52.750",
+        "Selling Price": "78.000",
+      },
+      {
+        "ID": "",
+        "SKU": " ",
+        "Barcode": " ",
+        "Image(s)": "https://images.unsplash.com/photo-1773332585749-5146862ba746?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDF8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwxNXx8fGVufDB8fHx8fA%3D%3D",
+        "English Title": "Ceramic Coffee Mug - Premium Edition",
+        "Arabic Title": "كوب قهوة سيراميك - إصدار فاخر",
+        "English Name": "Coffee Mug Ceramic",
+        "Arabic Name": "كوب قهوة سيراميك",
+        "English Brand": "Brew & Sip",
+        "Arabic Brand": "برو آند سيب",
+        "English Category": "Home & Kitchen",
+        "Arabic Category": "المنزل والمطبخ",
+        "English Sub Category": "Drinkware",
+        "Arabic Sub Category": "أواني الشرب",
+        "English Description": "High-quality ceramic coffee mug with heat-resistant design. Capacity: 350ml. Microwave and dishwasher safe.",
+        "Arabic Description": "كوب قهوة سيراميك عالي الجودة بتصميم مقاوم للحرارة. السعة: 350 مل. آمن للاستخدام في الميكروويف وغسالة الأطباق.",
+        "Slug": "ceramic-coffee-mug-premium",
+        "Unit": "piece",
+        "Weight (KG)": "0.35",
+        "Dimensions": "12x9x10 cm",
+        "Color": "White",
+        "Size": "350ml",
+        "Cost Price": "8.500",
+        "Average Cost Price": "8.000",
+        "Selling Price": "14.000",
       },
     ];
 
@@ -343,24 +432,31 @@ export default function EditProductModal({
 
     // Set column widths
     ws['!cols'] = [
-      { wch: 20 }, // Product Name
-      { wch: 12 }, // Category ID
-      { wch: 30 }, // Description
-      { wch: 10 }, // Unit
-      { wch: 15 }, // Cost Price
-      { wch: 15 }, // Selling Price
+      { wch: 10 }, // ID
       { wch: 15 }, // SKU
-      { wch: 12 }, // Weight
-      { wch: 15 }, // Dimensions
+      { wch: 18 }, // Barcode
+      { wch: 35 }, // Image(s)
+      { wch: 25 }, // English Title
+      { wch: 25 }, // Arabic Title
+      { wch: 25 }, // English Name
+      { wch: 25 }, // Arabic Name
+      { wch: 20 }, // English Brand
+      { wch: 20 }, // Arabic Brand
+      { wch: 22 }, // English Category
+      { wch: 22 }, // Arabic Category
+      { wch: 25 }, // English Sub Category
+      { wch: 25 }, // Arabic Sub Category
+      { wch: 45 }, // English Description
+      { wch: 45 }, // Arabic Description
+      { wch: 25 }, // Slug
+      { wch: 12 }, // Unit
+      { wch: 15 }, // Weight (KG)
+      { wch: 18 }, // Dimensions
       { wch: 12 }, // Color
-      { wch: 15 }, // Low Stock Alert
-      { wch: 12 }, // Is Active
-      { wch: 15 }, // Stock Status
-      { wch: 12 }, // Has Variants
-      { wch: 15 }, // Variant Name
-      { wch: 15 }, // Variant Value
-      { wch: 18 }, // Variant Cost Price
-      { wch: 18 }, // Variant Selling Price
+      { wch: 12 }, // Size
+      { wch: 15 }, // Cost Price
+      { wch: 18 }, // Average Cost Price
+      { wch: 15 }, // Selling Price
     ];
 
     const wb = XLSX.utils.book_new();
@@ -368,24 +464,31 @@ export default function EditProductModal({
 
     // Add instructions sheet
     const instructions = [
-      { Field: "Product Name", Required: "Yes", Type: "Text", Description: "Name of the product" },
-      { Field: "Category ID", Required: "Yes", Type: "Number", Description: "ID from categories list (e.g., 1, 2, 3)" },
-      { Field: "Description", Required: "No", Type: "Text", Description: "Product description" },
-      { Field: "Unit", Required: "Yes", Type: "Text", Description: "piece, kg, g, meter, cm, liter, ml, box, pack, dozen, set" },
-      { Field: "Cost Price (KWD)", Required: "Yes", Type: "Number", Description: "Cost price in KWD (e.g., 10.000)" },
-      { Field: "Selling Price (KWD)", Required: "Yes", Type: "Number", Description: "Selling price in KWD (e.g., 15.000)" },
+      { Field: "ID", Required: "No", Type: "Number", Description: "Product ID (auto-generated if empty)" },
       { Field: "SKU", Required: "No", Type: "Text", Description: "Unique SKU (auto-generated if empty)" },
-      { Field: "Weight (kg)", Required: "No", Type: "Number", Description: "Weight in kilograms" },
+      { Field: "Barcode", Required: "No", Type: "Text", Description: "Product barcode (auto-generated if empty)" },
+      { Field: "Image(s)", Required: "No", Type: "Text", Description: "Image URLs (comma separated for multiple)" },
+      { Field: "English Title", Required: "Yes", Type: "Text", Description: "Product title in English" },
+      { Field: "Arabic Title", Required: "Yes", Type: "Text", Description: "Product title in Arabic" },
+      { Field: "English Name", Required: "Yes", Type: "Text", Description: "Product name in English" },
+      { Field: "Arabic Name", Required: "Yes", Type: "Text", Description: "Product name in Arabic" },
+      { Field: "English Brand", Required: "No", Type: "Text", Description: "Brand name in English" },
+      { Field: "Arabic Brand", Required: "No", Type: "Text", Description: "Brand name in Arabic" },
+      { Field: "English Category", Required: "Yes", Type: "Text", Description: "Category name in English (must match existing)" },
+      { Field: "Arabic Category", Required: "Yes", Type: "Text", Description: "Category name in Arabic (must match existing)" },
+      { Field: "English Sub Category", Required: "No", Type: "Text", Description: "Sub category name in English" },
+      { Field: "Arabic Sub Category", Required: "No", Type: "Text", Description: "Sub category name in Arabic" },
+      { Field: "English Description", Required: "No", Type: "Text", Description: "Product description in English" },
+      { Field: "Arabic Description", Required: "No", Type: "Text", Description: "Product description in Arabic" },
+      { Field: "Slug", Required: "No", Type: "Text", Description: "URL-friendly slug (auto-generated if empty)" },
+      { Field: "Unit", Required: "Yes", Type: "Text", Description: "piece, kg, g, meter, cm, liter, ml, box, pack, dozen, set" },
+      { Field: "Weight (KG)", Required: "No", Type: "Number", Description: "Weight in kilograms" },
       { Field: "Dimensions", Required: "No", Type: "Text", Description: "L x W x H (e.g., 10x5x2 cm)" },
       { Field: "Color", Required: "No", Type: "Text", Description: "Product color" },
-      { Field: "Low Stock Alert", Required: "No", Type: "Number", Description: "Minimum stock alert threshold (default: 10)" },
-      { Field: "Is Active", Required: "No", Type: "Text", Description: "Yes or No (default: Yes)" },
-      { Field: "Stock Status", Required: "No", Type: "Text", Description: "In Stock, Low Stock, Out of Stock, Pre Order, Discontinued" },
-      { Field: "Has Variants", Required: "No", Type: "Text", Description: "Yes or No (enable variants for this product)" },
-      { Field: "Variant Name", Required: "No", Type: "Text", Description: "Storage, Color, Size, RAM, Processor, Material" },
-      { Field: "Variant Value", Required: "No", Type: "Text", Description: "e.g., 128GB, Red, Large" },
-      { Field: "Variant Cost Price (KWD)", Required: "No", Type: "Number", Description: "Variant cost price (if Has Variants = Yes)" },
-      { Field: "Variant Selling Price (KWD)", Required: "No", Type: "Number", Description: "Variant selling price (if Has Variants = Yes)" },
+      { Field: "Size", Required: "No", Type: "Text", Description: "Product size (e.g., S, M, L, XL)" },
+      { Field: "Cost Price", Required: "Yes", Type: "Number", Description: "Cost price in KWD (e.g., 10.000)" },
+      { Field: "Average Cost Price", Required: "No", Type: "Number", Description: "Average cost price in KWD" },
+      { Field: "Selling Price", Required: "Yes", Type: "Number", Description: "Selling price in KWD (e.g., 15.000)" },
     ];
 
     const wsInstructions = XLSX.utils.json_to_sheet(instructions);
@@ -393,32 +496,93 @@ export default function EditProductModal({
       { wch: 25 }, // Field
       { wch: 10 }, // Required
       { wch: 12 }, // Type
-      { wch: 40 }, // Description
+      { wch: 45 }, // Description
     ];
 
     XLSX.utils.book_append_sheet(wb, wsInstructions, "Instructions");
 
-    // Add a third sheet with category IDs reference
-    const categoriesRef = [
-      { "Category Name": "Electronics", "Category ID": "1" },
-      { "Category Name": "Clothing", "Category ID": "2" },
-      { "Category Name": "Food & Beverage", "Category ID": "3" },
-      { "Category Name": "Furniture", "Category ID": "4" },
-      { "Category Name": "Beauty & Personal Care", "Category ID": "5" },
-      { "Category Name": "Sports & Outdoors", "Category ID": "6" },
-      { "Category Name": "Books & Stationery", "Category ID": "7" },
-      { "Category Name": "Toys & Games", "Category ID": "8" },
-      { "Category Name": "Health & Wellness", "Category ID": "9" },
-      { "Category Name": "Automotive", "Category ID": "10" },
+    // Add a third sheet with units reference
+    const unitsRef = [
+      { "Unit": "piece", "Description": "Individual item" },
+      { "Unit": "kg", "Description": "Kilogram" },
+      { "Unit": "g", "Description": "Gram" },
+      { "Unit": "meter", "Description": "Meter" },
+      { "Unit": "cm", "Description": "Centimeter" },
+      { "Unit": "liter", "Description": "Liter" },
+      { "Unit": "ml", "Description": "Milliliter" },
+      { "Unit": "box", "Description": "Box" },
+      { "Unit": "pack", "Description": "Pack" },
+      { "Unit": "dozen", "Description": "Dozen (12 units)" },
+      { "Unit": "set", "Description": "Set" },
     ];
 
-    const wsCategories = XLSX.utils.json_to_sheet(categoriesRef);
-    wsCategories['!cols'] = [
-      { wch: 25 }, // Category Name
-      { wch: 12 }, // Category ID
+    const wsUnits = XLSX.utils.json_to_sheet(unitsRef);
+    wsUnits['!cols'] = [
+      { wch: 15 }, // Unit
+      { wch: 30 }, // Description
     ];
 
-    XLSX.utils.book_append_sheet(wb, wsCategories, "Category Reference");
+    XLSX.utils.book_append_sheet(wb, wsUnits, "Units Reference");
+
+    // Add fourth sheet with color reference
+    const colorsRef = [
+      { "Color": "Red", "Hex": "#FF0000" },
+      { "Color": "Blue", "Hex": "#0000FF" },
+      { "Color": "Green", "Hex": "#00FF00" },
+      { "Color": "Black", "Hex": "#000000" },
+      { "Color": "White", "Hex": "#FFFFFF" },
+      { "Color": "Yellow", "Hex": "#FFFF00" },
+      { "Color": "Orange", "Hex": "#FFA500" },
+      { "Color": "Purple", "Hex": "#800080" },
+      { "Color": "Pink", "Hex": "#FFC0CB" },
+      { "Color": "Brown", "Hex": "#A52A2A" },
+      { "Color": "Gray", "Hex": "#808080" },
+      { "Color": "Gold", "Hex": "#FFD700" },
+      { "Color": "Silver", "Hex": "#C0C0C0" },
+      { "Color": "Navy Blue", "Hex": "#000080" },
+      { "Color": "Sky Blue", "Hex": "#87CEEB" },
+      { "Color": "Lime Green", "Hex": "#32CD32" },
+      { "Color": "Olive", "Hex": "#808000" },
+      { "Color": "Maroon", "Hex": "#800000" },
+      { "Color": "Teal", "Hex": "#008080" },
+      { "Color": "Coral", "Hex": "#FF7F50" },
+    ];
+
+    const wsColors = XLSX.utils.json_to_sheet(colorsRef);
+    wsColors['!cols'] = [
+      { wch: 15 }, // Color
+      { wch: 15 }, // Hex
+    ];
+
+    XLSX.utils.book_append_sheet(wb, wsColors, "Color Reference");
+
+    // Add fifth sheet with size reference
+    const sizesRef = [
+      { "Size": "XS", "Description": "Extra Small" },
+      { "Size": "S", "Description": "Small" },
+      { "Size": "M", "Description": "Medium" },
+      { "Size": "L", "Description": "Large" },
+      { "Size": "XL", "Description": "Extra Large" },
+      { "Size": "XXL", "Description": "Double Extra Large" },
+      { "Size": "XXXL", "Description": "Triple Extra Large" },
+      { "Size": "28", "Description": "Waist size 28" },
+      { "Size": "30", "Description": "Waist size 30" },
+      { "Size": "32", "Description": "Waist size 32" },
+      { "Size": "34", "Description": "Waist size 34" },
+      { "Size": "36", "Description": "Waist size 36" },
+      { "Size": "38", "Description": "Waist size 38" },
+      { "Size": "40", "Description": "Waist size 40" },
+      { "Size": "42", "Description": "Waist size 42" },
+      { "Size": "44", "Description": "Waist size 44" },
+    ];
+
+    const wsSizes = XLSX.utils.json_to_sheet(sizesRef);
+    wsSizes['!cols'] = [
+      { wch: 12 }, // Size
+      { wch: 30 }, // Description
+    ];
+
+    XLSX.utils.book_append_sheet(wb, wsSizes, "Size Reference");
 
     XLSX.writeFile(wb, `product_template_${new Date().toISOString().split("T")[0]}.xlsx`);
   };
@@ -445,7 +609,7 @@ export default function EditProductModal({
           return;
         }
 
-        setBulkPreviewData(jsonData.slice(0, 10)); // Show first 10 rows for preview
+        setBulkPreviewData(jsonData.slice(0, 10));
         setSuccessMessage(`Loaded ${jsonData.length} products from file`);
         setShowSuccess(true);
       } catch (error) {
@@ -456,6 +620,7 @@ export default function EditProductModal({
     };
     reader.readAsArrayBuffer(file);
   };
+
 
   const handleBulkUpload = async () => {
     if (!bulkFile) {
@@ -468,7 +633,6 @@ export default function EditProductModal({
     setBulkUploadProgress(0);
 
     try {
-      // Step 1: Parse the Excel file
       const parseExcelToJson = (file: File): Promise<any[]> => {
         return new Promise((resolve, reject) => {
           const reader = new FileReader();
@@ -497,114 +661,129 @@ export default function EditProductModal({
         return;
       }
 
-      // Step 2: Transform Excel data to match backend expected format
-      const transformedProducts = productsData.map((row: any) => {
-  // Handle variants if present
-  let variants = [];
-  if (row["Has Variants"] === "Yes" && row["Variant Name"]) {
-    variants = [{
-      variant_name: row["Variant Name"],
-      variant_value: row["Variant Value"],
-      cost_price: parseFloat(row["Variant Cost Price (KWD)"]) || parseFloat(row["Cost Price (KWD)"]),
-      selling_price: parseFloat(row["Variant Selling Price (KWD)"]) || parseFloat(row["Selling Price (KWD)"]),
-      additional_price: (parseFloat(row["Variant Selling Price (KWD)"]) || parseFloat(row["Selling Price (KWD)"])) -
-        (parseFloat(row["Variant Cost Price (KWD)"]) || parseFloat(row["Cost Price (KWD)"])),
-    }];
-  }
+      // Prepare products array matching backend expectations
+      const productsPayload = productsData.map((row) => {
+        const product: any = {
+          name_en: String(row["English Name"] || "").trim(),
+          unit: String(row["Unit"] || "piece").trim(),
+          cost_price: parseFloat(row["Cost Price"]) || 0,
+          selling_price: parseFloat(row["Selling Price"]) || 0,
+        };
 
-  const product: any = {
-    product_name: row["Product Name"],
-    category_id: row["Category ID"] ? parseInt(row["Category ID"]) : null,
-    description: row["Description"] || "",
-    unit: row["Unit"] || "piece",
-    weight: row["Weight (kg)"] ? parseFloat(row["Weight (kg)"]) : null,
-    dimensions: row["Dimensions"] || null,
-    color: row["Color"] || null,
-    cost_price: parseFloat(row["Cost Price (KWD)"]),
-    selling_price: parseFloat(row["Selling Price (KWD)"]),
-    has_variants: row["Has Variants"] === "Yes",
-    low_stock_alert: row["Low Stock Alert"] ? parseInt(row["Low Stock Alert"]) : 10,
-    is_active: row["Is Active"]?.toLowerCase() !== "no",
-    variants: variants,
-  };
+        // Optional fields
+        if (row["Arabic Name"]) product.name_ar = String(row["Arabic Name"]).trim();
+        if (row["English Title"]) product.title_en = String(row["English Title"]).trim();
+        if (row["Arabic Title"]) product.title_ar = String(row["Arabic Title"]).trim();
+        if (row["English Brand"]) product.brand_en = String(row["English Brand"]).trim();
+        if (row["Arabic Brand"]) product.brand_ar = String(row["Arabic Brand"]).trim();
+        if (row["English Category"]) product.category_en = String(row["English Category"]).trim();
+        if (row["Arabic Category"]) product.category_ar = String(row["Arabic Category"]).trim();
+        if (row["English Sub Category"]) product.sub_category_en = String(row["English Sub Category"]).trim();
+        if (row["Arabic Sub Category"]) product.sub_category_ar = String(row["Arabic Sub Category"]).trim();
+        if (row["English Description"]) product.description_en = String(row["English Description"]).trim();
+        if (row["Arabic Description"]) product.description_ar = String(row["Arabic Description"]).trim();
+        if (row["Slug"]) product.slug = String(row["Slug"]).trim();
+        if (row["SKU"]) product.sku = String(row["SKU"]).trim();
+        if (row["Barcode"]) product.barcode = String(row["Barcode"]).trim();
+        if (row["Weight (KG)"]) product.weight = parseFloat(row["Weight (KG)"]);
+        if (row["Dimensions"]) product.dimensions = String(row["Dimensions"]).trim();
+        if (row["Color"]) product.color = String(row["Color"]).trim();
+        if (row["Size"]) product.size = String(row["Size"]).trim();
+        if (row["Average Cost Price"]) product.average_cost_price = parseFloat(row["Average Cost Price"]);
+        if (row["Low Stock Alert"]) product.low_stock_alert = parseInt(row["Low Stock Alert"]) || 10;
+        if (row["Is Active"]?.toLowerCase() === "no") product.is_active = false;
 
-  // IMPORTANT: Only add SKU if it has a value, and always send as string
-  if (row["SKU"] && row["SKU"].toString().trim() !== "") {
-    product.sku = row["SKU"].toString().trim();
-  }
-  // If no SKU, don't send the field at all (backend will auto-generate)
-
-  return product;
-});
-
-      // Step 3: Validate transformed data
-      const invalidProducts = transformedProducts.filter(p => !p.product_name || !p.cost_price || !p.selling_price);
-      if (invalidProducts.length > 0) {
-        setErrorMessage(`Found ${invalidProducts.length} products missing required fields (Name, Cost Price, Selling Price)`);
-        setShowError(true);
-        setIsUploading(false);
-        return;
-      }
-
-      // Step 4: Send as JSON (not FormData with file)
-      const progressInterval = setInterval(() => {
-        setBulkUploadProgress(prev => {
-          if (prev >= 90) {
-            clearInterval(progressInterval);
-            return 90;
+        // Send image URLs as string
+        if (row["Image(s)"]) {
+          const imageUrls = String(row["Image(s)"])
+            .split(',')
+            .map((url: string) => url.trim())
+            .filter((url: string) => url.length > 0);
+          if (imageUrls.length > 0) {
+            product.image_url = imageUrls.join(',');
           }
-          return prev + 10;
-        });
-      }, 500);
+        }
 
+        // Handle variants
+        if (row["Variant Name"] && row["Variant Value"]) {
+          product.has_variants = true;
+          product.variants = [{
+            variant_name: String(row["Variant Name"]).trim(),
+            variant_value: String(row["Variant Value"]).trim(),
+            cost_price: parseFloat(row["Variant Cost Price"]) || parseFloat(row["Cost Price"]) || 0,
+            selling_price: parseFloat(row["Variant Selling Price"]) || parseFloat(row["Selling Price"]) || 0,
+            additional_price: (parseFloat(row["Variant Selling Price"]) || parseFloat(row["Selling Price"]) || 0) -
+              (parseFloat(row["Variant Cost Price"]) || parseFloat(row["Cost Price"]) || 0),
+            is_active: true,
+          }];
+        }
+
+        return product;
+      });
+
+      // Log the payload for debugging
+      console.log('Sending payload:', JSON.stringify({ products: productsPayload }, null, 2));
+
+      // Use the mutation
       const result = await bulkUploadProducts({
-        products: transformedProducts
+        products: productsPayload
       }).unwrap();
 
-      clearInterval(progressInterval);
-      setBulkUploadProgress(100);
+      console.log('Upload result:', result);
 
-      setSuccessMessage(`Successfully uploaded ${result.data?.length || transformedProducts.length} products!`);
-      setShowSuccess(true);
+      if (result.success) {
+        setSuccessMessage(`Successfully uploaded ${result.data?.length || productsPayload.length} products!`);
+        setShowSuccess(true);
+        setTimeout(() => onClose(), 2000);
+      } else {
+        setErrorMessage(result.message || "Failed to upload products");
+        setShowError(true);
+      }
 
-      setTimeout(() => {
-        onClose();
-      }, 2000);
     } catch (error: any) {
-      console.error("Bulk upload failed:", error);
+      console.error("Bulk upload failed - Full error:", error);
 
+      // Better error handling
       let errorMsg = "Failed to upload products";
-      if (error?.data?.errors) {
-        const errors = error.data.errors;
-        if (typeof errors === "object") {
-          const errorMessages = Object.values(errors).flat().join(", ");
-          errorMsg = `Upload failed: ${errorMessages}`;
-        } else {
-          errorMsg = `Upload failed: ${JSON.stringify(errors)}`;
+
+      if (error?.data) {
+        // Handle API error response
+        if (error.data.errors) {
+          const errors = error.data.errors;
+          if (typeof errors === "object") {
+            const errorMessages = Object.values(errors).flat().join(", ");
+            errorMsg = `Validation failed: ${errorMessages}`;
+          } else {
+            errorMsg = `Error: ${JSON.stringify(errors)}`;
+          }
+        } else if (error.data.message) {
+          errorMsg = error.data.message;
+        } else if (typeof error.data === 'string') {
+          errorMsg = error.data;
         }
-      } else if (error?.data?.message) {
-        errorMsg = error.data.message;
       } else if (error?.error) {
         errorMsg = error.error;
+      } else if (error?.message) {
+        errorMsg = error.message;
       }
 
       setErrorMessage(errorMsg);
       setShowError(true);
     } finally {
       setIsUploading(false);
-      setTimeout(() => setBulkUploadProgress(0), 3000);
+      setBulkUploadProgress(0);
     }
   };
 
   // Single Product Validation
   const validateForm = () => {
-    if (!productName.trim()) {
-      setErrorMessage("Product name is required");
+    if (!nameEn.trim()) {
+      setErrorMessage("Product name (English) is required");
       setShowError(true);
       return false;
     }
 
-    if (!category) {
+    if (!categoryEn) {
       setErrorMessage("Category is required");
       setShowError(true);
       return false;
@@ -665,42 +844,50 @@ export default function EditProductModal({
     try {
       const formData = new FormData();
 
-      formData.append("product_name", productName.trim());
-      formData.append("category_id", category);
-      formData.append("description", description || "");
+      // Required fields
+      formData.append("name_en", nameEn.trim());
       formData.append("unit", unit);
       formData.append("cost_price", costPrice);
       formData.append("selling_price", sellingPrice);
-      formData.append("has_variants", hasVariants ? "1" : "0");
-      formData.append("low_stock_alert", lowStockAlert || "10");
-      formData.append("is_active", isActive ? "1" : "0");
+
+      // Optional fields - only append if they have values
+      if (nameAr.trim()) formData.append("name_ar", nameAr.trim());
+      if (titleEn.trim()) formData.append("title_en", titleEn.trim());
+      if (titleAr.trim()) formData.append("title_ar", titleAr.trim());
+      if (brandEn.trim()) formData.append("brand_en", brandEn.trim());
+      if (brandAr.trim()) formData.append("brand_ar", brandAr.trim());
+      if (categoryEn.trim()) formData.append("category_en", categoryEn.trim());
+      if (categoryAr.trim()) formData.append("category_ar", categoryAr.trim());
+      if (subCategoryEn.trim()) formData.append("sub_category_en", subCategoryEn.trim());
+      if (subCategoryAr.trim()) formData.append("sub_category_ar", subCategoryAr.trim());
+      if (descriptionEn.trim()) formData.append("description_en", descriptionEn.trim());
+      if (descriptionAr.trim()) formData.append("description_ar", descriptionAr.trim());
+      if (slug.trim()) formData.append("slug", slug.trim());
+      if (sku.trim()) formData.append("sku", sku.trim());
+      if (barcode.trim()) formData.append("barcode", barcode.trim());
+      if (weight && parseFloat(weight) > 0) formData.append("weight", weight);
+      if (dimensions.trim()) formData.append("dimensions", dimensions.trim());
+      if (color.trim()) formData.append("color", color.trim());
+      if (size.trim()) formData.append("size", size.trim());
+      if (averageCostPrice && parseFloat(averageCostPrice) > 0) {
+        formData.append("average_cost_price", averageCostPrice);
+      }
+      if (lowStockAlert) formData.append("low_stock_alert", lowStockAlert);
+      if (hasVariants) formData.append("has_variants", "1");
+      if (!isActive) formData.append("is_active", "0");
 
       if (mode === "edit") {
         formData.append("_method", "PUT");
       }
 
-      if (sku.trim()) {
-        formData.append("sku", sku.trim());
-      }
-
-      if (weight && parseFloat(weight) > 0) {
-        formData.append("weight", weight);
-      }
-
-      if (dimensions.trim()) {
-        formData.append("dimensions", dimensions.trim());
-      }
-
-      if (color.trim()) {
-        formData.append("color", color.trim());
-      }
-
+      // Images
       images.forEach((image) => {
         if (image.file) {
           formData.append("images[]", image.file);
         }
       });
 
+      // Variants
       if (hasVariants && variants.length > 0) {
         variants.forEach((variant, index) => {
           if (variant.variant_name && variant.variant_value) {
@@ -712,18 +899,24 @@ export default function EditProductModal({
               `variants[${index}][variant_value]`,
               variant.variant_value,
             );
-            formData.append(
-              `variants[${index}][cost_price]`,
-              variant.cost_price.toString(),
-            );
-            formData.append(
-              `variants[${index}][selling_price]`,
-              variant.selling_price.toString(),
-            );
-            formData.append(
-              `variants[${index}][additional_price]`,
-              variant.additional_price.toString(),
-            );
+            if (variant.cost_price > 0) {
+              formData.append(
+                `variants[${index}][cost_price]`,
+                variant.cost_price.toString(),
+              );
+            }
+            if (variant.selling_price > 0) {
+              formData.append(
+                `variants[${index}][selling_price]`,
+                variant.selling_price.toString(),
+              );
+            }
+            if (variant.additional_price > 0) {
+              formData.append(
+                `variants[${index}][additional_price]`,
+                variant.additional_price.toString(),
+              );
+            }
             formData.append(`variants[${index}][is_active]`, "1");
           }
         });
@@ -943,108 +1136,243 @@ export default function EditProductModal({
                 )}
               </div>
 
-              {/* Description */}
+              {/* Product Name - English (Required) */}
               <div>
                 <label className="block text-sm font-medium text-gray-600 mb-2">
-                  Description
+                  Product Name (English) *
+                </label>
+                <input
+                  type="text"
+                  value={nameEn}
+                  onChange={(e) => setNameEn(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 font-medium"
+                  placeholder="Enter product name in English"
+                  disabled={isLoading}
+                  required
+                />
+              </div>
+
+              {/* Product Name - Arabic */}
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-2">
+                  Product Name (Arabic)
+                </label>
+                <input
+                  type="text"
+                  value={nameAr}
+                  onChange={(e) => setNameAr(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 font-medium"
+                  placeholder="Enter product name in Arabic"
+                  disabled={isLoading}
+                  dir="rtl"
+                />
+              </div>
+
+              {/* Title - English */}
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-2">
+                  Title (English)
+                </label>
+                <input
+                  type="text"
+                  value={titleEn}
+                  onChange={(e) => setTitleEn(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 font-medium"
+                  placeholder="Enter product title in English"
+                  disabled={isLoading}
+                />
+              </div>
+
+              {/* Title - Arabic */}
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-2">
+                  Title (Arabic)
+                </label>
+                <input
+                  type="text"
+                  value={titleAr}
+                  onChange={(e) => setTitleAr(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 font-medium"
+                  placeholder="Enter product title in Arabic"
+                  disabled={isLoading}
+                  dir="rtl"
+                />
+              </div>
+
+              {/* Brand - English */}
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-2">
+                  Brand (English)
+                </label>
+                <input
+                  type="text"
+                  value={brandEn}
+                  onChange={(e) => setBrandEn(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 font-medium"
+                  placeholder="Enter brand name in English"
+                  disabled={isLoading}
+                />
+              </div>
+
+              {/* Brand - Arabic */}
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-2">
+                  Brand (Arabic)
+                </label>
+                <input
+                  type="text"
+                  value={brandAr}
+                  onChange={(e) => setBrandAr(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 font-medium"
+                  placeholder="Enter brand name in Arabic"
+                  disabled={isLoading}
+                  dir="rtl"
+                />
+              </div>
+
+              {/* Category - English */}
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-2">
+                  Category (English) *
+                </label>
+                <input
+                  type="text"
+                  value={categoryEn}
+                  onChange={(e) => setCategoryEn(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 font-medium"
+                  placeholder="Enter category in English"
+                  disabled={isLoading}
+                  required
+                />
+              </div>
+
+              {/* Category - Arabic */}
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-2">
+                  Category (Arabic)
+                </label>
+                <input
+                  type="text"
+                  value={categoryAr}
+                  onChange={(e) => setCategoryAr(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 font-medium"
+                  placeholder="Enter category in Arabic"
+                  disabled={isLoading}
+                  dir="rtl"
+                />
+              </div>
+
+              {/* Sub Category - English */}
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-2">
+                  Sub Category (English)
+                </label>
+                <input
+                  type="text"
+                  value={subCategoryEn}
+                  onChange={(e) => setSubCategoryEn(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 font-medium"
+                  placeholder="Enter sub category in English"
+                  disabled={isLoading}
+                />
+              </div>
+
+              {/* Sub Category - Arabic */}
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-2">
+                  Sub Category (Arabic)
+                </label>
+                <input
+                  type="text"
+                  value={subCategoryAr}
+                  onChange={(e) => setSubCategoryAr(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 font-medium"
+                  placeholder="Enter sub category in Arabic"
+                  disabled={isLoading}
+                  dir="rtl"
+                />
+              </div>
+
+              {/* Description - English */}
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-2">
+                  Description (English)
                 </label>
                 <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  value={descriptionEn}
+                  onChange={(e) => setDescriptionEn(e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 font-medium min-h-25"
-                  placeholder="Enter product description"
+                  placeholder="Enter description in English"
                   disabled={isLoading}
                   rows={4}
                 />
               </div>
 
-              {/* Product Name */}
-              <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-2">
-                    Product Name *
-                  </label>
-                  <input
-                    type="text"
-                    value={productName}
-                    onChange={(e) => setProductName(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 font-medium"
-                    placeholder="Enter product name"
-                    disabled={isLoading}
-                    required
-                  />
+              {/* Description - Arabic */}
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-2">
+                  Description (Arabic)
+                </label>
+                <textarea
+                  value={descriptionAr}
+                  onChange={(e) => setDescriptionAr(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 font-medium min-h-25"
+                  placeholder="Enter description in Arabic"
+                  disabled={isLoading}
+                  rows={4}
+                  dir="rtl"
+                />
+              </div>
+
+              {/* Slug */}
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-2">
+                  Slug
+                </label>
+                <input
+                  type="text"
+                  value={slug}
+                  onChange={(e) => setSlug(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 font-medium"
+                  placeholder="URL-friendly slug (auto-generated if empty)"
+                  disabled={isLoading}
+                />
+              </div>
+
+              {/* Unit */}
+              <div className="relative">
+                <label className="block text-sm font-medium text-gray-600 mb-2">
+                  Unit *
+                </label>
+                <select
+                  value={unit}
+                  onChange={(e) => setUnit(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white text-gray-900 font-medium cursor-pointer"
+                  disabled={isLoading}
+                  required
+                >
+                  <option value="piece">Piece</option>
+                  <option value="kg">Kilogram (kg)</option>
+                  <option value="g">Gram (g)</option>
+                  <option value="meter">Meter</option>
+                  <option value="cm">Centimeter (cm)</option>
+                  <option value="liter">Liter (L)</option>
+                  <option value="ml">Milliliter (ml)</option>
+                  <option value="box">Box</option>
+                  <option value="pack">Pack</option>
+                  <option value="dozen">Dozen</option>
+                  <option value="set">Set</option>
+                </select>
+                <div className="absolute inset-y-0 right-0 top-8 flex items-center pr-3 pointer-events-none">
+                  <img src={dropdown_arrow_icon} alt="" />
                 </div>
               </div>
 
-              {/* Category & Unit */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="relative">
-                  <label className="block text-sm font-medium text-gray-600 mb-2">
-                    Category *
-                  </label>
-                  <select
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white text-gray-900 font-medium cursor-pointer"
-                    disabled={isLoading || categoriesLoading}
-                    required
-                  >
-                    <option value="">Select Category</option>
-                    {categoriesLoading ? (
-                      <option disabled>Loading categories...</option>
-                    ) : categoriesError ? (
-                      <option disabled>Failed to load categories</option>
-                    ) : categories.length > 0 ? (
-                      categories
-                        .filter((cat: Category) => cat.is_active)
-                        .map((category: Category) => (
-                          <option key={category.id} value={category.id}>
-                            {category.category_name}
-                          </option>
-                        ))
-                    ) : (
-                      <option disabled>No categories found</option>
-                    )}
-                  </select>
-                  <div className="absolute inset-y-0 right-0 top-8 flex items-center pr-3 pointer-events-none">
-                    <img src={dropdown_arrow_icon} alt="" />
-                  </div>
-                </div>
-
-                <div className="relative">
-                  <label className="block text-sm font-medium text-gray-600 mb-2">
-                    Unit *
-                  </label>
-                  <select
-                    value={unit}
-                    onChange={(e) => setUnit(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white text-gray-900 font-medium cursor-pointer"
-                    disabled={isLoading}
-                    required
-                  >
-                    <option value="piece">Piece</option>
-                    <option value="kg">Kilogram (kg)</option>
-                    <option value="g">Gram (g)</option>
-                    <option value="meter">Meter</option>
-                    <option value="cm">Centimeter (cm)</option>
-                    <option value="liter">Liter (L)</option>
-                    <option value="ml">Milliliter (ml)</option>
-                    <option value="box">Box</option>
-                    <option value="pack">Pack</option>
-                    <option value="dozen">Dozen</option>
-                    <option value="set">Set</option>
-                  </select>
-                  <div className="absolute inset-y-0 right-0 top-8 flex items-center pr-3 pointer-events-none">
-                    <img src={dropdown_arrow_icon} alt="" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Weight, Dimensions & Color */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Weight, Dimensions, Color, Size */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-600 mb-2">
-                    Weight (kg)
+                    Weight (KG)
                   </label>
                   <input
                     type="number"
@@ -1085,10 +1413,24 @@ export default function EditProductModal({
                     disabled={isLoading}
                   />
                 </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 mb-2">
+                    Size
+                  </label>
+                  <input
+                    type="text"
+                    value={size}
+                    onChange={(e) => setSize(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 font-medium"
+                    placeholder="e.g., S, M, L, XL, 500g, 350ml"
+                    disabled={isLoading}
+                  />
+                </div>
               </div>
 
               {/* Pricing */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-600 mb-2">
                     Cost Price (KWD) *
@@ -1103,6 +1445,22 @@ export default function EditProductModal({
                     placeholder="0.000"
                     disabled={isLoading}
                     required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 mb-2">
+                    Average Cost Price (KWD)
+                  </label>
+                  <input
+                    type="number"
+                    value={averageCostPrice}
+                    onChange={(e) => setAverageCostPrice(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 font-medium"
+                    min="0"
+                    step="0.001"
+                    placeholder="0.000"
+                    disabled={isLoading}
                   />
                 </div>
 
@@ -1342,8 +1700,8 @@ export default function EditProductModal({
                 <ul className="text-sm text-blue-700 space-y-1">
                   <li>• Download the template Excel file using the button below</li>
                   <li>• Fill in your product data following the format in the template</li>
-                  <li>• Required fields: Product Name, Category ID, Unit, Cost Price, Selling Price</li>
-                  <li>• Category IDs can be found in the Categories section</li>
+                  <li>• Required fields: English Name, Unit, Cost Price, Selling Price</li>
+                  <li>• Category names should match existing categories in the system</li>
                   <li>• Upload the completed file back to add multiple products at once</li>
                 </ul>
               </div>
@@ -1414,7 +1772,7 @@ export default function EditProductModal({
                           {Object.keys(bulkPreviewData[0] || {}).map((key) => (
                             <th
                               key={key}
-                              className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase"
+                              className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap"
                             >
                               {key}
                             </th>
@@ -1427,10 +1785,9 @@ export default function EditProductModal({
                             {Object.values(row).map((value: any, colIdx) => (
                               <td
                                 key={colIdx}
-                                className="px-4 py-2 text-sm text-gray-600"
+                                className="px-4 py-2 text-sm text-gray-600 max-w-xs truncate"
                               >
-                                {String(value).substring(0, 30)}
-                                {String(value).length > 30 ? "..." : ""}
+                                {value !== undefined && value !== null ? String(value) : "—"}
                               </td>
                             ))}
                           </tr>
@@ -1455,17 +1812,6 @@ export default function EditProductModal({
                   </div>
                 </div>
               )}
-
-              <button
-                onClick={handleBulkUpload}
-                disabled={!bulkFile || isUploading}
-                className={`w-full py-3 rounded-lg font-semibold transition-colors ${!bulkFile || isUploading
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  : "bg-blue-600 text-white hover:bg-blue-700"
-                  }`}
-              >
-                {isUploading ? "Uploading..." : "Upload Products"}
-              </button>
             </div>
           )}
         </div>

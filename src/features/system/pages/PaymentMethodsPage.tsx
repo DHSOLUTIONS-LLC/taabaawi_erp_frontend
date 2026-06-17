@@ -8,30 +8,42 @@ import type { PaymentMethod } from '../../../types/payment-method';
 const PaymentMethodsPage: React.FC = () => {
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [showCreateForm, setShowCreateForm] = useState(false);
   const [mobileView, setMobileView] = useState<'list' | 'details' | 'form'>('list');
 
   const handleSelectMethod = (method: PaymentMethod) => {
     setSelectedMethod(method);
+    setShowForm(false);
+    setShowCreateForm(false);
     setMobileView('details');
     if (window.innerWidth < 1024) {
-      // On mobile/tablet, switch to details view
       setMobileView('details');
     }
   };
 
   const handleEditClick = () => {
     setShowForm(true);
+    setShowCreateForm(false);
+    setMobileView('form');
+  };
+
+  const handleAddNewClick = () => {
+    setSelectedMethod(null);
+    setShowForm(false);
+    setShowCreateForm(true);
     setMobileView('form');
   };
 
   const handleFormSuccess = () => {
     setShowForm(false);
+    setShowCreateForm(false);
     setSelectedMethod(null);
     setMobileView('list');
   };
 
   const handleFormCancel = () => {
     setShowForm(false);
+    setShowCreateForm(false);
     setSelectedMethod(null);
     setMobileView('list');
   };
@@ -40,22 +52,35 @@ const PaymentMethodsPage: React.FC = () => {
     setMobileView('list');
     setSelectedMethod(null);
     setShowForm(false);
+    setShowCreateForm(false);
   };
 
   const handleBackToDetails = () => {
     setMobileView('details');
     setShowForm(false);
+    setShowCreateForm(false);
   };
 
   return (
     <DashboardLayout>
       <div className="mx-auto px-2 py-2">
         {/* Header */}
-        <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Payment Methods</h1>
-          <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">
-            Configure payment methods, fees, and branch availability
-          </p>
+        <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Payment Methods</h1>
+            <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">
+              Configure payment methods, fees, and branch availability
+            </p>
+          </div>
+          <button
+            onClick={handleAddNewClick}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 whitespace-nowrap"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Add New Method
+          </button>
         </div>
 
         {/* Mobile Navigation Header */}
@@ -71,7 +96,9 @@ const PaymentMethodsPage: React.FC = () => {
               <span>Back</span>
             </button>
             <h2 className="text-lg font-semibold text-gray-900">
-              {mobileView === 'form' ? 'Edit Payment Method' : selectedMethod?.method_name}
+              {showCreateForm ? 'Add New Payment Method' :
+                showForm ? 'Edit Payment Method' :
+                  selectedMethod?.method_name}
             </h2>
           </div>
         )}
@@ -105,7 +132,24 @@ const PaymentMethodsPage: React.FC = () => {
             ${mobileView === 'details' || mobileView === 'form' ? 'block' : 'hidden lg:block'}
             lg:col-span-1
           `}>
-            {showForm && selectedMethod ? (
+            {showCreateForm ? (
+              // Create Form View
+              <div className="bg-white rounded-lg border border-gray-200">
+                <div className="p-4 sm:p-5 border-b border-gray-200">
+                  <h2 className="text-base sm:text-lg font-semibold text-gray-800">Add New Payment Method</h2>
+                  <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                    Create a new payment method with fee structure
+                  </p>
+                </div>
+                <div className="p-4 sm:p-5">
+                  <PaymentMethodForm
+                    method={null}
+                    onSuccess={handleFormSuccess}
+                    onCancel={handleFormCancel}
+                  />
+                </div>
+              </div>
+            ) : showForm && selectedMethod ? (
               // Edit Form View
               <div className="bg-white rounded-lg border border-gray-200">
                 <div className="p-4 sm:p-5 border-b border-gray-200">
@@ -151,20 +195,20 @@ const PaymentMethodsPage: React.FC = () => {
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-gray-600">Percentage Fee</span>
                         <span className="text-sm font-medium text-gray-900">
-                          {selectedMethod.transaction_fee_percentage}%
+                          {selectedMethod.transaction_fee_percentage || 0}%
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-gray-600">Fixed Fee</span>
                         <span className="text-sm font-medium text-gray-900">
-                          {selectedMethod.transaction_fee_fixed}
+                          {selectedMethod.transaction_fee_fixed || 0}
                         </span>
                       </div>
                       <div className="pt-2 border-t border-gray-200">
                         <div className="flex justify-between items-center">
                           <span className="text-sm font-semibold text-gray-700">Total Fee</span>
                           <span className="text-sm font-bold text-blue-600">
-                            {selectedMethod.transaction_fee_percentage}% + {selectedMethod.transaction_fee_fixed}
+                            {selectedMethod.transaction_fee_percentage || 0}% + {selectedMethod.transaction_fee_fixed || 0}
                           </span>
                         </div>
                       </div>

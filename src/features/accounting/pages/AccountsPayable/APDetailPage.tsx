@@ -44,9 +44,9 @@ export default function APDetailPage() {
   console.log('AP Data:', ap);
 
   // Fetch payment accounts for this supplier
-  const { 
-    data: paymentAccountsData, 
-    isLoading: paymentAccountsLoading 
+  const {
+    data: paymentAccountsData,
+    isLoading: paymentAccountsLoading
   } = useGetSupplierPaymentAccountsQuery(ap?.supplier_id, {
     skip: !ap?.supplier_id,
   });
@@ -353,7 +353,7 @@ export default function APDetailPage() {
                     <option value="">Select Payment Account</option>
                     {paymentAccounts.map((account: any) => (
                       <option key={account.id} value={account.id}>
-                        {account.account_code} - {account.account_name} 
+                        {account.account_code} - {account.account_name}
                         {ap.payment_account_id === account.id && ' (Current)'}
                       </option>
                     ))}

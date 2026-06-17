@@ -665,12 +665,12 @@ export const accountingApi = api.injectEndpoints({
     }),
 
     getSupplierPaymentAccounts: builder.query({
-  query: (supplierId) => ({
-    url: `/supplier-payments/${supplierId}/payment-account`,
-    method: 'GET',
-  }),
-  providesTags: ['SupplierPaymentAccount'],
-}),
+      query: (supplierId) => ({
+        url: `/supplier-payments/${supplierId}/payment-account`,
+        method: 'GET',
+      }),
+      providesTags: ['SupplierPaymentAccount'],
+    }),
 
     getAPById: builder.query<{ data: AccountsPayable }, number>({
       query: (id) => `/accounts-payable/${id}`,

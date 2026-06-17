@@ -122,18 +122,18 @@ export default function ProductPopup({
 
   const handleQuantityInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value;
-    
+
     // Allow empty string for typing
     if (value === "") {
       setInputValue("");
       return;
     }
-    
+
     // Remove leading zeros
     if (value.startsWith("0") && value.length > 1) {
       value = value.replace(/^0+/, "");
     }
-    
+
     // Only allow positive integers
     if (/^\d+$/.test(value)) {
       const numValue = parseInt(value, 10);
@@ -190,8 +190,8 @@ export default function ProductPopup({
           </div>
         )}
 
-        {/* Product Image */}
-        <div className="w-full h-32 sm:h-36 md:h-40 rounded-lg sm:rounded-xl overflow-hidden mb-3 sm:mb-4">
+        {/* Product Image - Square */}
+        <div className="w-full aspect-square rounded-lg sm:rounded-xl overflow-hidden mb-3 sm:mb-4 bg-gray-100">
           <img
             src={product.image}
             alt={product.name}

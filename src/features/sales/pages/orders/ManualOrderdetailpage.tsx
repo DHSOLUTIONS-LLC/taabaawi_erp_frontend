@@ -1,9 +1,10 @@
 // src/features/sales/pages/OrderDetailPage.tsx
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import DashboardLayout from "../../../../layouts/DashboardLayout";
 import { useGetChartOfAccountsQuery } from "../../../../services/accountingApi";
 import dropdown_arrow_icon from "../../../../assets/icons/dropdown_arrow_icon.svg";
+import { useGetActivePaymentMethodsQuery } from "../../../../services/paymentMethodApi";
 
 import {
   useGetOrderByIdQuery,
@@ -45,64 +46,66 @@ const PAYMENT_COLORS: Record<string, string> = {
   Failed: "bg-red-100 text-red-700",
 };
 
-const PAYMENT_METHODS = [
- "Cash",
-  
-  // Kuwaiti Local Payment Systems
-  "KNET",
-  "WAMD (Instant Transfer)",
-  "Mobile Payment (Kuwait Mobile)",
-  
-  // Local Kuwaiti Banks
-  "NBK (National Bank of Kuwait)",
-  "KFH (Kuwait Finance House)",
-  "CBK (Commercial Bank of Kuwait)",
-  "GIB (Gulf Bank)",
-  "ABK (Ahli United Bank)",
-  "Burgan Bank",
-  "KIB (Kuwait International Bank)",
-  "Boubyan Bank",
-  "Warba Bank",
-  "Al Ahli Bank of Kuwait",
-  
-  // Kuwaiti Digital Wallets
-  "My KNET Mobile",
-  "Tam (Boubyan Bank)",
-  "WeYak (KFH)",
-  "Gulf Pay (GIB)",
-  "NBK Mobile Banking",
-  "KFH Go",
-  "CBK Mobile",
-  
-  // International Cards
-  "Visa Card",
-  "Mastercard",
-  "American Express",
-  "Debit Card",
-  
-  // Mobile Wallets
-  "Apple Pay",
-  "Google Pay",
-  "Samsung Pay",
-  
-  // Other Methods
-  "Bank Transfer",
-  "Cheque",
-  "Gift Card",
-  "Voucher",
-  "Tabby (Buy Now Pay Later)",
-  "Tamara (Buy Now Pay Later)",
-  "Postal Order",
-  "Government Payment",
-  "Corporate Account",
-  "Other",
-];
+// const PAYMENT_METHODS = [
+//  "Cash",
+
+//   // Kuwaiti Local Payment Systems
+//   "KNET",
+//   "WAMD (Instant Transfer)",
+//   "Mobile Payment (Kuwait Mobile)",
+
+//   // Local Kuwaiti Banks
+//   "NBK (National Bank of Kuwait)",
+//   "KFH (Kuwait Finance House)",
+//   "CBK (Commercial Bank of Kuwait)",
+//   "GIB (Gulf Bank)",
+//   "ABK (Ahli United Bank)",
+//   "Burgan Bank",
+//   "KIB (Kuwait International Bank)",
+//   "Boubyan Bank",
+//   "Warba Bank",
+//   "Al Ahli Bank of Kuwait",
+
+//   // Kuwaiti Digital Wallets
+//   "My KNET Mobile",
+//   "Tam (Boubyan Bank)",
+//   "WeYak (KFH)",
+//   "Gulf Pay (GIB)",
+//   "NBK Mobile Banking",
+//   "KFH Go",
+//   "CBK Mobile",
+
+//   // International Cards
+//   "Visa Card",
+//   "Mastercard",
+//   "American Express",
+//   "Debit Card",
+
+//   // Mobile Wallets
+//   "Apple Pay",
+//   "Google Pay",
+//   "Samsung Pay",
+
+//   // Other Methods
+//   "Bank Transfer",
+//   "Cheque",
+//   "Gift Card",
+//   "Voucher",
+//   "Tabby (Buy Now Pay Later)",
+//   "Tamara (Buy Now Pay Later)",
+//   "Postal Order",
+//   "Government Payment",
+//   "Corporate Account",
+//   "Other",
+// ];
 
 export default function OrderDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const orderId = parseInt(id!);
   const printRef = useRef<HTMLDivElement>(null);
+  const [paymentMethods, setPaymentMethods] = useState<string[]>([]);
+
 
   const [activeTab, setActiveTab] = useState<"details" | "items" | "history">(
     "details",
@@ -125,6 +128,18 @@ export default function OrderDetailPage() {
 
   const [recordPayment, { isLoading: isRecordingPayment }] =
     useRecordSalePaymentMutation();
+
+  const { data: paymentMethodsData, isLoading: isLoadingPaymentMethods } =
+    useGetActivePaymentMethodsQuery();
+
+  useEffect(() => {
+    if (paymentMethodsData?.data) {
+      const methods = paymentMethodsData.data.map(
+        (method: any) => method.method_name
+      );
+      setPaymentMethods(methods);
+    }
+  }, [paymentMethodsData]);
 
   const { data: accountsData } = useGetChartOfAccountsQuery({
     is_active: 1 as any,
@@ -398,12 +413,12 @@ export default function OrderDetailPage() {
             <div class="order-info">
               <table>
                 <tr><td>Order Date:</td><td>${new Date(
-                  order?.created_at || new Date(),
-                ).toLocaleDateString("en-GB", {
-                  day: "2-digit",
-                  month: "long",
-                  year: "numeric",
-                })}</td></tr>
+      order?.created_at || new Date(),
+    ).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    })}</td></tr>
                 <tr><td>Status:</td><td>${order?.order_status || ""}</td></tr>
                 <tr><td>Payment Status:</td><td>${order?.payment_status || ""}</td></tr>
                 <tr><td>Payment Method:</td><td>${order?.payment_method || ""}</td></tr>
@@ -444,10 +459,9 @@ export default function OrderDetailPage() {
                 </tr>
               </thead>
               <tbody>
-                ${
-                  (order?.items || [])
-                    .map(
-                      (item: any) => `
+                ${(order?.items || [])
+        .map(
+          (item: any) => `
                   <tr>
                   <td class="border border-gray-300 p-2">
   <div class="flex items-center gap-2">
@@ -462,9 +476,9 @@ export default function OrderDetailPage() {
                     <td>KWD ${parseFloat(item.total).toFixed(3)}</td>
                   </tr>
                 `,
-                    )
-                    .join("") || ""
-                }
+        )
+        .join("") || ""
+      }
               </tbody>
             </table>
 
@@ -556,10 +570,9 @@ export default function OrderDetailPage() {
             </tr>
           </thead>
           <tbody>
-            ${
-              order?.items
-                ?.map(
-                  (item: any) => `
+            ${order?.items
+          ?.map(
+            (item: any) => `
               <tr>
               <td style="border: 1px solid #ddd; padding: 8px;">
   <div style="display: flex; align-items: center; gap: 8px;">
@@ -576,9 +589,9 @@ export default function OrderDetailPage() {
                 <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">KWD ${parseFloat(item.total).toFixed(3)}</td>
               </tr>
             `,
-                )
-                .join("") || ""
-            }
+          )
+          .join("") || ""
+        }
           </tbody>
         </table>
 
@@ -813,11 +826,10 @@ export default function OrderDetailPage() {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
-                  activeTab === tab
+                className={`px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${activeTab === tab
                     ? "border-[#1773CF] text-[#1773CF]"
                     : "border-transparent text-gray-500 hover:text-gray-700"
-                }`}
+                  }`}
               >
                 {tab === "history"
                   ? "Status History"
@@ -1060,9 +1072,8 @@ export default function OrderDetailPage() {
                   <div key={h.id} className="flex gap-3 sm:gap-4">
                     <div className="flex flex-col items-center">
                       <div
-                        className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full mt-1 ${
-                          i === 0 ? "bg-[#1773CF]" : "bg-gray-300"
-                        }`}
+                        className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full mt-1 ${i === 0 ? "bg-[#1773CF]" : "bg-gray-300"
+                          }`}
                       />
                       {i < history.length - 1 && (
                         <div className="w-0.5 flex-1 bg-gray-200 mt-1" />
@@ -1290,18 +1301,25 @@ export default function OrderDetailPage() {
                   Payment Method <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <select
-                    value={paymentMethod}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">Select Payment Method</option>
-                    {PAYMENT_METHODS.map((method) => (
-                      <option key={method} value={method}>
-                        {method}
-                      </option>
-                    ))}
-                  </select>
+                  {isLoadingPaymentMethods ? (
+                    <div className="flex items-center justify-center py-2">
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600" />
+                      <span className="ml-2 text-sm text-gray-500">Loading payment methods...</span>
+                    </div>
+                  ) : (
+                    <select
+                      value={paymentMethod}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">Select Payment Method</option>
+                      {paymentMethods.map((method) => (
+                        <option key={method} value={method}>
+                          {method}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                   <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                     <img src={dropdown_arrow_icon} alt="" className="w-4 h-4" />
                   </div>

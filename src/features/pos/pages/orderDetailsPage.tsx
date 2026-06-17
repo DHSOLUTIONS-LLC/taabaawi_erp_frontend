@@ -86,7 +86,7 @@ export default function OrderDetailsPage() {
 
     // Generate barcode image for the receipt
     const barcodeImage = generateBarcode(sale?.sale_number || `SALE-${sale?.id}`);
-    
+
     const printWindow = window.open("", "_blank");
     if (!printWindow) {
       alert("Please allow pop-ups to print");
@@ -219,14 +219,14 @@ export default function OrderDetailsPage() {
             <!-- Barcode Section -->
             <div class="barcode-container">
               <div class="divider"></div>
-              ${barcodeImage ? 
-                `<img src="${barcodeImage}" alt="Barcode" class="barcode-image" />` : 
-                `<div class="dummy-barcode">
+              ${barcodeImage ?
+        `<img src="${barcodeImage}" alt="Barcode" class="barcode-image" />` :
+        `<div class="dummy-barcode">
                    <div>✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦</div>
                    <div style="font-size: 10px; margin-top: 5px;">${sale?.sale_number || `SALE-${sale?.id}`}</div>
                    <div style="font-size: 8px; margin-top: 3px;">SCAN FOR RETURNS</div>
                  </div>`
-              }
+      }
               <div style="font-size: 9px; margin-top: 5px; color: #666;">
                 ${sale?.sale_number || `Order #${sale?.id}`}
               </div>

@@ -191,7 +191,7 @@ export default function ProductSelectionModal({
         quantity: productWithDetails.quantity || 1,
         image: currentProduct?.image || "",
         image_url: fullImageUrl,
-         discount_percentage: 0,
+        discount_percentage: 0,
       }),
     );
 
@@ -283,11 +283,10 @@ export default function ProductSelectionModal({
                   <button
                     key={category}
                     onClick={() => setSelectedCategory(category)}
-                    className={`px-2.5 sm:px-3 md:px-4 lg:px-5 py-1.5 sm:py-2 md:py-2.5 rounded-md font-medium text-[10px] sm:text-xs md:text-sm whitespace-nowrap transition-all duration-200 cursor-pointer ${
-                      selectedCategory === category
+                    className={`px-2.5 sm:px-3 md:px-4 lg:px-5 py-1.5 sm:py-2 md:py-2.5 rounded-md font-medium text-[10px] sm:text-xs md:text-sm whitespace-nowrap transition-all duration-200 cursor-pointer ${selectedCategory === category
                         ? "border border-[#1773CF] text-black shadow-md shadow-blue-200 bg-white"
                         : "bg-white text-gray-700 border border-gray-200 hover:border-blue-300 hover:text-blue-600"
-                    }`}
+                      }`}
                   >
                     {category}
                   </button>

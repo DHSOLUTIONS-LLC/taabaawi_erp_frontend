@@ -1,6 +1,6 @@
 // src/features/purchase/components/ProductSelectorModal.tsx
 import { useState, useMemo, useRef } from "react";
-import barcode_icon from "../../../assets/icons/barcode_icon.svg";
+// import barcode_icon from "../../../assets/icons/barcode_icon.svg";
 
 import {
   useGetProductsQuery,
@@ -124,11 +124,11 @@ export default function ProductSelectorModal({
           p.total_stock != null
             ? Number(p.total_stock)
             : // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              (p.inventory ?? []).reduce(
-                (sum: number, inv: any) =>
-                  sum + (inv.available_quantity ?? inv.quantity ?? 0),
-                0,
-              );
+            (p.inventory ?? []).reduce(
+              (sum: number, inv: any) =>
+                sum + (inv.available_quantity ?? inv.quantity ?? 0),
+              0,
+            );
         return {
           id: p.id as number,
           product_id: p.id as number,
@@ -210,12 +210,12 @@ export default function ProductSelectorModal({
             )}
           </div>
           <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-            <button
+            {/* <button
               onClick={onClose}
               className="flex-1 sm:flex-none px-3 sm:px-5 py-1.5 sm:py-2 bg-blue-600 text-white text-xs sm:text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors"
             >
               Done
-            </button>
+            </button> */}
             <button
               onClick={onClose}
               className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -298,11 +298,10 @@ export default function ProductSelectorModal({
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-medium whitespace-nowrap transition-colors ${
-                  selectedCategory === cat
+                className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-medium whitespace-nowrap transition-colors ${selectedCategory === cat
                     ? "bg-blue-600 text-white"
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                }`}
+                  }`}
               >
                 {cat}
               </button>
@@ -339,13 +338,12 @@ export default function ProductSelectorModal({
                 return (
                   <div
                     key={product.id}
-                    className={`border border-gray-300 rounded-md sm:rounded-xl overflow-hidden bg-white transition-all ${
-                      inPOQty > 0
+                    className={`border border-gray-300 rounded-md sm:rounded-xl overflow-hidden bg-white transition-all ${inPOQty > 0
                         ? "border-blue-400 shadow-sm"
                         : "border-gray-200 hover:border-gray-300 hover:shadow-sm"
-                    }`}
+                      }`}
                   >
-                    <div className="relative h-28 sm:h-32 md:h-36 bg-gray-100">
+                    <div className="relative aspect-square w-full bg-gray-100">
                       <img
                         src={product.image}
                         alt={product.name}
@@ -356,11 +354,10 @@ export default function ProductSelectorModal({
                         }}
                       />
                       <div
-                        className={`absolute top-1 left-1 sm:top-2 sm:left-2 px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-xs font-semibold ${
-                          product.stock <= 5
+                        className={`absolute top-1 left-1 sm:top-2 sm:left-2 px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-xs font-semibold ${product.stock <= 5
                             ? "bg-orange-500 text-white"
                             : "bg-white/90 text-gray-700"
-                        }`}
+                          }`}
                       >
                         {product.stock} left
                       </div>
@@ -425,13 +422,12 @@ export default function ProductSelectorModal({
                         </div>
                         <button
                           onClick={() => handleAdd(product)}
-                          className={`flex-1 py-1.5 sm:py-2 rounded-lg text-[10px] sm:text-xs font-semibold transition-all active:scale-95 ${
-                            isJustAdded
+                          className={`flex-1 py-1.5 sm:py-2 rounded-lg text-[10px] sm:text-xs font-semibold transition-all active:scale-95 ${isJustAdded
                               ? "bg-green-500 text-white"
                               : inPOQty > 0
                                 ? "bg-blue-100 text-blue-700 hover:bg-blue-200"
                                 : "bg-blue-600 text-white hover:bg-blue-700"
-                          }`}
+                            }`}
                         >
                           {isJustAdded
                             ? "✓ Added!"

@@ -1,6 +1,8 @@
 // src/features/pos/components/PaymentModal.tsx
 import { useState, useEffect } from "react";
 import { useCreateSaleMutation } from "../../../services/posApi";
+import { useGetActivePaymentMethodsQuery } from "../../../services/paymentMethodApi";
+import dropdown_arrow_icon from "../../../assets/icons/dropdown_arrow_icon.svg";
 
 interface CartItem {
   id: string;
@@ -24,6 +26,7 @@ interface PaymentModalProps {
   couponCode: string;
   isGift: boolean;
   isEmployeePurchase: boolean;
+  employeeDiscountPercent?: number; // ← ADD THIS - the percentage from sidebar
   isDPPR: boolean;
   registerId?: number;
   branchId: number;
@@ -40,8 +43,6 @@ interface PaymentModalProps {
 
 type PaymentMethod = string;
 
-const DEFAULT_PAYMENT_METHODS: PaymentMethod[] = ["Cash", "Card", "K-Net"];
-
 export default function PaymentModal({
   isOpen,
   onClose,
@@ -52,27 +53,33 @@ export default function PaymentModal({
   couponCode,
   isGift,
   isEmployeePurchase,
-  isDPPR, // ADDED - destructured from props
+  employeeDiscountPercent = 0, // ← ADD THIS with default 0
+  isDPPR,
   registerId,
   branchId,
   salesStaffId,
   customerId,
-  customerDetails, // ADDED - destructured from props
+  customerDetails,
   onSuccess,
 }: PaymentModalProps) {
-  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([
-    ...DEFAULT_PAYMENT_METHODS,
-  ]);
+  // Fetch active payment methods from API
+  const { data: paymentMethodsData, isLoading: isLoadingPaymentMethods } =
+    useGetActivePaymentMethodsQuery();
+
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("Cash");
-  const [showAddPaymentMethod, setShowAddPaymentMethod] = useState(false);
-  const [newPaymentMethod, setNewPaymentMethod] = useState("");
   const [cashReceived, setCashReceived] = useState("");
   const [cardReference, setCardReference] = useState("");
   const [otherPaymentAmount, setOtherPaymentAmount] = useState("");
   const [notes, setNotes] = useState("");
   const [error, setError] = useState("");
 
-  const total = subtotal - discount - couponDiscount;
+  // Calculate employee discount based on the percentage
+  const employeeDiscount = isEmployeePurchase
+    ? (subtotal - discount) * (employeeDiscountPercent / 100)
+    : 0;
+
+  const total = subtotal - discount - couponDiscount - employeeDiscount;
 
   // For Cash: calculate change
   const change =
@@ -81,6 +88,20 @@ export default function PaymentModal({
       : 0;
 
   const [createSale, { isLoading }] = useCreateSaleMutation();
+
+  // Set payment methods from API response
+  useEffect(() => {
+    if (paymentMethodsData?.data) {
+      const methods = paymentMethodsData.data.map(
+        (method: any) => method.method_name
+      );
+      setPaymentMethods(methods);
+
+      if (methods.length > 0) {
+        setPaymentMethod(methods[0]);
+      }
+    }
+  }, [paymentMethodsData]);
 
   // Reset form when modal closes
   useEffect(() => {
@@ -91,8 +112,6 @@ export default function PaymentModal({
       setOtherPaymentAmount("");
       setNotes("");
       setError("");
-      setShowAddPaymentMethod(false);
-      setNewPaymentMethod("");
     }
   }, [isOpen]);
 
@@ -117,7 +136,7 @@ export default function PaymentModal({
       }
     }
 
-    // Validate Other payment methods (Bank Transfer, Wallet, etc.)
+    // Validate Other payment methods
     else {
       if (!otherPaymentAmount || parseFloat(otherPaymentAmount) < total) {
         setError(`Payment amount must be at least KWD ${total.toFixed(3)}`);
@@ -134,23 +153,21 @@ export default function PaymentModal({
         discount_percentage: item.discount_percentage || 0,
       }));
 
-      // Build the payload
       const payload: any = {
         branch_id: branchId,
         cash_register_id: registerId,
         sales_staff_id: salesStaffId || null,
         customer_id: customerId || null,
-        is_dppr: isDPPR, // Now works - isDPPR is defined
+        is_dppr: isDPPR,
         is_gift: isGift,
         is_employee_purchase: isEmployeePurchase,
+        employee_discount_percentage: employeeDiscountPercent, // ← ADD THIS
         payment_method: paymentMethod,
         notes: notes || null,
         items,
       };
 
-      // Add customer details ONLY if DPPR is false AND customer details are provided
       if (!isDPPR && customerDetails) {
-        // Now works - both are defined
         payload.customer_details = {
           name: customerDetails.name || null,
           phone: customerDetails.phone || null,
@@ -159,12 +176,10 @@ export default function PaymentModal({
         };
       }
 
-      // Add coupon code if applied
       if (couponCode) {
         payload.coupon_code = couponCode;
       }
 
-      // Add payment-specific fields
       if (paymentMethod === "Cash") {
         payload.cash_received = parseFloat(cashReceived) || 0;
         payload.change_due = change;
@@ -176,7 +191,6 @@ export default function PaymentModal({
         payload.card_reference = cardReference;
         payload.amount_paid = null;
       } else {
-        // Other payment methods (Bank Transfer, Wallet, etc.)
         payload.cash_received = null;
         payload.change_due = null;
         payload.card_reference = null;
@@ -234,72 +248,32 @@ export default function PaymentModal({
             </p>
           </div>
 
-          {/* Payment Method */}
+          {/* Payment Method - Dropdown */}
           <div>
-            <p className="text-sm font-medium text-gray-700 mb-2">
+            <label className="text-sm font-medium text-gray-700 mb-1 block">
               Payment Method
-            </p>
-            <div className="grid grid-cols-2 gap-2">
-              {paymentMethods.map((method) => (
-                <button
-                  key={method}
-                  onClick={() => {
-                    setPaymentMethod(method);
-                    setShowAddPaymentMethod(false);
-                  }}
-                  className={`py-2.5 rounded-lg border-2 transition-all text-sm font-medium ${
-                    paymentMethod === method
-                      ? "border-[#1773CF] bg-blue-50 text-[#1773CF]"
-                      : "border-gray-200 text-gray-600 hover:border-gray-300"
-                  }`}
+            </label>
+            {isLoadingPaymentMethods ? (
+              <div className="flex items-center justify-center py-2">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600" />
+                <span className="ml-2 text-sm text-gray-500">Loading...</span>
+              </div>
+            ) : (
+              <div className="relative">
+                <select
+                  value={paymentMethod}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 >
-                  {method}
-                </button>
-              ))}
-              <button
-                onClick={() => setShowAddPaymentMethod(!showAddPaymentMethod)}
-                className="py-2.5 rounded-lg border-2 border-dashed border-blue-400 text-blue-600 text-sm font-medium hover:bg-blue-50 transition-all"
-              >
-                + Add New
-              </button>
-            </div>
-
-            {/* Add New Payment Method Input */}
-            {showAddPaymentMethod && (
-              <div className="mt-3 flex gap-2">
-                <input
-                  type="text"
-                  value={newPaymentMethod}
-                  onChange={(e) => setNewPaymentMethod(e.target.value)}
-                  placeholder="Enter new payment method (e.g., 'Bank Transfer', 'Wallet')"
-                  className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  autoFocus
-                />
-                <button
-                  onClick={() => {
-                    if (newPaymentMethod.trim()) {
-                      setPaymentMethods([
-                        ...paymentMethods,
-                        newPaymentMethod.trim(),
-                      ]);
-                      setPaymentMethod(newPaymentMethod.trim());
-                      setShowAddPaymentMethod(false);
-                      setNewPaymentMethod("");
-                    }
-                  }}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
-                >
-                  Add
-                </button>
-                <button
-                  onClick={() => {
-                    setShowAddPaymentMethod(false);
-                    setNewPaymentMethod("");
-                  }}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
+                  {paymentMethods.map((method) => (
+                    <option key={method} value={method}>
+                      {method}
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                  <img src={dropdown_arrow_icon} alt="Dropdown" className="w-4 h-4" />
+                </div>
               </div>
             )}
           </div>
@@ -402,13 +376,10 @@ export default function PaymentModal({
                 <span>-KWD {couponDiscount.toFixed(3)}</span>
               </div>
             )}
-            {isEmployeePurchase && (
+            {isEmployeePurchase && employeeDiscountPercent > 0 && (
               <div className="flex justify-between text-purple-600">
-                <span>Employee Discount (30%)</span>
-                <span>
-                  -KWD{" "}
-                  {((subtotal - discount - couponDiscount) * 0.3).toFixed(3)}
-                </span>
+                <span>Employee Discount ({employeeDiscountPercent}%)</span>
+                <span>-KWD {employeeDiscount.toFixed(3)}</span>
               </div>
             )}
             <div className="flex justify-between pt-2 border-t border-gray-200 font-bold">
@@ -435,6 +406,7 @@ export default function PaymentModal({
               onClick={handleProcessPayment}
               disabled={
                 isLoading ||
+                isLoadingPaymentMethods ||
                 (paymentMethod === "Cash" &&
                   (!cashReceived || parseFloat(cashReceived) < total)) ||
                 (paymentMethod !== "Cash" &&

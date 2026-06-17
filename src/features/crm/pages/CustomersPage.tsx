@@ -43,15 +43,15 @@ const fetchLastOrderForCustomer = async (customerId: number, token: string) => {
         },
       }
     );
-    
+
     if (!response.ok) {
       throw new Error('Failed to fetch orders');
     }
-    
+
     const result = await response.json();
     const orders = result?.data?.orders?.data || [];
     const lastOrder = orders.length > 0 ? orders[0] : null;
-    
+
     return {
       last_invoice_number: lastOrder?.order_number || "N/A",
       last_invoice_value: lastOrder?.total_amount ? parseFloat(lastOrder.total_amount) : 0,
@@ -162,7 +162,7 @@ export const CustomersPage = () => {
       const filtered = getFilteredCustomers();
       setFilteredCustomers(filtered);
     };
-    
+
     window.addEventListener('popstate', handleUrlChange);
     return () => window.removeEventListener('popstate', handleUrlChange);
   }, [customersWithLastInvoice]);
@@ -170,14 +170,14 @@ export const CustomersPage = () => {
   // Function to fetch last orders for all customers
   const fetchLastOrdersForAllCustomers = async (customers: any[]) => {
     if (!customers || customers.length === 0) return;
-    
+
     setLoadingOrders(true);
     const token = getAuthToken();
-    
+
     try {
       const batchSize = 5;
       const processedCustomers = [...customers];
-      
+
       for (let i = 0; i < customers.length; i += batchSize) {
         const batch = customers.slice(i, Math.min(i + batchSize, customers.length));
         const batchPromises = batch.map(async (customer) => {
@@ -187,20 +187,20 @@ export const CustomersPage = () => {
             ...orderData,
           };
         });
-        
+
         const batchResults = await Promise.all(batchPromises);
-        
+
         for (let j = 0; j < batchResults.length; j++) {
           processedCustomers[i + j] = batchResults[j];
         }
-        
+
         setCustomersWithLastInvoice([...processedCustomers.slice(0, i + batchSize)]);
-        
+
         if (i + batchSize < customers.length) {
           await new Promise(resolve => setTimeout(resolve, 300));
         }
       }
-      
+
       setCustomersWithLastInvoice(processedCustomers);
     } catch (error) {
       console.error("Error fetching customer orders:", error);
@@ -233,19 +233,19 @@ export const CustomersPage = () => {
   const handleExportExcel = async () => {
     setLoadingOrders(true);
     const token = getAuthToken();
-    
+
     let customers = getFilteredCustomers();
-    
+
     if (customers.length === 0) {
       alert("No customers to export");
       setLoadingOrders(false);
       return;
     }
-    
+
     const customersToUpdate = customers.filter(
       c => !c.last_invoice_number || c.last_invoice_number === "N/A"
     );
-    
+
     if (customersToUpdate.length > 0) {
       const updatedCustomers = await Promise.all(
         customers.map(async (customer) => {
@@ -258,7 +258,7 @@ export const CustomersPage = () => {
       );
       customers = updatedCustomers;
     }
-    
+
     const exportData = customers.map((customer) => ({
       ID: customer.id,
       "Full Name": `${customer.first_name || ""} ${customer.last_name || ""}`.trim(),
@@ -266,8 +266,8 @@ export const CustomersPage = () => {
       Email: customer.email || "N/A",
       "Last Invoice Number": customer.last_invoice_number || "N/A",
       "Invoice Value (KWD)": `${Number(customer.last_invoice_value || 0).toFixed(3)}`,
-      "Last Order Date": customer.last_order_date 
-        ? new Date(customer.last_order_date).toLocaleString() 
+      "Last Order Date": customer.last_order_date
+        ? new Date(customer.last_order_date).toLocaleString()
         : "No orders yet",
       "Date of Creation": new Date(customer.created_at).toLocaleString(),
       "Loyalty Tier": customer.loyalty_tier || "N/A",
@@ -287,19 +287,19 @@ export const CustomersPage = () => {
   const handleExportPDF = async () => {
     setLoadingOrders(true);
     const token = getAuthToken();
-    
+
     let customers = getFilteredCustomers();
-    
+
     if (customers.length === 0) {
       alert("No customers to export");
       setLoadingOrders(false);
       return;
     }
-    
+
     const customersToUpdate = customers.filter(
       c => !c.last_invoice_number || c.last_invoice_number === "N/A"
     );
-    
+
     if (customersToUpdate.length > 0) {
       const updatedCustomers = await Promise.all(
         customers.map(async (customer) => {
@@ -312,7 +312,7 @@ export const CustomersPage = () => {
       );
       customers = updatedCustomers;
     }
-    
+
     const doc = new jsPDF({
       orientation: "landscape",
       unit: "mm",
@@ -328,10 +328,10 @@ export const CustomersPage = () => {
     doc.setTextColor(100);
     doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 28);
     doc.text(`Total Customers: ${customers.length}`, 14, 34);
-    
+
     const urlParams = new URLSearchParams(window.location.search);
-    const hasFilters = urlParams.get("search") || urlParams.get("tier") || 
-                      urlParams.get("min_spent") || urlParams.get("max_spent");
+    const hasFilters = urlParams.get("search") || urlParams.get("tier") ||
+      urlParams.get("min_spent") || urlParams.get("max_spent");
     if (hasFilters) {
       doc.text(`Filters Applied: Yes`, 14, 40);
     }
@@ -351,14 +351,14 @@ export const CustomersPage = () => {
       customer.phone || "N/A",
       customer.last_invoice_number || "N/A",
       `${Number(customer.last_invoice_value || 0).toFixed(3)}`,
-      customer.last_order_date 
+      customer.last_order_date
         ? new Date(customer.last_order_date).toLocaleString("en-GB", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          })
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        })
         : "No orders yet",
     ]);
 
@@ -422,7 +422,7 @@ export const CustomersPage = () => {
               >
                 <RefreshCw className="h-4 w-4" />
               </button>
-              
+
               <div className="relative">
                 <button
                   onClick={() => setShowExportMenu(!showExportMenu)}
@@ -511,7 +511,7 @@ export const CustomersPage = () => {
           {!loadingOrders && filteredCustomers.length > 0 && (
             <div className="mb-4 text-sm text-gray-600">
               Showing {filteredCustomers.length} customer(s)
-              {filteredCustomers.length !== customersList.length && 
+              {filteredCustomers.length !== customersList.length &&
                 ` (filtered from ${customersList.length} total)`
               }
             </div>
@@ -590,14 +590,14 @@ export const CustomersPage = () => {
                           {customer.last_invoice_value ? `${customer.last_invoice_value.toFixed(3)} KWD` : "0.000 KWD"}
                         </td>
                         <td className="px-3 sm:px-4 py-3 text-center text-gray-600 text-sm">
-                          {customer.last_order_date 
-                            ? new Date(customer.last_order_date).toLocaleDateString() 
+                          {customer.last_order_date
+                            ? new Date(customer.last_order_date).toLocaleDateString()
                             : "No orders"}
                         </td>
                         {/* <td className="px-3 sm:px-4 py-3 text-right text-gray-700 font-semibold">
                           {customer.total_spent ? `${Number(customer.total_spent).toFixed(3)} KWD` : "0.000 KWD"}
                         </td> */}
-                        
+
                       </tr>
                     ))
                   )}
@@ -610,74 +610,74 @@ export const CustomersPage = () => {
           <div className="lg:hidden space-y-3">
             {loadingOrders
               ? Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="bg-white rounded-xl border border-gray-200 p-4 animate-pulse">
+                <div key={i} className="bg-white rounded-xl border border-gray-200 p-4 animate-pulse">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="h-10 w-10 bg-gray-100 rounded-full" />
+                    <div className="flex-1 space-y-2"><div className="h-4 bg-gray-100 rounded w-32" /><div className="h-3 bg-gray-100 rounded w-24" /></div>
+                    <div className="h-6 w-16 bg-gray-100 rounded-full" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="h-12 bg-gray-100 rounded" />
+                    <div className="h-12 bg-gray-100 rounded" />
+                  </div>
+                </div>
+              ))
+              : filteredCustomers.length === 0 ? (
+                <div className="bg-white rounded-xl border border-gray-200 p-8 text-center text-gray-400">
+                  No customers found matching the filters
+                </div>
+              ) : (
+                filteredCustomers.map((customer: any) => (
+                  <div
+                    key={customer.id}
+                    className="bg-white rounded-xl border border-gray-200 p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                    onClick={() => navigate(`${basePath}/crm/customers/${customer.id}`)}
+                  >
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="h-10 w-10 bg-gray-100 rounded-full" />
-                      <div className="flex-1 space-y-2"><div className="h-4 bg-gray-100 rounded w-32" /><div className="h-3 bg-gray-100 rounded w-24" /></div>
-                      <div className="h-6 w-16 bg-gray-100 rounded-full" />
+                      <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+                        <span className="text-sm font-semibold text-blue-700">
+                          {customer.first_name?.[0]}{customer.last_name?.[0]}
+                        </span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-gray-800 text-sm truncate">
+                          {customer.full_name ?? `${customer.first_name} ${customer.last_name}`}
+                        </p>
+                        <p className="text-xs text-gray-400 truncate">{customer.email}</p>
+                      </div>
+                      <TierBadge tier={customer.loyalty_tier} />
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="h-12 bg-gray-100 rounded" />
-                      <div className="h-12 bg-gray-100 rounded" />
+                    <div className="grid grid-cols-2 gap-2 text-center">
+                      <div className="bg-gray-50 rounded-lg p-2">
+                        <p className="text-xs text-gray-400">Last Invoice</p>
+                        <p className="text-sm font-semibold text-gray-800 truncate">
+                          {customer.last_invoice_number || "N/A"}
+                        </p>
+                      </div>
+                      <div className="bg-gray-50 rounded-lg p-2">
+                        <p className="text-xs text-gray-400">Invoice Value</p>
+                        <p className="text-sm font-semibold text-gray-800">
+                          {customer.last_invoice_value ? `${customer.last_invoice_value.toFixed(3)} KWD` : "0.000 KWD"}
+                        </p>
+                      </div>
+                      <div className="bg-gray-50 rounded-lg p-2">
+                        <p className="text-xs text-gray-400">Last Order Date</p>
+                        <p className="text-sm font-semibold text-gray-800">
+                          {customer.last_order_date
+                            ? new Date(customer.last_order_date).toLocaleDateString()
+                            : "No orders"}
+                        </p>
+                      </div>
+                      <div className="bg-gray-50 rounded-lg p-2">
+                        <p className="text-xs text-gray-400">Total Spent</p>
+                        <p className="text-sm font-semibold text-gray-800">
+                          {customer.total_spent ? `${Number(customer.total_spent).toFixed(3)} KWD` : "0.000 KWD"}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 ))
-              : filteredCustomers.length === 0 ? (
-                  <div className="bg-white rounded-xl border border-gray-200 p-8 text-center text-gray-400">
-                    No customers found matching the filters
-                  </div>
-                ) : (
-                  filteredCustomers.map((customer: any) => (
-                    <div
-                      key={customer.id}
-                      className="bg-white rounded-xl border border-gray-200 p-4 hover:bg-gray-50 cursor-pointer transition-colors"
-                      onClick={() => navigate(`${basePath}/crm/customers/${customer.id}`)}
-                    >
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-                          <span className="text-sm font-semibold text-blue-700">
-                            {customer.first_name?.[0]}{customer.last_name?.[0]}
-                          </span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-gray-800 text-sm truncate">
-                            {customer.full_name ?? `${customer.first_name} ${customer.last_name}`}
-                          </p>
-                          <p className="text-xs text-gray-400 truncate">{customer.email}</p>
-                        </div>
-                        <TierBadge tier={customer.loyalty_tier} />
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 text-center">
-                        <div className="bg-gray-50 rounded-lg p-2">
-                          <p className="text-xs text-gray-400">Last Invoice</p>
-                          <p className="text-sm font-semibold text-gray-800 truncate">
-                            {customer.last_invoice_number || "N/A"}
-                          </p>
-                        </div>
-                        <div className="bg-gray-50 rounded-lg p-2">
-                          <p className="text-xs text-gray-400">Invoice Value</p>
-                          <p className="text-sm font-semibold text-gray-800">
-                            {customer.last_invoice_value ? `${customer.last_invoice_value.toFixed(3)} KWD` : "0.000 KWD"}
-                          </p>
-                        </div>
-                        <div className="bg-gray-50 rounded-lg p-2">
-                          <p className="text-xs text-gray-400">Last Order Date</p>
-                          <p className="text-sm font-semibold text-gray-800">
-                            {customer.last_order_date 
-                              ? new Date(customer.last_order_date).toLocaleDateString() 
-                              : "No orders"}
-                          </p>
-                        </div>
-                        <div className="bg-gray-50 rounded-lg p-2">
-                          <p className="text-xs text-gray-400">Total Spent</p>
-                          <p className="text-sm font-semibold text-gray-800">
-                            {customer.total_spent ? `${Number(customer.total_spent).toFixed(3)} KWD` : "0.000 KWD"}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
+              )}
           </div>
 
           {isCustomerModalOpen && <CustomerModal />}

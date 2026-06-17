@@ -55,21 +55,36 @@ export default function Topbar({
   const [showCreateMenu, setShowCreateMenu] = useState(false);
   const [showShiftModal, setShowShiftModal] = useState(false);
   const [shiftDuration, setShiftDuration] = useState("");
+  const [isRegisterClosed, setIsRegisterClosed] = useState(false); // Add this state
 
   // Get current POS session for ALL users (including Super Admin)
-  const { data: currentRegisterResponse, refetch: refetchCurrentRegister } =
-    useGetCurrentPOSQuery(undefined, {
-      skip: !user?.id,
-      pollingInterval: 60000,
-    });
+  const {
+    data: currentRegisterResponse,
+    refetch: refetchCurrentRegister,
+    isFetching: isFetchingRegister,
+  } = useGetCurrentPOSQuery(undefined, {
+    skip: !user?.id,
+    pollingInterval: 60000,
+  });
 
   const currentRegister = currentRegisterResponse?.data;
   const isSuperAdmin = user?.role?.role_name === "Super Admin";
   const isCashier =
     user?.role?.role_name === "Cashier" || user?.role?.role_name === "cashier";
 
-  // Show shift button for both Cashier and Super Admin when they have an open register
-  const showShiftButton = (isCashier || isSuperAdmin) && currentRegister;
+  // Reset register closed state when a new register is opened
+  useEffect(() => {
+    if (currentRegister) {
+      setIsRegisterClosed(false);
+    }
+  }, [currentRegister]);
+
+  // Show shift button only when register is open
+  const showShiftButton = (isCashier || isSuperAdmin) && currentRegister && !isRegisterClosed;
+
+  // Show shift closed indicator when register is closed
+  const showShiftClosed = (isCashier || isSuperAdmin) &&
+    (isRegisterClosed || (!currentRegister && !isFetchingRegister));
 
   useEffect(() => {
     if (currentRegister?.opened_at) {
@@ -88,9 +103,18 @@ export default function Topbar({
   }, [currentRegister]);
 
   const handleCloseShift = () => setShowShiftModal(true);
+
   const handleShiftClosed = () => {
+    // Set register as closed
+    setIsRegisterClosed(true);
+    // Refetch to update the state
     refetchCurrentRegister();
     setShowShiftModal(false);
+
+    // Force a re-fetch after a short delay
+    setTimeout(() => {
+      refetchCurrentRegister();
+    }, 500);
   };
 
   const [createCategory] = useCreateCategoryMutation();
@@ -486,11 +510,11 @@ export default function Topbar({
             </button>
           </div>
 
-          {/* Shift Close Button */}
+          {/* Shift Close Button - Show when register is open */}
           {showShiftButton && (
             <button
               onClick={handleCloseShift}
-              className="hidden sm:flex items-center gap-1 px-2 py-1.5 xs:px-2.5 xs:py-1.5 sm:px-3 sm:py-2 bg-[#FF5F57] text-white rounded-lg hover:bg-[#FF4A42] transition-colors text-xs sm:text-sm whitespace-nowrap"
+              className="hidden sm:flex items-center gap-1 px-2 py-1.5 xs:px-2.5 xs:py-1.5 sm:px-3 sm:py-2 bg-[#FF5F57] text-white rounded-lg hover:bg-[#FF4A42] transition-colors text-xs sm:text-sm whitespace-nowrap animate-pulse"
             >
               <img
                 src={history_icon_2}
@@ -506,8 +530,8 @@ export default function Topbar({
             </button>
           )}
 
-          {/* Shift Closed Indicator */}
-          {(isCashier || isSuperAdmin) && !currentRegister && (
+          {/* Shift Closed Indicator - Show when register is closed */}
+          {showShiftClosed && (
             <div className="hidden sm:flex items-center gap-1 px-2 py-1.5 xs:px-2.5 xs:py-1.5 sm:px-3 sm:py-2 bg-gray-300 text-gray-500 rounded-lg text-xs sm:text-sm cursor-not-allowed whitespace-nowrap">
               <img
                 src={history_icon_2}
@@ -515,6 +539,7 @@ export default function Topbar({
                 className="w-3 h-3 sm:w-4 sm:h-4 opacity-50"
               />
               <span className="font-medium hidden xs:inline">Shift Closed</span>
+              <span className="font-medium xs:hidden">Closed</span>
             </div>
           )}
 
@@ -601,84 +626,84 @@ export default function Topbar({
           </button>
 
           {/* Profile Menu */}
-<div className="relative">
-  <button
-    onClick={(e) => {
-      e.stopPropagation();
-      setShowProfileMenu(!showProfileMenu);
-    }}
-    className="flex items-center gap-1 xs:gap-2 focus:outline-none"
-  >
-    <div className="w-6 h-6 xs:w-7 xs:h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center">
-      <span className="text-white text-xs xs:text-sm font-semibold">
-        {user?.name?.charAt(0) || "U"}
-      </span>
-    </div>
-    <div className="hidden md:block text-left">
-      <p className="text-xs sm:text-sm font-medium text-gray-900 max-w-[80px] sm:max-w-[100px] truncate">
-        {user?.name || "User"}
-      </p>
-      <p className="text-xs text-gray-500 max-w-[80px] sm:max-w-[100px] truncate">
-        {user?.role?.role_name || "Role"}
-      </p>
-    </div>
-    <ChevronDown className="hidden md:block w-3 h-3 sm:w-4 sm:h-4 text-gray-500" />
-  </button>
+          <div className="relative">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowProfileMenu(!showProfileMenu);
+              }}
+              className="flex items-center gap-1 xs:gap-2 focus:outline-none"
+            >
+              <div className="w-6 h-6 xs:w-7 xs:h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center">
+                <span className="text-white text-xs xs:text-sm font-semibold">
+                  {user?.name?.charAt(0) || "U"}
+                </span>
+              </div>
+              <div className="hidden md:block text-left">
+                <p className="text-xs sm:text-sm font-medium text-gray-900 max-w-[80px] sm:max-w-[100px] truncate">
+                  {user?.name || "User"}
+                </p>
+                <p className="text-xs text-gray-500 max-w-[80px] sm:max-w-[100px] truncate">
+                  {user?.role?.role_name || "Role"}
+                </p>
+              </div>
+              <ChevronDown className="hidden md:block w-3 h-3 sm:w-4 sm:h-4 text-gray-500" />
+            </button>
 
-  {showProfileMenu && (
-    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-      <div className="p-2">
-        <div className="px-3 py-2 border-b border-gray-100">
-          <p className="text-sm font-medium text-gray-900 truncate">
-            {user?.name}
-          </p>
-          <p className="text-xs text-gray-500 truncate">
-            {user?.email}
-          </p>
-          <p className="text-xs text-blue-600 font-medium mt-1">
-            {user?.role?.role_name}
-          </p>
-        </div>
-       
-        {/* Show My Leaves and My Leaves Requests to all users except Super Admin */}
-        {!isSuperAdmin && (
-          <>
-           <Link to="/profile">
-          <button
-            onClick={() => setShowProfileMenu(false)}
-            className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
-          >
-            My Profile
-          </button>
-        </Link>
-            <Link to="/my-leaves">
-              <button
-                onClick={() => setShowProfileMenu(false)}
-                className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
-              >
-                My Leaves
-              </button>
-            </Link>
-            <Link to="/my-leaves/request">
-              <button
-                onClick={() => setShowProfileMenu(false)}
-                className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
-              >
-                My Leaves Requests
-              </button>
-            </Link>
-          </>
-        )}
-        <button
-          onClick={handleLogout}
-          className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded transition-colors"
-        >
-          Logout
-        </button>
-      </div>
-    </div>
-  )}
-</div>
+            {showProfileMenu && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                <div className="p-2">
+                  <div className="px-3 py-2 border-b border-gray-100">
+                    <p className="text-sm font-medium text-gray-900 truncate">
+                      {user?.name}
+                    </p>
+                    <p className="text-xs text-gray-500 truncate">
+                      {user?.email}
+                    </p>
+                    <p className="text-xs text-blue-600 font-medium mt-1">
+                      {user?.role?.role_name}
+                    </p>
+                  </div>
+
+                  {/* Show My Leaves and My Leaves Requests to all users except Super Admin */}
+                  {!isSuperAdmin && (
+                    <>
+                      <Link to="/profile">
+                        <button
+                          onClick={() => setShowProfileMenu(false)}
+                          className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                        >
+                          My Profile
+                        </button>
+                      </Link>
+                      <Link to="/my-leaves">
+                        <button
+                          onClick={() => setShowProfileMenu(false)}
+                          className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                        >
+                          My Leaves
+                        </button>
+                      </Link>
+                      <Link to="/my-leaves/request">
+                        <button
+                          onClick={() => setShowProfileMenu(false)}
+                          className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                        >
+                          My Leaves Requests
+                        </button>
+                      </Link>
+                    </>
+                  )}
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded transition-colors"
+                  >
+                    Logout
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -703,6 +728,10 @@ export default function Topbar({
           register={currentRegister}
           onClose={() => setShowShiftModal(false)}
           onSuccess={handleShiftClosed}
+          onRegisterClosed={() => {
+            setIsRegisterClosed(true);
+            refetchCurrentRegister();
+          }}
         />
       )}
     </header>

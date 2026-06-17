@@ -106,9 +106,9 @@ export default function CreateExpenseModal({
       ...(checked
         ? {}
         : {
-            recurring_period: "Monthly",
-            next_recurrence_date: "",
-          }),
+          recurring_period: "Monthly",
+          next_recurrence_date: "",
+        }),
     }));
   };
 
@@ -205,58 +205,58 @@ export default function CreateExpenseModal({
   };
 
   const paymentMethods = [
-  // Cash
-  "Cash",
-  
-  // Kuwaiti Local Payment Systems
-  "KNET",
-  "WAMD (Instant Transfer)",
-  "Mobile Payment (Kuwait Mobile)",
-  
-  // Local Kuwaiti Banks
-  "NBK (National Bank of Kuwait)",
-  "KFH (Kuwait Finance House)",
-  "CBK (Commercial Bank of Kuwait)",
-  "GIB (Gulf Bank)",
-  "ABK (Ahli United Bank)",
-  "Burgan Bank",
-  "KIB (Kuwait International Bank)",
-  "Boubyan Bank",
-  "Warba Bank",
-  "Al Ahli Bank of Kuwait",
-  
-  // Kuwaiti Digital Wallets
-  "My KNET Mobile",
-  "Tam (Boubyan Bank)",
-  "WeYak (KFH)",
-  "Gulf Pay (GIB)",
-  "NBK Mobile Banking",
-  "KFH Go",
-  "CBK Mobile",
-  
-  // International Cards
-  "Visa Card",
-  "Mastercard",
-  "American Express",
-  "Debit Card",
-  
-  // Mobile Wallets
-  "Apple Pay",
-  "Google Pay",
-  "Samsung Pay",
-  
-  // Other Methods
-  "Bank Transfer",
-  "Cheque",
-  "Gift Card",
-  "Voucher",
-  "Tabby (Buy Now Pay Later)",
-  "Tamara (Buy Now Pay Later)",
-  "Postal Order",
-  "Government Payment",
-  "Corporate Account",
-  "Other",
-];
+    // Cash
+    "Cash",
+
+    // Kuwaiti Local Payment Systems
+    "KNET",
+    "WAMD (Instant Transfer)",
+    "Mobile Payment (Kuwait Mobile)",
+
+    // Local Kuwaiti Banks
+    "NBK (National Bank of Kuwait)",
+    "KFH (Kuwait Finance House)",
+    "CBK (Commercial Bank of Kuwait)",
+    "GIB (Gulf Bank)",
+    "ABK (Ahli United Bank)",
+    "Burgan Bank",
+    "KIB (Kuwait International Bank)",
+    "Boubyan Bank",
+    "Warba Bank",
+    "Al Ahli Bank of Kuwait",
+
+    // Kuwaiti Digital Wallets
+    "My KNET Mobile",
+    "Tam (Boubyan Bank)",
+    "WeYak (KFH)",
+    "Gulf Pay (GIB)",
+    "NBK Mobile Banking",
+    "KFH Go",
+    "CBK Mobile",
+
+    // International Cards
+    "Visa Card",
+    "Mastercard",
+    "American Express",
+    "Debit Card",
+
+    // Mobile Wallets
+    "Apple Pay",
+    "Google Pay",
+    "Samsung Pay",
+
+    // Other Methods
+    "Bank Transfer",
+    "Cheque",
+    "Gift Card",
+    "Voucher",
+    "Tabby (Buy Now Pay Later)",
+    "Tamara (Buy Now Pay Later)",
+    "Postal Order",
+    "Government Payment",
+    "Corporate Account",
+    "Other",
+  ];
 
 
   const recurringPeriods = [

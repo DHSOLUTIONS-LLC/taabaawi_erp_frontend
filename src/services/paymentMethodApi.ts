@@ -5,10 +5,23 @@ import type {
   PaymentMethodsResponse,
   FeeCalculationResponse,
   UpdatePaymentMethodPayload,
+  CreatePaymentMethodPayload
 } from '../types/payment-method';
 
 export const paymentMethodApi = api.injectEndpoints({
   endpoints: (builder) => ({
+
+    createPaymentMethod: builder.mutation<
+      PaymentMethodResponse,
+      CreatePaymentMethodPayload
+    >({
+      query: (data) => ({
+        url: '/payment-methods',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['PaymentMethods'],
+    }),
     // Get all payment methods
     getPaymentMethods: builder.query<PaymentMethodsResponse, PaymentMethodFilters | void>({
       query: (params) => ({
@@ -66,4 +79,5 @@ export const {
   useGetPaymentMethodByIdQuery,
   useUpdatePaymentMethodMutation,
   useCalculateFeeMutation,
+  useCreatePaymentMethodMutation
 } = paymentMethodApi;

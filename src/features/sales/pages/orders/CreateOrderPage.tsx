@@ -268,7 +268,7 @@ export default function CreateOrderPage() {
       } else {
         alert(
           err?.data?.message ||
-            "Failed to create order. Please check all fields and try again.",
+          "Failed to create order. Please check all fields and try again.",
         );
       }
     }
@@ -297,56 +297,56 @@ export default function CreateOrderPage() {
 
   const CHANNELS = ["Phone", "Manual"];
   const PAYMENT_METHODS = [
-   "Cash",
-  
-  // Kuwaiti Local Payment Systems
-  "KNET",
-  "WAMD (Instant Transfer)",
-  "Mobile Payment (Kuwait Mobile)",
-  
-  // Local Kuwaiti Banks
-  "NBK (National Bank of Kuwait)",
-  "KFH (Kuwait Finance House)",
-  "CBK (Commercial Bank of Kuwait)",
-  "GIB (Gulf Bank)",
-  "ABK (Ahli United Bank)",
-  "Burgan Bank",
-  "KIB (Kuwait International Bank)",
-  "Boubyan Bank",
-  "Warba Bank",
-  "Al Ahli Bank of Kuwait",
-  
-  // Kuwaiti Digital Wallets
-  "My KNET Mobile",
-  "Tam (Boubyan Bank)",
-  "WeYak (KFH)",
-  "Gulf Pay (GIB)",
-  "NBK Mobile Banking",
-  "KFH Go",
-  "CBK Mobile",
-  
-  // International Cards
-  "Visa Card",
-  "Mastercard",
-  "American Express",
-  "Debit Card",
-  
-  // Mobile Wallets
-  "Apple Pay",
-  "Google Pay",
-  "Samsung Pay",
-  
-  // Other Methods
-  "Bank Transfer",
-  "Cheque",
-  "Gift Card",
-  "Voucher",
-  "Tabby (Buy Now Pay Later)",
-  "Tamara (Buy Now Pay Later)",
-  "Postal Order",
-  "Government Payment",
-  "Corporate Account",
-  "Other",
+    "Cash",
+
+    // Kuwaiti Local Payment Systems
+    "KNET",
+    "WAMD (Instant Transfer)",
+    "Mobile Payment (Kuwait Mobile)",
+
+    // Local Kuwaiti Banks
+    "NBK (National Bank of Kuwait)",
+    "KFH (Kuwait Finance House)",
+    "CBK (Commercial Bank of Kuwait)",
+    "GIB (Gulf Bank)",
+    "ABK (Ahli United Bank)",
+    "Burgan Bank",
+    "KIB (Kuwait International Bank)",
+    "Boubyan Bank",
+    "Warba Bank",
+    "Al Ahli Bank of Kuwait",
+
+    // Kuwaiti Digital Wallets
+    "My KNET Mobile",
+    "Tam (Boubyan Bank)",
+    "WeYak (KFH)",
+    "Gulf Pay (GIB)",
+    "NBK Mobile Banking",
+    "KFH Go",
+    "CBK Mobile",
+
+    // International Cards
+    "Visa Card",
+    "Mastercard",
+    "American Express",
+    "Debit Card",
+
+    // Mobile Wallets
+    "Apple Pay",
+    "Google Pay",
+    "Samsung Pay",
+
+    // Other Methods
+    "Bank Transfer",
+    "Cheque",
+    "Gift Card",
+    "Voucher",
+    "Tabby (Buy Now Pay Later)",
+    "Tamara (Buy Now Pay Later)",
+    "Postal Order",
+    "Government Payment",
+    "Corporate Account",
+    "Other",
   ];
   const [paymentMethods, setPaymentMethods] = useState(PAYMENT_METHODS);
 
@@ -405,22 +405,20 @@ export default function CreateOrderPage() {
                     <button
                       type="button"
                       onClick={() => setOrderType("B2C")}
-                      className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${
-                        orderType === "B2C"
+                      className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${orderType === "B2C"
                           ? "bg-blue-600 text-white"
                           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
+                        }`}
                     >
                       B2C (Customer)
                     </button>
                     <button
                       type="button"
                       onClick={() => setOrderType("B2B")}
-                      className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${
-                        orderType === "B2B"
+                      className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${orderType === "B2B"
                           ? "bg-blue-600 text-white"
                           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
+                        }`}
                     >
                       B2B (Business)
                     </button>
@@ -551,11 +549,10 @@ export default function CreateOrderPage() {
                       type="text"
                       value={customerName}
                       onChange={(e) => setCustomerName(e.target.value)}
-                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 ${
-                        errors.customerName
+                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.customerName
                           ? "border-red-500"
                           : "border-gray-300"
-                      }`}
+                        }`}
                       placeholder="Enter customer name"
                     />
                     {errors.customerName && (
@@ -572,11 +569,10 @@ export default function CreateOrderPage() {
                       type="email"
                       value={customerEmail}
                       onChange={(e) => setCustomerEmail(e.target.value)}
-                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 ${
-                        errors.customerEmail
+                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.customerEmail
                           ? "border-red-500"
                           : "border-gray-300"
-                      }`}
+                        }`}
                       placeholder="customer@example.com"
                     />
                     {errors.customerEmail && (
@@ -593,11 +589,10 @@ export default function CreateOrderPage() {
                       type="text"
                       value={customerPhone}
                       onChange={(e) => setCustomerPhone(e.target.value)}
-                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 ${
-                        errors.customerPhone
+                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.customerPhone
                           ? "border-red-500"
                           : "border-gray-300"
-                      }`}
+                        }`}
                       placeholder="+965 XXXX XXXX"
                     />
                     {errors.customerPhone && (
@@ -649,11 +644,10 @@ export default function CreateOrderPage() {
                       type="email"
                       value={customerEmail}
                       onChange={(e) => setCustomerEmail(e.target.value)}
-                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 ${
-                        errors.customerEmail
+                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.customerEmail
                           ? "border-red-500"
                           : "border-gray-300"
-                      }`}
+                        }`}
                       placeholder="info@company.com"
                     />
                     {errors.customerEmail && (
@@ -704,11 +698,10 @@ export default function CreateOrderPage() {
                     type="text"
                     value={shippingAddress}
                     onChange={(e) => setShippingAddress(e.target.value)}
-                    className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 ${
-                      errors.shippingAddress
+                    className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 ${errors.shippingAddress
                         ? "border-red-500"
                         : "border-gray-300"
-                    }`}
+                      }`}
                     placeholder="Block, Street, House number, Area"
                   />
                   {errors.shippingAddress && (
@@ -725,11 +718,10 @@ export default function CreateOrderPage() {
                     <select
                       value={shippingCity}
                       onChange={(e) => setShippingCity(e.target.value)}
-                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10 ${
-                        errors.shippingCity
+                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10 ${errors.shippingCity
                           ? "border-red-500"
                           : "border-gray-300"
-                      }`}
+                        }`}
                     >
                       <option value="">Select City</option>
                       {KUWAIT_CITIES.map((city) => (
@@ -772,11 +764,10 @@ export default function CreateOrderPage() {
                     <select
                       value={shippingCountry}
                       onChange={(e) => setShippingCountry(e.target.value)}
-                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10 ${
-                        errors.shippingCountry
+                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10 ${errors.shippingCountry
                           ? "border-red-500"
                           : "border-gray-300"
-                      }`}
+                        }`}
                     >
                       {COUNTRIES.map((country) => (
                         <option key={country} value={country}>
@@ -1181,11 +1172,10 @@ export default function CreateOrderPage() {
                           );
                         }
                       }}
-                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10 ${
-                        errors.shippingMethod
+                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 appearance-none bg-white pr-8 sm:pr-10 ${errors.shippingMethod
                           ? "border-red-500"
                           : "border-gray-300"
-                      }`}
+                        }`}
                     >
                       <option value="">Select a shipping method</option>
                       {methods.map((method: ShippingMethod) => (

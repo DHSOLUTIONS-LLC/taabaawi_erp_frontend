@@ -14,6 +14,7 @@ interface CloseRegisterPageProps {
   };
   onClose: () => void;
   onSuccess: () => void;
+  onRegisterClosed?: () => void; // Add this callback
 }
 
 // Kuwait Currency Denominations
@@ -36,6 +37,7 @@ export default function CloseRegisterPage({
   register,
   onClose,
   onSuccess,
+  onRegisterClosed, // Add this
 }: CloseRegisterPageProps) {
   const [denominations, setDenominations] = useState<DenominationCount>({});
   const [closingNotes, setClosingNotes] = useState("");
@@ -72,65 +74,69 @@ export default function CloseRegisterPage({
     }));
   };
 
- const handleCloseRegister = async () => {
-  setError("");
-  if (!register?.id) return;
+  const handleCloseRegister = async () => {
+    setError("");
+    if (!register?.id) return;
 
-  if (useDenominationMode && closingBalance === 0) {
-    setError("Please enter at least one denomination count");
-    return;
-  }
-
-  if (!useDenominationMode && (!manualClosingBalance || closingBalance < 0)) {
-    setError("Please enter a valid closing balance");
-    return;
-  }
-
-  if (closingBalance > 1000000) {
-    setError("Closing balance seems too high. Please verify.");
-    return;
-  }
-
-  try {
-    // Build the payload
-    const payload: {
-      id: number;
-      closing_balance: number;
-      closing_notes?: string;
-      denominations?: Record<string, number>;
-    } = {
-      id: register.id,
-      closing_balance: closingBalance,
-      closing_notes: closingNotes || undefined,
-    };
-
-    // Add denominations only if in denomination mode
-    if (useDenominationMode && Object.keys(denominations).length > 0) {
-      payload.denominations = denominations;
+    if (useDenominationMode && closingBalance === 0) {
+      setError("Please enter at least one denomination count");
+      return;
     }
 
-    console.log("📤 Closing register payload:", payload);
+    if (!useDenominationMode && (!manualClosingBalance || closingBalance < 0)) {
+      setError("Please enter a valid closing balance");
+      return;
+    }
 
-    // Close the register
-    await closeRegister(payload).unwrap();
- localStorage.removeItem("pos_session");
+    if (closingBalance > 1000000) {
+      setError("Closing balance seems too high. Please verify.");
+      return;
+    }
 
- 
-    setStep("generating");
+    try {
+      // Build the payload
+      const payload: {
+        id: number;
+        closing_balance: number;
+        closing_notes?: string;
+        denominations?: Record<string, number>;
+      } = {
+        id: register.id,
+        closing_balance: closingBalance,
+        closing_notes: closingNotes || undefined,
+      };
 
-    // Generate shift report
-    const reportResult = await generateShiftReport(register.id).unwrap();
-    setShiftReport(reportResult?.data);
+      // Add denominations only if in denomination mode
+      if (useDenominationMode && Object.keys(denominations).length > 0) {
+        payload.denominations = denominations;
+      }
 
-    setStep("done");
-  } catch (err: any) {
-    console.error("Close register error:", err);
-    setError(
-      err?.data?.message || "Failed to close register. Please try again."
-    );
-    setStep("form");
-  }
-};
+      console.log("📤 Closing register payload:", payload);
+
+      // Close the register
+      await closeRegister(payload).unwrap();
+      localStorage.removeItem("pos_session");
+
+      // Call the callback to notify parent that register is closed
+      if (onRegisterClosed) {
+        onRegisterClosed();
+      }
+
+      setStep("generating");
+
+      // Generate shift report
+      const reportResult = await generateShiftReport(register.id).unwrap();
+      setShiftReport(reportResult?.data);
+
+      setStep("done");
+    } catch (err: any) {
+      console.error("Close register error:", err);
+      setError(
+        err?.data?.message || "Failed to close register. Please try again."
+      );
+      setStep("form");
+    }
+  };
 
   const handleDone = () => {
     setStep("form");
@@ -148,9 +154,8 @@ export default function CloseRegisterPage({
       <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div
-          className={`px-6 py-5 sticky top-0 ${
-            step === "done" ? "bg-green-600" : "bg-red-600"
-          }`}
+          className={`px-6 py-5 sticky top-0 ${step === "done" ? "bg-green-600" : "bg-red-600"
+            }`}
         >
           <h2 className="text-xl font-bold text-white">
             {step === "done" ? "✓ Register Closed" : "Close Register"}
@@ -282,11 +287,10 @@ export default function CloseRegisterPage({
                     setUseDenominationMode(true);
                     setManualClosingBalance("");
                   }}
-                  className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${
-                    useDenominationMode
+                  className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${useDenominationMode
                       ? "bg-blue-600 text-white"
                       : "text-gray-600 hover:bg-gray-200"
-                  }`}
+                    }`}
                 >
                   Count Denominations
                 </button>
@@ -296,11 +300,10 @@ export default function CloseRegisterPage({
                     setUseDenominationMode(false);
                     setDenominations({});
                   }}
-                  className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${
-                    !useDenominationMode
+                  className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${!useDenominationMode
                       ? "bg-blue-600 text-white"
                       : "text-gray-600 hover:bg-gray-200"
-                  }`}
+                    }`}
                 >
                   Enter Total Manually
                 </button>
@@ -410,13 +413,12 @@ export default function CloseRegisterPage({
               {/* Difference Display */}
               {closingBalance > 0 && (
                 <div
-                  className={`p-3 rounded-lg ${
-                    difference === 0
+                  className={`p-3 rounded-lg ${difference === 0
                       ? "bg-green-50 border border-green-200"
                       : difference > 0
-                      ? "bg-blue-50 border border-blue-200"
-                      : "bg-red-50 border border-red-200"
-                  }`}
+                        ? "bg-blue-50 border border-blue-200"
+                        : "bg-red-50 border border-red-200"
+                    }`}
                 >
                   <div className="flex justify-between items-center">
                     <span className="font-medium text-gray-700">
@@ -429,19 +431,18 @@ export default function CloseRegisterPage({
                       Difference:
                     </span>
                     <span
-                      className={`font-bold text-lg ${
-                        difference === 0
+                      className={`font-bold text-lg ${difference === 0
                           ? "text-green-600"
                           : difference > 0
-                          ? "text-blue-600"
-                          : "text-red-600"
-                      }`}
+                            ? "text-blue-600"
+                            : "text-red-600"
+                        }`}
                     >
                       {difference === 0
                         ? "✓ Balanced"
                         : difference > 0
-                        ? `+ KWD ${difference.toFixed(3)} (Over)`
-                        : `- KWD ${Math.abs(difference).toFixed(3)} (Short)`}
+                          ? `+ KWD ${difference.toFixed(3)} (Over)`
+                          : `- KWD ${Math.abs(difference).toFixed(3)} (Short)`}
                     </span>
                   </div>
                 </div>
@@ -486,8 +487,8 @@ export default function CloseRegisterPage({
                   {isClosing
                     ? "Closing..."
                     : isGenerating
-                    ? "Generating..."
-                    : "Close Register"}
+                      ? "Generating..."
+                      : "Close Register"}
                 </button>
               </div>
             </div>

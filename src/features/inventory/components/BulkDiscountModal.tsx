@@ -69,13 +69,13 @@ export default function BulkDiscountModal({
       .split("T")[0],
   );
   const [description, setDescription] = useState("");
-  
+
   // Frontend validation states
   const [validatedItems, setValidatedItems] = useState<ValidatedItem[]>([]);
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
   const [isParsing, setIsParsing] = useState(false);
   const [excelColumns, setExcelColumns] = useState<string[]>([]);
-  
+
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -239,47 +239,47 @@ export default function BulkDiscountModal({
   const parseAndValidateExcel = async (file: File): Promise<{ valid: ValidatedItem[]; errors: ValidationError[] }> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      
+
       reader.onload = (e) => {
         try {
           const data = new Uint8Array(e.target?.result as ArrayBuffer);
           const workbook = XLSX.read(data, { type: 'array' });
           const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
           const jsonData = XLSX.utils.sheet_to_json(firstSheet);
-          
+
           if (jsonData.length === 0) {
             reject(new Error("Excel file is empty"));
             return;
           }
-          
+
           // Get column headers
           const columns = Object.keys(jsonData[0]);
           setExcelColumns(columns);
-          
+
           const valid: ValidatedItem[] = [];
           const errors: ValidationError[] = [];
-          
+
           // Create a map of products by ID for quick lookup
           const productsMap = new Map();
           products.forEach((p: any) => {
             productsMap.set(p.id, p);
             productsMap.set(Number(p.id), p);
           });
-          
+
           for (let index = 0; index < jsonData.length; index++) {
             const row: any = jsonData[index];
             const rowNumber = index + 2; // +2 for header row + 1-based index
-            
+
             // Try different column name variations
             let productId = row.product_id || row["Product ID"] || row.productId;
             let discountPercentage = row.discount_percentage || row["Discount Percentage"] || row.discountPercentage;
             let discountAmount = row.discount_amount || row["Discount Amount"] || row.discountAmount;
-            
+
             // Skip empty rows
             if (!productId && !discountPercentage && !discountAmount) {
               continue;
             }
-            
+
             // Validate product ID
             if (!productId) {
               errors.push({
@@ -288,9 +288,9 @@ export default function BulkDiscountModal({
               });
               continue;
             }
-            
+
             const product = productsMap.get(Number(productId));
-            
+
             if (!product) {
               errors.push({
                 row: rowNumber,
@@ -299,18 +299,18 @@ export default function BulkDiscountModal({
               });
               continue;
             }
-            
+
             // Get original price
             const originalPrice = parseFloat(product.selling_price || product.price || 0);
-            
+
             // Calculate discount
             let finalDiscountPercentage = 0;
             let finalDiscountAmount = 0;
             let finalPrice = originalPrice;
-            
+
             if (discountPercentage && !isNaN(parseFloat(discountPercentage))) {
               finalDiscountPercentage = parseFloat(discountPercentage);
-              
+
               // Validate discount percentage
               if (finalDiscountPercentage < 0 || finalDiscountPercentage > 100) {
                 errors.push({
@@ -321,13 +321,13 @@ export default function BulkDiscountModal({
                 });
                 continue;
               }
-              
+
               finalDiscountAmount = originalPrice * (finalDiscountPercentage / 100);
               finalPrice = originalPrice - finalDiscountAmount;
-            } 
+            }
             else if (discountAmount && !isNaN(parseFloat(discountAmount))) {
               finalDiscountAmount = parseFloat(discountAmount);
-              
+
               // Validate discount amount
               if (finalDiscountAmount < 0 || finalDiscountAmount > originalPrice) {
                 errors.push({
@@ -338,7 +338,7 @@ export default function BulkDiscountModal({
                 });
                 continue;
               }
-              
+
               finalDiscountPercentage = (finalDiscountAmount / originalPrice) * 100;
               finalPrice = originalPrice - finalDiscountAmount;
             }
@@ -351,7 +351,7 @@ export default function BulkDiscountModal({
               });
               continue;
             }
-            
+
             // Validate final price
             if (finalPrice < 0) {
               errors.push({
@@ -362,7 +362,7 @@ export default function BulkDiscountModal({
               });
               continue;
             }
-            
+
             // Add to valid items
             valid.push({
               row: rowNumber,
@@ -376,14 +376,14 @@ export default function BulkDiscountModal({
               variant_id: row.variant_id || null
             });
           }
-          
+
           resolve({ valid, errors });
-          
+
         } catch (err: any) {
           reject(new Error(`Failed to parse Excel: ${err.message}`));
         }
       };
-      
+
       reader.onerror = () => reject(new Error("Failed to read file"));
       reader.readAsArrayBuffer(file);
     });
@@ -394,7 +394,7 @@ export default function BulkDiscountModal({
     setValidatedItems([]);
     setValidationErrors([]);
     setImportResult(null);
-    
+
     // Validate file type
     const fileExtension = file.name.split(".").pop()?.toLowerCase();
     if (!["xlsx", "xls", "csv"].includes(fileExtension || "")) {
@@ -402,38 +402,38 @@ export default function BulkDiscountModal({
       setSelectedFile(null);
       return;
     }
-    
+
     if (file.size > 5 * 1024 * 1024) {
       setError("File size should be less than 5MB");
       setSelectedFile(null);
       return;
     }
-    
+
     setSelectedFile(file);
     setIsParsing(true);
-    
+
     try {
       toast.loading("Reading and validating file...", { id: "parsing" });
-      
+
       const result = await parseAndValidateExcel(file);
-      
+
       setValidatedItems(result.valid);
       setValidationErrors(result.errors);
-      
+
       toast.dismiss("parsing");
-      
+
       if (result.valid.length > 0) {
         toast.success(`✅ ${result.valid.length} valid items found`);
       }
-      
+
       if (result.errors.length > 0) {
         toast.error(`⚠️ ${result.errors.length} errors found - please review`);
       }
-      
+
       if (result.valid.length === 0 && result.errors.length === 0) {
         setError("No data found in Excel file");
       }
-      
+
     } catch (err: any) {
       toast.dismiss("parsing");
       setError(err.message || "Failed to parse file");
@@ -443,87 +443,87 @@ export default function BulkDiscountModal({
     }
   };
 
- const handleImport = async () => {
-  if (validatedItems.length === 0) {
-    setError("No valid items to import");
-    return;
-  }
-  
-  if (!discountName.trim()) {
-    setError("Please enter a discount name");
-    return;
-  }
-  
-  if (!startDate || !endDate) {
-    setError("Please select start and end dates");
-    return;
-  }
+  const handleImport = async () => {
+    if (validatedItems.length === 0) {
+      setError("No valid items to import");
+      return;
+    }
 
-  try {
-    setUploadProgress(30);
-    toast.loading("Creating discounts...", { id: "import" });
-    
-    // Create FormData
-    const formData = new FormData();
-    formData.append("discount_name", discountName);
-    formData.append("start_date", startDate);
-    formData.append("end_date", endDate);
-    if (description) formData.append("description", description);
-    
-    // Create a simple array with just product_id and discount
-    const simpleData = validatedItems.map(item => ({
-      product_id: item.product_id,
-      discount: item.discount_percentage
-    }));
-    
-    // Create worksheet
-    const ws = XLSX.utils.json_to_sheet(simpleData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Discounts");
-    
-    // Generate file
-    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'binary' });
-    const buf = new ArrayBuffer(wbout.length);
-    const view = new Uint8Array(buf);
-    for (let i = 0; i < wbout.length; i++) {
-      view[i] = wbout.charCodeAt(i) & 0xFF;
+    if (!discountName.trim()) {
+      setError("Please enter a discount name");
+      return;
     }
-    const blob = new Blob([buf], { type: 'application/octet-stream' });
-    formData.append("file", blob, "discounts.xlsx");
-    
-    // Call API
-    const response = await importBulkDiscount(formData).unwrap();
-    
-    setUploadProgress(100);
-    toast.dismiss("import");
-    setImportResult(response.data);
-    toast.success(`✅ Successfully created ${validatedItems.length} discounts!`);
-    
-    if (onSuccess) onSuccess();
-    setTimeout(() => onClose(), 2000);
-    
-  } catch (err: any) {
-    toast.dismiss("import");
-    console.error("Import error:", err);
-    
-    let errorMessage = "Failed to import discounts";
-    if (err?.data?.message) {
-      errorMessage = err.data.message;
-    } else if (err?.data?.errors) {
-      const errors = err.data.errors;
-      if (typeof errors === 'object') {
-        errorMessage = Object.values(errors).flat().join(', ');
-      } else {
-        errorMessage = String(errors);
+
+    if (!startDate || !endDate) {
+      setError("Please select start and end dates");
+      return;
+    }
+
+    try {
+      setUploadProgress(30);
+      toast.loading("Creating discounts...", { id: "import" });
+
+      // Create FormData
+      const formData = new FormData();
+      formData.append("discount_name", discountName);
+      formData.append("start_date", startDate);
+      formData.append("end_date", endDate);
+      if (description) formData.append("description", description);
+
+      // Create a simple array with just product_id and discount
+      const simpleData = validatedItems.map(item => ({
+        product_id: item.product_id,
+        discount: item.discount_percentage
+      }));
+
+      // Create worksheet
+      const ws = XLSX.utils.json_to_sheet(simpleData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Discounts");
+
+      // Generate file
+      const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'binary' });
+      const buf = new ArrayBuffer(wbout.length);
+      const view = new Uint8Array(buf);
+      for (let i = 0; i < wbout.length; i++) {
+        view[i] = wbout.charCodeAt(i) & 0xFF;
       }
-    } else if (err?.message) {
-      errorMessage = err.message;
+      const blob = new Blob([buf], { type: 'application/octet-stream' });
+      formData.append("file", blob, "discounts.xlsx");
+
+      // Call API
+      const response = await importBulkDiscount(formData).unwrap();
+
+      setUploadProgress(100);
+      toast.dismiss("import");
+      setImportResult(response.data);
+      toast.success(`✅ Successfully created ${validatedItems.length} discounts!`);
+
+      if (onSuccess) onSuccess();
+      setTimeout(() => onClose(), 2000);
+
+    } catch (err: any) {
+      toast.dismiss("import");
+      console.error("Import error:", err);
+
+      let errorMessage = "Failed to import discounts";
+      if (err?.data?.message) {
+        errorMessage = err.data.message;
+      } else if (err?.data?.errors) {
+        const errors = err.data.errors;
+        if (typeof errors === 'object') {
+          errorMessage = Object.values(errors).flat().join(', ');
+        } else {
+          errorMessage = String(errors);
+        }
+      } else if (err?.message) {
+        errorMessage = err.message;
+      }
+
+      setError(errorMessage);
+      setUploadProgress(0);
     }
-    
-    setError(errorMessage);
-    setUploadProgress(0);
-  }
-};
+  };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -584,21 +584,19 @@ export default function BulkDiscountModal({
               <nav className="flex gap-6">
                 <button
                   onClick={() => setActiveTab("export")}
-                  className={`py-3 text-sm font-medium border-b-2 transition-colors ${
-                    activeTab === "export"
-                      ? "border-blue-600 text-blue-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700"
-                  }`}
+                  className={`py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === "export"
+                    ? "border-blue-600 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700"
+                    }`}
                 >
-                 Export Products
+                  Export Products
                 </button>
                 <button
                   onClick={() => setActiveTab("import")}
-                  className={`py-3 text-sm font-medium border-b-2 transition-colors ${
-                    activeTab === "import"
-                      ? "border-blue-600 text-blue-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700"
-                  }`}
+                  className={`py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === "import"
+                    ? "border-blue-600 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700"
+                    }`}
                 >
                   Import Discounts
                 </button>
@@ -703,7 +701,7 @@ export default function BulkDiscountModal({
                               (sum: number, inv: any) => sum + (inv.quantity || 0),
                               0,
                             ) || product.stock_quantity || product.quantity || 0;
-                            
+
                             return (
                               <tr key={product.id} className="hover:bg-gray-50">
                                 <td className="px-4 py-3">
@@ -734,10 +732,9 @@ export default function BulkDiscountModal({
                                   KWD {parseFloat(product.selling_price || product.price || 0).toFixed(3)}
                                 </td>
                                 <td className="px-4 py-3 text-center">
-                                  <span className={`text-sm font-medium ${
-                                    totalStock === 0 ? "text-red-600" : 
+                                  <span className={`text-sm font-medium ${totalStock === 0 ? "text-red-600" :
                                     totalStock <= (product.low_stock_alert || 10) ? "text-yellow-600" : "text-green-600"
-                                  }`}>
+                                    }`}>
                                     {totalStock}
                                   </span>
                                 </td>
@@ -779,7 +776,7 @@ export default function BulkDiscountModal({
                 {/* Export Button */}
                 <div className="mt-6 pt-4 border-t border-gray-200">
                   <button onClick={handleExportToExcel} className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-                   Download Template ({filteredProducts.length} products)
+                    Download Template ({filteredProducts.length} products)
                   </button>
                 </div>
               </div>
@@ -852,9 +849,8 @@ export default function BulkDiscountModal({
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
                     onClick={() => fileInputRef.current?.click()}
-                    className={`relative border-2 border-dashed rounded-lg p-6 transition-all cursor-pointer ${
-                      isDragging ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-blue-400 hover:bg-gray-50"
-                    }`}
+                    className={`relative border-2 border-dashed rounded-lg p-6 transition-all cursor-pointer ${isDragging ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-blue-400 hover:bg-gray-50"
+                      }`}
                   >
                     <input
                       ref={fileInputRef}

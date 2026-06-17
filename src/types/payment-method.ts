@@ -14,6 +14,16 @@ export interface PaymentMethod {
   updated_at?: string;
 }
 
+export interface CreatePaymentMethodPayload {
+  method_name: string;
+  description?: string;
+  transaction_fee_percentage?: number;
+  transaction_fee_fixed?: number;
+  sort_order?: number;
+  is_active?: boolean;
+}
+
+
 export interface PaymentMethodFilters {
   is_active?: boolean;
   is_online?: boolean;

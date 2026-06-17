@@ -49,6 +49,7 @@ export default function CartSidebar({
 
   const [giftReceipt, setGiftReceipt] = useState(false);
   const [isEmployeePurchase, setIsEmployeePurchase] = useState(false);
+  const [employeeDiscountPercent, setEmployeeDiscountPercent] = useState<number>(0);
   const [promoCode, setPromoCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<{
     code: string;
@@ -106,9 +107,12 @@ export default function CartSidebar({
     return sum + (item.price * item.quantity * discPct) / 100;
   }, 0);
   const couponDiscount = appliedCoupon?.discount || 0;
+
+  // Calculate employee discount based on the percentage entered
   const employeeDiscount = isEmployeePurchase
-    ? (subtotal - itemDiscountTotal) * 0.3
+    ? (subtotal - itemDiscountTotal) * (employeeDiscountPercent / 100)
     : 0;
+
   const total =
     subtotal - itemDiscountTotal - couponDiscount - employeeDiscount;
   const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
@@ -128,6 +132,13 @@ export default function CartSidebar({
       document.body.style.overflow = "unset";
     };
   }, [isOpen]);
+
+  // Reset employee discount when toggled off
+  useEffect(() => {
+    if (!isEmployeePurchase) {
+      setEmployeeDiscountPercent(0);
+    }
+  }, [isEmployeePurchase]);
 
   const handleApplyCoupon = async () => {
     setCouponError("");
@@ -209,6 +220,16 @@ export default function CartSidebar({
     }
   };
 
+  const handleEmployeeDiscountChange = (value: string) => {
+    let percent = parseFloat(value) || 0;
+
+    // Clamp between 0 and 20
+    if (percent < 0) percent = 0;
+    if (percent > 20) percent = 20;
+
+    setEmployeeDiscountPercent(percent);
+  };
+
   const handleSaleSuccess = (sale: any) => {
     setCompletedSaleId(sale.id);
     setShowPayment(false);
@@ -220,6 +241,7 @@ export default function CartSidebar({
     setPromoCode("");
     setGiftReceipt(false);
     setIsEmployeePurchase(false);
+    setEmployeeDiscountPercent(0);
     setItemDiscounts({});
     setCompletedSaleId(null);
     setSalesPersonId("");
@@ -623,7 +645,12 @@ export default function CartSidebar({
                 </div>
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => setIsEmployeePurchase(!isEmployeePurchase)}
+                    onClick={() => {
+                      setIsEmployeePurchase(!isEmployeePurchase);
+                      if (!isEmployeePurchase) {
+                        setEmployeeDiscountPercent(0);
+                      }
+                    }}
                     className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${isEmployeePurchase ? "bg-purple-500" : "bg-gray-300"}`}
                   >
                     <span
@@ -633,6 +660,38 @@ export default function CartSidebar({
                   <span className="text-sm text-gray-700">👤 Employee</span>
                 </div>
               </div>
+
+              {/* Employee Discount Input - Show only when employee purchase is enabled */}
+              {isEmployeePurchase && (
+                <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
+                  <div className="flex items-center gap-3">
+                    <label className="text-sm font-medium text-purple-700 whitespace-nowrap">
+                      Employee Discount (%):
+                    </label>
+                    <div className="flex-1 flex items-center gap-2">
+                      <input
+                        type="number"
+                        min="0"
+                        max="20"
+                        step="0.5"
+                        value={employeeDiscountPercent}
+                        onChange={(e) => handleEmployeeDiscountChange(e.target.value)}
+                        className="w-20 px-2 py-1.5 border border-purple-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white"
+                      />
+                      <span className="text-xs text-purple-600">
+                        Max 20%
+                      </span>
+                    </div>
+                  </div>
+                  {employeeDiscountPercent > 0 && (
+                    <div className="mt-1 text-xs text-purple-600">
+                      Discount: KWD {(subtotal - itemDiscountTotal) * (employeeDiscountPercent / 100) > 0
+                        ? ((subtotal - itemDiscountTotal) * (employeeDiscountPercent / 100)).toFixed(3)
+                        : '0.000'}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Coupon */}
               {!appliedCoupon ? (
@@ -698,7 +757,7 @@ export default function CartSidebar({
                 )}
                 {employeeDiscount > 0 && (
                   <div className="flex justify-between text-purple-600">
-                    <span>Employee (30%)</span>
+                    <span>Employee ({employeeDiscountPercent}%)</span>
                     <span>-KWD {employeeDiscount.toFixed(3)}</span>
                   </div>
                 )}
@@ -749,20 +808,20 @@ export default function CartSidebar({
         couponCode={appliedCoupon?.code || ""}
         isGift={giftReceipt}
         isEmployeePurchase={isEmployeePurchase}
+        employeeDiscountPercent={employeeDiscountPercent}
         isDPPR={isDPPR}
         registerId={registerId}
         branchId={branchId || 0}
         salesStaffId={salesPersonId ? parseInt(salesPersonId) : undefined}
         customerId={undefined}
         customerDetails={
-          // ADD THIS
           !isDPPR && (customerName || customerPhone)
             ? {
-                name: customerName,
-                phone: customerPhone,
-                email: customerEmail,
-                address: customerAddress,
-              }
+              name: customerName,
+              phone: customerPhone,
+              email: customerEmail,
+              address: customerAddress,
+            }
             : undefined
         }
         onSuccess={handleSaleSuccess}

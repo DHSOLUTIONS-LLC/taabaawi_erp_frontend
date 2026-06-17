@@ -1,8 +1,11 @@
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import { useUpdatePaymentMethodMutation } from '../../../../services/paymentMethodApi';
-import type { PaymentMethod, UpdatePaymentMethodPayload } from '../../../../types/payment-method';
+import {
+  useUpdatePaymentMethodMutation,
+  useCreatePaymentMethodMutation
+} from '../../../../services/paymentMethodApi';
+import type { PaymentMethod, UpdatePaymentMethodPayload, CreatePaymentMethodPayload } from '../../../../types/payment-method';
 
 interface Props {
   method: PaymentMethod | null;
@@ -11,36 +14,54 @@ interface Props {
 }
 
 const PaymentMethodForm: React.FC<Props> = ({ method, onSuccess, onCancel }) => {
-  const [updateMethod, { isLoading }] = useUpdatePaymentMethodMutation();
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<UpdatePaymentMethodPayload>({
-    defaultValues: method || {},
+  const [updateMethod, { isLoading: isUpdating }] = useUpdatePaymentMethodMutation();
+  const [createMethod, { isLoading: isCreating }] = useCreatePaymentMethodMutation();
+  const isLoading = isCreating || isUpdating;
+
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<UpdatePaymentMethodPayload | CreatePaymentMethodPayload>({
+    defaultValues: method || {
+      method_name: '',
+      description: '',
+      transaction_fee_percentage: 0,
+      transaction_fee_fixed: 0,
+      sort_order: 0,
+      is_active: true,
+    },
   });
 
   useEffect(() => {
     if (method) {
       reset(method);
+    } else {
+      reset({
+        method_name: '',
+        description: '',
+        transaction_fee_percentage: 0,
+        transaction_fee_fixed: 0,
+        sort_order: 0,
+        is_active: true,
+      });
     }
   }, [method, reset]);
 
-  const onSubmit = async (data: UpdatePaymentMethodPayload) => {
-    if (!method) return;
-
+  const onSubmit = async (data: UpdatePaymentMethodPayload | CreatePaymentMethodPayload) => {
     try {
-      await updateMethod({ id: method.id, data }).unwrap();
-      toast.success('Payment method updated successfully');
+      if (method) {
+        // Update existing
+        await updateMethod({ id: method.id, data }).unwrap();
+        toast.success('Payment method updated successfully');
+      } else {
+        // Create new
+        await createMethod(data).unwrap();
+        toast.success('Payment method created successfully');
+      }
       onSuccess?.();
-    } catch {
-      toast.error('Failed to update payment method');
+    } catch (error: any) {
+      console.error('Payment method error:', error);
+      const errorMessage = error?.data?.message || error?.message || 'Failed to save payment method';
+      toast.error(errorMessage);
     }
   };
-
-  if (!method) {
-    return (
-      <div className="text-center py-8 text-gray-500">
-        Select a payment method to edit
-      </div>
-    );
-  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
@@ -55,6 +76,7 @@ const PaymentMethodForm: React.FC<Props> = ({ method, onSuccess, onCancel }) => 
             type="text"
             {...register('method_name', { required: 'Method name is required' })}
             className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+            placeholder="e.g., Credit Card, Cash, PayPal"
           />
           {errors.method_name && (
             <p className="text-xs text-red-500 mt-1">{errors.method_name.message}</p>
@@ -159,10 +181,10 @@ const PaymentMethodForm: React.FC<Props> = ({ method, onSuccess, onCancel }) => 
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              Saving...
+              {method ? 'Updating...' : 'Creating...'}
             </>
           ) : (
-            'Save Changes'
+            method ? 'Save Changes' : 'Create Method'
           )}
         </button>
       </div>

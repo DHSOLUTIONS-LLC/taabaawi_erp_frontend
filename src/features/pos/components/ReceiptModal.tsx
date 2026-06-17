@@ -24,19 +24,44 @@ export default function ReceiptModal({
   const { data: settingsData } = useGetSystemSettingsQuery();
 
   const receipt = receiptResponse?.data;
+  console.log("receipt data:", receipt);
   const settings = settingsData?.data;
 
   const companyLogo = settings?.logo
     ? `${import.meta.env.VITE_API_URL?.replace("/api", "")}/storage/${settings.logo}`
     : null;
   const companyName = settings?.company_name || "ERP System";
-  const companyAddress = settings?.company_address || "";
-  const companyPhone = settings?.phone || "";
-  const companyEmail = settings?.email || "";
+  // const companyAddress = settings?.company_address || "";
+  // const companyPhone = settings?.phone || "";
+  // const companyEmail = settings?.email || "";
 
   // Get barcode from backend response
   const barcodeValue = receipt?.barcode || receipt?.sale_number || "";
+<<<<<<< HEAD
   const barcodeImageUrl = receipt?.barcode_image_url || null;
+=======
+  localStorage.setItem("barcodeValue", barcodeValue);
+  let barcodeImageUrl = null;
+  if (receipt?.barcode_image) {
+    if (receipt.barcode_image.startsWith("http")) {
+      barcodeImageUrl = receipt.barcode_image;
+      console.log("barcodeurl", barcodeImageUrl);
+    } else if (receipt.barcode_image.startsWith("/")) {
+      barcodeImageUrl = `${import.meta.env.VITE_API_URL?.replace("/api", "")}${receipt.barcode_image}`;
+    } else {
+      barcodeImageUrl = `${import.meta.env.VITE_API_URL?.replace("/api", "")}/storage/${receipt.barcode_image}`;
+    }
+  } else if (receipt?.barcode_image_url) {
+    barcodeImageUrl = receipt.barcode_image_url;
+  } else if (receipt?.barcode) {
+    // Try common patterns
+    barcodeImageUrl = `${import.meta.env.VITE_API_URL?.replace("/api", "")}/storage/barcodes/${receipt.barcode}.png`;
+  }
+
+  console.log("Barcode Value:", barcodeValue);
+  console.log("Barcode Image URL:", barcodeImageUrl);
+  console.log("Receipt Data:", receipt);
+>>>>>>> 3d9dabf29d6eef69126abb15115077b87fcb15df
 
   if (!isOpen) return null;
 
@@ -357,7 +382,13 @@ export default function ReceiptModal({
                 {receipt.sales_staff_id && (
                   <div className="row text-xs">
                     <span className="text-gray-500">Staff ID: </span>
+<<<<<<< HEAD
                     <span className="text-gray-700">{receipt.sales_staff_id}</span>
+=======
+                    <span className="text-gray-700">
+                      {receipt.sales_staff_id}
+                    </span>
+>>>>>>> 3d9dabf29d6eef69126abb15115077b87fcb15df
                   </div>
                 )}
                 {receipt.is_gift && (
@@ -430,19 +461,43 @@ export default function ReceiptModal({
                   {parseFloat(receipt.discount) > 0 && (
                     <div className="row text-xs text-red-600">
                       <span>Discount:</span>
+<<<<<<< HEAD
                       <span>- KWD {parseFloat(receipt.discount).toFixed(3)}</span>
+=======
+                      <span>
+                        - KWD {parseFloat(receipt.discount).toFixed(3)}
+                      </span>
+>>>>>>> 3d9dabf29d6eef69126abb15115077b87fcb15df
                     </div>
                   )}
                   {parseFloat(receipt.coupon_discount) > 0 && (
                     <div className="row text-xs text-green-600">
                       <span>Coupon:</span>
+<<<<<<< HEAD
                       <span>- KWD {parseFloat(receipt.coupon_discount).toFixed(3)}</span>
+=======
+                      <span>
+                        - KWD {parseFloat(receipt.coupon_discount).toFixed(3)}
+                      </span>
+>>>>>>> 3d9dabf29d6eef69126abb15115077b87fcb15df
                     </div>
                   )}
                   {parseFloat(receipt.employee_discount) > 0 && (
                     <div className="row text-xs text-purple-600">
                       <span>Employee Disc.:</span>
+<<<<<<< HEAD
                       <span>- KWD {parseFloat(receipt.employee_discount).toFixed(3)}</span>
+                    </div>
+                  )}
+                  {parseFloat(receipt.tax) > 0 && (
+                    <div className="row text-xs text-orange-600">
+                      <span>Tax:</span>
+                      <span>+ KWD {parseFloat(receipt.tax).toFixed(3)}</span>
+=======
+                      <span>
+                        - KWD {parseFloat(receipt.employee_discount).toFixed(3)}
+                      </span>
+>>>>>>> 3d9dabf29d6eef69126abb15115077b87fcb15df
                     </div>
                   )}
                   {parseFloat(receipt.tax) > 0 && (
@@ -464,6 +519,7 @@ export default function ReceiptModal({
                       {receipt.payment_method}
                     </span>
                   </div>
+<<<<<<< HEAD
                   {receipt.cash_received && parseFloat(receipt.cash_received) > 0 && (
                     <div className="row text-xs">
                       <span className="text-gray-500">Cash Received: </span>
@@ -476,6 +532,23 @@ export default function ReceiptModal({
                     <div className="row text-xs text-green-600 font-semibold">
                       <span>Change Given: </span>
                       <span>KWD {parseFloat(receipt.change_given).toFixed(3)}</span>
+=======
+                  {receipt.cash_received &&
+                    parseFloat(receipt.cash_received) > 0 && (
+                      <div className="row text-xs">
+                        <span className="text-gray-500">Cash Received: </span>
+                        <span className="text-gray-700">
+                          KWD {parseFloat(receipt.cash_received).toFixed(3)}
+                        </span>
+                      </div>
+                    )}
+                  {parseFloat(receipt.change_given) > 0 && (
+                    <div className="row text-xs text-green-600 font-semibold">
+                      <span>Change Given: </span>
+                      <span>
+                        KWD {parseFloat(receipt.change_given).toFixed(3)}
+                      </span>
+>>>>>>> 3d9dabf29d6eef69126abb15115077b87fcb15df
                     </div>
                   )}
                 </div>
@@ -484,35 +557,81 @@ export default function ReceiptModal({
               <div className="divider my-3" />
 
               {/* BARCODE SECTION - Using actual backend barcode */}
+<<<<<<< HEAD
               <div className="barcode">
                 {barcodeImageUrl ? (
                   // Show actual barcode image from backend
+=======
+              {/* BARCODE SECTION */}
+              <div className="barcode">
+                {barcodeImageUrl ? (
+>>>>>>> 3d9dabf29d6eef69126abb15115077b87fcb15df
                   <img
                     src={barcodeImageUrl}
                     alt="Barcode"
                     className="mx-auto"
                     style={{ maxWidth: "100%", height: "auto" }}
                     onError={(e) => {
+<<<<<<< HEAD
                       // If image fails to load, show text barcode
                       const target = e.target as HTMLImageElement;
                       target.style.display = "none";
+=======
+                      console.error(
+                        "Failed to load barcode image:",
+                        barcodeImageUrl,
+                      );
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = "none";
+                      // Show text barcode fallback
+>>>>>>> 3d9dabf29d6eef69126abb15115077b87fcb15df
                       const parent = target.parentElement;
                       if (parent) {
                         const textBarcode = document.createElement("div");
                         textBarcode.className = "text-center";
                         textBarcode.innerHTML = `
+<<<<<<< HEAD
                           <div class="barcode-text">${barcodeValue}</div>
                           <div class="text-[9px] text-gray-400 mt-1">Scan this code</div>
                         `;
+=======
+            <div class="barcode-text" style="font-family: 'Courier New', monospace; font-size: 14px; letter-spacing: 3px; padding: 8px; background: #f5f5f5; display: inline-block; font-weight: bold;">
+              ${barcodeValue}
+            </div>
+            <div class="text-[9px] text-gray-400 mt-1">Scan this code for returns</div>
+          `;
+>>>>>>> 3d9dabf29d6eef69126abb15115077b87fcb15df
                         parent.appendChild(textBarcode);
                       }
                     }}
                   />
                 ) : (
+<<<<<<< HEAD
                   // Fallback: Show text barcode
                   <div className="text-center">
                     <div className="barcode-text">{barcodeValue}</div>
                     <div className="text-[9px] text-gray-400 mt-1">Scan this code for returns</div>
+=======
+                  // Show text barcode as primary fallback
+                  <div className="text-center">
+                    <div
+                      className="barcode-text"
+                      style={{
+                        fontFamily: "'Courier New', monospace",
+                        fontSize: "14px",
+                        letterSpacing: "3px",
+                        padding: "8px",
+                        background: "#f5f5f5",
+                        display: "inline-block",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {barcodeValue}
+                    </div>
+                    <div className="text-[9px] text-gray-400 mt-1">
+                      Scan this code for returns
+                    </div>
+>>>>>>> 3d9dabf29d6eef69126abb15115077b87fcb15df
                   </div>
                 )}
               </div>

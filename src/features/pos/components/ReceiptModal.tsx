@@ -317,7 +317,7 @@ export default function ReceiptModal({
                     Tel: {receipt.branch_phone}
                   </div>
                 )}
-                
+
                 {/* Receipt Title with Receipt No on the right */}
                 <div className="header-row">
                   <span className="receipt-title text-[10px] text-gray-400 tracking-wider">
@@ -378,9 +378,9 @@ export default function ReceiptModal({
 
               {/* Items Header */}
               <div className="row text-[10px] font-bold text-gray-600 uppercase tracking-wide mb-1">
-                <span className="item-name">ITEM</span>
-                <span className="item-qty text-center">QTY</span>
-                <span className="item-price text-right">AMOUNT</span>
+                <span className="item-name">ITEM </span>
+                <span className="item-qty text-center">QTY </span>
+                <span className="item-price text-right">AMOUNT </span>
               </div>
 
               {/* Items List */}

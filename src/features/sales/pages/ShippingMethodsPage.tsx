@@ -340,7 +340,7 @@ export default function ShippingMethodsPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
                   <label className="text-xs sm:text-sm font-medium text-gray-700 mb-1 block">
-                    Base Cost (KD) *
+                    Base Cost (KWD) *
                   </label>
                   <input
                     type="number"
@@ -355,7 +355,7 @@ export default function ShippingMethodsPage() {
                 </div>
                 <div>
                   <label className="text-xs sm:text-sm font-medium text-gray-700 mb-1 block">
-                    Cost per KG (KD)
+                    Cost per KG (KWD)
                   </label>
                   <input
                     type="number"

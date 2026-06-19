@@ -282,7 +282,7 @@ export default function PaymentModal({
           {paymentMethod === "Cash" && (
             <div>
               <label className="text-sm font-medium text-gray-700 mb-1 block">
-                Cash Received (KD)
+                Cash Received (KWD)
               </label>
               <input
                 type="number"
@@ -323,7 +323,7 @@ export default function PaymentModal({
             paymentMethod !== "K-Net" && (
               <div>
                 <label className="text-sm font-medium text-gray-700 mb-1 block">
-                  Payment Amount (KD)
+                  Payment Amount (KWD)
                 </label>
                 <input
                   type="number"

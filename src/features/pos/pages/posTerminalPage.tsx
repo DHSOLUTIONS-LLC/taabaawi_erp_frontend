@@ -1,6 +1,6 @@
 // src/features/pos/POSTerminalPage.tsx
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import { useAppSelector } from "../../../app/hooks";
 import type { RootState } from "../../../app/store";
@@ -18,6 +18,7 @@ import dropdown_arrow_icon from "../../../assets/icons/dropdown_arrow_icon.svg";
 
 export default function POSTerminalPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAppSelector((state: RootState) => state.auth);
 
   const [selectedTerminal, setSelectedTerminal] = useState(
@@ -27,19 +28,21 @@ export default function POSTerminalPage() {
   const [openingCash, setOpeningCash] = useState("");
   const [selectedBranchId, setSelectedBranchId] = useState<number | null>(null);
   const [showBranchDropdown, setShowBranchDropdown] = useState(false);
+  const [isRegisterClosed, setIsRegisterClosed] = useState(() => {
+    return !localStorage.getItem('pos_session');
+  });
 
   const isSuperAdmin = user?.role?.role_name === "Super Admin";
   const isEmp = user?.role?.role_name;
   const basePath = isSuperAdmin ? "/admin" : isEmp ? "/" : "";
 
-  // Check if user already has an open register
   const {
     data: currentRegisterResponse,
     isLoading: checkingRegister,
     refetch: refetchCurrent,
   } = useGetCurrentPOSQuery(undefined, {
     skip: !user?.id,
-    pollingInterval: 300000,  
+    pollingInterval: 300000,
   });
 
   const { data: branchRegistersResponse } = useGetPOSsQuery(
@@ -57,11 +60,21 @@ export default function POSTerminalPage() {
   const branches = Array.isArray(branchesData) ? branchesData : [];
   const userCanSwitchBranch = canSwitchBranch(user?.role?.role_name);
 
-  const hasActiveSession =
-    currentRegisterResponse?.success === true && currentRegisterResponse?.data;
+  const isRegisterActuallyClosed = !localStorage.getItem('pos_session') || isRegisterClosed;
+
+  const hasActiveSession = 
+    currentRegisterResponse?.success === true && 
+    currentRegisterResponse?.data && 
+    !isRegisterActuallyClosed;
+    
   const currentRegister = currentRegisterResponse?.data;
 
-  // Update localStorage whenever API returns active session
+  useEffect(() => {
+    if (!localStorage.getItem('pos_session')) {
+      setIsRegisterClosed(true);
+    }
+  }, [location.pathname]);
+
   useEffect(() => {
     if (hasActiveSession && currentRegister) {
       localStorage.setItem(
@@ -152,7 +165,8 @@ export default function POSTerminalPage() {
         opening_notes: `Shift - ${new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`,
       }).unwrap();
 
-      // Save to localStorage
+      setIsRegisterClosed(false);
+
       localStorage.setItem(
         "pos_session",
         JSON.stringify({
@@ -165,7 +179,6 @@ export default function POSTerminalPage() {
         }),
       );
 
-      // Navigate to POS page
       navigate(`${basePath}/pos`, {
         replace: true,
         state: { register: response.data },
@@ -179,10 +192,6 @@ export default function POSTerminalPage() {
     }
   };
 
-  // const handleGoToPOS = () => {
-  //   navigate(`${basePath}/pos`);
-  // };
-
   if (checkingRegister) {
     return (
       <DashboardLayout>
@@ -194,11 +203,10 @@ export default function POSTerminalPage() {
     );
   }
 
-  // Show active session card instead of form
   if (hasActiveSession) {
     return (
       <DashboardLayout>
-        <div className="min-h-screen flex  justify-center p-4">
+        <div className="min-h-screen flex justify-center p-4">
           <div className="w-full">
             <div className="bg-green-50 rounded-xl p-6 text-center">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -258,13 +266,6 @@ export default function POSTerminalPage() {
                   </span>
                 </div>
               </div>
-
-              {/* <button
-                onClick={handleGoToPOS}
-                className="w-full py-3 bg-[#1773CF] text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-              >
-                Continue to POS Terminal
-              </button> */}
             </div>
           </div>
         </div>

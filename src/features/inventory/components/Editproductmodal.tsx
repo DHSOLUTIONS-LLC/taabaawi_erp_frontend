@@ -120,6 +120,7 @@ export default function EditProductModal({
   const [color, setColor] = useState(product?.color || "");
   const [size, setSize] = useState("");
   const [costPrice, setCostPrice] = useState(product?.cost.toString() || "");
+  const [quantity, setQuantity] = useState(product?.quantity?.toString() || "");
   const [averageCostPrice, setAverageCostPrice] = useState("");
   const [bulkImageFiles, setBulkImageFiles] = useState<File[]>([]);
   const [isBulkImageUploading, setIsBulkImageUploading] = useState(false);
@@ -371,6 +372,7 @@ export default function EditProductModal({
         "Cost Price": "47.000",
         "Average Cost Price": "45.500",
         "Selling Price": "67.000",
+        "Quantity": "10"
       },
       {
         "ID": "",
@@ -398,6 +400,7 @@ export default function EditProductModal({
         "Cost Price": "55.000",
         "Average Cost Price": "52.750",
         "Selling Price": "78.000",
+        "Quantity": "10",
       },
       {
         "ID": "",
@@ -425,6 +428,7 @@ export default function EditProductModal({
         "Cost Price": "8.500",
         "Average Cost Price": "8.000",
         "Selling Price": "14.000",
+        "Quantity": "10",
       },
     ];
 
@@ -457,6 +461,7 @@ export default function EditProductModal({
       { wch: 15 }, // Cost Price
       { wch: 18 }, // Average Cost Price
       { wch: 15 }, // Selling Price
+      { wch: 12 },  // Quantity
     ];
 
     const wb = XLSX.utils.book_new();
@@ -489,6 +494,7 @@ export default function EditProductModal({
       { Field: "Cost Price", Required: "Yes", Type: "Number", Description: "Cost price in KWD (e.g., 10.000)" },
       { Field: "Average Cost Price", Required: "No", Type: "Number", Description: "Average cost price in KWD" },
       { Field: "Selling Price", Required: "Yes", Type: "Number", Description: "Selling price in KWD (e.g., 15.000)" },
+      { Field: "Quantity", Required: "No", Type: "Number", Description: "Initial stock quantity (auto-set to 0 if empty)" },
     ];
 
     const wsInstructions = XLSX.utils.json_to_sheet(instructions);
@@ -609,7 +615,7 @@ export default function EditProductModal({
           return;
         }
 
-        setBulkPreviewData(jsonData.slice(0, 10));
+        setBulkPreviewData(jsonData.slice(0, 1000000));
         setSuccessMessage(`Loaded ${jsonData.length} products from file`);
         setShowSuccess(true);
       } catch (error) {
@@ -689,6 +695,7 @@ export default function EditProductModal({
         if (row["Dimensions"]) product.dimensions = String(row["Dimensions"]).trim();
         if (row["Color"]) product.color = String(row["Color"]).trim();
         if (row["Size"]) product.size = String(row["Size"]).trim();
+        if (row["Quantity"]) product.quantity = parseInt(row["Quantity"]) || 0;
         if (row["Average Cost Price"]) product.average_cost_price = parseFloat(row["Average Cost Price"]);
         if (row["Low Stock Alert"]) product.low_stock_alert = parseInt(row["Low Stock Alert"]) || 10;
         if (row["Is Active"]?.toLowerCase() === "no") product.is_active = false;
@@ -866,6 +873,7 @@ export default function EditProductModal({
       if (sku.trim()) formData.append("sku", sku.trim());
       if (barcode.trim()) formData.append("barcode", barcode.trim());
       if (weight && parseFloat(weight) > 0) formData.append("weight", weight);
+      if (quantity && parseFloat(quantity) > 0) formData.append("quantity", quantity);
       if (dimensions.trim()) formData.append("dimensions", dimensions.trim());
       if (color.trim()) formData.append("color", color.trim());
       if (size.trim()) formData.append("size", size.trim());
@@ -1368,6 +1376,27 @@ export default function EditProductModal({
                 </div>
               </div>
 
+
+              {/* Quantity */}
+<div>
+  <label className="block text-sm font-medium text-gray-600 mb-2">
+    Quantity
+  </label>
+  <input
+    type="number"
+    value={quantity}
+    onChange={(e) => setQuantity(e.target.value)}
+    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 font-medium"
+    placeholder="Enter initial quantity"
+    min="0"
+    step="1"
+    disabled={isLoading}
+  />
+  <p className="text-xs text-gray-500 mt-1">
+    Initial stock quantity for this product
+  </p>
+</div>
+
               {/* Weight, Dimensions, Color, Size */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
@@ -1759,7 +1788,7 @@ export default function EditProductModal({
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <h3 className="font-medium text-gray-700">
-                      Preview (First {Math.min(10, bulkPreviewData.length)} rows)
+                      Preview extracted data from file 
                     </h3>
                     <span className="text-sm text-gray-500">
                       Total: {bulkPreviewData.length} products

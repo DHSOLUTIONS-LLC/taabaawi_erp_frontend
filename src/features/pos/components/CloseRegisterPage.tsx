@@ -14,10 +14,9 @@ interface CloseRegisterPageProps {
   };
   onClose: () => void;
   onSuccess: () => void;
-  onRegisterClosed?: () => void; // Add this callback
+  onRegisterClosed?: () => void;
 }
 
-// Kuwait Currency Denominations
 const KUWAIT_DENOMINATIONS = [
   { value: 20, label: "20 KWD", type: "note" },
   { value: 10, label: "10 KWD", type: "note" },
@@ -37,7 +36,7 @@ export default function CloseRegisterPage({
   register,
   onClose,
   onSuccess,
-  onRegisterClosed, // Add this
+  onRegisterClosed,
 }: CloseRegisterPageProps) {
   const [denominations, setDenominations] = useState<DenominationCount>({});
   const [closingNotes, setClosingNotes] = useState("");
@@ -52,13 +51,11 @@ export default function CloseRegisterPage({
 
   const expectedBalance = parseFloat(register.expected_balance || "0");
 
-  // Calculate total from denominations
   const calculatedTotal = Object.entries(denominations).reduce(
     (sum, [value, count]) => sum + parseFloat(value) * (count || 0),
     0
   );
 
-  // Get manual closing balance (if not using denominations)
   const [manualClosingBalance, setManualClosingBalance] = useState("");
 
   const closingBalance = useDenominationMode
@@ -74,69 +71,69 @@ export default function CloseRegisterPage({
     }));
   };
 
-  const handleCloseRegister = async () => {
-    setError("");
-    if (!register?.id) return;
+const handleCloseRegister = async () => {
+  setError("");
+  if (!register?.id) return;
 
-    if (useDenominationMode && closingBalance === 0) {
-      setError("Please enter at least one denomination count");
-      return;
+  if (useDenominationMode && closingBalance === 0) {
+    setError("Please enter at least one denomination count");
+    return;
+  }
+
+  if (!useDenominationMode && (!manualClosingBalance || closingBalance < 0)) {
+    setError("Please enter a valid closing balance");
+    return;
+  }
+
+  if (closingBalance > 1000000) {
+    setError("Closing balance seems too high. Please verify.");
+    return;
+  }
+
+  try {
+    // Payload for /cash-registers/{id}/close
+    const payload: {
+      closing_balance: number;
+      closing_notes?: string;
+      denominations?: Record<string, number>;
+    } = {
+      closing_balance: closingBalance,
+      closing_notes: closingNotes || undefined,
+    };
+
+    if (useDenominationMode && Object.keys(denominations).length > 0) {
+      payload.denominations = denominations;
     }
 
-    if (!useDenominationMode && (!manualClosingBalance || closingBalance < 0)) {
-      setError("Please enter a valid closing balance");
-      return;
+    console.log("📤 Closing register payload:", payload);
+
+    // Send ID in the URL, data in the body
+    await closeRegister({
+      id: register.id,
+      ...payload
+    }).unwrap();
+    
+    localStorage.removeItem("pos_session");
+
+    if (onRegisterClosed) {
+      onRegisterClosed();
     }
 
-    if (closingBalance > 1000000) {
-      setError("Closing balance seems too high. Please verify.");
-      return;
-    }
+    setStep("generating");
 
-    try {
-      // Build the payload
-      const payload: {
-        id: number;
-        closing_balance: number;
-        closing_notes?: string;
-        denominations?: Record<string, number>;
-      } = {
-        id: register.id,
-        closing_balance: closingBalance,
-        closing_notes: closingNotes || undefined,
-      };
+    const reportResult = await generateShiftReport(register.id).unwrap();
+    setShiftReport(reportResult?.data);
+    console.log("📄 Shift report generated:", reportResult);
 
-      // Add denominations only if in denomination mode
-      if (useDenominationMode && Object.keys(denominations).length > 0) {
-        payload.denominations = denominations;
-      }
-
-      console.log("📤 Closing register payload:", payload);
-
-      // Close the register
-      await closeRegister(payload).unwrap();
-      localStorage.removeItem("pos_session");
-
-      // Call the callback to notify parent that register is closed
-      if (onRegisterClosed) {
-        onRegisterClosed();
-      }
-
-      setStep("generating");
-
-      // Generate shift report
-      const reportResult = await generateShiftReport(register.id).unwrap();
-      setShiftReport(reportResult?.data);
-
-      setStep("done");
-    } catch (err: any) {
-      console.error("Close register error:", err);
-      setError(
-        err?.data?.message || "Failed to close register. Please try again."
-      );
-      setStep("form");
-    }
-  };
+    setStep("done");
+  } catch (err: any) {
+    console.error("Close register error:", err);
+    setError(
+      err?.data?.message || "Failed to close register. Please try again."
+    );
+    setStep("form");
+  }
+};
 
   const handleDone = () => {
     setStep("form");
@@ -152,7 +149,6 @@ export default function CloseRegisterPage({
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
-        {/* Header */}
         <div
           className={`px-6 py-5 sticky top-0 ${step === "done" ? "bg-green-600" : "bg-red-600"
             }`}
@@ -168,7 +164,6 @@ export default function CloseRegisterPage({
         </div>
 
         <div className="p-6">
-          {/* Generating spinner */}
           {step === "generating" && (
             <div className="flex flex-col items-center py-10 gap-4">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
@@ -178,7 +173,6 @@ export default function CloseRegisterPage({
             </div>
           )}
 
-          {/* Done — show shift summary */}
           {step === "done" && shiftReport && (
             <div className="space-y-4">
               <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
@@ -224,7 +218,6 @@ export default function CloseRegisterPage({
                 ))}
               </div>
 
-              {/* Show counted denominations in done step */}
               {shiftReport.denominations && (
                 <div className="bg-blue-50 rounded-xl p-4">
                   <h4 className="text-sm font-semibold text-blue-800 mb-2">
@@ -259,7 +252,6 @@ export default function CloseRegisterPage({
             </div>
           )}
 
-          {/* Form */}
           {step === "form" && (
             <div className="space-y-4">
               <div className="p-3 bg-gray-50 rounded-xl text-sm space-y-1">
@@ -279,7 +271,6 @@ export default function CloseRegisterPage({
                 </p>
               </div>
 
-              {/* Toggle between denomination count and manual entry */}
               <div className="flex gap-2 p-1 bg-gray-100 rounded-lg">
                 <button
                   type="button"
@@ -288,8 +279,8 @@ export default function CloseRegisterPage({
                     setManualClosingBalance("");
                   }}
                   className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${useDenominationMode
-                      ? "bg-blue-600 text-white"
-                      : "text-gray-600 hover:bg-gray-200"
+                    ? "bg-blue-600 text-white"
+                    : "text-gray-600 hover:bg-gray-200"
                     }`}
                 >
                   Count Denominations
@@ -301,15 +292,14 @@ export default function CloseRegisterPage({
                     setDenominations({});
                   }}
                   className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${!useDenominationMode
-                      ? "bg-blue-600 text-white"
-                      : "text-gray-600 hover:bg-gray-200"
+                    ? "bg-blue-600 text-white"
+                    : "text-gray-600 hover:bg-gray-200"
                     }`}
                 >
                   Enter Total Manually
                 </button>
               </div>
 
-              {/* Denomination Counting */}
               {useDenominationMode && (
                 <div className="space-y-3">
                   <label className="block text-sm font-semibold text-gray-700">
@@ -377,7 +367,6 @@ export default function CloseRegisterPage({
                     ))}
                   </div>
 
-                  {/* Total from denominations */}
                   <div className="bg-blue-50 p-3 rounded-lg">
                     <div className="flex justify-between items-center">
                       <span className="font-semibold text-gray-700">
@@ -391,11 +380,10 @@ export default function CloseRegisterPage({
                 </div>
               )}
 
-              {/* Manual Entry Mode */}
               {!useDenominationMode && (
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Closing Balance (KD) *
+                    Closing Balance (KWD) *
                   </label>
                   <input
                     type="number"
@@ -410,14 +398,13 @@ export default function CloseRegisterPage({
                 </div>
               )}
 
-              {/* Difference Display */}
               {closingBalance > 0 && (
                 <div
                   className={`p-3 rounded-lg ${difference === 0
-                      ? "bg-green-50 border border-green-200"
-                      : difference > 0
-                        ? "bg-blue-50 border border-blue-200"
-                        : "bg-red-50 border border-red-200"
+                    ? "bg-green-50 border border-green-200"
+                    : difference > 0
+                      ? "bg-blue-50 border border-blue-200"
+                      : "bg-red-50 border border-red-200"
                     }`}
                 >
                   <div className="flex justify-between items-center">
@@ -432,10 +419,10 @@ export default function CloseRegisterPage({
                     </span>
                     <span
                       className={`font-bold text-lg ${difference === 0
-                          ? "text-green-600"
-                          : difference > 0
-                            ? "text-blue-600"
-                            : "text-red-600"
+                        ? "text-green-600"
+                        : difference > 0
+                          ? "text-blue-600"
+                          : "text-red-600"
                         }`}
                     >
                       {difference === 0
@@ -448,7 +435,6 @@ export default function CloseRegisterPage({
                 </div>
               )}
 
-              {/* Notes */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1">
                   Closing Notes (Optional)

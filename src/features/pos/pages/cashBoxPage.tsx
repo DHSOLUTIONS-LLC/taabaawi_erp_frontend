@@ -22,10 +22,6 @@ interface DenominationCount {
   [key: number]: number;
 }
 
-// Update the register type to include denominations
-// If you have a proper type definition, add denominations field
-// Otherwise, the code will work with the existing any type
-
 const KUWAIT_DENOMINATIONS = [
   { value: 20, label: "20 KWD", type: "note", color: "bg-purple-100" },
   { value: 10, label: "10 KWD", type: "note", color: "bg-blue-100" },
@@ -37,30 +33,24 @@ const KUWAIT_DENOMINATIONS = [
   { value: 0.05, label: "50 Fils", type: "coin", color: "bg-gray-100" },
 ];
 
-
 export default function CashRegistersPage() {
   const { user } = useAppSelector((state: RootState) => state.auth);
   const [selectedBranch, setSelectedBranch] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
-  const [selectedRegisterId, setSelectedRegisterId] = useState<number | null>(
-    null,
-  );
+  const [selectedRegisterId, setSelectedRegisterId] = useState<number | null>(null);
   const [showRegisterDetails, setShowRegisterDetails] = useState(false);
 
-  // Search and pagination states
   const [searchQuery, setSearchQuery] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Fetch branches
   const { data: branchesData } = useGetBranchesQuery();
   const branches = Array.isArray(branchesData) ? branchesData : [];
 
   const userCanSwitchBranch = canSwitchBranch(user?.role?.role_name);
   const userBranchId = user?.branch_id;
 
-  // Set initial branch based on user role
   useEffect(() => {
     if (!userCanSwitchBranch && userBranchId && branches.length > 0) {
       const userBranch = branches.find((b) => b.id === userBranchId);
@@ -70,7 +60,6 @@ export default function CashRegistersPage() {
     }
   }, [userCanSwitchBranch, userBranchId, branches]);
 
-  // Fetch cash registers
   const { data: registersResponse, isLoading } = useGetPOSsQuery({
     branch_id: selectedBranch ? parseInt(selectedBranch) : undefined,
     status: selectedStatus || undefined,
@@ -78,21 +67,14 @@ export default function CashRegistersPage() {
     page: currentPage,
   });
 
-  // Fetch selected register details
-  const { data: registerDetailsResponse } = useGetPOSByIdQuery(
-    selectedRegisterId!,
-    {
-      skip: !selectedRegisterId,
-    },
-  );
-
-  console.log("registerDetailsResponse", registerDetailsResponse);
+  const { data: registerDetailsResponse } = useGetPOSByIdQuery(selectedRegisterId!, {
+    skip: !selectedRegisterId,
+  });
 
   const registers = registersResponse?.data?.data || [];
   const pagination = registersResponse?.data;
   const selectedRegister = registerDetailsResponse?.data;
 
-  // Calculate summary stats
   const totalOpening = registers.reduce(
     (sum: number, register: any) => sum + parseFloat(register.opening_balance),
     0,
@@ -109,7 +91,6 @@ export default function CashRegistersPage() {
     (r: any) => r.status === "Open",
   ).length;
 
-  // Filter registers based on search query
   const filteredRegisters = useMemo(() => {
     if (!searchQuery.trim()) return registers;
     const query = searchQuery.toLowerCase().trim();
@@ -121,12 +102,10 @@ export default function CashRegistersPage() {
     );
   }, [searchQuery, registers]);
 
-  // Reset to page 1 when search changes
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery]);
 
-  // Get search suggestions
   const searchSuggestions = useMemo(() => {
     if (!searchQuery.trim() || searchQuery.length < 2) return [];
     const query = searchQuery.toLowerCase().trim();
@@ -169,21 +148,17 @@ export default function CashRegistersPage() {
     }
 
     try {
-      // Create PDF in landscape mode
       const doc = new jsPDF("landscape", "mm", "a4");
 
-      // Set margins
       const marginLeft = 10;
       const marginTop = 20;
       let yPos = marginTop;
 
-      // Title
       doc.setFontSize(18);
       doc.setFont("helvetica", "bold");
       doc.text("CASH REGISTERS REPORT", 148.5, yPos, { align: "center" });
       yPos += 10;
 
-      // Report details
       doc.setFontSize(10);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(100);
@@ -193,12 +168,10 @@ export default function CashRegistersPage() {
       });
       yPos += 8;
 
-      // Draw line
       doc.setDrawColor(200, 200, 200);
       doc.line(marginLeft, yPos, 287, yPos);
       yPos += 10;
 
-      // Define column widths for 10 columns
       const colWidths = [35, 35, 40, 40, 30, 30, 30, 25, 25, 25];
       const headers = [
         "Branch",
@@ -207,13 +180,11 @@ export default function CashRegistersPage() {
         "Closed At",
         "Opening Balance",
         "Closing Balance",
-        // "Expected Balance",
         "Difference",
         "Status",
         "Total Sales",
       ];
 
-      // Draw table header
       doc.setFontSize(9);
       doc.setFont("helvetica", "bold");
       doc.setTextColor(255);
@@ -230,14 +201,11 @@ export default function CashRegistersPage() {
       doc.setTextColor(0);
       doc.setFont("helvetica", "normal");
 
-      // Draw table rows
       filteredRegisters.forEach((register: any, rowIndex: number) => {
-        // Check if we need a new page
         if (yPos > 190) {
           doc.addPage("landscape");
           yPos = marginTop;
 
-          // Draw header again on new page
           doc.setFont("helvetica", "bold");
           doc.setTextColor(255);
           doc.setFillColor(59, 130, 246);
@@ -252,7 +220,6 @@ export default function CashRegistersPage() {
           doc.setFont("helvetica", "normal");
         }
 
-        // Alternate row colors
         if (rowIndex % 2 === 0) {
           doc.setFillColor(248, 248, 248);
           xPos = marginLeft;
@@ -262,38 +229,29 @@ export default function CashRegistersPage() {
           });
         }
 
-        // Prepare row data
         const rowData = [
           register.branch?.branch_name || "-",
           register.user?.name || "-",
           new Date(register.opened_at).toLocaleString(),
-          register.closed_at
-            ? new Date(register.closed_at).toLocaleString()
-            : "-",
+          register.closed_at ? new Date(register.closed_at).toLocaleString() : "-",
           formatCurrency(register.opening_balance),
-          register.closing_balance
-            ? formatCurrency(register.closing_balance)
-            : "-",
-          // register.expected_balance ? formatCurrency(register.expected_balance) : "-",
+          register.closing_balance ? formatCurrency(register.closing_balance) : "-",
           register.difference || "0",
           register.status || "-",
           String(register.sales?.length || 0),
         ];
 
-        // Draw cell content
         xPos = marginLeft;
         doc.setFontSize(8);
         rowData.forEach((cell, index) => {
           let text = String(cell);
           const maxWidth = colWidths[index] - 4;
 
-          // Truncate text if too long
           while (doc.getTextWidth(text) > maxWidth && text.length > 3) {
             text = text.substring(0, text.length - 4) + "...";
           }
 
-          // Align numeric columns to the right
-          const numericColumns = [4, 5, 6, 7, 9]; // Balance columns and total sales
+          const numericColumns = [4, 5, 6, 7];
           const align = numericColumns.includes(index) ? "right" : "left";
           const xOffset = align === "right" ? colWidths[index] - 2 : 2;
 
@@ -304,7 +262,6 @@ export default function CashRegistersPage() {
         yPos += 8;
       });
 
-      // Add page numbers
       const pageCount = doc.internal.pages.length;
       for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
@@ -313,7 +270,6 @@ export default function CashRegistersPage() {
         doc.text(`Page ${i} of ${pageCount}`, 148.5, 205, { align: "center" });
       }
 
-      // Save PDF
       doc.save(`cash_registers_${new Date().toISOString().split("T")[0]}.pdf`);
     } catch (error) {
       console.error("PDF export failed:", error);
@@ -321,7 +277,6 @@ export default function CashRegistersPage() {
     }
   };
 
-  // Helper function to format currency
   const formatCurrency = (value: number | string | undefined) => {
     if (value === undefined || value === null) return "-";
     const numValue = typeof value === "string" ? parseFloat(value) : value;
@@ -329,19 +284,15 @@ export default function CashRegistersPage() {
     return `KWD ${numValue.toFixed(3)}`;
   };
 
-  // Export functions remain the same but use actual data
   const handleExportToExcel = () => {
     try {
       const exportData = filteredRegisters.map((register: any) => ({
         Branch: register.branch?.branch_name,
         Cashier: register.user?.name,
         "Opened At": new Date(register.opened_at).toLocaleString(),
-        "Closed At": register.closed_at
-          ? new Date(register.closed_at).toLocaleString()
-          : "-",
+        "Closed At": register.closed_at ? new Date(register.closed_at).toLocaleString() : "-",
         "Opening Balance": register.opening_balance,
         "Closing Balance": register.closing_balance || "-",
-        // "Expected Balance": register.expected_balance || "-",
         Difference: register.difference || "0",
         Status: register.status,
         "Total Sales": register.sales?.length || 0,
@@ -373,7 +324,6 @@ export default function CashRegistersPage() {
         <div className="">
           {/* Header with Dropdowns */}
           <div className="bg-white px-4 py-4 rounded-lg grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
-            {/* Date Selector */}
             <div className="relative">
               <div className="relative">
                 <div className="absolute left-4 top-1/2 -translate-y-1/2">
@@ -391,14 +341,12 @@ export default function CashRegistersPage() {
               </div>
             </div>
 
-            {/* Branch Selector - Conditional based on user role */}
             <div className="relative">
               <div className="relative">
                 <div className="absolute left-4 top-1/2 -translate-y-1/2">
                   <img src={market_icon} alt="" />
                 </div>
                 {userCanSwitchBranch ? (
-                  // Users who can switch branches (Super Admin/Accountant)
                   <select
                     value={selectedBranch}
                     onChange={(e) => setSelectedBranch(e.target.value)}
@@ -412,7 +360,6 @@ export default function CashRegistersPage() {
                     ))}
                   </select>
                 ) : (
-                  // Users with fixed branch
                   <div className="w-full pl-12 pr-10 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-700">
                     {branches.find((b) => b.id === parseInt(selectedBranch))
                       ?.branch_name || "No Branch Assigned"}
@@ -424,7 +371,6 @@ export default function CashRegistersPage() {
               </div>
             </div>
 
-            {/* Status Selector */}
             <div className="relative">
               <div className="relative">
                 <select
@@ -442,7 +388,6 @@ export default function CashRegistersPage() {
               </div>
             </div>
 
-            {/* Stats Summary */}
             <div className="bg-blue-50 rounded-xl p-3 flex items-center justify-between">
               <div>
                 <p className="text-xs text-blue-600">Active Registers</p>
@@ -458,48 +403,6 @@ export default function CashRegistersPage() {
               </div>
             </div>
           </div>
-          {/* {selectedRegister?.denominations && Object.keys(selectedRegister.denominations).length > 0 && (
-  <div className="mb-6">
-    <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">
-      Currency Denominations Counted
-    </h3>
-    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        {KUWAIT_DENOMINATIONS.map((denom) => {
-          const count = selectedRegister.denominations[denom.value] || 0;
-          if (count > 0) {
-            return (
-              <div key={denom.value} className={`${denom.color} rounded-lg p-3`}>
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="font-semibold text-gray-800">{denom.label}</p>
-                    <p className="text-xs text-gray-500 capitalize">{denom.type}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-lg font-bold text-gray-800">{count} × {denom.value}</p>
-                    <p className="text-sm text-gray-600">= {(count * denom.value).toFixed(3)} KWD</p>
-                  </div>
-                </div>
-              </div>
-            );
-          }
-          return null;
-        })}
-      </div>
-      <div className="mt-3 pt-3 border-t border-blue-200">
-        <div className="flex justify-between items-center">
-          <span className="font-semibold text-gray-700">Total Cash Counted:</span>
-          <span className="text-xl font-bold text-blue-600">
-            KWD {Object.entries(selectedRegister.denominations).reduce(
-              (sum, [value, count]) => sum + parseFloat(value) * (count as number),
-              0
-            ).toFixed(3)}
-          </span>
-        </div>
-      </div>
-    </div>
-  </div>
-)} */}
 
           {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
@@ -540,9 +443,7 @@ export default function CashRegistersPage() {
                   type="text"
                   value={searchQuery}
                   onChange={handleSearchChange}
-                  onFocus={() =>
-                    searchQuery.length >= 2 && setShowSuggestions(true)
-                  }
+                  onFocus={() => searchQuery.length >= 2 && setShowSuggestions(true)}
                   onBlur={handleSearchBlur}
                   placeholder="Search by cashier or branch..."
                   className="pl-10 pr-4 py-2.5 border border-gray-300 rounded-md w-full"
@@ -591,36 +492,15 @@ export default function CashRegistersPage() {
                 <table className="min-w-full">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">
-                        Branch
-                      </th>
-                      <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">
-                        Cashier
-                      </th>
-                      <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">
-                        Opened
-                      </th>
-                      <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">
-                        Closed
-                      </th>
-                      <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">
-                        Opening
-                      </th>
-                      <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">
-                        Closing
-                      </th>
-                      {/* <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">
-                        Expected
-                      </th> */}
-                      <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">
-                        Difference
-                      </th>
-                      <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">
-                        Status
-                      </th>
-                      <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">
-                        Actions
-                      </th>
+                      <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Branch</th>
+                      <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Cashier</th>
+                      <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Opened</th>
+                      <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Closed</th>
+                      <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Opening</th>
+                      <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Closing</th>
+                      <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Difference</th>
+                      <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Status</th>
+                      <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -648,45 +528,24 @@ export default function CashRegistersPage() {
                             {new Date(register.opened_at).toLocaleString()}
                           </td>
                           <td className="px-4 py-4 text-sm text-gray-900">
-                            {register.closed_at
-                              ? new Date(register.closed_at).toLocaleString()
-                              : "-"}
+                            {register.closed_at ? new Date(register.closed_at).toLocaleString() : "-"}
                           </td>
                           <td className="px-4 py-4 text-sm text-gray-900">
                             KWD {register.opening_balance}
                           </td>
                           <td className="px-4 py-4 text-sm text-gray-900">
-                            {register.closing_balance
-                              ? `KWD ${register.closing_balance}`
-                              : "-"}
+                            {register.closing_balance ? `KWD ${register.closing_balance}` : "-"}
                           </td>
-                          {/* <td className="px-4 py-4 text-sm text-gray-900">
-                            {register.expected_balance
-                              ? `KWD ${register.expected_balance}`
-                              : "-"}
-                          </td> */}
                           <td className="px-4 py-4 text-sm text-gray-900">
-                            <span
-                              className={
-                                register.difference > 0
-                                  ? "text-green-600"
-                                  : register.difference < 0
-                                    ? "text-red-600"
-                                    : ""
-                              }
-                            >
-                              {register.difference
-                                ? `KWD ${register.difference}`
-                                : "-"}
+                            <span className={
+                              register.difference > 0 ? "text-green-600" : 
+                              register.difference < 0 ? "text-red-600" : ""
+                            }>
+                              {register.difference ? `KWD ${register.difference}` : "-"}
                             </span>
                           </td>
                           <td className="px-4 py-4 text-sm text-gray-900">
-                            <span
-                              className={`px-2 py-1 rounded-full text-xs ${register.status === "Open"
-                                  ? "bg-green-100 text-green-800"
-                                  : "bg-gray-100"
-                                }`}
-                            >
+                            <span className={`px-2 py-1 rounded-full text-xs ${register.status === "Open" ? "bg-green-100 text-green-800" : "bg-gray-100"}`}>
                               {register.status}
                             </span>
                           </td>
@@ -695,11 +554,7 @@ export default function CashRegistersPage() {
                               onClick={() => handleViewDetails(register.id)}
                               className="text-blue-600 hover:text-blue-800 cursor-pointer"
                             >
-                              <img
-                                src={view_icon}
-                                alt="View"
-                                className="w-5 h-5"
-                              />
+                              <img src={view_icon} alt="View" className="w-5 h-5" />
                             </button>
                           </td>
                         </tr>
@@ -710,13 +565,11 @@ export default function CashRegistersPage() {
               </div>
             </div>
 
-            {/* Pagination */}
             {pagination && pagination.last_page > 1 && (
               <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-gray-300">
                 <div className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-0">
                   <div className="text-xs sm:text-sm text-gray-500">
-                    Showing {pagination.from} to {pagination.to} of{" "}
-                    {pagination.total}
+                    Showing {pagination.from} to {pagination.to} of {pagination.total}
                   </div>
                   <div className="flex space-x-1 sm:space-x-2">
                     <button
@@ -730,11 +583,7 @@ export default function CashRegistersPage() {
                       {currentPage}
                     </span>
                     <button
-                      onClick={() =>
-                        setCurrentPage((p) =>
-                          Math.min(pagination.last_page, p + 1),
-                        )
-                      }
+                      onClick={() => setCurrentPage((p) => Math.min(pagination.last_page, p + 1))}
                       disabled={currentPage === pagination.last_page}
                       className="px-2 sm:px-3 py-1 border border-gray-300 rounded disabled:opacity-50 text-xs sm:text-sm"
                     >
@@ -768,28 +617,61 @@ export default function CashRegistersPage() {
               {/* Summary Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
                 <div className="bg-blue-50 p-3 sm:p-4 rounded-lg">
-                  <p className="text-xs sm:text-sm text-blue-600">
-                    Opening Balance
-                  </p>
+                  <p className="text-xs sm:text-sm text-blue-600">Opening Balance</p>
                   <p className="text-xl sm:text-2xl font-bold break-words">
                     KWD {selectedRegister.opening_balance}
                   </p>
                 </div>
-                {/* <div className="bg-green-50 p-3 sm:p-4 rounded-lg">
-                  <p className="text-xs sm:text-sm text-green-600">Expected Balance</p>
-                  <p className="text-xl sm:text-2xl font-bold break-words">
-                    KWD {selectedRegister.expected_balance || "0.000"}
-                  </p>
-                </div> */}
                 <div className="bg-purple-50 p-3 sm:p-4 rounded-lg">
-                  <p className="text-xs sm:text-sm text-purple-600">
-                    Closing Balance
-                  </p>
+                  <p className="text-xs sm:text-sm text-purple-600">Closing Balance</p>
                   <p className="text-xl sm:text-2xl font-bold break-words">
-                    KWD {selectedRegister.closing_balance || "0.000"}
+                    KWD {selectedRegister.closing_balance?.closing_balance || "0.000"}
                   </p>
                 </div>
               </div>
+
+              {/* Currency Denominations Counted */}
+              {selectedRegister?.closing_balance?.denominations && 
+               Object.keys(selectedRegister.closing_balance.denominations).length > 0 && (
+                <div className="mb-4 sm:mb-6">
+                  <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">
+                    Currency Denominations Counted
+                  </h3>
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                      {KUWAIT_DENOMINATIONS.map((denom) => {
+                        const count = selectedRegister.closing_balance.denominations[denom.value] || 0;
+                        if (count > 0) {
+                          return (
+                            <div key={denom.value} className={`${denom.color} rounded-lg p-3 border border-gray-200`}>
+                              <div className="flex flex-col">
+                                <p className="font-semibold text-gray-800 text-sm">{denom.label}</p>
+                                <p className="text-xs text-gray-500 capitalize">{denom.type}</p>
+                                <div className="mt-1">
+                                  <p className="text-sm font-bold text-gray-800">{count} × {denom.value}</p>
+                                  <p className="text-xs text-blue-600 font-medium">= {(count * denom.value).toFixed(3)} KWD</p>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        }
+                        return null;
+                      })}
+                    </div>
+                    <div className="mt-3 pt-3 border-t border-blue-200">
+                      <div className="flex justify-between items-center">
+                        <span className="font-semibold text-gray-700">Total Cash Counted:</span>
+                        <span className="text-xl font-bold text-blue-600">
+                          KWD {Object.entries(selectedRegister.closing_balance.denominations).reduce(
+                            (sum, [value, count]) => sum + parseFloat(value) * (count as number),
+                            0
+                          ).toFixed(3)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Cash Movements */}
               <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">
@@ -800,21 +682,11 @@ export default function CashRegistersPage() {
                   <table className="min-w-full">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm">
-                          Type
-                        </th>
-                        <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm">
-                          Amount
-                        </th>
-                        <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm">
-                          Reason
-                        </th>
-                        <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm">
-                          Time
-                        </th>
-                        <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm">
-                          Recorded By
-                        </th>
+                        <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm">Type</th>
+                        <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm">Amount</th>
+                        <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm">Reason</th>
+                        <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm">Time</th>
+                        <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm">Recorded By</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -822,12 +694,7 @@ export default function CashRegistersPage() {
                         selectedRegister.cash_movements.map((movement: any) => (
                           <tr key={movement.id}>
                             <td className="px-2 sm:px-4 py-2 whitespace-nowrap">
-                              <span
-                                className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs ${movement.type === "Cash In"
-                                    ? "bg-green-100 text-green-800"
-                                    : "bg-red-100 text-red-800"
-                                  }`}
-                              >
+                              <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs ${movement.type === "Cash In" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
                                 {movement.type}
                               </span>
                             </td>
@@ -838,9 +705,7 @@ export default function CashRegistersPage() {
                               {movement.reason}
                             </td>
                             <td className="px-2 sm:px-4 py-2 text-xs sm:text-sm whitespace-nowrap">
-                              {new Date(
-                                movement.movement_date,
-                              ).toLocaleString()}
+                              {new Date(movement.movement_date).toLocaleString()}
                             </td>
                             <td className="px-2 sm:px-4 py-2 text-xs sm:text-sm whitespace-nowrap">
                               {movement.recorded_by?.name}
@@ -849,10 +714,7 @@ export default function CashRegistersPage() {
                         ))
                       ) : (
                         <tr>
-                          <td
-                            colSpan={5}
-                            className="text-center py-3 sm:py-4 text-xs sm:text-sm"
-                          >
+                          <td colSpan={5} className="text-center py-3 sm:py-4 text-xs sm:text-sm">
                             No cash movements
                           </td>
                         </tr>
@@ -871,19 +733,10 @@ export default function CashRegistersPage() {
                   <table className="min-w-full">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm">
-                          Invoice
-                        </th>
-                        <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm">
-                          Time
-                        </th>
-                        {/* <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm">Items</th> */}
-                        <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm">
-                          Total
-                        </th>
-                        <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm">
-                          Payment
-                        </th>
+                        <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm">Invoice</th>
+                        <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm">Time</th>
+                        <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm">Total</th>
+                        <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm">Payment</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -896,9 +749,6 @@ export default function CashRegistersPage() {
                             <td className="px-2 sm:px-4 py-2 text-xs sm:text-sm whitespace-nowrap">
                               {new Date(sale.created_at).toLocaleString()}
                             </td>
-                            {/* <td className="px-2 sm:px-4 py-2 text-xs sm:text-sm whitespace-nowrap">
-                              {sale.items?.length || 0}
-                            </td> */}
                             <td className="px-2 sm:px-4 py-2 font-medium text-xs sm:text-sm whitespace-nowrap">
                               KWD {sale.total_amount}
                             </td>
@@ -909,10 +759,7 @@ export default function CashRegistersPage() {
                         ))
                       ) : (
                         <tr>
-                          <td
-                            colSpan={5}
-                            className="text-center py-3 sm:py-4 text-xs sm:text-sm"
-                          >
+                          <td colSpan={4} className="text-center py-3 sm:py-4 text-xs sm:text-sm">
                             No sales
                           </td>
                         </tr>

@@ -1,6 +1,6 @@
 // src/layouts/components/Topbar.tsx
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
 import { logout } from "../../features/auth/authSlice";
 import { setSelectedBranch } from "../../features/branch/branchSlice";
@@ -14,7 +14,6 @@ import { canSwitchBranch } from "../../utils/roleHelpers";
 
 import type { RootState } from "../../app/store";
 import history_icon_2 from "../../assets/icons/history_icon_3.svg";
-// import market_icon from "../../assets/icons/market_icon.svg";
 
 import { useCreateCategoryMutation } from "../../services/inventoryApi";
 import CategoryPopup from "../../features/inventory/components/CategoryPopup";
@@ -47,6 +46,7 @@ export default function Topbar({
   );
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [showBranchDropdown, setShowBranchDropdown] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -55,9 +55,10 @@ export default function Topbar({
   const [showCreateMenu, setShowCreateMenu] = useState(false);
   const [showShiftModal, setShowShiftModal] = useState(false);
   const [shiftDuration, setShiftDuration] = useState("");
-  const [isRegisterClosed, setIsRegisterClosed] = useState(false); // Add this state
+  const [isRegisterClosed, setIsRegisterClosed] = useState(() => {
+    return !localStorage.getItem('pos_session');
+  });
 
-  // Get current POS session for ALL users (including Super Admin)
   const {
     data: currentRegisterResponse,
     refetch: refetchCurrentRegister,
@@ -72,22 +73,26 @@ export default function Topbar({
   const isCashier =
     user?.role?.role_name === "Cashier" || user?.role?.role_name === "cashier";
 
-  // Reset register closed state when a new register is opened
   useEffect(() => {
-    if (currentRegister) {
+    if (currentRegister?.closed_at || currentRegister?.status === 'closed') {
+      setIsRegisterClosed(true);
+      localStorage.removeItem('pos_session');
+    } else if (currentRegister) {
       setIsRegisterClosed(false);
     }
   }, [currentRegister]);
 
-  // Show shift button only when register is open
-  const showShiftButton = (isCashier || isSuperAdmin) && currentRegister && !isRegisterClosed;
+  useEffect(() => {
+    if (!localStorage.getItem('pos_session')) {
+      setIsRegisterClosed(true);
+    }
+  }, [location.pathname]);
 
-  // Show shift closed indicator when register is closed
-  const showShiftClosed = (isCashier || isSuperAdmin) &&
-    (isRegisterClosed || (!currentRegister && !isFetchingRegister));
+  const showShiftButton = (isCashier || isSuperAdmin) && currentRegister && !isRegisterClosed;
+  const showShiftClosed = (isCashier || isSuperAdmin) && (isRegisterClosed || !currentRegister);
 
   useEffect(() => {
-    if (currentRegister?.opened_at) {
+    if (currentRegister?.opened_at && !isRegisterClosed) {
       const updateDuration = () => {
         const openedAt = new Date(currentRegister.opened_at);
         const now = new Date();
@@ -100,21 +105,19 @@ export default function Topbar({
       const interval = setInterval(updateDuration, 60000);
       return () => clearInterval(interval);
     }
-  }, [currentRegister]);
+  }, [currentRegister, isRegisterClosed]);
 
-  const handleCloseShift = () => setShowShiftModal(true);
+  const handleCloseShift = () => {
+    if (isRegisterClosed || !localStorage.getItem('pos_session')) {
+      return;
+    }
+    setShowShiftModal(true);
+  };
 
   const handleShiftClosed = () => {
-    // Set register as closed
     setIsRegisterClosed(true);
-    // Refetch to update the state
-    refetchCurrentRegister();
     setShowShiftModal(false);
-
-    // Force a re-fetch after a short delay
-    setTimeout(() => {
-      refetchCurrentRegister();
-    }, 500);
+    setTimeout(() => refetchCurrentRegister(), 300);
   };
 
   const [createCategory] = useCreateCategoryMutation();
@@ -234,7 +237,6 @@ export default function Topbar({
     if (toggleMobileMenu) toggleMobileMenu();
   };
 
-  // Close all dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = () => {
       setShowBranchDropdown(false);
@@ -249,9 +251,7 @@ export default function Topbar({
   return (
     <header className="sticky top-0 h-14 sm:h-16 bg-white border-b border-gray-200 z-50">
       <div className="flex items-center justify-between h-full px-2 xs:px-3 sm:px-4 md:px-6 gap-1 xs:gap-2 sm:gap-4">
-        {/* Left Section */}
         <div className="flex items-center gap-1 xs:gap-2 sm:gap-4 md:gap-6 min-w-0 flex-shrink">
-          {/* Mobile Menu Button */}
           <button
             onClick={handleMobileMenuToggle}
             className="lg:hidden p-1.5 xs:p-2 rounded-lg hover:bg-gray-100 transition-colors flex-shrink-0"
@@ -281,15 +281,12 @@ export default function Topbar({
             </svg>
           </button>
 
-          {/* Page Title */}
           <h1 className="text-xs xs:text-sm sm:text-base md:text-lg lg:text-xl font-bold text-gray-900 max-w-[80px] xs:max-w-[120px] sm:max-w-[200px] md:max-w-none">
             {pageTitle}
           </h1>
         </div>
 
-        {/* Right Section */}
         <div className="flex items-center gap-1 xs:gap-1.5 sm:gap-2 md:gap-3">
-          {/* Create Menu - Mobile & Tablet */}
           <div className="relative block xl:hidden">
             <button
               onClick={(e) => {
@@ -421,7 +418,6 @@ export default function Topbar({
             )}
           </div>
 
-          {/* Create Buttons - Desktop */}
           <div className="hidden xl:flex items-center gap-2">
             {canSeeAdminButtons && canCreateRole && (
               <Link
@@ -510,7 +506,6 @@ export default function Topbar({
             </button>
           </div>
 
-          {/* Shift Close Button - Show when register is open */}
           {showShiftButton && (
             <button
               onClick={handleCloseShift}
@@ -530,7 +525,6 @@ export default function Topbar({
             </button>
           )}
 
-          {/* Shift Closed Indicator - Show when register is closed */}
           {showShiftClosed && (
             <div className="hidden sm:flex items-center gap-1 px-2 py-1.5 xs:px-2.5 xs:py-1.5 sm:px-3 sm:py-2 bg-gray-300 text-gray-500 rounded-lg text-xs sm:text-sm cursor-not-allowed whitespace-nowrap">
               <img
@@ -543,7 +537,6 @@ export default function Topbar({
             </div>
           )}
 
-          {/* Notifications */}
           <div className="relative">
             <button
               onClick={(e) => {
@@ -599,7 +592,6 @@ export default function Topbar({
             )}
           </div>
 
-          {/* Settings */}
           <button
             className="hidden xs:flex p-1.5 xs:p-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
             aria-label="Settings"
@@ -625,7 +617,6 @@ export default function Topbar({
             </svg>
           </button>
 
-          {/* Profile Menu */}
           <div className="relative">
             <button
               onClick={(e) => {
@@ -665,7 +656,6 @@ export default function Topbar({
                     </p>
                   </div>
 
-                  {/* Show My Leaves and My Leaves Requests to all users except Super Admin */}
                   {!isSuperAdmin && (
                     <>
                       <Link to="/profile">
@@ -707,7 +697,6 @@ export default function Topbar({
         </div>
       </div>
 
-      {/* Category Popup */}
       {showCategoryPopup && (
         <CategoryPopup
           onClose={() => setShowCategoryPopup(false)}
@@ -722,7 +711,6 @@ export default function Topbar({
         />
       )}
 
-      {/* Shift Close Modal */}
       {showShiftModal && currentRegister && (
         <CloseRegisterPage
           register={currentRegister}

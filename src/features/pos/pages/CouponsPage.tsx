@@ -650,7 +650,7 @@ export default function CouponsPage() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Discount Value *{" "}
-                    {form.discount_type === "Percentage" ? "(%)" : "(KD)"}
+                    {form.discount_type === "Percentage" ? "(%)" : "(KWD)"}
                   </label>
                   <input
                     type="number"

@@ -153,7 +153,7 @@ export default function EmployeeDashboardPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 5;
+    const itemsPerPage = 25;
 
     // Filter states
     const [_selectedDate, setSelectedDate] = useState<string>('');

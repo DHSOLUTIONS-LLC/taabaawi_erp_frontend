@@ -77,18 +77,22 @@ export default function ReceiptModal({
               padding: 0;
               box-sizing: border-box;
             }
-            body {
-              font-family: 'Courier New', 'Lucida Sans Typewriter', monospace;
-              font-size: 11px;
-              line-height: 1.4;
-              background: white;
-              padding: 20px;
-            }
-            .receipt {
-              max-width: 300px;
-              margin: 0 auto;
-              background: white;
-            }
+           body {
+  font-family: 'Courier New', 'Lucida Sans Typewriter', monospace;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.6;
+  background: white;
+  padding: 20px;
+}
+.receipt {
+  max-width: 350px;
+  margin: 0 auto;
+  background: white;
+}
+.receipt * {
+  font-weight: 900;
+}
             .text-center { text-align: center; }
             .text-right { text-align: right; }
             .text-left { text-align: left; }
@@ -106,63 +110,74 @@ export default function ReceiptModal({
               justify-content: space-between;
               margin: 4px 0;
             }
+              .row .text-right {
+  text-align: right;
+}
             .logo {
-              max-width: 80px;
-              max-height: 60px;
-              margin: 0 auto 8px auto;
-              display: block;
-              object-fit: contain;
-            }
+  max-width: 80px;
+  max-height: 60px;
+  margin: 0 auto 8px auto;
+  display: block;
+  object-fit: contain;
+}
             .company-name {
-              font-size: 14px;
-              font-weight: bold;
-              margin-bottom: 4px;
-            }
+  font-size: 18px;
+  font-weight: 900;
+  margin-bottom: 4px;
+}
             .company-details {
               font-size: 9px;
               color: #555;
               margin-bottom: 2px;
             }
             .receipt-title {
-              font-size: 10px;
-              letter-spacing: 2px;
-              margin: 5px 0;
-            }
+  font-size: 13px;
+  letter-spacing: 2px;
+  margin: 5px 0;
+  font-weight: 900;
+}
             .items-table {
               width: 100%;
               margin: 5px 0;
             }
             .item-name {
-              width: 55%;
-            }
+  width: 55%;
+  font-weight: 900;
+}
             .item-qty {
-              width: 20%;
-              text-align: center;
-            }
-            .item-price {
-              width: 25%;
-              text-align: right;
-            }
-            .totals {
-              margin-top: 5px;
-            }
-            .barcode {
-              text-align: center;
-              margin: 10px 0;
-            }
-            .barcode img {
-              max-width: 100%;
-              height: auto;
-            }
-            .barcode-text {
-              font-family: 'Courier New', monospace;
-              font-size: 14px;
-              letter-spacing: 3px;
-              padding: 8px;
-              background: #f5f5f5;
-              display: inline-block;
-              font-weight: bold;
-            }
+  width: 20%;
+  text-align: center;
+  font-weight: 900;
+}
+.item-price {
+  width: 25%;
+  text-align: right;
+  font-weight: 900;
+}
+.totals {
+  margin-top: 5px;
+  font-weight: 900;
+}
+.thankyou {
+  font-size: 13px;
+  font-weight: 900;
+  margin-top: 8px;
+}
+.barcode-text {
+  font-family: 'Courier New', monospace;
+  font-size: 16px;
+  letter-spacing: 3px;
+  padding: 8px;
+  background: #f5f5f5;
+  display: inline-block;
+  font-weight: 900;
+}
+.barcode img {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  height: auto;
+}
             .footer {
               margin-top: 10px;
               text-align: center;
@@ -175,11 +190,11 @@ export default function ReceiptModal({
               margin-top: 8px;
             }
             .header-row {
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              margin-top: 4px;
-            }
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
+}
             @media print {
               body {
                 padding: 0;
@@ -268,34 +283,34 @@ export default function ReceiptModal({
               className="receipt bg-white p-4 rounded-lg shadow-sm"
             >
               {/* Company Logo */}
-              <div className="text-center mb-3">
-                {companyLogo ? (
-                  <img
-                    src={companyLogo}
-                    alt={companyName}
-                    className="mx-auto max-h-14 object-contain"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = "none";
-                    }}
-                  />
-                ) : (
-                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
-                    <svg
-                      className="w-6 h-6 text-blue-600"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M3 10h18M6 14h6m-6-4h12M5 4h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"
-                      />
-                    </svg>
-                  </div>
-                )}
-              </div>
+              <div style={{ textAlign: 'center', marginBottom: '12px' }}>
+  {companyLogo ? (
+    <img
+      src={companyLogo}
+      alt={companyName}
+      style={{ display: 'block', margin: '0 auto', maxHeight: '56px', objectFit: 'contain' }}
+      onError={(e) => {
+        (e.target as HTMLImageElement).style.display = "none";
+      }}
+    />
+  ) : (
+    <div style={{ width: '48px', height: '48px', backgroundColor: '#DBEAFE', borderRadius: '9999px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
+      <svg
+        style={{ width: '24px', height: '24px', color: '#2563EB' }}
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+          d="M3 10h18M6 14h6m-6-4h12M5 4h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"
+        />
+      </svg>
+    </div>
+  )}
+</div>
 
               {/* Company Header */}
               <div className="text-center">
@@ -319,11 +334,30 @@ export default function ReceiptModal({
                 )}
 
                 {/* Receipt Title with Receipt No on the right */}
-                <div className="header-row">
-                  <span className="receipt-title text-[10px] text-gray-400 tracking-wider">
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginTop: "4px",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: "10px",
+                      color: "#9CA3AF",
+                      letterSpacing: "2px",
+                    }}
+                  >
                     OFFICIAL RECEIPT
                   </span>
-                  <span className="text-[10px] font-semibold text-gray-700">
+                  <span
+                    style={{
+                      fontSize: "10px",
+                      fontWeight: "600",
+                      color: "#374151",
+                    }}
+                  >
                     #{receipt.sale_number}
                   </span>
                 </div>
@@ -362,7 +396,9 @@ export default function ReceiptModal({
                 {receipt.sales_staff_id && (
                   <div className="row text-xs">
                     <span className="text-gray-500">Staff ID: </span>
-                    <span className="text-gray-700">{receipt.sales_staff_id}</span>
+                    <span className="text-gray-700">
+                      {receipt.sales_staff_id}
+                    </span>
                   </div>
                 )}
                 {receipt.is_gift && (
@@ -377,30 +413,61 @@ export default function ReceiptModal({
               <div className="divider my-3" />
 
               {/* Items Header */}
-              <div className="row text-[10px] font-bold text-gray-600 uppercase tracking-wide mb-1">
-                <span className="item-name">ITEM </span>
-                <span className="item-qty text-center">QTY </span>
-                <span className="item-price text-right">AMOUNT </span>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  fontSize: "10px",
+                  fontWeight: "bold",
+                  color: "#4B5563",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                  marginBottom: "4px",
+                }}
+              >
+                <span style={{ width: "55%" }}>ITEM</span>
+                <span style={{ width: "20%", textAlign: "center" }}>QTY</span>
+                <span style={{ width: "25%", textAlign: "right" }}>AMOUNT</span>
               </div>
 
               {/* Items List */}
               <div className="items-table space-y-2">
                 {receipt.items?.map((item: any, index: number) => (
                   <div key={index} className="text-xs">
-                    <div className="row">
-                      <span className="item-name text-gray-800">
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        margin: "4px 0",
+                      }}
+                    >
+                      <span style={{ width: "55%", color: "#1F2937" }}>
                         {item.product_name}
                         {item.variant && (
-                          <span className="text-gray-400 text-[10px]">
-                            {" "}({item.variant})
+                          <span style={{ color: "#9CA3AF", fontSize: "10px" }}>
+                            {" "}
+                            ({item.variant})
                           </span>
                         )}
                       </span>
-                      <span className="item-qty text-center text-gray-600">
+                      <span
+                        style={{
+                          width: "20%",
+                          textAlign: "center",
+                          color: "#4B5563",
+                        }}
+                      >
                         {item.quantity}
                       </span>
                       {!receipt.is_gift && (
-                        <span className="item-price text-right font-semibold text-gray-800">
+                        <span
+                          style={{
+                            width: "25%",
+                            textAlign: "right",
+                            fontWeight: "600",
+                            color: "#1F2937",
+                          }}
+                        >
                           KWD {parseFloat(item.total || "0").toFixed(3)}
                         </span>
                       )}
@@ -435,19 +502,25 @@ export default function ReceiptModal({
                   {parseFloat(receipt.discount) > 0 && (
                     <div className="row text-xs text-red-600">
                       <span>Discount:</span>
-                      <span>- KWD {parseFloat(receipt.discount).toFixed(3)}</span>
+                      <span>
+                        - KWD {parseFloat(receipt.discount).toFixed(3)}
+                      </span>
                     </div>
                   )}
                   {parseFloat(receipt.coupon_discount) > 0 && (
                     <div className="row text-xs text-green-600">
                       <span>Coupon:</span>
-                      <span>- KWD {parseFloat(receipt.coupon_discount).toFixed(3)}</span>
+                      <span>
+                        - KWD {parseFloat(receipt.coupon_discount).toFixed(3)}
+                      </span>
                     </div>
                   )}
                   {parseFloat(receipt.employee_discount) > 0 && (
                     <div className="row text-xs text-purple-600">
                       <span>Employee Disc.:</span>
-                      <span>- KWD {parseFloat(receipt.employee_discount).toFixed(3)}</span>
+                      <span>
+                        - KWD {parseFloat(receipt.employee_discount).toFixed(3)}
+                      </span>
                     </div>
                   )}
                   {parseFloat(receipt.tax) > 0 && (
@@ -469,18 +542,21 @@ export default function ReceiptModal({
                       {receipt.payment_method}
                     </span>
                   </div>
-                  {receipt.cash_received && parseFloat(receipt.cash_received) > 0 && (
-                    <div className="row text-xs">
-                      <span className="text-gray-500">Cash Received: </span>
-                      <span className="text-gray-700">
-                        KWD {parseFloat(receipt.cash_received).toFixed(3)}
-                      </span>
-                    </div>
-                  )}
+                  {receipt.cash_received &&
+                    parseFloat(receipt.cash_received) > 0 && (
+                      <div className="row text-xs">
+                        <span className="text-gray-500">Cash Received: </span>
+                        <span className="text-gray-700">
+                          KWD {parseFloat(receipt.cash_received).toFixed(3)}
+                        </span>
+                      </div>
+                    )}
                   {parseFloat(receipt.change_given) > 0 && (
                     <div className="row text-xs text-green-600 font-semibold">
                       <span>Change Given: </span>
-                      <span>KWD {parseFloat(receipt.change_given).toFixed(3)}</span>
+                      <span>
+                        KWD {parseFloat(receipt.change_given).toFixed(3)}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -489,7 +565,7 @@ export default function ReceiptModal({
               <div className="divider my-3" />
 
               {/* BARCODE SECTION */}
-              <div className="barcode">
+              <div className="barcode text-center">
                 {barcodeImageUrl ? (
                   <img
                     src={barcodeImageUrl}
@@ -504,9 +580,9 @@ export default function ReceiptModal({
                         const textBarcode = document.createElement("div");
                         textBarcode.className = "text-center";
                         textBarcode.innerHTML = `
-                          <div class="barcode-text">${barcodeValue}</div>
-                          <div class="text-[9px] text-gray-400 mt-1">Scan this code</div>
-                        `;
+            <div class="barcode-text">${barcodeValue}</div>
+            <div class="text-[9px] text-gray-400 mt-1">Scan this code</div>
+          `;
                         parent.appendChild(textBarcode);
                       }
                     }}
@@ -514,7 +590,9 @@ export default function ReceiptModal({
                 ) : (
                   <div className="text-center">
                     <div className="barcode-text">{barcodeValue}</div>
-                    <div className="text-[9px] text-gray-400 mt-1">Scan this code for returns</div>
+                    <div className="text-[9px] text-gray-400 mt-1">
+                      Scan this code for returns
+                    </div>
                   </div>
                 )}
               </div>

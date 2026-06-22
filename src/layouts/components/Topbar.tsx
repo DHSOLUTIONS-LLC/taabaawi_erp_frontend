@@ -69,8 +69,8 @@ export default function Topbar({
 
   const currentRegister = currentRegisterResponse?.data;
   const isSuperAdmin = user?.role?.role_name === "Super Admin";
-  const isCashier =
-    user?.role?.role_name === "Cashier" || user?.role?.role_name === "cashier";
+  const isCashier = user?.role?.role_name === "Cashier" || user?.role?.role_name === "cashier";
+  const isSalesStaff = user?.role?.role_name === "Sales Staff" || user?.role?.role_name === "sales staff";
 
   // Reset register closed state when a new register is opened
   useEffect(() => {
@@ -80,10 +80,10 @@ export default function Topbar({
   }, [currentRegister]);
 
   // Show shift button only when register is open
-  const showShiftButton = (isCashier || isSuperAdmin) && currentRegister && !isRegisterClosed;
+  const showShiftButton = (isCashier || isSuperAdmin || isSalesStaff) && currentRegister && !isRegisterClosed;
 
   // Show shift closed indicator when register is closed
-  const showShiftClosed = (isCashier || isSuperAdmin) &&
+  const showShiftClosed = (isCashier || isSuperAdmin || isSalesStaff) &&
     (isRegisterClosed || (!currentRegister && !isFetchingRegister));
 
   useEffect(() => {

@@ -49,6 +49,11 @@ interface SplitPayment {
   reference?: string;
 }
 
+// Helper function to round to 3 decimal places
+const roundTo3 = (value: number): number => {
+  return Math.round(value * 1000) / 1000;
+};
+
 export default function PaymentModal({
   isOpen,
   onClose,
@@ -91,12 +96,12 @@ export default function PaymentModal({
     ? (subtotal - discount) * (employeeDiscountPercent / 100)
     : 0;
 
-  const total = subtotal - discount - couponDiscount - employeeDiscount;
+  const total = roundTo3(subtotal - discount - couponDiscount - employeeDiscount);
 
   // For single Cash: calculate change
   const change =
     paymentMethod === "Cash" && cashReceived
-      ? parseFloat(cashReceived) - total
+      ? roundTo3(parseFloat(cashReceived) - total)
       : 0;
 
   const [createSale, { isLoading }] = useCreateSaleMutation();
@@ -134,8 +139,11 @@ export default function PaymentModal({
   // Update split remaining when payments change
   useEffect(() => {
     if (isSplitPayment) {
-      const totalPaid = splitPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
-      setSplitRemaining(Math.max(0, total - totalPaid));
+      const totalPaid = splitPayments.reduce((sum, p) => {
+        return sum + (p.amount || 0);
+      }, 0);
+      const remaining = roundTo3(total - totalPaid);
+      setSplitRemaining(Math.max(0, remaining));
     }
   }, [splitPayments, total, isSplitPayment]);
 
@@ -146,7 +154,6 @@ export default function PaymentModal({
       setError("No remaining amount to split");
       return;
     }
-    // Find a payment method that's not already used or use the first available
     const usedMethods = splitPayments.map(p => p.method);
     const availableMethod = paymentMethods.find(m => !usedMethods.includes(m)) || paymentMethods[0];
     setSplitPayments([...splitPayments, { method: availableMethod || "Cash", amount: 0 }]);
@@ -171,12 +178,18 @@ export default function PaymentModal({
 
   const handleSplitAmountChange = (index: number, amount: string) => {
     const updated = [...splitPayments];
+
+    // Parse the amount as is - no rounding conversion for display
     const numAmount = parseFloat(amount) || 0;
-    
+
     // Calculate max allowed for this split
-    const otherTotal = updated.reduce((sum, p, i) => sum + (i === index ? 0 : (p.amount || 0)), 0);
+    const otherTotal = updated.reduce((sum, p, i) => {
+      if (i === index) return sum;
+      return sum + (p.amount || 0);
+    }, 0);
+
     const maxAllowed = Math.max(0, total - otherTotal);
-    
+
     // Auto-adjust if exceeds max
     const finalAmount = Math.min(numAmount, maxAllowed);
     updated[index].amount = finalAmount;
@@ -195,7 +208,7 @@ export default function PaymentModal({
     if (isSplitPayment) {
       // Validate split payments
       const totalPaid = splitPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
-      
+
       if (Math.abs(totalPaid - total) > 0.001) {
         setError(`Total paid (${totalPaid.toFixed(3)}) does not match total amount (${total.toFixed(3)})`);
         return;
@@ -207,8 +220,7 @@ export default function PaymentModal({
           setError(`Payment amount for ${split.method} must be greater than 0`);
           return;
         }
-        
-        // ✅ Match backend validation: Card/K-Net need reference
+
         if (split.method === "Card" || split.method === "K-Net") {
           if (!split.reference?.trim()) {
             setError(`Please enter card reference for ${split.method}`);
@@ -245,7 +257,6 @@ export default function PaymentModal({
         discount_percentage: item.discount_percentage || 0,
       }));
 
-      // ✅ Build payload matching backend API
       const payload: any = {
         branch_id: branchId,
         cash_register_id: registerId || undefined,
@@ -259,13 +270,10 @@ export default function PaymentModal({
         items,
       };
 
-      // ✅ Add employee discount percentage if applicable
       if (isEmployeePurchase && employeeDiscountPercent > 0) {
         payload.is_employee_purchase = true;
-        // The backend calculates employee discount automatically
       }
 
-      // ✅ Add customer details
       if (!isDPPR && customerDetails) {
         payload.customer_details = {
           name: customerDetails.name || null,
@@ -275,12 +283,10 @@ export default function PaymentModal({
         };
       }
 
-      // ✅ Add coupon if applicable
       if (couponCode) {
         payload.coupon_code = couponCode;
       }
 
-      // ✅ Handle Split Payment
       if (isSplitPayment) {
         payload.is_split_payment = true;
         payload.split_payments = splitPayments.map((split) => ({
@@ -288,19 +294,13 @@ export default function PaymentModal({
           amount: split.amount,
           reference: split.reference || null,
         }));
-        // payment_method is already set to "Mixed"
       } else {
-        // ✅ Single Payment
         payload.is_split_payment = false;
-        
+
         if (paymentMethod === "Cash") {
           payload.cash_received = parseFloat(cashReceived) || 0;
-          // change_due will be calculated by backend
         } else if (paymentMethod === "Card" || paymentMethod === "K-Net") {
           payload.card_reference = cardReference;
-        } else {
-          // Other payment methods
-          // No specific fields needed, payment_method is already set
         }
       }
 
@@ -317,6 +317,7 @@ export default function PaymentModal({
   };
 
   const isSplitComplete = isSplitPayment && splitRemaining <= 0.001;
+  const isOverpayment = isSplitPayment && splitRemaining < 0;
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -375,14 +376,12 @@ export default function PaymentModal({
                   setSplitRemaining(0);
                 }
               }}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                isSplitPayment ? "bg-blue-600" : "bg-gray-300"
-              }`}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${isSplitPayment ? "bg-blue-600" : "bg-gray-300"
+                }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  isSplitPayment ? "translate-x-6" : "translate-x-1"
-                }`}
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isSplitPayment ? "translate-x-6" : "translate-x-1"
+                  }`}
               />
             </button>
           </div>
@@ -405,7 +404,7 @@ export default function PaymentModal({
                       <select
                         value={split.method}
                         onChange={(e) => handleSplitMethodChange(index, e.target.value)}
-                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg appearance-none bg-white pr-8"
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg appearance-none bg-white pr-8 focus:ring-2 focus:ring-blue-500"
                       >
                         {paymentMethods.map((method) => (
                           <option key={method} value={method}>{method}</option>
@@ -434,7 +433,7 @@ export default function PaymentModal({
                         min="0"
                         value={split.amount || ""}
                         onChange={(e) => handleSplitAmountChange(index, e.target.value)}
-                        className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg"
+                        className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                         placeholder="Amount"
                       />
                       <span className="text-sm text-gray-500">KWD</span>
@@ -445,7 +444,7 @@ export default function PaymentModal({
                         type="text"
                         value={split.reference || ""}
                         onChange={(e) => handleSplitReferenceChange(index, e.target.value)}
-                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                         placeholder="Card Reference / Transaction ID"
                       />
                     )}
@@ -460,6 +459,20 @@ export default function PaymentModal({
               >
                 + Add Another Payment
               </button>
+
+              {isOverpayment && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-yellow-700">⚠️ Extra Amount:</span>
+                    <span className="text-sm font-bold text-yellow-700">
+                      KWD {Math.abs(splitRemaining).toFixed(3)}
+                    </span>
+                  </div>
+                  <p className="text-xs text-yellow-600 mt-1">
+                    This will be added as change/credit.
+                  </p>
+                </div>
+              )}
 
               {isSplitComplete && (
                 <div className="bg-green-50 border border-green-200 rounded-lg p-2 text-center">
@@ -484,7 +497,7 @@ export default function PaymentModal({
                     <select
                       value={paymentMethod}
                       onChange={(e) => setPaymentMethod(e.target.value)}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:border-transparent text-sm"
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                     >
                       {paymentMethods.map((method) => (
                         <option key={method} value={method}>
@@ -510,13 +523,18 @@ export default function PaymentModal({
                     step="0.001"
                     value={cashReceived}
                     onChange={(e) => setCashReceived(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     placeholder="0.000"
                     autoFocus
                   />
                   {cashReceived && parseFloat(cashReceived) >= total && (
                     <div className="mt-2 text-sm text-green-600">
                       Change: KWD {change.toFixed(3)}
+                    </div>
+                  )}
+                  {cashReceived && parseFloat(cashReceived) < total && parseFloat(cashReceived) > 0 && (
+                    <div className="mt-2 text-sm text-red-500">
+                      Short: KWD {(total - parseFloat(cashReceived)).toFixed(3)}
                     </div>
                   )}
                 </div>
@@ -532,7 +550,7 @@ export default function PaymentModal({
                     type="text"
                     value={cardReference}
                     onChange={(e) => setCardReference(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     placeholder="Transaction ID"
                   />
                 </div>
@@ -551,15 +569,14 @@ export default function PaymentModal({
                       step="0.001"
                       value={otherPaymentAmount}
                       onChange={(e) => setOtherPaymentAmount(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                       placeholder={`Minimum: ${total.toFixed(3)}`}
                       autoFocus
                     />
                     {otherPaymentAmount &&
                       parseFloat(otherPaymentAmount) >= total && (
                         <div className="mt-2 text-sm text-green-600">
-                          Amount received: KWD{" "}
-                          {parseFloat(otherPaymentAmount).toFixed(3)}
+                          Change: KWD {(parseFloat(otherPaymentAmount) - total).toFixed(3)}
                         </div>
                       )}
                   </div>
@@ -576,7 +593,7 @@ export default function PaymentModal({
               type="text"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               placeholder="Add notes..."
             />
           </div>
@@ -619,9 +636,15 @@ export default function PaymentModal({
                   </div>
                 ))}
                 {splitRemaining > 0 && (
-                  <div className="flex justify-between text-xs text-red-500">
+                  <div className="flex justify-between text-xs text-blue-500">
                     <span>Remaining</span>
                     <span>KWD {splitRemaining.toFixed(3)}</span>
+                  </div>
+                )}
+                {isOverpayment && (
+                  <div className="flex justify-between text-xs text-yellow-600">
+                    <span>Extra Amount</span>
+                    <span>KWD {Math.abs(splitRemaining).toFixed(3)}</span>
                   </div>
                 )}
               </div>
@@ -647,7 +670,7 @@ export default function PaymentModal({
               disabled={
                 isLoading ||
                 isLoadingPaymentMethods ||
-                (isSplitPayment && !isSplitComplete) ||
+                (isSplitPayment && (!isSplitComplete || splitPayments.some(p => p.amount <= 0))) ||
                 (!isSplitPayment && paymentMethod === "Cash" &&
                   (!cashReceived || parseFloat(cashReceived) < total)) ||
                 (!isSplitPayment && paymentMethod !== "Cash" &&

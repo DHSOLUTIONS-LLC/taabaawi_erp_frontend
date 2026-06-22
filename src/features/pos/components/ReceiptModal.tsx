@@ -542,7 +542,7 @@ export default function ReceiptModal({
                       {receipt.is_split_payment ? 'Split Payment (Mixed)' : receipt.payment_method}
                     </span>
                   </div>
-                  
+
                   {parseFloat(receipt.change_given) > 0 && (
                     <div className="row text-xs text-green-600 font-semibold">
                       <span>Change Given: </span>

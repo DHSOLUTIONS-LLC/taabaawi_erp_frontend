@@ -74,6 +74,7 @@ export default function CashRegistersPage() {
   const registers = registersResponse?.data?.data || [];
   const pagination = registersResponse?.data;
   const selectedRegister = registerDetailsResponse?.data;
+  console.log('selected registers: ', selectedRegister)
 
   const totalOpening = registers.reduce(
     (sum: number, register: any) => sum + parseFloat(register.opening_balance),
@@ -538,8 +539,8 @@ export default function CashRegistersPage() {
                           </td>
                           <td className="px-4 py-4 text-sm text-gray-900">
                             <span className={
-                              register.difference > 0 ? "text-green-600" : 
-                              register.difference < 0 ? "text-red-600" : ""
+                              register.difference > 0 ? "text-green-600" :
+                                register.difference < 0 ? "text-red-600" : ""
                             }>
                               {register.difference ? `KWD ${register.difference}` : "-"}
                             </span>
@@ -631,47 +632,47 @@ export default function CashRegistersPage() {
               </div>
 
               {/* Currency Denominations Counted */}
-              {selectedRegister?.closing_balance?.denominations && 
-               Object.keys(selectedRegister.closing_balance.denominations).length > 0 && (
-                <div className="mb-4 sm:mb-6">
-                  <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">
-                    Currency Denominations Counted
-                  </h3>
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4">
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                      {KUWAIT_DENOMINATIONS.map((denom) => {
-                        const count = selectedRegister.closing_balance.denominations[denom.value] || 0;
-                        if (count > 0) {
-                          return (
-                            <div key={denom.value} className={`${denom.color} rounded-lg p-3 border border-gray-200`}>
-                              <div className="flex flex-col">
-                                <p className="font-semibold text-gray-800 text-sm">{denom.label}</p>
-                                <p className="text-xs text-gray-500 capitalize">{denom.type}</p>
-                                <div className="mt-1">
-                                  <p className="text-sm font-bold text-gray-800">{count} × {denom.value}</p>
-                                  <p className="text-xs text-blue-600 font-medium">= {(count * denom.value).toFixed(3)} KWD</p>
+              {selectedRegister?.closing_balance?.denominations &&
+                Object.keys(selectedRegister.closing_balance.denominations).length > 0 && (
+                  <div className="mb-4 sm:mb-6">
+                    <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">
+                      Currency Denominations Counted
+                    </h3>
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                        {KUWAIT_DENOMINATIONS.map((denom) => {
+                          const count = selectedRegister.closing_balance.denominations[denom.value] || 0;
+                          if (count > 0) {
+                            return (
+                              <div key={denom.value} className={`${denom.color} rounded-lg p-3 border border-gray-200`}>
+                                <div className="flex flex-col">
+                                  <p className="font-semibold text-gray-800 text-sm">{denom.label}</p>
+                                  <p className="text-xs text-gray-500 capitalize">{denom.type}</p>
+                                  <div className="mt-1">
+                                    <p className="text-sm font-bold text-gray-800">{count} × {denom.value}</p>
+                                    <p className="text-xs text-blue-600 font-medium">= {(count * denom.value).toFixed(3)} KWD</p>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          );
-                        }
-                        return null;
-                      })}
-                    </div>
-                    <div className="mt-3 pt-3 border-t border-blue-200">
-                      <div className="flex justify-between items-center">
-                        <span className="font-semibold text-gray-700">Total Cash Counted:</span>
-                        <span className="text-xl font-bold text-blue-600">
-                          KWD {Object.entries(selectedRegister.closing_balance.denominations).reduce(
-                            (sum, [value, count]) => sum + parseFloat(value) * (count as number),
-                            0
-                          ).toFixed(3)}
-                        </span>
+                            );
+                          }
+                          return null;
+                        })}
+                      </div>
+                      <div className="mt-3 pt-3 border-t border-blue-200">
+                        <div className="flex justify-between items-center">
+                          <span className="font-semibold text-gray-700">Total Cash Counted:</span>
+                          <span className="text-xl font-bold text-blue-600">
+                            KWD {Object.entries(selectedRegister.closing_balance.denominations).reduce(
+                              (sum, [value, count]) => sum + parseFloat(value) * (count as number),
+                              0
+                            ).toFixed(3)}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
 
               {/* Cash Movements */}
               <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">

@@ -102,6 +102,14 @@ export const inventoryApi = createApi({
     }),
 
 
+    deleteProduct: builder.mutation<any, number>({
+      query: (id) => ({
+        url: `/products/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Products"],
+    }),
+
     bulkUploadProducts: builder.mutation({
       query: (productsData) => ({
         url: '/products/bulk',
@@ -577,5 +585,6 @@ export const {
   useGetBulkDiscountStatisticsQuery,
   useGetActiveBulkDiscountsQuery,
   useExportBulkDiscountQuery,
-  useBulkUploadProductsMutation
+  useBulkUploadProductsMutation,
+  useDeleteProductMutation
 } = inventoryApi;

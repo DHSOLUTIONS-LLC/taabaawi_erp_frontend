@@ -144,6 +144,7 @@ import CreateNewBranch from "../features/branch/pages/CreateNewBranch";
 import BranchesDashboard from "../features/branch/pages/BranchesDashboard";
 import CouponsPage from "../features/pos/pages/CouponsPage";
 import LeavePlannerPage from "../features/hr/pages/LeavePlannerPage";
+import ReturnDetailsPage from "../features/pos/pages/ReturnDetailsPage";
 
 // ---------------------------
 // Helper functions
@@ -624,6 +625,11 @@ export const router = createBrowserRouter([
                 <PurchaseReturnsPage />
               </PermissionRoute>
             ),
+          },
+
+          {
+            path: "pos/returns/:id",
+            element: <ReturnDetailsPage />,
           },
           {
             path: "returns/create/:poId?",
@@ -1182,7 +1188,7 @@ export const router = createBrowserRouter([
                 <DocumentManagementPage />
               </PermissionRoute>
             ),
-          }, 
+          },
           {
             path: "leave-planner",
             element: (
@@ -1572,6 +1578,7 @@ export const router = createBrowserRouter([
           { path: "orders/:id", element: <POSOrdersDetails /> },
           { path: "shift_reports", element: <POSShiftReports /> },
           { path: "returns", element: <ReturnsPage /> },
+          { path: "returns/:id", element: <ReturnDetailsPage /> },
           { path: "coupon", element: <CouponsPage /> },
         ],
       },
@@ -1597,9 +1604,9 @@ export const router = createBrowserRouter([
           },
           { path: "payrolls/:id", element: <PayrollDetailsPage /> },
           {
-  path: "leave-planner",
-  element: <LeavePlannerPage />,
-},
+            path: "leave-planner",
+            element: <LeavePlannerPage />,
+          },
           { path: "documents", element: <DocumentManagementPage /> },
         ],
       },

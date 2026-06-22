@@ -1,5 +1,6 @@
 // src/features/pos/pages/ReturnsPage.tsx
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import {
   useGetReturnsQuery,
@@ -19,13 +20,17 @@ import export_excel from "../../../assets/icons/export_excel.svg";
 import date_icon from "../../../assets/icons/date_icon.svg";
 import dropdown_arrow_icon from "../../../assets/icons/dropdown_arrow_icon.svg";
 import market_icon from "../../../assets/icons/market_icon.svg";
+import view_icon from "../../../assets/icons/view-icon.png";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import jsPDF from "jspdf";
 
 export default function ReturnsPage() {
+  const navigate = useNavigate();
   const { user } = useAppSelector((state: RootState) => state.auth);
   const userCanSwitchBranch = canSwitchBranch(user?.role?.role_name);
+  const isSuperAdmin = user?.role?.role_name === "Super Admin";
+  const basePath = isSuperAdmin ? "/admin" : "";
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedBranch, setSelectedBranch] = useState("");
@@ -72,9 +77,6 @@ export default function ReturnsPage() {
   const returns = returnsResponse?.data?.data || [];
   const pagination = returnsResponse?.data;
 
-  // Debug — remove once confirmed working
-  console.log("statsResponse raw:", statsResponse);
-
   // Handle both { data: { total_returns, ... } } and { total_returns, ... }
   const stats =
     statsResponse?.data?.data ?? statsResponse?.data ?? statsResponse ?? null;
@@ -99,6 +101,10 @@ export default function ReturnsPage() {
     } catch (err: any) {
       alert(err?.data?.message || "Failed to reject return");
     }
+  };
+
+  const handleViewReturn = (returnId: number) => {
+    navigate(`${basePath}/pos/returns/${returnId}`);
   };
 
   const handleExportExcel = () => {
@@ -134,21 +140,16 @@ export default function ReturnsPage() {
     }
 
     try {
-      // Create PDF in landscape mode
       const doc = new jsPDF("landscape", "mm", "a4");
-
-      // Set margins
       const marginLeft = 10;
       const marginTop = 20;
       let yPos = marginTop;
 
-      // Title
       doc.setFontSize(18);
       doc.setFont("helvetica", "bold");
       doc.text("RETURNS REPORT", 148.5, yPos, { align: "center" });
       yPos += 10;
 
-      // Report details
       doc.setFontSize(10);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(100);
@@ -158,12 +159,10 @@ export default function ReturnsPage() {
       });
       yPos += 8;
 
-      // Draw line
       doc.setDrawColor(200, 200, 200);
       doc.line(marginLeft, yPos, 287, yPos);
       yPos += 10;
 
-      // Define column widths for 9 columns
       const colWidths = [30, 30, 35, 35, 30, 30, 25, 40, 30];
       const headers = [
         "Return #",
@@ -177,7 +176,6 @@ export default function ReturnsPage() {
         "Date",
       ];
 
-      // Draw table header
       doc.setFontSize(9);
       doc.setFont("helvetica", "bold");
       doc.setTextColor(255);
@@ -194,14 +192,10 @@ export default function ReturnsPage() {
       doc.setTextColor(0);
       doc.setFont("helvetica", "normal");
 
-      // Draw table rows
       returns.forEach((returnItem: any, rowIndex: number) => {
-        // Check if we need a new page
         if (yPos > 190) {
           doc.addPage("landscape");
           yPos = marginTop;
-
-          // Draw header again on new page
           doc.setFont("helvetica", "bold");
           doc.setTextColor(255);
           doc.setFillColor(59, 130, 246);
@@ -216,7 +210,6 @@ export default function ReturnsPage() {
           doc.setFont("helvetica", "normal");
         }
 
-        // Alternate row colors
         if (rowIndex % 2 === 0) {
           doc.setFillColor(248, 248, 248);
           xPos = marginLeft;
@@ -226,7 +219,6 @@ export default function ReturnsPage() {
           });
         }
 
-        // Prepare row data (matching Excel export exactly)
         const rowData = [
           returnItem.return_number || "-",
           returnItem.sale?.sale_number || "-",
@@ -239,22 +231,16 @@ export default function ReturnsPage() {
           new Date(returnItem.return_date).toLocaleDateString(),
         ];
 
-        // Draw cell content
         xPos = marginLeft;
         doc.setFontSize(8);
         rowData.forEach((cell, index) => {
           let text = String(cell);
           const maxWidth = colWidths[index] - 4;
-
-          // Truncate text if too long (especially for Reason column)
           while (doc.getTextWidth(text) > maxWidth && text.length > 3) {
             text = text.substring(0, text.length - 4) + "...";
           }
-
-          // Align currency column to the right
           const align = index === 4 ? "right" : "left";
           const xOffset = align === "right" ? colWidths[index] - 2 : 2;
-
           doc.text(text, xPos + xOffset, yPos + 5.5, { align });
           xPos += colWidths[index];
         });
@@ -262,7 +248,6 @@ export default function ReturnsPage() {
         yPos += 8;
       });
 
-      // Add page numbers
       const pageCount = doc.internal.pages.length;
       for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
@@ -271,7 +256,6 @@ export default function ReturnsPage() {
         doc.text(`Page ${i} of ${pageCount}`, 148.5, 205, { align: "center" });
       }
 
-      // Save PDF
       doc.save(`returns_${new Date().toISOString().split("T")[0]}.pdf`);
     } catch (error) {
       console.error("PDF export failed:", error);
@@ -301,7 +285,7 @@ export default function ReturnsPage() {
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="w-full pl-12 pr-10 py-3.5 border border-gray-300 rounded-md "
+              className="w-full pl-12 pr-10 py-3.5 border border-gray-300 rounded-md"
             />
           </div>
           <div className="relative">
@@ -312,7 +296,7 @@ export default function ReturnsPage() {
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="w-full pl-12 pr-10 py-3.5 border border-gray-300 rounded-md "
+              className="w-full pl-12 pr-10 py-3.5 border border-gray-300 rounded-md"
             />
           </div>
           <div className="relative">
@@ -323,7 +307,7 @@ export default function ReturnsPage() {
               <select
                 value={selectedBranch}
                 onChange={(e) => setSelectedBranch(e.target.value)}
-                className="w-full pl-12 pr-10 py-3.5 border border-gray-300 rounded-md  "
+                className="w-full pl-12 pr-10 py-3.5 border border-gray-300 rounded-md"
               >
                 <option value="">All Branches</option>
                 {branches.map((b: any) => (
@@ -403,9 +387,8 @@ export default function ReturnsPage() {
         {/* Table Section */}
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
           {/* Search + Filters */}
-          <div className="px-4 sm:px-6 py-3 sm:py-4 border-b  border-gray-300  flex flex-col lg:flex-row flex-wrap items-start lg:items-center justify-between gap-3 sm:gap-4">
+          <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-300 flex flex-col lg:flex-row flex-wrap items-start lg:items-center justify-between gap-3 sm:gap-4">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
-              {/* Search Input */}
               <div className="relative w-full sm:w-auto">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <img src={search_icon} alt="" className="w-4 h-4" />
@@ -419,7 +402,6 @@ export default function ReturnsPage() {
                 />
               </div>
 
-              {/* Status Filter */}
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
@@ -431,7 +413,6 @@ export default function ReturnsPage() {
                 <option value="Rejected">Rejected</option>
               </select>
 
-              {/* Refund Method Filter */}
               <select
                 value={refundMethodFilter}
                 onChange={(e) => setRefundMethodFilter(e.target.value)}
@@ -444,9 +425,6 @@ export default function ReturnsPage() {
               </select>
             </div>
 
-
-
-            {/* Export Button */}
             <div className="flex flex-row space-x-2 w-full sm:w-auto">
               <button
                 onClick={handleExportPdf}
@@ -551,22 +529,31 @@ export default function ReturnsPage() {
                           })}
                         </td>
                         <td className="px-5 py-4">
-                          {r.status === "Pending" && (
-                            <div className="flex gap-2">
-                              <button
-                                onClick={() => handleApprove(r.id)}
-                                className="px-3 py-1.5 bg-green-600 text-white text-xs rounded-lg hover:bg-green-700 font-medium"
-                              >
-                                Approve
-                              </button>
-                              <button
-                                onClick={() => setRejectingId(r.id)}
-                                className="px-3 py-1.5 bg-red-100 text-red-700 text-xs rounded-lg hover:bg-red-200 font-medium"
-                              >
-                                Reject
-                              </button>
-                            </div>
-                          )}
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleViewReturn(r.id)}
+                              className="px-3 py-1.5 bg-blue-600 text-white text-xs rounded-lg hover:bg-blue-700 font-medium flex items-center gap-1"
+                            >
+                              <img src={view_icon} alt="View" className="w-3.5 h-3.5" />
+                              View
+                            </button>
+                            {r.status === "Pending" && (
+                              <>
+                                <button
+                                  onClick={() => handleApprove(r.id)}
+                                  className="px-3 py-1.5 bg-green-600 text-white text-xs rounded-lg hover:bg-green-700 font-medium"
+                                >
+                                  Approve
+                                </button>
+                                <button
+                                  onClick={() => setRejectingId(r.id)}
+                                  className="px-3 py-1.5 bg-red-100 text-red-700 text-xs rounded-lg hover:bg-red-200 font-medium"
+                                >
+                                  Reject
+                                </button>
+                              </>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))

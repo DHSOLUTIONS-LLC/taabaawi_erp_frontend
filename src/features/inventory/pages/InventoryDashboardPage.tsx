@@ -21,6 +21,7 @@ import {
 import { exportToExcel, exportToPDF } from "../../../utils/exportUtils";
 import { getProductImageUrl } from "../../../utils/imageHelpers";
 import { useGetBranchesQuery } from "../../../services/superAdminApi";
+import { useDeleteProductMutation } from "../../../services/inventoryApi";
 
 import icon_1 from "../../../assets/icons/low_stock.svg";
 import icon_2 from "../../../assets/icons/pending_transfer.svg";
@@ -233,6 +234,9 @@ export default function DashboardPage() {
 
   const datePickerRef = useRef<HTMLDivElement>(null);
 
+  const [deleteProduct, { isLoading: isDeleting }] = useDeleteProductMutation();
+
+
   const {
     data: categoriesResponse,
     isLoading: categoriesLoading,
@@ -291,6 +295,21 @@ export default function DashboardPage() {
     });
     return map;
   }, [inventoryItems]);
+
+
+  const handleDeleteProduct = async (productId: number, productName: string) => {
+    if (window.confirm(`Are you sure you want to delete "${productName}"? This action cannot be undone.`)) {
+      try {
+        await deleteProduct(productId).unwrap();
+        alert('Product deleted successfully!');
+        refetchProducts();
+      } catch (error: any) {
+        console.error('Failed to delete product:', error);
+        alert(error?.data?.message || 'Failed to delete product. Please try again.');
+      }
+    }
+  };
+
 
   // Build products with inventory for the inventory tab
   const productsWithInventory = useMemo(() => {
@@ -1288,12 +1307,21 @@ export default function DashboardPage() {
                         </td>
                         {activeTab === "products" && (
                           <td className="px-4 md:px-5 py-3 md:py-4 whitespace-nowrap">
-                            <button
-                              onClick={() => handleViewProduct(product)}
-                              className="text-blue-600 hover:text-blue-700 font-medium text-sm"
-                            >
-                              View
-                            </button>
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => handleViewProduct(product)}
+                                className="text-blue-600 hover:text-blue-700 font-medium text-sm"
+                              >
+                                View
+                              </button>
+                              <button
+                                onClick={() => handleDeleteProduct(product.id, product.product_name || product.name || `Product #${product.id}`)}
+                                disabled={isDeleting}
+                                className="text-red-600 hover:text-red-700 font-medium text-sm disabled:opacity-50"
+                              >
+                                Delete
+                              </button>
+                            </div>
                           </td>
                         )}
                       </tr>

@@ -514,7 +514,7 @@ export default function Topbar({
           {showShiftButton && (
             <button
               onClick={handleCloseShift}
-              className="hidden sm:flex items-center gap-1 px-2 py-1.5 xs:px-2.5 xs:py-1.5 sm:px-3 sm:py-2 bg-[#FF5F57] text-white rounded-lg hover:bg-[#FF4A42] transition-colors text-xs sm:text-sm whitespace-nowrap animate-pulse"
+              className="hidden sm:flex items-center gap-1 px-2 py-1.5 xs:px-2.5 xs:py-1.5 sm:px-3 sm:py-2 bg-[#FF5F57] text-white rounded-lg hover:bg-[#FF4A42] transition-colors text-xs sm:text-sm whitespace-nowrap animate-pulse cursor-pointer"
             >
               <img
                 src={history_icon_2}

@@ -93,7 +93,7 @@ export default function PaymentModal({
 
   const total = subtotal - discount - couponDiscount - employeeDiscount;
 
-  // For Cash: calculate change
+  // For single Cash: calculate change
   const change =
     paymentMethod === "Cash" && cashReceived
       ? parseFloat(cashReceived) - total
@@ -172,11 +172,11 @@ export default function PaymentModal({
   const handleSplitAmountChange = (index: number, amount: string) => {
     const updated = [...splitPayments];
     const numAmount = parseFloat(amount) || 0;
-
+    
     // Calculate max allowed for this split
     const otherTotal = updated.reduce((sum, p, i) => sum + (i === index ? 0 : (p.amount || 0)), 0);
     const maxAllowed = Math.max(0, total - otherTotal);
-
+    
     // Auto-adjust if exceeds max
     const finalAmount = Math.min(numAmount, maxAllowed);
     updated[index].amount = finalAmount;
@@ -195,7 +195,7 @@ export default function PaymentModal({
     if (isSplitPayment) {
       // Validate split payments
       const totalPaid = splitPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
-
+      
       if (Math.abs(totalPaid - total) > 0.001) {
         setError(`Total paid (${totalPaid.toFixed(3)}) does not match total amount (${total.toFixed(3)})`);
         return;
@@ -207,7 +207,8 @@ export default function PaymentModal({
           setError(`Payment amount for ${split.method} must be greater than 0`);
           return;
         }
-
+        
+        // ✅ Match backend validation: Card/K-Net need reference
         if (split.method === "Card" || split.method === "K-Net") {
           if (!split.reference?.trim()) {
             setError(`Please enter card reference for ${split.method}`);
@@ -244,21 +245,27 @@ export default function PaymentModal({
         discount_percentage: item.discount_percentage || 0,
       }));
 
+      // ✅ Build payload matching backend API
       const payload: any = {
         branch_id: branchId,
-        cash_register_id: registerId,
+        cash_register_id: registerId || undefined,
         sales_staff_id: salesStaffId || null,
         customer_id: customerId || null,
         is_dppr: isDPPR,
         is_gift: isGift,
         is_employee_purchase: isEmployeePurchase,
-        employee_discount_percentage: employeeDiscountPercent,
         payment_method: isSplitPayment ? "Mixed" : paymentMethod,
         notes: notes || null,
         items,
-        is_split_payment: isSplitPayment,
       };
 
+      // ✅ Add employee discount percentage if applicable
+      if (isEmployeePurchase && employeeDiscountPercent > 0) {
+        payload.is_employee_purchase = true;
+        // The backend calculates employee discount automatically
+      }
+
+      // ✅ Add customer details
       if (!isDPPR && customerDetails) {
         payload.customer_details = {
           name: customerDetails.name || null,
@@ -268,38 +275,41 @@ export default function PaymentModal({
         };
       }
 
+      // ✅ Add coupon if applicable
       if (couponCode) {
         payload.coupon_code = couponCode;
       }
 
+      // ✅ Handle Split Payment
       if (isSplitPayment) {
+        payload.is_split_payment = true;
         payload.split_payments = splitPayments.map((split) => ({
           method: split.method,
           amount: split.amount,
           reference: split.reference || null,
         }));
-      } else if (paymentMethod === "Cash") {
-        payload.cash_received = parseFloat(cashReceived) || 0;
-        payload.change_due = change;
-        payload.card_reference = null;
-        payload.amount_paid = null;
-      } else if (paymentMethod === "Card" || paymentMethod === "K-Net") {
-        payload.cash_received = null;
-        payload.change_due = null;
-        payload.card_reference = cardReference;
-        payload.amount_paid = null;
+        // payment_method is already set to "Mixed"
       } else {
-        payload.cash_received = null;
-        payload.change_due = null;
-        payload.card_reference = null;
-        payload.amount_paid = parseFloat(otherPaymentAmount) || 0;
+        // ✅ Single Payment
+        payload.is_split_payment = false;
+        
+        if (paymentMethod === "Cash") {
+          payload.cash_received = parseFloat(cashReceived) || 0;
+          // change_due will be calculated by backend
+        } else if (paymentMethod === "Card" || paymentMethod === "K-Net") {
+          payload.card_reference = cardReference;
+        } else {
+          // Other payment methods
+          // No specific fields needed, payment_method is already set
+        }
       }
 
-      console.log("Final Payment Payload:", JSON.stringify(payload, null, 2));
+      console.log("📤 Final Payment Payload:", JSON.stringify(payload, null, 2));
 
       const result = await createSale(payload).unwrap();
       onSuccess(result.data);
     } catch (err: any) {
+      console.error("❌ Payment error:", err);
       setError(
         err?.data?.message || "Failed to process payment. Please try again.",
       );
@@ -365,12 +375,14 @@ export default function PaymentModal({
                   setSplitRemaining(0);
                 }
               }}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${isSplitPayment ? "bg-blue-600" : "bg-gray-300"
-                }`}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                isSplitPayment ? "bg-blue-600" : "bg-gray-300"
+              }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isSplitPayment ? "translate-x-6" : "translate-x-1"
-                  }`}
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  isSplitPayment ? "translate-x-6" : "translate-x-1"
+                }`}
               />
             </button>
           </div>
@@ -393,7 +405,7 @@ export default function PaymentModal({
                       <select
                         value={split.method}
                         onChange={(e) => handleSplitMethodChange(index, e.target.value)}
-                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg appearance-none bg-white pr-8 focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg appearance-none bg-white pr-8"
                       >
                         {paymentMethods.map((method) => (
                           <option key={method} value={method}>{method}</option>
@@ -422,7 +434,7 @@ export default function PaymentModal({
                         min="0"
                         value={split.amount || ""}
                         onChange={(e) => handleSplitAmountChange(index, e.target.value)}
-                        className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg"
                         placeholder="Amount"
                       />
                       <span className="text-sm text-gray-500">KWD</span>
@@ -433,7 +445,7 @@ export default function PaymentModal({
                         type="text"
                         value={split.reference || ""}
                         onChange={(e) => handleSplitReferenceChange(index, e.target.value)}
-                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
                         placeholder="Card Reference / Transaction ID"
                       />
                     )}
@@ -472,7 +484,7 @@ export default function PaymentModal({
                     <select
                       value={paymentMethod}
                       onChange={(e) => setPaymentMethod(e.target.value)}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:border-transparent text-sm"
                     >
                       {paymentMethods.map((method) => (
                         <option key={method} value={method}>
@@ -498,7 +510,7 @@ export default function PaymentModal({
                     step="0.001"
                     value={cashReceived}
                     onChange={(e) => setCashReceived(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none"
                     placeholder="0.000"
                     autoFocus
                   />
@@ -520,7 +532,7 @@ export default function PaymentModal({
                     type="text"
                     value={cardReference}
                     onChange={(e) => setCardReference(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none"
                     placeholder="Transaction ID"
                   />
                 </div>
@@ -539,7 +551,7 @@ export default function PaymentModal({
                       step="0.001"
                       value={otherPaymentAmount}
                       onChange={(e) => setOtherPaymentAmount(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none"
                       placeholder={`Minimum: ${total.toFixed(3)}`}
                       autoFocus
                     />
@@ -564,7 +576,7 @@ export default function PaymentModal({
               type="text"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none"
               placeholder="Add notes..."
             />
           </div>

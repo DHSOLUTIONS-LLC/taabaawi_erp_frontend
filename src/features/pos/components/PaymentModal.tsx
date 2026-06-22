@@ -26,7 +26,7 @@ interface PaymentModalProps {
   couponCode: string;
   isGift: boolean;
   isEmployeePurchase: boolean;
-  employeeDiscountPercent?: number; // ← ADD THIS - the percentage from sidebar
+  employeeDiscountPercent?: number;
   isDPPR: boolean;
   registerId?: number;
   branchId: number;
@@ -43,6 +43,12 @@ interface PaymentModalProps {
 
 type PaymentMethod = string;
 
+interface SplitPayment {
+  method: string;
+  amount: number;
+  reference?: string;
+}
+
 export default function PaymentModal({
   isOpen,
   onClose,
@@ -53,7 +59,7 @@ export default function PaymentModal({
   couponCode,
   isGift,
   isEmployeePurchase,
-  employeeDiscountPercent = 0, // ← ADD THIS with default 0
+  employeeDiscountPercent = 0,
   isDPPR,
   registerId,
   branchId,
@@ -62,7 +68,6 @@ export default function PaymentModal({
   customerDetails,
   onSuccess,
 }: PaymentModalProps) {
-  // Fetch active payment methods from API
   const { data: paymentMethodsData, isLoading: isLoadingPaymentMethods } =
     useGetActivePaymentMethodsQuery();
 
@@ -74,7 +79,14 @@ export default function PaymentModal({
   const [notes, setNotes] = useState("");
   const [error, setError] = useState("");
 
-  // Calculate employee discount based on the percentage
+  // Split Payment States
+  const [isSplitPayment, setIsSplitPayment] = useState(false);
+  const [splitPayments, setSplitPayments] = useState<SplitPayment[]>([
+    { method: "Cash", amount: 0 }
+  ]);
+  const [splitRemaining, setSplitRemaining] = useState(0);
+
+  // Calculate employee discount
   const employeeDiscount = isEmployeePurchase
     ? (subtotal - discount) * (employeeDiscountPercent / 100)
     : 0;
@@ -99,6 +111,7 @@ export default function PaymentModal({
 
       if (methods.length > 0) {
         setPaymentMethod(methods[0]);
+        setSplitPayments([{ method: methods[0], amount: 0 }]);
       }
     }
   }, [paymentMethodsData]);
@@ -112,35 +125,113 @@ export default function PaymentModal({
       setOtherPaymentAmount("");
       setNotes("");
       setError("");
+      setIsSplitPayment(false);
+      setSplitPayments([{ method: "Cash", amount: 0 }]);
+      setSplitRemaining(0);
     }
   }, [isOpen]);
 
+  // Update split remaining when payments change
+  useEffect(() => {
+    if (isSplitPayment) {
+      const totalPaid = splitPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
+      setSplitRemaining(Math.max(0, total - totalPaid));
+    }
+  }, [splitPayments, total, isSplitPayment]);
+
   if (!isOpen) return null;
+
+  const handleAddSplitPayment = () => {
+    if (splitRemaining <= 0) {
+      setError("No remaining amount to split");
+      return;
+    }
+    // Find a payment method that's not already used or use the first available
+    const usedMethods = splitPayments.map(p => p.method);
+    const availableMethod = paymentMethods.find(m => !usedMethods.includes(m)) || paymentMethods[0];
+    setSplitPayments([...splitPayments, { method: availableMethod || "Cash", amount: 0 }]);
+    setCardReference("");
+  };
+
+  const handleRemoveSplitPayment = (index: number) => {
+    if (splitPayments.length <= 1) {
+      setError("At least one payment method is required");
+      return;
+    }
+    const newSplitPayments = splitPayments.filter((_, i) => i !== index);
+    setSplitPayments(newSplitPayments);
+  };
+
+  const handleSplitMethodChange = (index: number, method: string) => {
+    const updated = [...splitPayments];
+    updated[index].method = method;
+    updated[index].reference = "";
+    setSplitPayments(updated);
+  };
+
+  const handleSplitAmountChange = (index: number, amount: string) => {
+    const updated = [...splitPayments];
+    const numAmount = parseFloat(amount) || 0;
+    
+    // Calculate max allowed for this split
+    const otherTotal = updated.reduce((sum, p, i) => sum + (i === index ? 0 : (p.amount || 0)), 0);
+    const maxAllowed = Math.max(0, total - otherTotal);
+    
+    // Auto-adjust if exceeds max
+    const finalAmount = Math.min(numAmount, maxAllowed);
+    updated[index].amount = finalAmount;
+    setSplitPayments(updated);
+  };
+
+  const handleSplitReferenceChange = (index: number, reference: string) => {
+    const updated = [...splitPayments];
+    updated[index].reference = reference;
+    setSplitPayments(updated);
+  };
 
   const handleProcessPayment = async () => {
     setError("");
 
-    // Validate Cash payment
-    if (paymentMethod === "Cash") {
-      if (!cashReceived || parseFloat(cashReceived) < total) {
-        setError("Cash received must be at least the total amount");
+    if (isSplitPayment) {
+      // Validate split payments
+      const totalPaid = splitPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
+      
+      if (Math.abs(totalPaid - total) > 0.001) {
+        setError(`Total paid (${totalPaid.toFixed(3)}) does not match total amount (${total.toFixed(3)})`);
         return;
       }
-    }
 
-    // Validate Card/K-Net payment
-    else if (paymentMethod === "Card" || paymentMethod === "K-Net") {
-      if (!cardReference.trim()) {
-        setError("Please enter card reference / transaction ID");
-        return;
+      // Validate each split payment
+      for (const split of splitPayments) {
+        if (split.amount <= 0) {
+          setError(`Payment amount for ${split.method} must be greater than 0`);
+          return;
+        }
+        
+        if (split.method === "Card" || split.method === "K-Net") {
+          if (!split.reference?.trim()) {
+            setError(`Please enter card reference for ${split.method}`);
+            return;
+          }
+        }
       }
-    }
-
-    // Validate Other payment methods
-    else {
-      if (!otherPaymentAmount || parseFloat(otherPaymentAmount) < total) {
-        setError(`Payment amount must be at least KWD ${total.toFixed(3)}`);
-        return;
+    } else {
+      // Validate single payment
+      if (paymentMethod === "Cash") {
+        if (!cashReceived || parseFloat(cashReceived) < total) {
+          setError("Cash received must be at least the total amount");
+          return;
+        }
+      } else if (paymentMethod === "Card" || paymentMethod === "K-Net") {
+        if (!cardReference.trim()) {
+          setError("Please enter card reference / transaction ID");
+          return;
+        }
+      } else {
+        if (!otherPaymentAmount || parseFloat(otherPaymentAmount) < total) {
+          setError(`Payment amount must be at least KWD ${total.toFixed(3)}`);
+          return;
+        }
       }
     }
 
@@ -161,10 +252,11 @@ export default function PaymentModal({
         is_dppr: isDPPR,
         is_gift: isGift,
         is_employee_purchase: isEmployeePurchase,
-        employee_discount_percentage: employeeDiscountPercent, // ← ADD THIS
-        payment_method: paymentMethod,
+        employee_discount_percentage: employeeDiscountPercent,
+        payment_method: isSplitPayment ? "Mixed" : paymentMethod,
         notes: notes || null,
         items,
+        is_split_payment: isSplitPayment,
       };
 
       if (!isDPPR && customerDetails) {
@@ -180,7 +272,13 @@ export default function PaymentModal({
         payload.coupon_code = couponCode;
       }
 
-      if (paymentMethod === "Cash") {
+      if (isSplitPayment) {
+        payload.split_payments = splitPayments.map((split) => ({
+          method: split.method,
+          amount: split.amount,
+          reference: split.reference || null,
+        }));
+      } else if (paymentMethod === "Cash") {
         payload.cash_received = parseFloat(cashReceived) || 0;
         payload.change_due = change;
         payload.card_reference = null;
@@ -207,6 +305,8 @@ export default function PaymentModal({
       );
     }
   };
+
+  const isSplitComplete = isSplitPayment && splitRemaining <= 0.001;
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -248,101 +348,214 @@ export default function PaymentModal({
             </p>
           </div>
 
-          {/* Payment Method - Dropdown */}
-          <div>
-            <label className="text-sm font-medium text-gray-700 mb-1 block">
-              Payment Method
-            </label>
-            {isLoadingPaymentMethods ? (
-              <div className="flex items-center justify-center py-2">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600" />
-                <span className="ml-2 text-sm text-gray-500">Loading...</span>
-              </div>
-            ) : (
-              <div className="relative">
-                <select
-                  value={paymentMethod}
-                  onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                >
-                  {paymentMethods.map((method) => (
-                    <option key={method} value={method}>
-                      {method}
-                    </option>
-                  ))}
-                </select>
-                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                  <img src={dropdown_arrow_icon} alt="Dropdown" className="w-4 h-4" />
-                </div>
-              </div>
-            )}
+          {/* Toggle Split Payment */}
+          <div className="flex items-center justify-between bg-blue-50 p-3 rounded-lg">
+            <div>
+              <span className="text-sm font-medium text-gray-700">Split Payment</span>
+              <p className="text-xs text-gray-500">Pay using multiple methods</p>
+            </div>
+            <button
+              onClick={() => {
+                setIsSplitPayment(!isSplitPayment);
+                if (!isSplitPayment) {
+                  setSplitPayments([{ method: paymentMethod, amount: 0 }]);
+                  setSplitRemaining(total);
+                } else {
+                  setSplitPayments([{ method: "Cash", amount: total }]);
+                  setSplitRemaining(0);
+                }
+              }}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                isSplitPayment ? "bg-blue-600" : "bg-gray-300"
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  isSplitPayment ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </button>
           </div>
 
-          {/* Cash Amount - Only for Cash */}
-          {paymentMethod === "Cash" && (
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-1 block">
-                Cash Received (KWD)
-              </label>
-              <input
-                type="number"
-                step="0.001"
-                value={cashReceived}
-                onChange={(e) => setCashReceived(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="0.000"
-                autoFocus
-              />
-              {cashReceived && parseFloat(cashReceived) >= total && (
-                <div className="mt-2 text-sm text-green-600">
-                  Change: KWD {change.toFixed(3)}
+          {/* Split Payment UI */}
+          {isSplitPayment ? (
+            <div className="space-y-3 border border-gray-200 rounded-lg p-3">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium text-gray-700">Payment Breakdown</span>
+                <span className="text-sm font-medium">
+                  Remaining: <span className="text-blue-600 font-bold">KWD {splitRemaining.toFixed(3)}</span>
+                </span>
+              </div>
+
+              {splitPayments.map((split, index) => (
+                <div key={index} className="border-t border-gray-200 pt-3 first:border-t-0 first:pt-0">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs font-medium text-gray-500">#{index + 1}</span>
+                    <div className="flex-1 relative">
+                      <select
+                        value={split.method}
+                        onChange={(e) => handleSplitMethodChange(index, e.target.value)}
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg appearance-none bg-white pr-8 focus:ring-2 focus:ring-blue-500"
+                      >
+                        {paymentMethods.map((method) => (
+                          <option key={method} value={method}>{method}</option>
+                        ))}
+                      </select>
+                      <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                        <img src={dropdown_arrow_icon} alt="" className="w-3 h-3" />
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleRemoveSplitPayment(index)}
+                      disabled={splitPayments.length <= 1}
+                      className="text-red-500 hover:text-red-700 disabled:opacity-50"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        step="0.001"
+                        min="0"
+                        value={split.amount || ""}
+                        onChange={(e) => handleSplitAmountChange(index, e.target.value)}
+                        className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        placeholder="Amount"
+                      />
+                      <span className="text-sm text-gray-500">KWD</span>
+                    </div>
+
+                    {(split.method === "Card" || split.method === "K-Net") && (
+                      <input
+                        type="text"
+                        value={split.reference || ""}
+                        onChange={(e) => handleSplitReferenceChange(index, e.target.value)}
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        placeholder="Card Reference / Transaction ID"
+                      />
+                    )}
+                  </div>
+                </div>
+              ))}
+
+              <button
+                onClick={handleAddSplitPayment}
+                disabled={splitRemaining <= 0}
+                className="w-full py-2 text-sm text-blue-600 border border-blue-300 rounded-lg hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                + Add Another Payment
+              </button>
+
+              {isSplitComplete && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-2 text-center">
+                  <p className="text-sm text-green-600 font-medium">✓ All payments allocated!</p>
                 </div>
               )}
             </div>
-          )}
-
-          {/* Card Reference - Only for Card or K-Net */}
-          {(paymentMethod === "Card" || paymentMethod === "K-Net") && (
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-1 block">
-                Card Reference / Transaction ID
-              </label>
-              <input
-                type="text"
-                value={cardReference}
-                onChange={(e) => setCardReference(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Transaction ID"
-              />
-            </div>
-          )}
-
-          {/* Payment Amount - For Other Payment Methods */}
-          {paymentMethod !== "Cash" &&
-            paymentMethod !== "Card" &&
-            paymentMethod !== "K-Net" && (
+          ) : (
+            <>
+              {/* Single Payment Method - Dropdown */}
               <div>
                 <label className="text-sm font-medium text-gray-700 mb-1 block">
-                  Payment Amount (KWD)
+                  Payment Method
                 </label>
-                <input
-                  type="number"
-                  step="0.001"
-                  value={otherPaymentAmount}
-                  onChange={(e) => setOtherPaymentAmount(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder={`Minimum: ${total.toFixed(3)}`}
-                  autoFocus
-                />
-                {otherPaymentAmount &&
-                  parseFloat(otherPaymentAmount) >= total && (
+                {isLoadingPaymentMethods ? (
+                  <div className="flex items-center justify-center py-2">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600" />
+                    <span className="ml-2 text-sm text-gray-500">Loading...</span>
+                  </div>
+                ) : (
+                  <div className="relative">
+                    <select
+                      value={paymentMethod}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg appearance-none bg-white pr-10 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    >
+                      {paymentMethods.map((method) => (
+                        <option key={method} value={method}>
+                          {method}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                      <img src={dropdown_arrow_icon} alt="Dropdown" className="w-4 h-4" />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Cash Amount - Only for Cash */}
+              {paymentMethod === "Cash" && (
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">
+                    Cash Received (KWD)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.001"
+                    value={cashReceived}
+                    onChange={(e) => setCashReceived(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="0.000"
+                    autoFocus
+                  />
+                  {cashReceived && parseFloat(cashReceived) >= total && (
                     <div className="mt-2 text-sm text-green-600">
-                      Amount received: KWD{" "}
-                      {parseFloat(otherPaymentAmount).toFixed(3)}
+                      Change: KWD {change.toFixed(3)}
                     </div>
                   )}
-              </div>
-            )}
+                </div>
+              )}
+
+              {/* Card Reference - Only for Card or K-Net */}
+              {(paymentMethod === "Card" || paymentMethod === "K-Net") && (
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">
+                    Card Reference / Transaction ID
+                  </label>
+                  <input
+                    type="text"
+                    value={cardReference}
+                    onChange={(e) => setCardReference(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Transaction ID"
+                  />
+                </div>
+              )}
+
+              {/* Payment Amount - For Other Payment Methods */}
+              {paymentMethod !== "Cash" &&
+                paymentMethod !== "Card" &&
+                paymentMethod !== "K-Net" && (
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-1 block">
+                      Payment Amount (KWD)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.001"
+                      value={otherPaymentAmount}
+                      onChange={(e) => setOtherPaymentAmount(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder={`Minimum: ${total.toFixed(3)}`}
+                      autoFocus
+                    />
+                    {otherPaymentAmount &&
+                      parseFloat(otherPaymentAmount) >= total && (
+                        <div className="mt-2 text-sm text-green-600">
+                          Amount received: KWD{" "}
+                          {parseFloat(otherPaymentAmount).toFixed(3)}
+                        </div>
+                      )}
+                  </div>
+                )}
+            </>
+          )}
 
           {/* Notes */}
           <div>
@@ -386,6 +599,23 @@ export default function PaymentModal({
               <span>Total</span>
               <span className="text-[#1773CF]">KWD {total.toFixed(3)}</span>
             </div>
+            {isSplitPayment && (
+              <div className="mt-2 pt-2 border-t border-gray-200">
+                <p className="text-xs font-medium text-gray-500 mb-1">Split Payment Details:</p>
+                {splitPayments.map((split, idx) => (
+                  <div key={idx} className="flex justify-between text-xs">
+                    <span>{split.method}</span>
+                    <span className="font-medium">KWD {(split.amount || 0).toFixed(3)}</span>
+                  </div>
+                ))}
+                {splitRemaining > 0 && (
+                  <div className="flex justify-between text-xs text-red-500">
+                    <span>Remaining</span>
+                    <span>KWD {splitRemaining.toFixed(3)}</span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {error && (
@@ -407,9 +637,10 @@ export default function PaymentModal({
               disabled={
                 isLoading ||
                 isLoadingPaymentMethods ||
-                (paymentMethod === "Cash" &&
+                (isSplitPayment && !isSplitComplete) ||
+                (!isSplitPayment && paymentMethod === "Cash" &&
                   (!cashReceived || parseFloat(cashReceived) < total)) ||
-                (paymentMethod !== "Cash" &&
+                (!isSplitPayment && paymentMethod !== "Cash" &&
                   paymentMethod !== "Card" &&
                   paymentMethod !== "K-Net" &&
                   (!otherPaymentAmount ||
@@ -440,6 +671,8 @@ export default function PaymentModal({
                   </svg>
                   Processing...
                 </span>
+              ) : isSplitPayment ? (
+                `Pay KWD ${total.toFixed(3)} (Split)`
               ) : (
                 `Pay KWD ${total.toFixed(3)}`
               )}

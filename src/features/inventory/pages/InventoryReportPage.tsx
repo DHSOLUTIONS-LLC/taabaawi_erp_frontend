@@ -211,86 +211,72 @@ export default function InventoryReportsPage() {
       },
     );
 
-  const damageDiscardData: DamageDiscardItem[] = useMemo(() => {
-    if (activeTab !== "damage-discard") return [];
+const damageDiscardData: DamageDiscardItem[] = useMemo(() => {
+  if (activeTab !== 'damage-discard') return [];
 
-    const movements = damageMovements?.data?.data || [];
+  const movements = damageMovements?.data?.data || [];
 
-    // Filter movements that are damage/discard or going to/from repair/discard branches
-    const filtered = movements.filter((m: any) => {
-      const type = (m.movement_type || "").toLowerCase();
-      const fromBranch = (m.from_branch?.branch_name || "").toLowerCase();
-      const toBranch = (m.to_branch?.branch_name || "").toLowerCase();
+  const filtered = movements.filter((m: any) => {
+    const type = (m.movement_type || '').toLowerCase();
+    const fromBranch = (m.from_branch?.branch_name || '').toLowerCase();
+    const toBranch = (m.to_branch?.branch_name || '').toLowerCase();
 
-      return (
-        type === "damage" ||
-        type === "discard" ||
-        fromBranch.includes("repair") ||
-        fromBranch.includes("discard") ||
-        toBranch.includes("repair") ||
-        toBranch.includes("discard")
-      );
-    });
+    return (
+      type === 'damage' ||
+      type === 'discard' ||
+      fromBranch.includes('repair') ||
+      fromBranch.includes('discard') ||
+      toBranch.includes('repair') ||
+      toBranch.includes('discard')
+    );
+  });
 
-    return filtered.map((m: any) => ({
-      id: m.id,
-      product: m.product?.product_name || "Unknown",
-      name: m.product?.sku || "N/A",
-      branch:
-        m.to_branch?.branch_name || m.from_branch?.branch_name || "Unknown",
-      quantity: Math.abs(m.quantity || 0),
-      status:
-        m.movement_type === "damage"
-          ? "Damaged"
-          : m.movement_type === "discard"
-            ? "Discarded"
-            : "In Repair",
-      financialImpact: Math.abs(m.quantity || 0) * (m.product?.cost_price || 0),
-      reference: m.reference_number || `MOV-${m.id}`,
-    }));
-  }, [damageMovements, activeTab]);
-
+  return filtered.map((m: any) => ({
+    id: m.id,
+    product: m.product?.product_name || m.product?.name || 'Deleted Product',
+    name: m.product?.sku || 'N/A',
+    branch: m.to_branch?.branch_name || m.from_branch?.branch_name || 'Unknown',
+    quantity: Math.abs(m.quantity || 0),
+    status: m.movement_type === 'damage' ? 'Damaged' : m.movement_type === 'discard' ? 'Discarded' : 'In Repair',
+    financialImpact: Math.abs(m.quantity || 0) * (m.product?.cost_price || 0),
+    reference: m.reference_number || `MOV-${m.id}`,
+  }));
+}, [damageMovements, activeTab]);
   // Get active categories only
   const activeCategories = useMemo(() => {
     return categories.filter((cat: Category) => cat.is_active);
   }, [categories]);
 
   // Process inventory data for stock summary
-  const stockSummaryData: StockSummaryItem[] = useMemo(() => {
-    const movements = inventoryResponse?.data?.data || [];
-    const inventoryMap = new Map<string, StockSummaryItem>();
+const stockSummaryData: StockSummaryItem[] = useMemo(() => {
+  const movements = inventoryResponse?.data?.data || [];
+  const inventoryMap = new Map<string, StockSummaryItem>();
 
-    movements.forEach((movement: any) => {
-      if (movement.to_branch) {
-        const key = `${movement.product_id}-${movement.to_branch.id}`;
+  movements.forEach((movement: any) => {
+    if (movement.to_branch && movement.product) {
+      const key = `${movement.product_id}-${movement.to_branch.id}`;
 
-        if (!inventoryMap.has(key)) {
-          inventoryMap.set(key, {
-            id: movement.id,
-            product_id: movement.product_id,
-            product_name: movement.product.product_name,
-            sku: movement.product.sku,
-            category: "General",
-            branch: movement.to_branch.branch_name,
-            branch_id: movement.to_branch.id,
-            quantity: movement.quantity,
-            reserved_quantity: 0,
-            available_quantity: movement.quantity,
-            status:
-              movement.quantity > 10
-                ? "In Stock"
-                : movement.quantity > 0
-                  ? "Low Stock"
-                  : "Out of Stock",
-            image:
-              "https://images.unsplash.com/photo-1611930022073-b7a4ba5fcccd?w=150",
-          });
-        }
+      if (!inventoryMap.has(key)) {
+        inventoryMap.set(key, {
+          id: movement.id,
+          product_id: movement.product_id,
+          product_name: movement.product?.product_name || movement.product?.name || 'Deleted Product',
+          sku: movement.product?.sku || 'N/A',
+          category: 'General',
+          branch: movement.to_branch.branch_name,
+          branch_id: movement.to_branch.id,
+          quantity: movement.quantity || 0,
+          reserved_quantity: 0,
+          available_quantity: movement.quantity || 0,
+          status: movement.quantity > 10 ? 'In Stock' : movement.quantity > 0 ? 'Low Stock' : 'Out of Stock',
+          image: 'https://images.unsplash.com/photo-1611930022073-b7a4ba5fcccd?w=150',
+        });
       }
-    });
+    }
+  });
 
-    return Array.from(inventoryMap.values());
-  }, [inventoryResponse]);
+  return Array.from(inventoryMap.values());
+}, [inventoryResponse]);
 
   // Process inventory movements
   const inventoryMovementData: InventoryMovementItem[] = useMemo(() => {
@@ -299,14 +285,14 @@ export default function InventoryReportsPage() {
   return movements.map((movement: any) => ({
     id: movement.id,
     date: new Date(movement.movement_date).toLocaleDateString(),
-    product: movement.product?.product_name || movement.product?.name || "Unknown Product",
+    product: movement.product?.product_name || movement.product?.name || 'Deleted Product',
     product_id: movement.product_id,
-    type: movement.movement_type || "Unknown",
-    from: movement.from_branch?.branch_name || "-",
-    to: movement.to_branch?.branch_name || "-",
+    type: movement.movement_type || 'Unknown',
+    from: movement.from_branch?.branch_name || '-',
+    to: movement.to_branch?.branch_name || '-',
     quantity: movement.quantity || 0,
     balanceAfter: 0,
-    user: movement.moved_by?.name || movement.moved_by?.employee_code || "System",
+    user: movement.moved_by?.name || movement.moved_by?.employee_code || 'System',
     from_branch_id: movement.from_branch_id,
     to_branch_id: movement.to_branch_id,
   }));
@@ -1067,7 +1053,7 @@ export default function InventoryReportsPage() {
                         </td>
                         <td className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
                           <div className="text-xs sm:text-sm md:text-[14px] font-medium text-gray-900">
-                            {movement.product}
+                           {movement.product || 'Deleted Product'}
                           </div>
                         </td>
                         <td className="hidden sm:table-cell px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">

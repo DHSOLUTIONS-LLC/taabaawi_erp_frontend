@@ -147,6 +147,12 @@ export default function CloseRegisterPage({
     setUseDenominationMode(true);
     onSuccess();
     onClose();
+
+    localStorage.removeItem('pos_session')
+
+    setTimeout(() => {
+    window.location.reload();
+  }, 500);
   };
 
   return (

@@ -7,10 +7,12 @@ import { useAppSelector } from "../../../app/hooks";
 import type { RootState } from "../../../app/store";
 import CreateReturnModal from "../components/CreateReturnModal";
 import JsBarcode from "jsbarcode";
+import ReturnReceiptModal from "../components/ReturnReceiptModal";
 
 import arrow_back_icon from "../../../assets/icons/arrow_back_icon.svg";
 import print_icon from "../../../assets/icons/print_svg.png";
 import returns from "../../../assets/icons/returns.png";
+import dropdown_arrow_icon from "../../../assets/icons/dropdown_arrow_icon.svg";
 
 const STATUS_COLORS: Record<string, string> = {
   Completed: "bg-green-100 text-green-800",
@@ -33,8 +35,11 @@ export default function OrderDetailsPage() {
   const navigate = useNavigate();
   const { user } = useAppSelector((state: RootState) => state.auth);
   const [showReturnModal, setShowReturnModal] = useState(false);
+  const [showRefundDropdown, setShowRefundDropdown] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
-  const barcodeCanvasRef = useRef<HTMLCanvasElement>(null);
+  const [showRefundReceipt, setShowRefundReceipt] = useState(false);
+  const [selectedReturnId, setSelectedReturnId] = useState<number | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const isSuperAdmin = user?.role?.role_name === "Super Admin";
   const basePath = isSuperAdmin ? "/admin" : "";
@@ -45,10 +50,8 @@ export default function OrderDetailsPage() {
 
   const sale = saleResponse?.data;
 
-  // Generate barcode for sale number
   const generateBarcode = (saleNumber: string) => {
     try {
-      // Create a temporary canvas element
       const canvas = document.createElement("canvas");
       JsBarcode(canvas, saleNumber, {
         format: "CODE128",
@@ -80,11 +83,16 @@ export default function OrderDetailsPage() {
     });
   };
 
+  const handlePrintRefundReceipt = (returnId: number) => {
+    setSelectedReturnId(returnId);
+    setShowRefundReceipt(true);
+    setShowRefundDropdown(false);
+  };
+
   const handlePrintReceipt = () => {
     const printContent = printRef.current;
     if (!printContent) return;
 
-    // Generate barcode image for the receipt
     const barcodeImage = generateBarcode(sale?.sale_number || `SALE-${sale?.id}`);
 
     const printWindow = window.open("", "_blank");
@@ -100,11 +108,7 @@ export default function OrderDetailsPage() {
           <title>Receipt - ${sale?.sale_number || "Print"}</title>
           <meta charset="utf-8" />
           <style>
-            * {
-              margin: 0;
-              padding: 0;
-              box-sizing: border-box;
-            }
+            * { margin: 0; padding: 0; box-sizing: border-box; }
             body {
               font-family: 'Courier New', 'Lucida Sans Typewriter', monospace;
               font-size: 12px;
@@ -112,89 +116,26 @@ export default function OrderDetailsPage() {
               background: white;
               padding: 20px;
             }
-            .receipt {
-              max-width: 300px;
-              margin: 0 auto;
-              background: white;
-            }
-            .text-center {
-              text-align: center;
-            }
-            .text-right {
-              text-align: right;
-            }
-            .text-left {
-              text-align: left;
-            }
-            .bold {
-              font-weight: bold;
-            }
-            .divider {
-              border-top: 1px dashed #333;
-              margin: 8px 0;
-            }
-            .divider-dotted {
-              border-top: 1px dotted #999;
-              margin: 6px 0;
-            }
-            .row {
-              display: flex;
-              justify-content: space-between;
-              margin: 4px 0;
-            }
-            .company-name {
-              font-size: 14px;
-              font-weight: bold;
-              margin-bottom: 4px;
-            }
-            .company-details {
-              font-size: 9px;
-              color: #555;
-              margin-bottom: 2px;
-            }
-            .receipt-title {
-              font-size: 10px;
-              letter-spacing: 2px;
-              margin: 5px 0;
-            }
-            .item-name {
-              width: 55%;
-            }
-            .item-qty {
-              width: 15%;
-              text-align: center;
-            }
-            .item-price {
-              width: 30%;
-              text-align: right;
-            }
-            .items-table {
-              width: 100%;
-              margin: 5px 0;
-            }
-            .totals {
-              margin-top: 5px;
-            }
-            .footer {
-              margin-top: 10px;
-              text-align: center;
-              font-size: 9px;
-              color: #777;
-            }
-            .thankyou {
-              font-size: 10px;
-              font-weight: bold;
-              margin-top: 8px;
-            }
-            .barcode-container {
-              text-align: center;
-              margin: 10px 0;
-              padding: 8px 0;
-            }
-            .barcode-image {
-              max-width: 100%;
-              height: auto;
-            }
+            .receipt { max-width: 300px; margin: 0 auto; background: white; }
+            .text-center { text-align: center; }
+            .text-right { text-align: right; }
+            .text-left { text-align: left; }
+            .bold { font-weight: bold; }
+            .divider { border-top: 1px dashed #333; margin: 8px 0; }
+            .divider-dotted { border-top: 1px dotted #999; margin: 6px 0; }
+            .row { display: flex; justify-content: space-between; margin: 4px 0; }
+            .company-name { font-size: 14px; font-weight: bold; margin-bottom: 4px; }
+            .company-details { font-size: 9px; color: #555; margin-bottom: 2px; }
+            .receipt-title { font-size: 10px; letter-spacing: 2px; margin: 5px 0; }
+            .item-name { width: 55%; }
+            .item-qty { width: 15%; text-align: center; }
+            .item-price { width: 30%; text-align: right; }
+            .items-table { width: 100%; margin: 5px 0; }
+            .totals { margin-top: 5px; }
+            .footer { margin-top: 10px; text-align: center; font-size: 9px; color: #777; }
+            .thankyou { font-size: 10px; font-weight: bold; margin-top: 8px; }
+            .barcode-container { text-align: center; margin: 10px 0; padding: 8px 0; }
+            .barcode-image { max-width: 100%; height: auto; }
             .dummy-barcode {
               font-family: 'Courier New', monospace;
               font-size: 18px;
@@ -204,19 +145,12 @@ export default function OrderDetailsPage() {
               margin: 5px 0;
               text-align: center;
             }
-            @media print {
-              body {
-                padding: 0;
-                margin: 0;
-              }
-            }
+            @media print { body { padding: 0; margin: 0; } }
           </style>
         </head>
         <body>
           <div class="receipt">
             ${printContent.innerHTML}
-            
-            <!-- Barcode Section -->
             <div class="barcode-container">
               <div class="divider"></div>
               ${barcodeImage ?
@@ -248,6 +182,17 @@ export default function OrderDetailsPage() {
     printWindow.document.close();
   };
 
+  // Close dropdown when clicking outside
+  useState(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowRefundDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  });
+
   if (isLoading) {
     return (
       <DashboardLayout>
@@ -274,10 +219,10 @@ export default function OrderDetailsPage() {
     );
   }
 
-  const canReturn =
-    sale.status === "Completed" &&
-    sale.returns?.length === 0 &&
-    parseFloat(sale.total_amount) > 0;
+  const canReturn = sale.status === "Completed" && parseFloat(sale.total_amount) > 0;
+  const hasRefunds = sale.returns && sale.returns.length > 0;
+  const isFullyRefunded = sale.status === "Refunded";
+  const isPartiallyRefunded = sale.status === "Partially Refunded";
 
   return (
     <DashboardLayout>
@@ -305,6 +250,16 @@ export default function OrderDetailsPage() {
                 >
                   {sale.status}
                 </span>
+                {sale.is_gift && (
+                  <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-pink-100 text-pink-700">
+                    🎁 Gift
+                  </span>
+                )}
+                {sale.is_employee_purchase && (
+                  <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                    👤 Employee
+                  </span>
+                )}
               </div>
               <p className="text-xs sm:text-sm text-gray-500 mt-1 break-words">
                 {formatDate(sale.sale_date)}
@@ -313,14 +268,64 @@ export default function OrderDetailsPage() {
           </div>
 
           <div className="flex flex-wrap gap-2">
+            {/* Print Original Receipt */}
             <button
               onClick={handlePrintReceipt}
               className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-sm"
             >
               <img src={print_icon} alt="Print" className="w-4 h-4" />
-              Print
+              Print Receipt
             </button>
-            {canReturn && (
+
+            {/* Print Refund Receipt - Single Button or Dropdown */}
+            {hasRefunds && (
+              <div className="relative" ref={dropdownRef}>
+                {sale.returns.length === 1 ? (
+                  <button
+                    onClick={() => handlePrintRefundReceipt(sale.returns[0].id)}
+                    className="flex items-center gap-2 px-3 py-2 border-2 border-orange-500 text-orange-600 rounded-lg hover:bg-orange-50 transition-colors text-sm"
+                  >
+                    <img src={returns} alt="Refund" className="w-4 h-4" />
+                    Print Refund
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setShowRefundDropdown(!showRefundDropdown)}
+                    className="flex items-center gap-2 px-3 py-2 border-2 border-orange-500 text-orange-600 rounded-lg hover:bg-orange-50 transition-colors text-sm"
+                  >
+                    <img src={returns} alt="Refund" className="w-4 h-4" />
+                    Print Refund
+                    <img src={dropdown_arrow_icon} alt="" className="w-3 h-3" />
+                  </button>
+                )}
+
+                {/* Dropdown for multiple refunds */}
+                {showRefundDropdown && sale.returns.length > 1 && (
+                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                    <div className="p-2">
+                      <div className="text-xs font-semibold text-gray-500 px-3 py-2 border-b border-gray-100">
+                        Select Refund Receipt
+                      </div>
+                      {sale.returns.map((returnItem: any) => (
+                        <button
+                          key={returnItem.id}
+                          onClick={() => handlePrintRefundReceipt(returnItem.id)}
+                          className="w-full text-left px-3 py-2 hover:bg-gray-50 rounded transition-colors text-sm flex justify-between items-center"
+                        >
+                          <span>#{returnItem.return_number}</span>
+                          <span className="text-xs text-gray-500">
+                            {formatDate(returnItem.return_date)}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Return Button - Only show if not fully refunded */}
+            {!isFullyRefunded && canReturn && (
               <button
                 onClick={() => setShowReturnModal(true)}
                 className="flex items-center gap-2 px-3 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors text-sm"
@@ -334,7 +339,6 @@ export default function OrderDetailsPage() {
 
         {/* Hidden Print Template */}
         <div ref={printRef} className="hidden">
-          {/* Receipt Content */}
           <div className="text-center">
             <div className="company-name text-base font-bold">
               {sale.branch?.branch_name || "Store"}
@@ -356,7 +360,6 @@ export default function OrderDetailsPage() {
 
           <div className="divider my-3" />
 
-          {/* Transaction Details */}
           <div className="space-y-2">
             <div className="row text-xs">
               <span>Receipt #</span>
@@ -376,25 +379,22 @@ export default function OrderDetailsPage() {
                 <span>{sale.sales_staff?.name}</span>
               </div>
             )}
-            {/* Customer Info - Show if available */}
             {(sale.customer || sale.customer_details) && (
               <div className="row text-xs">
                 <span>Customer</span>
-                <span>{sale.customer?.full_name || sale.customer_details?.name || "—"}</span>
+                <span>{sale.customer?.full_name || sale.customer_details?.name || sale.customer?.name || "—"}</span>
               </div>
             )}
           </div>
 
           <div className="divider my-3" />
 
-          {/* Items Header */}
           <div className="row text-[10px] font-bold uppercase tracking-wide">
             <span className="item-name">ITEM</span>
             <span className="item-qty text-center">QTY</span>
             <span className="item-price text-right">AMOUNT</span>
           </div>
 
-          {/* Items List */}
           <div className="items-table space-y-2">
             {sale.items?.map((item: any) => (
               <div key={item.id} className="text-xs">
@@ -431,7 +431,6 @@ export default function OrderDetailsPage() {
 
           <div className="divider my-3" />
 
-          {/* Totals */}
           <div className="totals space-y-1">
             <div className="row text-xs">
               <span>Subtotal</span>
@@ -482,7 +481,6 @@ export default function OrderDetailsPage() {
 
           <div className="divider my-3" />
 
-          {/* Footer */}
           <div className="footer">
             <div className="thankyou text-center text-xs font-semibold">
               Thank You For Your Purchase!
@@ -494,15 +492,12 @@ export default function OrderDetailsPage() {
               This is a computer generated receipt
             </div>
           </div>
-
-          {/* Barcode will be added dynamically in print function */}
         </div>
 
-        {/* Rest of the page content remains the same */}
+        {/* Main Content */}
         <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Left Column - 2/3 width */}
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">
-            {/* Items Table */}
             <div className="bg-white rounded-xl p-4 sm:p-6">
               <h2 className="text-base font-semibold text-gray-900 mb-4">
                 Order Items
@@ -511,21 +506,11 @@ export default function OrderDetailsPage() {
                 <table className="w-full min-w-[600px]">
                   <thead className="bg-gray-50 border-y border-gray-200">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                        Product
-                      </th>
-                      <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">
-                        Qty
-                      </th>
-                      <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">
-                        Unit Price
-                      </th>
-                      <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">
-                        Discount
-                      </th>
-                      <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">
-                        Total
-                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Product</th>
+                      <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Qty</th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Unit Price</th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Discount</th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Total</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
@@ -539,8 +524,7 @@ export default function OrderDetailsPage() {
                                 alt={item.product?.product_name}
                                 className="w-10 h-10 rounded-lg object-cover"
                                 onError={(e) => {
-                                  (e.target as HTMLImageElement).style.display =
-                                    "none";
+                                  (e.target as HTMLImageElement).style.display = "none";
                                 }}
                               />
                             )}
@@ -575,12 +559,9 @@ export default function OrderDetailsPage() {
               </div>
             </div>
 
-            {/* Notes */}
             {sale.notes && (
               <div className="bg-white rounded-xl p-4 sm:p-6">
-                <h2 className="text-base font-semibold text-gray-900 mb-2">
-                  Notes
-                </h2>
+                <h2 className="text-base font-semibold text-gray-900 mb-2">Notes</h2>
                 <p className="text-sm text-gray-700 whitespace-pre-wrap break-words">
                   {sale.notes}
                 </p>
@@ -592,9 +573,7 @@ export default function OrderDetailsPage() {
           <div className="space-y-4 sm:space-y-6">
             {/* Amount Summary */}
             <div className="bg-white rounded-xl p-4 sm:p-6">
-              <h2 className="text-base font-semibold text-gray-900 mb-4">
-                Amount Summary
-              </h2>
+              <h2 className="text-base font-semibold text-gray-900 mb-4">Amount Summary</h2>
               <div className="space-y-3">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-500">Subtotal</span>
@@ -617,9 +596,7 @@ export default function OrderDetailsPage() {
                 {parseFloat(sale.employee_discount_amount) > 0 && (
                   <div className="flex justify-between text-sm text-purple-600">
                     <span>Employee Discount</span>
-                    <span>
-                      -{formatCurrency(sale.employee_discount_amount)}
-                    </span>
+                    <span>-{formatCurrency(sale.employee_discount_amount)}</span>
                   </div>
                 )}
                 <div className="flex justify-between pt-2 border-t border-gray-200">
@@ -631,26 +608,93 @@ export default function OrderDetailsPage() {
               </div>
             </div>
 
+            {/* Refund Details */}
+            {hasRefunds && (
+              <div className="bg-white rounded-xl p-4 sm:p-6">
+                <h2 className="text-base font-semibold text-gray-900 mb-4">Refund Details</h2>
+                {/* Refund Details - Show if order has returns */}
+                {sale.returns && sale.returns.length > 0 && (
+                  <div className="bg-white rounded-xl p-4 sm:p-6">
+                    <h2 className="text-base font-semibold text-gray-900 mb-4">
+                      Refund Details
+                    </h2>
+                    {sale.returns.map((returnItem: any) => (
+                      <div key={returnItem.id} className="space-y-3 border-b border-gray-200 last:border-0 pb-4 last:pb-0">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">
+                              Return #{returnItem.return_number}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {formatDate(returnItem.return_date)}
+                            </p>
+                          </div>
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${returnItem.status === 'Refunded' ? 'bg-red-100 text-red-700' :
+                              returnItem.status === 'Partially Refunded' ? 'bg-yellow-100 text-yellow-700' :
+                                'bg-green-100 text-green-700'
+                            }`}>
+                            {returnItem.status}
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2 text-sm bg-gray-50 rounded-lg p-3">
+                          <div>
+                            <p className="text-xs text-gray-500">Refund Method</p>
+                            <p className="font-medium">{returnItem.refund_method || '—'}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500">Refund Amount</p>
+                            <p className="font-medium text-red-600">{formatCurrency(returnItem.return_amount)}</p>
+                          </div>
+                          <div className="col-span-2">
+                            <p className="text-xs text-gray-500">Reason</p>
+                            <p className="text-sm">{returnItem.reason || 'No reason provided'}</p>
+                          </div>
+                          <div className="col-span-2">
+                            <p className="text-xs text-gray-500">Processed By</p>
+                            <p className="text-sm">{returnItem.processed_by?.name || returnItem.processed_by || '—'}</p>
+                          </div>
+                        </div>
+
+                        {/* Refund Items */}
+                        {returnItem.items && returnItem.items.length > 0 && (
+                          <div className="mt-2">
+                            <p className="text-xs text-gray-500 mb-2">Items Refunded</p>
+                            <div className="space-y-1">
+                              {returnItem.items.map((item: any) => (
+                                <div key={item.id} className="flex justify-between text-sm border-b border-gray-100 pb-1">
+                                  <span>
+                                    {item.product?.product_name || item.product_name}
+                                    {item.variant && ` (${item.variant})`}
+                                    <span className="text-gray-500 text-xs ml-2">×{item.quantity}</span>
+                                  </span>
+                                  <span className="text-red-600">{formatCurrency(item.refund_amount)}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Payment Details */}
             <div className="bg-white rounded-xl p-4 sm:p-6">
-              <h2 className="text-base font-semibold text-gray-900 mb-4">
-                Payment Details
-              </h2>
+              <h2 className="text-base font-semibold text-gray-900 mb-4">Payment Details</h2>
               <div className="space-y-3">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-500">Payment Method</span>
-                  <span
-                    className={`px-2 py-0.5 rounded-full text-xs font-medium ${PAYMENT_METHOD_COLORS[sale.payment_method] || "bg-gray-100 text-gray-700"}`}
-                  >
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${PAYMENT_METHOD_COLORS[sale.payment_method] || "bg-gray-100 text-gray-700"}`}>
                     {sale.payment_method}
                   </span>
                 </div>
                 {sale.cash_received && (
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">Cash Received</span>
-                    <span className="font-medium">
-                      {formatCurrency(sale.cash_received)}
-                    </span>
+                    <span className="font-medium">{formatCurrency(sale.cash_received)}</span>
                   </div>
                 )}
                 {sale.change_given && (
@@ -662,17 +706,13 @@ export default function OrderDetailsPage() {
                 {sale.card_reference && (
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">Card Reference</span>
-                    <span className="font-mono text-xs">
-                      {sale.card_reference}
-                    </span>
+                    <span className="font-mono text-xs">{sale.card_reference}</span>
                   </div>
                 )}
                 {sale.coupon_code && (
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">Coupon Code</span>
-                    <span className="font-medium text-green-600">
-                      {sale.coupon_code}
-                    </span>
+                    <span className="font-medium text-green-600">{sale.coupon_code}</span>
                   </div>
                 )}
               </div>
@@ -680,67 +720,45 @@ export default function OrderDetailsPage() {
 
             {/* Store Information */}
             <div className="bg-white rounded-xl p-4 sm:p-6">
-              <h2 className="text-base font-semibold text-gray-900 mb-4">
-                Store Information
-              </h2>
+              <h2 className="text-base font-semibold text-gray-900 mb-4">Store Information</h2>
               <div className="space-y-3">
                 <div>
                   <p className="text-xs text-gray-500">Branch</p>
-                  <p className="text-sm font-medium text-gray-900 mt-1">
-                    {sale.branch?.branch_name}
-                  </p>
+                  <p className="text-sm font-medium text-gray-900 mt-1">{sale.branch?.branch_name}</p>
                   {sale.branch?.address && (
-                    <p className="text-xs text-gray-500 mt-1">
-                      {sale.branch.address}
-                    </p>
+                    <p className="text-xs text-gray-500 mt-1">{sale.branch.address}</p>
                   )}
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">Cashier</p>
-                  <p className="text-sm text-gray-900 mt-1">
-                    {sale.cashier?.name}
-                  </p>
+                  <p className="text-sm text-gray-900 mt-1">{sale.cashier?.name}</p>
                 </div>
                 {sale.sales_staff && (
                   <div>
                     <p className="text-xs text-gray-500">Sales Staff</p>
-                    <p className="text-sm text-gray-900 mt-1">
-                      {sale.sales_staff?.name}
-                    </p>
+                    <p className="text-sm text-gray-900 mt-1">{sale.sales_staff?.name}</p>
                   </div>
                 )}
                 {sale.cash_register && (
                   <div>
                     <p className="text-xs text-gray-500">Register</p>
-                    <p className="text-sm text-gray-900 mt-1">
-                      {sale.cash_register.register_number}
-                    </p>
+                    <p className="text-sm text-gray-900 mt-1">{sale.cash_register.register_number}</p>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Gift Receipt Info */}
             {sale.is_gift && (
               <div className="bg-pink-50 border border-pink-200 rounded-xl p-4">
-                <p className="text-sm font-semibold text-pink-700">
-                  🎁 Gift Receipt
-                </p>
-                <p className="text-xs text-pink-600 mt-1">
-                  This sale was marked as a gift receipt
-                </p>
+                <p className="text-sm font-semibold text-pink-700">🎁 Gift Receipt</p>
+                <p className="text-xs text-pink-600 mt-1">This sale was marked as a gift receipt</p>
               </div>
             )}
 
-            {/* Employee Purchase Info */}
             {sale.is_employee_purchase && (
               <div className="bg-purple-50 border border-purple-200 rounded-xl p-4">
-                <p className="text-sm font-semibold text-purple-700">
-                  👤 Employee Purchase
-                </p>
-                <p className="text-xs text-purple-600 mt-1">
-                  Employee discount applied
-                </p>
+                <p className="text-sm font-semibold text-purple-700">👤 Employee Purchase</p>
+                <p className="text-xs text-purple-600 mt-1">Employee discount applied</p>
               </div>
             )}
           </div>
@@ -750,13 +768,23 @@ export default function OrderDetailsPage() {
       {/* Return Modal */}
       <CreateReturnModal
         isOpen={showReturnModal}
-        onClose={() => {
-          setShowReturnModal(false);
-        }}
-        onSuccess={() => {
-          setShowReturnModal(false);
-        }}
+        onClose={() => setShowReturnModal(false)}
+        onSuccess={() => setShowReturnModal(false)}
         saleId={sale.id}
+      />
+
+      {/* Refund Receipt Modal */}
+      <ReturnReceiptModal
+        isOpen={showRefundReceipt}
+        onClose={() => {
+          setShowRefundReceipt(false);
+          setSelectedReturnId(null);
+        }}
+        returnId={selectedReturnId || 0}
+        onNewReturn={() => {
+          setShowRefundReceipt(false);
+          setSelectedReturnId(null);
+        }}
       />
     </DashboardLayout>
   );

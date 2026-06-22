@@ -259,6 +259,12 @@ export const posApi = api.injectEndpoints({
       providesTags: ["Sales"],
     }),
 
+
+    getReturnReceipt: builder.query<any, number>({
+      query: (id) => `/returns/${id}/receipt`,
+      providesTags: (_result, _error, id) => [{ type: 'Returns', id }],
+    }),
+
     validateDiscount: builder.mutation<
       {
         success: boolean;
@@ -494,4 +500,5 @@ export const {
 
   useScanBarcodeMutation,
   useSearchByBarcodeQuery,
+  useGetReturnReceiptQuery
 } = posApi;

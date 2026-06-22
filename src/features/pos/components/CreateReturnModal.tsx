@@ -1,6 +1,7 @@
 // src/features/pos/components/CreateReturnModal.tsx
 import { useState, useEffect } from 'react';
 import { useGetSaleByIdQuery, useCreateReturnMutation } from '../../../services/posApi';
+import ReturnReceiptModal from './ReturnReceiptModal';
 
 interface CreateReturnModalProps {
   isOpen: boolean;
@@ -14,6 +15,9 @@ type RefundMethod = 'Cash' | 'Card' | 'Store Credit';
 export default function CreateReturnModal({ isOpen, onClose, onSuccess, saleId: initialSaleId }: CreateReturnModalProps) {
   const [saleIdInput, setSaleIdInput] = useState(initialSaleId?.toString() || '');
   const [lookupSaleId, setLookupSaleId] = useState<number | undefined>(initialSaleId);
+  const [showReceipt, setShowReceipt] = useState(false);
+  const [returnData, setReturnData] = useState<any>(null);
+  const [returnId, setReturnId] = useState<number | null>(null);
   const [selectedItems, setSelectedItems] = useState<{
     sale_item_id: number;
     quantity: number;
@@ -110,7 +114,7 @@ export default function CreateReturnModal({ isOpen, onClose, onSuccess, saleId: 
     if (selectedItems.length === 0) { setError('Please select at least one item to return'); return; }
 
     try {
-      await createReturn({
+      const result = await createReturn({
         sale_id: lookupSaleId,
         refund_method: refundMethod,
         reason,
@@ -120,14 +124,20 @@ export default function CreateReturnModal({ isOpen, onClose, onSuccess, saleId: 
           condition: item.condition,
         })),
       }).unwrap();
-      onSuccess();
-      onClose();
-      // Reset
-      setSaleIdInput('');
-      setLookupSaleId(undefined);
-      setSelectedItems([]);
-      setReason('');
+
+      console.log('✅ Return successful:', result);
+
+      // Store return data for receipt
+      const returnIdValue = result.data?.id || result?.id || null;
+      setReturnData(result.data);
+      setReturnId(returnIdValue);
+      setShowReceipt(true);
+
+      // DON'T reset form or close modal - keep it open behind the receipt
+      // Only reset after receipt is closed via onNewReturn or onClose
+
     } catch (err: any) {
+      console.error('❌ Return error:', err);
       setError(err?.data?.message || 'Failed to process return');
     }
   };
@@ -289,8 +299,8 @@ export default function CreateReturnModal({ isOpen, onClose, onSuccess, saleId: 
                       key={method}
                       onClick={() => setRefundMethod(method)}
                       className={`py-2 sm:py-2.5 rounded-xl border-2 text-xs sm:text-sm font-medium transition-all ${refundMethod === method
-                          ? 'border-[#1773CF] bg-blue-50 text-[#1773CF]'
-                          : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                        ? 'border-[#1773CF] bg-blue-50 text-[#1773CF]'
+                        : 'border-gray-200 text-gray-600 hover:border-gray-300'
                         }`}
                     >
                       {method}
@@ -353,6 +363,20 @@ export default function CreateReturnModal({ isOpen, onClose, onSuccess, saleId: 
           </button>
         </div>
       </div>
+      <ReturnReceiptModal
+        isOpen={showReceipt}
+        onClose={() => {
+          setShowReceipt(false);
+          setReturnId(null);
+          onClose();
+        }}
+        returnId={returnId || 0}
+        onNewReturn={() => {
+          setShowReceipt(false);
+          setReturnId(null);
+          onClose();
+        }}
+      />
     </div>
   );
 }

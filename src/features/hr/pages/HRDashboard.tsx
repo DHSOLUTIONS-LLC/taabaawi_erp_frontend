@@ -6,7 +6,7 @@ import {
     useGetBranchesQuery,
 } from '../../../services/superAdminApi';
 
-import { useGetEmployeesQuery, useGetDashboardStatisticsQuery } from '../../../services/hrApi'
+import { useGetEmployeesQuery, useGetDashboardStatisticsQuery, useDeleteEmployeeMutation } from '../../../services/hrApi'
 
 
 import dropdown_arrow_icon from '../../../assets/icons/dropdown_arrow_icon.svg';
@@ -27,6 +27,7 @@ import type { RootState } from '../../../app/store';
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import jsPDF from 'jspdf';
+import TrashIcon from '@heroicons/react/24/outline/TrashIcon';
 
 interface Employee {
     id: number;
@@ -107,6 +108,9 @@ export default function EmployeeDashboardPage() {
         isLoading: branchesLoading,
         error: branchesError,
     } = useGetBranchesQuery();
+
+    const [deleteEmployee, { isLoading: isDeleting }] = useDeleteEmployeeMutation();
+
 
     const branches = Array.isArray(branchesData) ? branchesData : [];
 
@@ -294,6 +298,22 @@ export default function EmployeeDashboardPage() {
 
         return pageNumbers;
     };
+
+
+    const handleDeleteEmployee = async (employeeId: number, employeeName: string) => {
+    if (window.confirm(`Are you sure you want to delete employee "${employeeName}"? This action cannot be undone.`)) {
+        try {
+            await deleteEmployee(employeeId).unwrap();
+            alert('Employee deleted successfully!');
+            // Refetch employees to update the list
+            // You might want to refetch the employees list here
+        } catch (error: any) {
+            console.error('Failed to delete employee:', error);
+            alert(error?.data?.message || 'Failed to delete employee. Please try again.');
+        }
+    }
+};
+
 
     // Export to Excel function
     const handleExportToExcel = () => {
@@ -716,6 +736,7 @@ export default function EmployeeDashboardPage() {
                                         <th className="px-3 sm:px-4 py-2 sm:py-3 text-left text-sm sm:text-[16px] font-semibold text-[#37638F] uppercase tracking-wider whitespace-nowrap">BRANCH</th>
                                         <th className="px-3 sm:px-4 py-2 sm:py-3 text-left text-sm sm:text-[16px] font-semibold text-[#37638F] uppercase tracking-wider whitespace-nowrap">DEPARTMENT</th>
                                         <th className="px-3 sm:px-4 py-2 sm:py-3 text-left text-sm sm:text-[16px] font-semibold text-[#37638F] uppercase tracking-wider whitespace-nowrap">STATUS</th>
+                                        <th className="px-3 sm:px-4 py-2 sm:py-3 text-left text-sm sm:text-[16px] font-semibold text-[#37638F] uppercase tracking-wider whitespace-nowrap">ACTION</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-200">
@@ -756,6 +777,20 @@ export default function EmployeeDashboardPage() {
                                                         {employee.is_active ? 'Active' : 'Inactive'}
                                                     </span>
                                                 </td>
+                                                <td className="px-3 sm:px-4 py-3 sm:py-4 whitespace-nowrap">
+    {employee.role?.role_name !== 'Super Admin' && (
+        <button
+            onClick={(e) => {
+                e.stopPropagation();
+                handleDeleteEmployee(employee.id, employee.name);
+            }}
+            disabled={isDeleting}
+            className="text-red-600 hover:text-red-800 font-medium text-xs sm:text-sm cursor-pointer disabled:opacity-50"
+        >
+            Delete
+        </button>
+    )}
+</td>
                                             </tr>
                                         ))
                                     )}

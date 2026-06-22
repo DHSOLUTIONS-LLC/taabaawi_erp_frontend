@@ -153,78 +153,34 @@ export default function AddEmployee() {
         }
     }, [isEditMode, employee]);
 
-const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate password confirmation in edit mode if password is provided
+    // Validate password confirmation
     if (isEditMode && formData.password && formData.password !== formData.password_confirmation) {
         alert('Passwords do not match!');
         return;
     }
 
-    // Validate password in create mode
     if (!isEditMode && formData.password !== formData.password_confirmation) {
         alert('Passwords do not match!');
         return;
     }
 
     try {
-        // For edit mode - send ONLY HR fields
-        if (isEditMode) {
-            const payload: any = {
-                national_id: formData.national_id || null,
-                date_of_birth: formData.date_of_birth || null,
-                gender: formData.gender || null,
-                marital_status: formData.marital_status || null,
-                joining_date: formData.joining_date || null,
-                job_title: formData.job_title || null,
-                department: formData.department || null,
-                address: formData.address || null,
-                emergency_contact_name: formData.emergency_contact_name || null,
-                emergency_contact_phone: formData.emergency_contact_phone || null,
-                basic_salary: formData.basic_salary ? parseFloat(formData.basic_salary) : null,
-                transportation_allowance: formData.transportation_allowance ? parseFloat(formData.transportation_allowance) : null,
-                housing_allowance: formData.housing_allowance ? parseFloat(formData.housing_allowance) : null,
-                communication_allowance: formData.communication_allowance ? parseFloat(formData.communication_allowance) : null,
-                meal_allowance: formData.meal_allowance ? parseFloat(formData.meal_allowance) : null,
-                accommodation_allowance: formData.accommodation_allowance ? parseFloat(formData.accommodation_allowance) : null,
-            };
-
-            // Only add password if provided
-            if (formData.password) {
-                payload.password = formData.password;
-                payload.password_confirmation = formData.password_confirmation;
-                console.log("🔑 Password included in payload:", formData.password);
-            } else {
-                console.log("🔑 No password change - keeping existing password");
-            }
-
-            console.log("📤 Sending HR update payload:", JSON.stringify(payload, null, 2));
-
-            // ✅ CORRECT WAY: Send as { id, data }
-            const response = await updateUser({ 
-                id: Number(id), 
-                data: payload  // ← payload goes inside 'data'
-            }).unwrap();
-            
-            console.log("✅ Update response:", response);
-            
-            alert(formData.password ? 'Employee updated and password changed successfully!' : 'Employee updated successfully!');
-            navigate(`${basePath}/hr`);
-            return;
-        }
-
-        // For create mode - send all fields
         const fullName = `${formData.firstName} ${formData.lastName}`.trim();
-        const createPayload: any = {
+
+        // Build the payload with ALL fields
+        const payload: any = {
+            // User details
             name: fullName,
             email: formData.email,
             phone: formData.phone,
             role_id: Number(formData.role_id),
             branch_id: Number(formData.branch_id),
             is_active: formData.is_active,
-            password: formData.password,
-            password_confirmation: formData.password_confirmation,
+            
+            // HR fields
             national_id: formData.national_id || null,
             date_of_birth: formData.date_of_birth || null,
             gender: formData.gender || null,
@@ -243,12 +199,36 @@ const handleSubmit = async (e: React.FormEvent) => {
             accommodation_allowance: formData.accommodation_allowance ? parseFloat(formData.accommodation_allowance) : null,
         };
 
-        console.log("📤 Sending create payload:", JSON.stringify(createPayload, null, 2));
+        // Only add password if provided
+        if (formData.password) {
+            payload.password = formData.password;
+            payload.password_confirmation = formData.password_confirmation;
+            console.log("🔑 Password included in payload");
+        }
 
-        await createUser(createPayload).unwrap();
-        alert('Employee created successfully!');
+        console.log("📤 Sending payload to /employees/${id}/hr-info:", JSON.stringify(payload, null, 2));
+
+        if (isEditMode) {
+            // ✅ Send ALL fields to the SAME endpoint
+            const response = await updateUser({ 
+                id: Number(id), 
+                data: payload  // or spread it based on your mutation
+            }).unwrap();
+            
+            console.log("✅ Update response:", response);
+            alert(formData.password ? 'Employee updated and password changed successfully!' : 'Employee updated successfully!');
+        } else {
+            // Create mode
+            const createPayload = {
+                ...payload,
+                password: formData.password,
+                password_confirmation: formData.password_confirmation,
+            };
+            await createUser(createPayload).unwrap();
+            alert('Employee created successfully!');
+        }
+
         navigate(`${basePath}/hr`);
-
     } catch (error: any) {
         console.error('❌ Failed to save employee:', error);
         console.error('❌ Error response:', error?.data);
@@ -262,6 +242,8 @@ const handleSubmit = async (e: React.FormEvent) => {
         }
     }
 };
+
+
     const handleAddAllowance = () => {
         const newAllowance: Allowance = {
             id: Date.now().toString(),
@@ -788,52 +770,52 @@ const handleSubmit = async (e: React.FormEvent) => {
 
                     {/* System Access - Only show password fields for create mode */}
                     <div className="bg-white rounded-xl p-4 md:p-6">
-    <h2 className="text-lg font-semibold mb-4 text-gray-800">
-        System Access
-        {isEditMode && (
-            <span className="text-sm font-normal text-gray-400 ml-2">(Update password if needed)</span>
-        )}
-    </h2>
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">
-                Password {!isEditMode && <span className="text-red-500">*</span>}
-                {isEditMode && <span className="text-gray-400 text-xs ml-1">(Leave blank to keep current)</span>}
-            </label>
-            <input
-                type="password"
-                required={!isEditMode}
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
-                placeholder={isEditMode ? "Enter new password (optional)" : "Enter password"}
-            />
-        </div>
+                        <h2 className="text-lg font-semibold mb-4 text-gray-800">
+                            System Access
+                            {isEditMode && (
+                                <span className="text-sm font-normal text-gray-400 ml-2">(Update password if needed)</span>
+                            )}
+                        </h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-400 mb-2">
+                                    Password {!isEditMode && <span className="text-red-500">*</span>}
+                                    {isEditMode && <span className="text-gray-400 text-xs ml-1">(Leave blank to keep current)</span>}
+                                </label>
+                                <input
+                                    type="password"
+                                    required={!isEditMode}
+                                    value={formData.password}
+                                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                    placeholder={isEditMode ? "Enter new password (optional)" : "Enter password"}
+                                />
+                            </div>
 
-        <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">
-                Confirm Password {!isEditMode && <span className="text-red-500">*</span>}
-                {isEditMode && <span className="text-gray-400 text-xs ml-1">(Leave blank to keep current)</span>}
-            </label>
-            <input
-                type="password"
-                required={!isEditMode}
-                value={formData.password_confirmation}
-                onChange={(e) => setFormData({ ...formData, password_confirmation: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
-                placeholder={isEditMode ? "Confirm new password (optional)" : "Confirm password"}
-            />
-        </div>
-    </div>
-    {isEditMode && (
-        <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-xs text-blue-600">
-                <span className="font-medium">Note:</span> Only fill in the password fields if you want to change the user's password. 
-                Leave them blank to keep the current password unchanged.
-            </p>
-        </div>
-    )}
-</div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-400 mb-2">
+                                    Confirm Password {!isEditMode && <span className="text-red-500">*</span>}
+                                    {isEditMode && <span className="text-gray-400 text-xs ml-1">(Leave blank to keep current)</span>}
+                                </label>
+                                <input
+                                    type="password"
+                                    required={!isEditMode}
+                                    value={formData.password_confirmation}
+                                    onChange={(e) => setFormData({ ...formData, password_confirmation: e.target.value })}
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                    placeholder={isEditMode ? "Confirm new password (optional)" : "Confirm password"}
+                                />
+                            </div>
+                        </div>
+                        {isEditMode && (
+                            <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                <p className="text-xs text-blue-600">
+                                    <span className="font-medium">Note:</span> Only fill in the password fields if you want to change the user's password.
+                                    Leave them blank to keep the current password unchanged.
+                                </p>
+                            </div>
+                        )}
+                    </div>
 
                     {/* Action Buttons */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">

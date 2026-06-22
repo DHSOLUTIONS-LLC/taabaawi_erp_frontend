@@ -278,6 +278,15 @@ export const hrApi = api.injectEndpoints({
       }),
     }),
 
+
+    deleteEmployee: builder.mutation<any, number>({
+    query: (id) => ({
+        url: `/employees/${id}`,
+        method: "DELETE",
+    }),
+    invalidatesTags: ["Employee"],
+}),
+
     // Get expiring documents (within 30 days)
     getExpiringDocuments: builder.query<any, void>({
       query: () => "/employee-documents/expiring",
@@ -587,12 +596,13 @@ export const {
   useApprovePayrollMutation,
   useMarkPayrollAsPaidMutation,
   useDeletePayrollMutation,
-   useGetExpiringDocumentsQuery,
+  useGetExpiringDocumentsQuery,
   useGetExpiredDocumentsQuery,
 
-   useGetLeaveCalendarQuery,
+  useGetLeaveCalendarQuery,
   useGetTeamScheduleQuery,
   useGetLeaveConflictsQuery,
   useGetDepartmentViewQuery,
   useGetAvailabilityQuery,
+  useDeleteEmployeeMutation
 } = hrApi;

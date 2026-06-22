@@ -172,11 +172,11 @@ export default function PaymentModal({
   const handleSplitAmountChange = (index: number, amount: string) => {
     const updated = [...splitPayments];
     const numAmount = parseFloat(amount) || 0;
-    
+
     // Calculate max allowed for this split
     const otherTotal = updated.reduce((sum, p, i) => sum + (i === index ? 0 : (p.amount || 0)), 0);
     const maxAllowed = Math.max(0, total - otherTotal);
-    
+
     // Auto-adjust if exceeds max
     const finalAmount = Math.min(numAmount, maxAllowed);
     updated[index].amount = finalAmount;
@@ -195,7 +195,7 @@ export default function PaymentModal({
     if (isSplitPayment) {
       // Validate split payments
       const totalPaid = splitPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
-      
+
       if (Math.abs(totalPaid - total) > 0.001) {
         setError(`Total paid (${totalPaid.toFixed(3)}) does not match total amount (${total.toFixed(3)})`);
         return;
@@ -207,7 +207,7 @@ export default function PaymentModal({
           setError(`Payment amount for ${split.method} must be greater than 0`);
           return;
         }
-        
+
         if (split.method === "Card" || split.method === "K-Net") {
           if (!split.reference?.trim()) {
             setError(`Please enter card reference for ${split.method}`);
@@ -365,14 +365,12 @@ export default function PaymentModal({
                   setSplitRemaining(0);
                 }
               }}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                isSplitPayment ? "bg-blue-600" : "bg-gray-300"
-              }`}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${isSplitPayment ? "bg-blue-600" : "bg-gray-300"
+                }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  isSplitPayment ? "translate-x-6" : "translate-x-1"
-                }`}
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isSplitPayment ? "translate-x-6" : "translate-x-1"
+                  }`}
               />
             </button>
           </div>

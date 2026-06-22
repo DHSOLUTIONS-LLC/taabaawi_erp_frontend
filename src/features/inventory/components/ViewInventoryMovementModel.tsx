@@ -249,43 +249,43 @@ export default function TransferStockModal({ isOpen, onClose, product }: Transfe
                                             </tr>
                                         </thead>
                                         <tbody className="bg-white divide-y divide-gray-200">
-  {movements.map((movement: any) => (
-    <tr key={movement.id} className="hover:bg-gray-50">
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-        {formatDate(movement.movement_date)}
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap">
-        <div className="text-sm font-medium text-gray-900">
-          {movement.product ? (
-            movement.product.product_name || movement.product.name || 'Deleted Product'
-          ) : (
-            <span className="text-gray-400 italic">Product Deleted</span>
-          )}
-        </div>
-        <div className="text-xs text-gray-500">
-          {movement.product?.sku || 'N/A'}
-        </div>
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-        {movement.from_branch?.branch_name || movement.from_branch_name || 'Central Warehouse'}
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-        {movement.to_branch?.branch_name || movement.to_branch_name || '-'}
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap">
-        <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
-          {movement.movement_type || 'Unknown'}
-        </span>
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
-        {movement.quantity || 0}
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-        {movement.moved_by?.name || movement.user?.name || '-'}
-      </td>
-    </tr>
-  ))}
-</tbody>
+                                            {movements.map((movement: any) => (
+                                                <tr key={movement.id} className="hover:bg-gray-50">
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                        {formatDate(movement.movement_date)}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <div className="text-sm font-medium text-gray-900">
+                                                            {movement.product ? (
+                                                                movement.product.product_name || movement.product.name || 'Deleted Product'
+                                                            ) : (
+                                                                <span className="text-gray-400 italic">Product Deleted</span>
+                                                            )}
+                                                        </div>
+                                                        <div className="text-xs text-gray-500">
+                                                            {movement.product?.sku || 'N/A'}
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                        {movement.from_branch?.branch_name || movement.from_branch_name || 'Central Warehouse'}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                        {movement.to_branch?.branch_name || movement.to_branch_name || '-'}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
+                                                            {movement.movement_type || 'Unknown'}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
+                                                        {movement.quantity || 0}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                        {movement.moved_by?.name || movement.user?.name || '-'}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
                                     </table>
                                 </div>
 

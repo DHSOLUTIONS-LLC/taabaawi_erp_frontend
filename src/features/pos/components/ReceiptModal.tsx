@@ -284,33 +284,33 @@ export default function ReceiptModal({
             >
               {/* Company Logo */}
               <div style={{ textAlign: 'center', marginBottom: '12px' }}>
-  {companyLogo ? (
-    <img
-      src={companyLogo}
-      alt={companyName}
-      style={{ display: 'block', margin: '0 auto', maxHeight: '56px', objectFit: 'contain' }}
-      onError={(e) => {
-        (e.target as HTMLImageElement).style.display = "none";
-      }}
-    />
-  ) : (
-    <div style={{ width: '48px', height: '48px', backgroundColor: '#DBEAFE', borderRadius: '9999px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
-      <svg
-        style={{ width: '24px', height: '24px', color: '#2563EB' }}
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="2"
-          d="M3 10h18M6 14h6m-6-4h12M5 4h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"
-        />
-      </svg>
-    </div>
-  )}
-</div>
+                {companyLogo ? (
+                  <img
+                    src={companyLogo}
+                    alt={companyName}
+                    style={{ display: 'block', margin: '0 auto', maxHeight: '56px', objectFit: 'contain' }}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = "none";
+                    }}
+                  />
+                ) : (
+                  <div style={{ width: '48px', height: '48px', backgroundColor: '#DBEAFE', borderRadius: '9999px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
+                    <svg
+                      style={{ width: '24px', height: '24px', color: '#2563EB' }}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M3 10h18M6 14h6m-6-4h12M5 4h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"
+                      />
+                    </svg>
+                  </div>
+                )}
+              </div>
 
               {/* Company Header */}
               <div className="text-center">

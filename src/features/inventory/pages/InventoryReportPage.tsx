@@ -211,92 +211,92 @@ export default function InventoryReportsPage() {
       },
     );
 
-const damageDiscardData: DamageDiscardItem[] = useMemo(() => {
-  if (activeTab !== 'damage-discard') return [];
+  const damageDiscardData: DamageDiscardItem[] = useMemo(() => {
+    if (activeTab !== 'damage-discard') return [];
 
-  const movements = damageMovements?.data?.data || [];
+    const movements = damageMovements?.data?.data || [];
 
-  const filtered = movements.filter((m: any) => {
-    const type = (m.movement_type || '').toLowerCase();
-    const fromBranch = (m.from_branch?.branch_name || '').toLowerCase();
-    const toBranch = (m.to_branch?.branch_name || '').toLowerCase();
+    const filtered = movements.filter((m: any) => {
+      const type = (m.movement_type || '').toLowerCase();
+      const fromBranch = (m.from_branch?.branch_name || '').toLowerCase();
+      const toBranch = (m.to_branch?.branch_name || '').toLowerCase();
 
-    return (
-      type === 'damage' ||
-      type === 'discard' ||
-      fromBranch.includes('repair') ||
-      fromBranch.includes('discard') ||
-      toBranch.includes('repair') ||
-      toBranch.includes('discard')
-    );
-  });
+      return (
+        type === 'damage' ||
+        type === 'discard' ||
+        fromBranch.includes('repair') ||
+        fromBranch.includes('discard') ||
+        toBranch.includes('repair') ||
+        toBranch.includes('discard')
+      );
+    });
 
-  return filtered.map((m: any) => ({
-    id: m.id,
-    product: m.product?.product_name || m.product?.name || 'Deleted Product',
-    name: m.product?.sku || 'N/A',
-    branch: m.to_branch?.branch_name || m.from_branch?.branch_name || 'Unknown',
-    quantity: Math.abs(m.quantity || 0),
-    status: m.movement_type === 'damage' ? 'Damaged' : m.movement_type === 'discard' ? 'Discarded' : 'In Repair',
-    financialImpact: Math.abs(m.quantity || 0) * (m.product?.cost_price || 0),
-    reference: m.reference_number || `MOV-${m.id}`,
-  }));
-}, [damageMovements, activeTab]);
+    return filtered.map((m: any) => ({
+      id: m.id,
+      product: m.product?.product_name || m.product?.name || 'Deleted Product',
+      name: m.product?.sku || 'N/A',
+      branch: m.to_branch?.branch_name || m.from_branch?.branch_name || 'Unknown',
+      quantity: Math.abs(m.quantity || 0),
+      status: m.movement_type === 'damage' ? 'Damaged' : m.movement_type === 'discard' ? 'Discarded' : 'In Repair',
+      financialImpact: Math.abs(m.quantity || 0) * (m.product?.cost_price || 0),
+      reference: m.reference_number || `MOV-${m.id}`,
+    }));
+  }, [damageMovements, activeTab]);
   // Get active categories only
   const activeCategories = useMemo(() => {
     return categories.filter((cat: Category) => cat.is_active);
   }, [categories]);
 
   // Process inventory data for stock summary
-const stockSummaryData: StockSummaryItem[] = useMemo(() => {
-  const movements = inventoryResponse?.data?.data || [];
-  const inventoryMap = new Map<string, StockSummaryItem>();
+  const stockSummaryData: StockSummaryItem[] = useMemo(() => {
+    const movements = inventoryResponse?.data?.data || [];
+    const inventoryMap = new Map<string, StockSummaryItem>();
 
-  movements.forEach((movement: any) => {
-    if (movement.to_branch && movement.product) {
-      const key = `${movement.product_id}-${movement.to_branch.id}`;
+    movements.forEach((movement: any) => {
+      if (movement.to_branch && movement.product) {
+        const key = `${movement.product_id}-${movement.to_branch.id}`;
 
-      if (!inventoryMap.has(key)) {
-        inventoryMap.set(key, {
-          id: movement.id,
-          product_id: movement.product_id,
-          product_name: movement.product?.product_name || movement.product?.name || 'Deleted Product',
-          sku: movement.product?.sku || 'N/A',
-          category: 'General',
-          branch: movement.to_branch.branch_name,
-          branch_id: movement.to_branch.id,
-          quantity: movement.quantity || 0,
-          reserved_quantity: 0,
-          available_quantity: movement.quantity || 0,
-          status: movement.quantity > 10 ? 'In Stock' : movement.quantity > 0 ? 'Low Stock' : 'Out of Stock',
-          image: 'https://images.unsplash.com/photo-1611930022073-b7a4ba5fcccd?w=150',
-        });
+        if (!inventoryMap.has(key)) {
+          inventoryMap.set(key, {
+            id: movement.id,
+            product_id: movement.product_id,
+            product_name: movement.product?.product_name || movement.product?.name || 'Deleted Product',
+            sku: movement.product?.sku || 'N/A',
+            category: 'General',
+            branch: movement.to_branch.branch_name,
+            branch_id: movement.to_branch.id,
+            quantity: movement.quantity || 0,
+            reserved_quantity: 0,
+            available_quantity: movement.quantity || 0,
+            status: movement.quantity > 10 ? 'In Stock' : movement.quantity > 0 ? 'Low Stock' : 'Out of Stock',
+            image: 'https://images.unsplash.com/photo-1611930022073-b7a4ba5fcccd?w=150',
+          });
+        }
       }
-    }
-  });
+    });
 
-  return Array.from(inventoryMap.values());
-}, [inventoryResponse]);
+    return Array.from(inventoryMap.values());
+  }, [inventoryResponse]);
 
   // Process inventory movements
   const inventoryMovementData: InventoryMovementItem[] = useMemo(() => {
-  const movements = inventoryResponse?.data?.data || [];
-  console.log("movement data:", movements);
-  return movements.map((movement: any) => ({
-    id: movement.id,
-    date: new Date(movement.movement_date).toLocaleDateString(),
-    product: movement.product?.product_name || movement.product?.name || 'Deleted Product',
-    product_id: movement.product_id,
-    type: movement.movement_type || 'Unknown',
-    from: movement.from_branch?.branch_name || '-',
-    to: movement.to_branch?.branch_name || '-',
-    quantity: movement.quantity || 0,
-    balanceAfter: 0,
-    user: movement.moved_by?.name || movement.moved_by?.employee_code || 'System',
-    from_branch_id: movement.from_branch_id,
-    to_branch_id: movement.to_branch_id,
-  }));
-}, [inventoryResponse]);
+    const movements = inventoryResponse?.data?.data || [];
+    console.log("movement data:", movements);
+    return movements.map((movement: any) => ({
+      id: movement.id,
+      date: new Date(movement.movement_date).toLocaleDateString(),
+      product: movement.product?.product_name || movement.product?.name || 'Deleted Product',
+      product_id: movement.product_id,
+      type: movement.movement_type || 'Unknown',
+      from: movement.from_branch?.branch_name || '-',
+      to: movement.to_branch?.branch_name || '-',
+      quantity: movement.quantity || 0,
+      balanceAfter: 0,
+      user: movement.moved_by?.name || movement.moved_by?.employee_code || 'System',
+      from_branch_id: movement.from_branch_id,
+      to_branch_id: movement.to_branch_id,
+    }));
+  }, [inventoryResponse]);
 
   // Process low stock data
   const lowStockData: LowStockItem[] = useMemo(() => {
@@ -862,7 +862,7 @@ const stockSummaryData: StockSummaryItem[] = useMemo(() => {
                         type="checkbox"
                         checked={
                           selectedProductIds.length ===
-                            stockSummaryData.length &&
+                          stockSummaryData.length &&
                           stockSummaryData.length > 0
                         }
                         onChange={handleSelectAll}
@@ -977,13 +977,12 @@ const stockSummaryData: StockSummaryItem[] = useMemo(() => {
                         </td>
                         <td className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
                           <span
-                            className={`inline-flex px-2 sm:px-3 py-1 sm:py-2 text-xs font-medium rounded-lg ${
-                              product.status === "In Stock"
+                            className={`inline-flex px-2 sm:px-3 py-1 sm:py-2 text-xs font-medium rounded-lg ${product.status === "In Stock"
                                 ? "bg-green-100 text-green-800"
                                 : product.status === "Low Stock"
                                   ? "bg-yellow-100 text-yellow-800"
                                   : "bg-red-100 text-red-800"
-                            }`}
+                              }`}
                           >
                             <span className="hidden xs:inline">
                               {product.status}
@@ -1053,20 +1052,19 @@ const stockSummaryData: StockSummaryItem[] = useMemo(() => {
                         </td>
                         <td className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
                           <div className="text-xs sm:text-sm md:text-[14px] font-medium text-gray-900">
-                           {movement.product || 'Deleted Product'}
+                            {movement.product || 'Deleted Product'}
                           </div>
                         </td>
                         <td className="hidden sm:table-cell px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
                           <span
-                            className={`inline-flex px-2 sm:px-3 py-1 text-xs font-medium rounded-lg ${
-                              movement.type === "Transfer"
+                            className={`inline-flex px-2 sm:px-3 py-1 text-xs font-medium rounded-lg ${movement.type === "Transfer"
                                 ? "bg-blue-100 text-blue-800"
                                 : movement.type === "Sale"
                                   ? "bg-green-100 text-green-800"
                                   : movement.type === "Purchase"
                                     ? "bg-purple-100 text-purple-800"
                                     : "bg-gray-100 text-gray-800"
-                            }`}
+                              }`}
                           >
                             {movement.type}
                           </span>
@@ -1164,13 +1162,12 @@ const stockSummaryData: StockSummaryItem[] = useMemo(() => {
                         </td>
                         <td className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
                           <div
-                            className={`text-xs sm:text-sm md:text-[14px] font-semibold ${
-                              lowStockItem.current_stock === 0
+                            className={`text-xs sm:text-sm md:text-[14px] font-semibold ${lowStockItem.current_stock === 0
                                 ? "text-red-600"
                                 : lowStockItem.current_stock < 5
                                   ? "text-orange-600"
                                   : "text-yellow-600"
-                            }`}
+                              }`}
                           >
                             {lowStockItem.current_stock}
                           </div>
@@ -1187,13 +1184,12 @@ const stockSummaryData: StockSummaryItem[] = useMemo(() => {
                         </td>
                         <td className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
                           <span
-                            className={`inline-flex px-2 sm:px-3 py-1 text-xs font-medium rounded-lg whitespace-nowrap ${
-                              lowStockItem.current_stock === 0
+                            className={`inline-flex px-2 sm:px-3 py-1 text-xs font-medium rounded-lg whitespace-nowrap ${lowStockItem.current_stock === 0
                                 ? "bg-red-100 text-red-800"
                                 : lowStockItem.quantity_needed > 5
                                   ? "bg-orange-100 text-orange-800"
                                   : "bg-yellow-100 text-yellow-800"
-                            }`}
+                              }`}
                           >
                             <span className="hidden xs:inline">
                               {lowStockItem.current_stock === 0
@@ -1286,11 +1282,10 @@ const stockSummaryData: StockSummaryItem[] = useMemo(() => {
                         </td>
                         <td className="hidden md:table-cell px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
                           <span
-                            className={`inline-flex px-2 sm:px-3 py-1 text-xs font-medium rounded-lg ${
-                              damageItem.status === "Damaged"
+                            className={`inline-flex px-2 sm:px-3 py-1 text-xs font-medium rounded-lg ${damageItem.status === "Damaged"
                                 ? "bg-orange-100 text-orange-800"
                                 : "bg-red-100 text-red-800"
-                            }`}
+                              }`}
                           >
                             {damageItem.status}
                           </span>
@@ -1392,15 +1387,14 @@ const stockSummaryData: StockSummaryItem[] = useMemo(() => {
                         </td>
                         <td className="px-2 xs:px-3 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
                           <span
-                            className={`inline-flex px-2 sm:px-3 py-1 text-xs font-medium rounded-lg ${
-                              transfer.status === "Completed"
+                            className={`inline-flex px-2 sm:px-3 py-1 text-xs font-medium rounded-lg ${transfer.status === "Completed"
                                 ? "bg-green-100 text-green-800"
                                 : transfer.status === "In Transit"
                                   ? "bg-blue-100 text-blue-800"
                                   : transfer.status === "Approved"
                                     ? "bg-purple-100 text-purple-800"
                                     : "bg-yellow-100 text-yellow-800"
-                            }`}
+                              }`}
                           >
                             {transfer.status}
                           </span>
@@ -1731,51 +1725,46 @@ const stockSummaryData: StockSummaryItem[] = useMemo(() => {
             <nav className="flex flex-wrap gap-1 sm:gap-2" aria-label="Tabs">
               <button
                 onClick={() => setActiveTab("stock-summary")}
-                className={`px-2 xs:px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium rounded-t-lg transition-colors whitespace-nowrap ${
-                  activeTab === "stock-summary"
+                className={`px-2 xs:px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium rounded-t-lg transition-colors whitespace-nowrap ${activeTab === "stock-summary"
                     ? "bg-blue-50 text-blue-700 border-b-2 border-blue-700"
                     : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                }`}
+                  }`}
               >
                 Stock Summary
               </button>
               <button
                 onClick={() => setActiveTab("inventory-movement")}
-                className={`px-2 xs:px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium rounded-t-lg transition-colors whitespace-nowrap ${
-                  activeTab === "inventory-movement"
+                className={`px-2 xs:px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium rounded-t-lg transition-colors whitespace-nowrap ${activeTab === "inventory-movement"
                     ? "bg-blue-50 text-blue-700 border-b-2 border-blue-700"
                     : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                }`}
+                  }`}
               >
                 Inventory Movement
               </button>
               <button
                 onClick={() => setActiveTab("low-stock")}
-                className={`px-2 xs:px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium rounded-t-lg transition-colors whitespace-nowrap ${
-                  activeTab === "low-stock"
+                className={`px-2 xs:px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium rounded-t-lg transition-colors whitespace-nowrap ${activeTab === "low-stock"
                     ? "bg-blue-50 text-blue-700 border-b-2 border-blue-700"
                     : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                }`}
+                  }`}
               >
                 Low Stock
               </button>
               <button
                 onClick={() => setActiveTab("damage-discard")}
-                className={`px-2 xs:px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium rounded-t-lg transition-colors whitespace-nowrap ${
-                  activeTab === "damage-discard"
+                className={`px-2 xs:px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium rounded-t-lg transition-colors whitespace-nowrap ${activeTab === "damage-discard"
                     ? "bg-blue-50 text-blue-700 border-b-2 border-blue-700"
                     : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                }`}
+                  }`}
               >
                 Damage & Discard
               </button>
               <button
                 onClick={() => setActiveTab("transfer-history")}
-                className={`px-2 xs:px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium rounded-t-lg transition-colors whitespace-nowrap ${
-                  activeTab === "transfer-history"
+                className={`px-2 xs:px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium rounded-t-lg transition-colors whitespace-nowrap ${activeTab === "transfer-history"
                     ? "bg-blue-50 text-blue-700 border-b-2 border-blue-700"
                     : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                }`}
+                  }`}
               >
                 Transfer History
               </button>
@@ -1841,11 +1830,10 @@ const stockSummaryData: StockSummaryItem[] = useMemo(() => {
                   <button
                     onClick={handlePrevious}
                     disabled={currentPage === 1}
-                    className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg transition-colors ${
-                      currentPage === 1
+                    className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg transition-colors ${currentPage === 1
                         ? "text-gray-400 bg-gray-100 cursor-not-allowed"
                         : "text-gray-700 bg-gray-100 hover:bg-gray-200"
-                    }`}
+                      }`}
                   >
                     Prev
                   </button>
@@ -1862,11 +1850,10 @@ const stockSummaryData: StockSummaryItem[] = useMemo(() => {
                       <button
                         key={`page-${pageNumber}`}
                         onClick={() => handlePageChange(pageNumber)}
-                        className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg transition-colors ${
-                          currentPage === pageNumber
+                        className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg transition-colors ${currentPage === pageNumber
                             ? "text-blue-600 bg-blue-50 hover:bg-blue-100"
                             : "text-gray-700 hover:bg-gray-100"
-                        }`}
+                          }`}
                       >
                         {pageNumber}
                       </button>
@@ -1876,11 +1863,10 @@ const stockSummaryData: StockSummaryItem[] = useMemo(() => {
                   <button
                     onClick={handleNext}
                     disabled={currentPage === totalPages}
-                    className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg transition-colors ${
-                      currentPage === totalPages
+                    className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg transition-colors ${currentPage === totalPages
                         ? "text-gray-400 bg-gray-100 cursor-not-allowed"
                         : "text-gray-700 bg-gray-100 hover:bg-gray-200"
-                    }`}
+                      }`}
                   >
                     Next
                   </button>
